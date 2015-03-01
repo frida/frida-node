@@ -4,8 +4,8 @@
     {
       "target_name": "frida",
       "sources": [
-        "src/frida.cc",
-        "src/device_manager.cc"
+        "src/addon.cc",
+        "src/device_manager.cc",
       ],
       'conditions': [
         ['OS=="mac"', {
