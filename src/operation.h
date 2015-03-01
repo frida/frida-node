@@ -35,10 +35,12 @@ class Operation {
     if (error_ != NULL) {
       g_error_free(error_);
     }
-    // TODO: is uv_close() enough?
-    uv_close(reinterpret_cast<uv_handle_t*>(&async_), NULL);
-    resolver_.Reset();
-    wrapper_->Unref();
+    if (wrapper_ != NULL) {
+      // TODO: is uv_close() enough?
+      uv_close(reinterpret_cast<uv_handle_t*>(&async_), NULL);
+      resolver_.Reset();
+      wrapper_->Unref();
+    }
   }
 
   virtual void Begin() = 0;
