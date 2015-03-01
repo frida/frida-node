@@ -18,9 +18,16 @@ class DeviceManager : public node::ObjectWrap {
   static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void EnumerateDevices(const v8::FunctionCallbackInfo<v8::Value>& args);
 
+  void Ref() { node::ObjectWrap::Ref(); }
+  void Unref() { node::ObjectWrap::Unref(); }
+
   static v8::Persistent<v8::Function> constructor;
 
   FridaDeviceManager* handle_;
+
+  template<class T>
+  friend class Operation;
+  friend class EnumerateDevicesOperation;
 };
 
 }
