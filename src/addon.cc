@@ -1,6 +1,7 @@
 #include "device_manager.h"
 #include "events.h"
 #include "main_context.h"
+#include "runtime.h"
 
 #include <node.h>
 
@@ -11,8 +12,8 @@ namespace frida {
 static void InitAll(Handle<Object> exports) {
   frida_init();
 
-  auto main_context = new MainContext(frida_get_main_context());
-  Events::Init(exports, main_context);
+  Runtime::Init(new MainContext(frida_get_main_context()));
+  Events::Init(exports);
   DeviceManager::Init(exports);
 }
 

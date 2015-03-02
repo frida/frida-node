@@ -1,6 +1,8 @@
 #ifndef FRIDANODE_OPERATION_H
 #define FRIDANODE_OPERATION_H
 
+#include "runtime.h"
+
 #include <frida-core.h>
 #include <node.h>
 #include <uv.h>
@@ -18,10 +20,7 @@ class Operation {
     uv_async_init(uv_default_loop(), &async_, DeliverWrapper);
     async_.data = this;
 
-    auto source = g_idle_source_new();
-    g_source_set_callback(source, PerformBegin, this, NULL);
-    g_source_attach(source, frida_get_main_context());
-    g_source_unref(source);
+    Runtime::GetMainContext()->schedule([=] () { Begin(); });
   }
 
   v8::Local<v8::Promise> GetPromise(v8::Isolate* isolate) {
@@ -57,11 +56,6 @@ class Operation {
   v8::Persistent<v8::Promise::Resolver> resolver_;
 
  private:
-  static gboolean PerformBegin(gpointer data) {
-    static_cast<Operation<T>*>(data)->Begin();
-    return FALSE;
-  }
-
   void PerformEnd(GAsyncResult* result) {
     End(result, &error_);
     uv_async_send(&async_);
@@ -84,6 +78,7 @@ class Operation {
     }
   }
 
+  static MainContext* main_context_;
   uv_async_t async_;
   GError* error_;
 };

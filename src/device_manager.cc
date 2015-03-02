@@ -24,12 +24,11 @@ void DeviceManager::Init(Handle<Object> exports) {
   auto tpl = FunctionTemplate::New(isolate, New);
   tpl->SetClassName(String::NewFromUtf8(isolate, "DeviceManager"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
-
   NODE_SET_PROTOTYPE_METHOD(tpl, "enumerateDevices", EnumerateDevices);
-
-  constructor_.Reset(isolate, tpl->GetFunction());
   exports->Set(String::NewFromUtf8(isolate, "DeviceManager"),
       tpl->GetFunction());
+
+  constructor_.Reset(isolate, tpl->GetFunction());
 }
 
 void DeviceManager::New(const FunctionCallbackInfo<Value>& args) {
