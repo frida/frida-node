@@ -5,3 +5,6 @@ console.log("enumerateDevices() starting")
 manager.enumerateDevices().then(function () {
   console.log("enumerateDevices() completed:", arguments);
 });
+manager.events.listen('changed', function () {
+  console.log("changed!");
+});

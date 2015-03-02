@@ -6,6 +6,8 @@
       "sources": [
         "src/addon.cc",
         "src/device_manager.cc",
+        "src/events.cc",
+        "src/main_context.cc",
       ],
       'conditions': [
         ['OS=="mac"', {

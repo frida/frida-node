@@ -1,18 +1,21 @@
 #include "device_manager.h"
 
+#include "events.h"
 #include "operation.h"
 
 using namespace v8;
 
 namespace frida {
 
-Persistent<Function> DeviceManager::constructor;
+Persistent<Function> DeviceManager::constructor_;
 
-DeviceManager::DeviceManager(FridaDeviceManager* handle) : handle_(handle) {
+DeviceManager::DeviceManager(FridaDeviceManager* handle)
+    : handle_(handle) {
 }
 
 DeviceManager::~DeviceManager() {
-  g_object_unref(handle_);
+  events_.Reset();
+  frida_unref(handle_);
 }
 
 void DeviceManager::Init(Handle<Object> exports) {
@@ -24,33 +27,36 @@ void DeviceManager::Init(Handle<Object> exports) {
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "enumerateDevices", EnumerateDevices);
 
-  constructor.Reset(isolate, tpl->GetFunction());
+  constructor_.Reset(isolate, tpl->GetFunction());
   exports->Set(String::NewFromUtf8(isolate, "DeviceManager"),
-               tpl->GetFunction());
+      tpl->GetFunction());
 }
 
 void DeviceManager::New(const FunctionCallbackInfo<Value>& args) {
-  auto isolate = Isolate::GetCurrent();
+  auto isolate = args.GetIsolate();
   HandleScope scope(isolate);
 
   if (args.IsConstructCall()) {
-    auto obj = new DeviceManager(frida_device_manager_new());
-    obj->Wrap(args.This());
-    args.GetReturnValue().Set(args.This());
+    auto wrapper = new DeviceManager(frida_device_manager_new());
+    auto obj = args.This();
+    wrapper->Wrap(obj);
+    obj->Set(String::NewFromUtf8(isolate, "events"),
+        Events::Create(g_object_ref(wrapper->handle_)));
+    args.GetReturnValue().Set(obj);
   } else {
-    auto cons = Local<Function>::New(isolate, constructor);
-    args.GetReturnValue().Set(cons->NewInstance(0, 0));
+    auto constructor = Local<Function>::New(isolate, constructor_);
+    args.GetReturnValue().Set(constructor->NewInstance(0, NULL));
   }
 }
 
-class EnumerateDevicesOperation : public Operation<DeviceManager> {
+class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
  public:
   void Begin() {
-    frida_device_manager_enumerate_devices(wrapper_->handle_, OnReady, this);
+    frida_device_manager_enumerate_devices(handle_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
-    devices_ = frida_device_manager_enumerate_devices_finish(wrapper_->handle_, result, error);
+    devices_ = frida_device_manager_enumerate_devices_finish(handle_, result, error);
   }
 
   Local<Value> Result(Isolate* isolate) {
@@ -63,12 +69,13 @@ class EnumerateDevicesOperation : public Operation<DeviceManager> {
 };
 
 void DeviceManager::EnumerateDevices(const FunctionCallbackInfo<Value>& args) {
-  auto isolate = Isolate::GetCurrent();
+  auto isolate = args.GetIsolate();
   HandleScope scope(isolate);
-  auto wrapper = ObjectWrap::Unwrap<DeviceManager>(args.Holder());
+  auto obj = args.Holder();
+  auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
 
   auto operation = new EnumerateDevicesOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, obj, wrapper->handle_);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
 }

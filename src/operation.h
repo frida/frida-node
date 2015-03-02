@@ -10,9 +10,9 @@ namespace frida {
 template<class T>
 class Operation {
  public:
-  void Schedule(v8::Isolate* isolate, T* wrapper) {
-    wrapper_ = wrapper;
-    wrapper_->Ref();
+  void Schedule(v8::Isolate* isolate, v8::Handle<v8::Object> parent, T* handle) {
+    parent_.Reset(isolate, parent);
+    handle_ = handle;
     resolver_.Reset(isolate, v8::Promise::Resolver::New(isolate));
 
     uv_async_init(uv_default_loop(), &async_, DeliverWrapper);
@@ -29,18 +29,18 @@ class Operation {
   }
 
  protected:
-  Operation() : wrapper_(NULL), error_(NULL) {
+  Operation() : handle_(NULL), error_(NULL) {
   }
   virtual ~Operation() {
     if (error_ != NULL) {
       g_error_free(error_);
     }
-    if (wrapper_ != NULL) {
+    if (handle_ != NULL) {
       // TODO: is uv_close() enough?
       uv_close(reinterpret_cast<uv_handle_t*>(&async_), NULL);
-      resolver_.Reset();
-      wrapper_->Unref();
     }
+    resolver_.Reset();
+    parent_.Reset();
   }
 
   virtual void Begin() = 0;
@@ -52,7 +52,8 @@ class Operation {
     self->PerformEnd(result);
   }
 
-  T* wrapper_;
+  v8::Persistent<v8::Value> parent_;
+  T* handle_;
   v8::Persistent<v8::Promise::Resolver> resolver_;
 
  private:
