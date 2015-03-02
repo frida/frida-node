@@ -17,6 +17,7 @@ typedef struct _EventsClosureInvocation EventsClosureInvocation;
 struct _EventsClosure {
   GClosure closure;
   guint handler_id;
+  Persistent<Object>* parent;
   Persistent<Function>* callback;
 };
 
@@ -100,7 +101,7 @@ void Events::Listen(const FunctionCallbackInfo<Value>& args) {
     return;
   auto closure = events_closure_new(obj, callback);
   wrapper->closures_ = g_slist_append(wrapper->closures_, closure);
-  Runtime::GetMainContext()->schedule([=] () {
+  Runtime::GetGLibContext()->schedule([=] () {
     closure->handler_id = g_signal_connect_closure_by_id(wrapper->handle_,
         signal_id, 0, reinterpret_cast<GClosure*>(closure), TRUE);
   });
@@ -120,7 +121,7 @@ void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
     auto closure_callback = Local<Function>::New(isolate, *closure->callback);
     if (closure_callback->SameValue(callback)) {
       wrapper->closures_ = g_slist_delete_link(wrapper->closures_, cur);
-      Runtime::GetMainContext()->schedule([=] () {
+      Runtime::GetGLibContext()->schedule([=] () {
         g_signal_handler_disconnect(wrapper->handle_, closure->handler_id);
       });
       break;
@@ -154,11 +155,12 @@ static EventsClosure* events_closure_new(Handle<Object> parent,
 
   GClosure* closure = g_closure_new_simple(sizeof(EventsClosure), NULL);
   g_closure_add_finalize_notifier(closure, NULL, events_closure_finalize);
+  g_closure_set_marshal(closure, events_closure_marshal);
+
   EventsClosure* self = reinterpret_cast<EventsClosure*>(closure);
   self->handler_id = 0;
+  self->parent = new Persistent<Object>(isolate, parent);
   self->callback = new Persistent<Function>(isolate, callback);
-
-  g_closure_set_marshal(closure, events_closure_marshal);
 
   return self;
 }
@@ -167,7 +169,9 @@ static void events_closure_finalize(gpointer data, GClosure* closure) {
   EventsClosure* self = reinterpret_cast<EventsClosure*>(closure);
 
   self->callback->Reset();
+  self->parent->Reset();
   delete self->callback;
+  delete self->parent;
 }
 
 static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
@@ -177,6 +181,7 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
 
   auto invocation = g_slice_new(EventsClosureInvocation);
   invocation->closure = self;
+  g_closure_ref(closure);
   invocation->args = g_array_sized_new(FALSE, FALSE, sizeof (GValue), n_param_values);
   for (guint i = 0; i != n_param_values; i++) {
     GValue val;

@@ -1,5 +1,5 @@
-#ifndef FRIDANODE_MAINCONTEXT_H
-#define FRIDANODE_MAINCONTEXT_H
+#ifndef FRIDANODE_GLIB_CONTEXT_H
+#define FRIDANODE_GLIB_CONTEXT_H
 
 #include <frida-core.h>
 
@@ -7,21 +7,19 @@
 
 namespace frida {
 
-class MainContext {
+class GLibContext {
 public:
-  MainContext(GMainContext* main_context);
-  ~MainContext();
+  GLibContext(GMainContext* main_context);
+  ~GLibContext();
 
   void schedule(std::function<void ()> f);
   void perform(std::function<void ()> f);
-
-  GMainContext* handle() const { return handle_; }
 
 private:
   static gboolean InvokeCallback(gpointer data);
   static void DestroyCallback(gpointer data);
 
-  GMainContext* handle_;
+  GMainContext* main_context_;
   GMutex mutex_;
   GCond cond_;
 };

@@ -17,10 +17,7 @@ class Operation {
     handle_ = handle;
     resolver_.Reset(isolate, v8::Promise::Resolver::New(isolate));
 
-    uv_async_init(uv_default_loop(), &async_, DeliverWrapper);
-    async_.data = this;
-
-    Runtime::GetMainContext()->schedule([=] () { Begin(); });
+    Runtime::GetGLibContext()->schedule([=] () { Begin(); });
   }
 
   v8::Local<v8::Promise> GetPromise(v8::Isolate* isolate) {
@@ -34,10 +31,6 @@ class Operation {
     if (error_ != NULL) {
       g_error_free(error_);
     }
-    if (handle_ != NULL) {
-      // TODO: is uv_close() enough?
-      uv_close(reinterpret_cast<uv_handle_t*>(&async_), NULL);
-    }
     resolver_.Reset();
     parent_.Reset();
   }
@@ -47,8 +40,7 @@ class Operation {
   virtual v8::Local<v8::Value> Result(v8::Isolate* isolate) = 0;
 
   static void OnReady(GObject* source_object, GAsyncResult* result, gpointer user_data) {
-    auto self = static_cast<Operation<T>*>(user_data);
-    self->PerformEnd(result);
+    static_cast<Operation<T>*>(user_data)->PerformEnd(result);
   }
 
   v8::Persistent<v8::Value> parent_;
@@ -58,28 +50,23 @@ class Operation {
  private:
   void PerformEnd(GAsyncResult* result) {
     End(result, &error_);
-    uv_async_send(&async_);
+    Runtime::GetUVContext()->schedule([=] () { Deliver(); });
   }
 
-  static void DeliverWrapper(uv_async_t* async) {
+  void Deliver() {
     auto isolate = v8::Isolate::GetCurrent();
     v8::HandleScope scope(isolate);
-    auto instance = static_cast<Operation<T>*>(async->data);
-    instance->Deliver(isolate);
-    delete instance;
-  }
-
-  void Deliver(v8::Isolate* isolate) {
     auto resolver = v8::Local<v8::Promise::Resolver>::New(isolate, resolver_);
+    v8::TryCatch try_catch;
+    try_catch.SetVerbose(true);
     if (error_ == NULL) {
       resolver->Resolve(Result(isolate));
     } else {
       resolver->Reject(v8::Exception::Error(v8::String::NewFromUtf8(isolate, error_->message)));
     }
+    delete this;
   }
 
-  static MainContext* main_context_;
-  uv_async_t async_;
   GError* error_;
 };
 

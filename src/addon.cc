@@ -1,7 +1,8 @@
 #include "device_manager.h"
 #include "events.h"
-#include "main_context.h"
+#include "glib_context.h"
 #include "runtime.h"
+#include "uv_context.h"
 
 #include <node.h>
 
@@ -12,7 +13,10 @@ namespace frida {
 static void InitAll(Handle<Object> exports) {
   frida_init();
 
-  Runtime::Init(new MainContext(frida_get_main_context()));
+  auto uv_context = new UVContext(uv_default_loop());
+  auto glib_context = new GLibContext(frida_get_main_context());
+  Runtime::Init(uv_context, glib_context);
+
   Events::Init(exports);
   DeviceManager::Init(exports);
 }

@@ -2,6 +2,7 @@
 
 namespace frida {
 
-MainContext* Runtime::main_context_ = NULL;
+UVContext* Runtime::uv_context_ = NULL;
+GLibContext* Runtime::glib_context_ = NULL;
 
 }
