@@ -150,7 +150,8 @@ class EnumerateProcessesOperation : public Operation<FridaDevice> {
   }
 
   void End(GAsyncResult* result, GError** error) {
-    processes_ = frida_device_enumerate_processes_finish(handle_, result, error);
+    processes_ = frida_device_enumerate_processes_finish(handle_, result,
+        error);
   }
 
   Local<Value> Result(Isolate* isolate) {

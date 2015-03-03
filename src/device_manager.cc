@@ -37,6 +37,7 @@ void DeviceManager::Init(Handle<Object> exports) {
   auto tpl = FunctionTemplate::New(isolate, New);
   tpl->SetClassName(String::NewFromUtf8(isolate, "DeviceManager"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "close", Close);
   NODE_SET_PROTOTYPE_METHOD(tpl, "enumerateDevices", EnumerateDevices);
   exports->Set(String::NewFromUtf8(isolate, "DeviceManager"),
       tpl->GetFunction());
@@ -61,6 +62,33 @@ void DeviceManager::New(const FunctionCallbackInfo<Value>& args) {
   }
 }
 
+class CloseOperation : public Operation<FridaDeviceManager> {
+ public:
+  void Begin() {
+    frida_device_manager_close(handle_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_device_manager_close_finish(handle_, result);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Undefined(isolate);
+  }
+};
+
+void DeviceManager::Close(const FunctionCallbackInfo<Value>& args) {
+  auto isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  auto obj = args.Holder();
+  auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
+
+  auto operation = new CloseOperation();
+  operation->Schedule(isolate, obj, wrapper->handle_);
+
+  args.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
 class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
  public:
   void Begin() {
@@ -68,7 +96,8 @@ class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
   }
 
   void End(GAsyncResult* result, GError** error) {
-    devices_ = frida_device_manager_enumerate_devices_finish(handle_, result, error);
+    devices_ = frida_device_manager_enumerate_devices_finish(handle_, result,
+        error);
   }
 
   Local<Value> Result(Isolate* isolate) {
