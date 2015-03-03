@@ -3,6 +3,7 @@
 #include "events.h"
 #include "operation.h"
 #include "process.h"
+#include "session.h"
 
 using v8::AccessorSignature;
 using v8::Array;
@@ -56,6 +57,7 @@ void Device::Init(Handle<Object> exports) {
       data, DEFAULT, None, signature);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "enumerateProcesses", EnumerateProcesses);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "attach", Attach);
 
   exports->Set(String::NewFromUtf8(isolate, "Device"),
       tpl->GetFunction());
@@ -101,7 +103,8 @@ void Device::GetId(Local<String> property,
   HandleScope scope(isolate);
   auto handle = ObjectWrap::Unwrap<Device>(info.Holder())->handle_;
 
-  info.GetReturnValue().Set(Integer::New(isolate, frida_device_get_id(handle)));
+  info.GetReturnValue().Set(
+      Integer::NewFromUnsigned(isolate, frida_device_get_id(handle)));
 }
 
 void Device::GetName(Local<String> property,
@@ -170,6 +173,51 @@ void Device::EnumerateProcesses(const FunctionCallbackInfo<Value>& args) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   auto operation = new EnumerateProcessesOperation();
+  operation->Schedule(isolate, obj, wrapper->handle_);
+
+  args.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class AttachOperation : public Operation<FridaDevice> {
+ public:
+  AttachOperation(guint pid) : pid_(pid) {
+  }
+
+  void Begin() {
+    frida_device_attach(handle_, pid_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    session_ = frida_device_attach_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Session::Create(session_);
+  }
+
+  const guint pid_;
+  FridaSession* session_;
+};
+
+void Device::Attach(const FunctionCallbackInfo<Value>& args) {
+  auto isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  auto obj = args.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+
+  if (args.Length() < 1 || !args[0]->IsNumber()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
+        "Bad argument, expected pid")));
+    return;
+  }
+  auto pid = args[0]->ToInteger()->Value();
+  if (pid <= 0) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
+        "Bad argument, expected pid")));
+    return;
+  }
+
+  auto operation = new AttachOperation(pid);
   operation->Schedule(isolate, obj, wrapper->handle_);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));

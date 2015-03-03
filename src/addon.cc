@@ -4,6 +4,7 @@
 #include "glib_context.h"
 #include "process.h"
 #include "runtime.h"
+#include "session.h"
 #include "uv_context.h"
 
 #include <node.h>
@@ -28,6 +29,7 @@ static void InitAll(Handle<Object> exports) {
   DeviceManager::Init(exports);
   Device::Init(exports);
   Process::Init(exports);
+  Session::Init(exports);
 }
 
 }
