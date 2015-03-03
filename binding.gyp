@@ -6,6 +6,7 @@
       "sources": [
         "src/addon.cc",
         "src/device_manager.cc",
+        "src/device.cc",
         "src/events.cc",
         "src/runtime.cc",
         "src/uv_context.cc",

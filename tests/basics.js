@@ -3,8 +3,16 @@ var frida = require("../build/Release/frida");
 var manager = new frida.DeviceManager();
 
 console.log("enumerateDevices() starting")
-manager.enumerateDevices().then(function (devices) {
+manager.enumerateDevices()
+.then(function (devices) {
   console.log("enumerateDevices() completed:", devices);
+  var firstDevice = devices[0];
+  firstDevice.enumerateProcesses().then(function (processes) {
+    console.log("processes:", processes);
+  });
+})
+.catch(function (error) {
+  console.log("enumerateDevices failed:", error);
 });
 
 var onChanged = function () {

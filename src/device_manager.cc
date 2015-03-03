@@ -1,8 +1,10 @@
 #include "device_manager.h"
 
+#include "device.h"
 #include "events.h"
 #include "operation.h"
 
+using v8::Array;
 using v8::Function;
 using v8::FunctionCallbackInfo;
 using v8::FunctionTemplate;
@@ -71,8 +73,15 @@ class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
 
   Local<Value> Result(Isolate* isolate) {
     auto size = frida_device_list_size(devices_);
+    auto devices = Array::New(isolate, size);
+    for (auto i = 0; i != size; i++) {
+      auto device = Device::Create(frida_device_list_get(devices_, i));
+      devices->Set(i, device);
+    }
+
     g_object_unref(devices_);
-    return Number::New(isolate, size);
+
+    return devices;
   }
 
   FridaDeviceList* devices_;

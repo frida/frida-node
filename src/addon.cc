@@ -1,3 +1,4 @@
+#include "device.h"
 #include "device_manager.h"
 #include "events.h"
 #include "glib_context.h"
@@ -23,6 +24,7 @@ static void InitAll(Handle<Object> exports) {
 
   Events::Init(exports);
   DeviceManager::Init(exports);
+  Device::Init(exports);
 }
 
 }

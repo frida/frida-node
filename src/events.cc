@@ -83,7 +83,7 @@ void Events::New(const FunctionCallbackInfo<Value>& args) {
   HandleScope scope(isolate);
 
   if (args.IsConstructCall()) {
-    if (args.Length() < 1 || !args[0]->IsExternal()) {
+    if (args.Length() != 1 || !args[0]->IsExternal()) {
       isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
           "Bad argument, expected raw handle")));
       return;
