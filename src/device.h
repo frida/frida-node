@@ -26,6 +26,9 @@ class Device : public node::ObjectWrap {
 
   static void EnumerateProcesses(
       const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void Spawn(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void Resume(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void Kill(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void Attach(const v8::FunctionCallbackInfo<v8::Value>& args);
 
   static v8::Persistent<v8::Function> constructor_;

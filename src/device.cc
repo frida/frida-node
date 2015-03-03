@@ -57,6 +57,9 @@ void Device::Init(Handle<Object> exports) {
       data, DEFAULT, None, signature);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "enumerateProcesses", EnumerateProcesses);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "spawn", Spawn);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "resume", Resume);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "kill", Kill);
   NODE_SET_PROTOTYPE_METHOD(tpl, "attach", Attach);
 
   exports->Set(String::NewFromUtf8(isolate, "Device"),
@@ -173,6 +176,179 @@ void Device::EnumerateProcesses(const FunctionCallbackInfo<Value>& args) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   auto operation = new EnumerateProcessesOperation();
+  operation->Schedule(isolate, obj, wrapper->handle_);
+
+  args.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class SpawnOperation : public Operation<FridaDevice> {
+ public:
+  SpawnOperation(gchar* path, gchar** argv, gchar** envp)
+    : path_(path),
+      argv_(argv),
+      envp_(envp) {
+  }
+
+  ~SpawnOperation() {
+    g_strfreev(envp_);
+    g_strfreev(argv_);
+    g_free(path_);
+  }
+
+  void Begin() {
+    frida_device_spawn(handle_, path_, argv_, g_strv_length(argv_),
+        envp_, g_strv_length(envp_), OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    pid_ = frida_device_spawn_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Integer::NewFromUnsigned(isolate, pid_);
+  }
+
+  gchar* path_;
+  gchar** argv_;
+  gchar** envp_;
+  guint pid_;
+};
+
+void Device::Spawn(const FunctionCallbackInfo<Value>& args) {
+  auto isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  auto obj = args.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+
+  gchar** argv = NULL;
+  if (args.Length() >= 1) {
+    if (args[0]->IsArray()) {
+      auto elements = Local<Array>::Cast(args[0]);
+      uint32_t length = elements->Length();
+      argv = g_new0(gchar *, length + 1);
+      for (uint32_t i = 0; i != length; i++) {
+        auto element_value = elements->Get(i);
+        if (element_value->IsString()) {
+          String::Utf8Value element(Local<String>::Cast(element_value));
+          argv[i] = g_strdup(*element);
+        } else {
+          g_strfreev(argv);
+          argv = NULL;
+          break;
+        }
+      }
+    } else if (args[0]->IsString()) {
+      String::Utf8Value command_line(Local<String>::Cast(args[0]));
+      GError* error;
+      if (!g_shell_parse_argv(*command_line, NULL, &argv, &error)) {
+        gchar* message = g_strdup_printf("Bad argv string: %s", error->message);
+        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(
+            isolate, message)));
+        g_free(message);
+        g_error_free(error);
+        return;
+      }
+    }
+  }
+  if (argv == NULL) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
+        "Bad argument, expected argv as a string or array of strings")));
+    return;
+  }
+
+  gchar** envp = g_get_environ();
+
+  gchar* path = g_strdup(argv[0]);
+
+  auto operation = new SpawnOperation(path, argv, envp);
+  operation->Schedule(isolate, obj, wrapper->handle_);
+
+  args.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class ResumeOperation : public Operation<FridaDevice> {
+ public:
+  ResumeOperation(guint pid) : pid_(pid) {
+  }
+
+  void Begin() {
+    frida_device_resume(handle_, pid_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_device_resume_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Undefined(isolate);
+  }
+
+  const guint pid_;
+};
+
+void Device::Resume(const FunctionCallbackInfo<Value>& args) {
+  auto isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  auto obj = args.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+
+  if (args.Length() < 1 || !args[0]->IsNumber()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
+        "Bad argument, expected pid")));
+    return;
+  }
+  auto pid = args[0]->ToInteger()->Value();
+  if (pid <= 0) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
+        "Bad argument, expected pid")));
+    return;
+  }
+
+  auto operation = new ResumeOperation(pid);
+  operation->Schedule(isolate, obj, wrapper->handle_);
+
+  args.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class KillOperation : public Operation<FridaDevice> {
+ public:
+  KillOperation(guint pid) : pid_(pid) {
+  }
+
+  void Begin() {
+    frida_device_kill(handle_, pid_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_device_kill_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Undefined(isolate);
+  }
+
+  const guint pid_;
+};
+
+void Device::Kill(const FunctionCallbackInfo<Value>& args) {
+  auto isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  auto obj = args.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+
+  if (args.Length() < 1 || !args[0]->IsNumber()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
+        "Bad argument, expected pid")));
+    return;
+  }
+  auto pid = args[0]->ToInteger()->Value();
+  if (pid <= 0) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
+        "Bad argument, expected pid")));
+    return;
+  }
+
+  auto operation = new KillOperation(pid);
   operation->Schedule(isolate, obj, wrapper->handle_);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
