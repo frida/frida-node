@@ -22,8 +22,7 @@ namespace frida {
 
 Persistent<Function> DeviceManager::constructor_;
 
-DeviceManager::DeviceManager(FridaDeviceManager* handle)
-    : handle_(handle) {
+DeviceManager::DeviceManager(FridaDeviceManager* handle) : handle_(handle) {
 }
 
 DeviceManager::~DeviceManager() {
@@ -37,8 +36,10 @@ void DeviceManager::Init(Handle<Object> exports) {
   auto tpl = FunctionTemplate::New(isolate, New);
   tpl->SetClassName(String::NewFromUtf8(isolate, "DeviceManager"));
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
+
   NODE_SET_PROTOTYPE_METHOD(tpl, "close", Close);
   NODE_SET_PROTOTYPE_METHOD(tpl, "enumerateDevices", EnumerateDevices);
+
   exports->Set(String::NewFromUtf8(isolate, "DeviceManager"),
       tpl->GetFunction());
 

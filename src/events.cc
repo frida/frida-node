@@ -138,6 +138,7 @@ void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
     auto closure = reinterpret_cast<GClosure*>(events_closure);
     auto closure_callback = Local<Function>::New(isolate,
         *events_closure->callback);
+    // TODO: also check signal name
     if (closure_callback->SameValue(callback)) {
       wrapper->closures_ = g_slist_delete_link(wrapper->closures_, cur);
 
@@ -248,6 +249,7 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
 
 static Local<Value> events_closure_gvalue_to_jsvalue(Isolate* isolate,
     const GValue* gvalue) {
+  // TODO: parse JSON
   switch (G_VALUE_TYPE(gvalue)) {
     case G_TYPE_BOOLEAN:
       return Boolean::New(isolate, g_value_get_boolean(gvalue));

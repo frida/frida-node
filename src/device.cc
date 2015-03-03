@@ -30,8 +30,7 @@ namespace frida {
 
 Persistent<Function> Device::constructor_;
 
-Device::Device(FridaDevice* handle)
-    : handle_(handle) {
+Device::Device(FridaDevice* handle) : handle_(handle) {
 }
 
 Device::~Device() {
@@ -62,8 +61,7 @@ void Device::Init(Handle<Object> exports) {
   NODE_SET_PROTOTYPE_METHOD(tpl, "kill", Kill);
   NODE_SET_PROTOTYPE_METHOD(tpl, "attach", Attach);
 
-  exports->Set(String::NewFromUtf8(isolate, "Device"),
-      tpl->GetFunction());
+  exports->Set(String::NewFromUtf8(isolate, "Device"), tpl->GetFunction());
 
   constructor_.Reset(isolate, tpl->GetFunction());
 }

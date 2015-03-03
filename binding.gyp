@@ -9,6 +9,7 @@
         "src/device.cc",
         "src/process.cc",
         "src/session.cc",
+        "src/script.cc",
         "src/events.cc",
         "src/runtime.cc",
         "src/uv_context.cc",

@@ -21,6 +21,7 @@ class Session : public node::ObjectWrap {
       const v8::PropertyCallbackInfo<v8::Value>& info);
 
   static void Detach(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void CreateScript(const v8::FunctionCallbackInfo<v8::Value>& args);
 
   static v8::Persistent<v8::Function> constructor_;
 

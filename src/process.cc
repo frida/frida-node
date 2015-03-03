@@ -23,8 +23,7 @@ namespace frida {
 
 Persistent<Function> Process::constructor_;
 
-Process::Process(FridaProcess* handle)
-    : handle_(handle) {
+Process::Process(FridaProcess* handle) : handle_(handle) {
 }
 
 Process::~Process() {
@@ -46,8 +45,7 @@ void Process::Init(Handle<Object> exports) {
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "name"), GetName, 0,
       data, DEFAULT, None, signature);
 
-  exports->Set(String::NewFromUtf8(isolate, "Process"),
-      tpl->GetFunction());
+  exports->Set(String::NewFromUtf8(isolate, "Process"), tpl->GetFunction());
 
   constructor_.Reset(isolate, tpl->GetFunction());
 }
