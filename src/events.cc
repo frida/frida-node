@@ -7,6 +7,7 @@
 
 #include <cstring>
 
+using v8::Boolean;
 using v8::Exception;
 using v8::External;
 using v8::Function;
@@ -14,8 +15,10 @@ using v8::FunctionCallbackInfo;
 using v8::FunctionTemplate;
 using v8::Handle;
 using v8::HandleScope;
+using v8::Integer;
 using v8::Isolate;
 using v8::Local;
+using v8::Number;
 using v8::Object;
 using v8::Persistent;
 using v8::String;
@@ -24,7 +27,6 @@ using v8::Value;
 namespace frida {
 
 typedef struct _EventsClosure EventsClosure;
-typedef struct _EventsClosureInvocation EventsClosureInvocation;
 
 struct _EventsClosure {
   GClosure closure;
@@ -33,25 +35,20 @@ struct _EventsClosure {
   Persistent<Function>* callback;
 };
 
-struct _EventsClosureInvocation
-{
-  EventsClosure* closure;
-  GArray* args;
-};
-
 static EventsClosure* events_closure_new(Handle<Object> parent,
     Handle<Function> callback);
 static void events_closure_finalize(gpointer data, GClosure* closure);
 static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
     guint n_param_values, const GValue* param_values, gpointer invocation_hint,
     gpointer marshal_data);
+static Local<Value> events_closure_gvalue_to_jsvalue(Isolate* isolate,
+    const GValue* gvalue);
 
 Persistent<Function> Events::constructor_;
 
 Events::Events(gpointer handle)
     : handle_(handle),
-      closures_(NULL),
-      pending_(NULL) {
+      closures_(NULL) {
 }
 
 Events::~Events() {
@@ -111,12 +108,18 @@ void Events::Listen(const FunctionCallbackInfo<Value>& args) {
   Local<Function> callback;
   if (!wrapper->GetSignalArguments(args, signal_id, callback))
     return;
-  auto closure = events_closure_new(obj, callback);
-  wrapper->closures_ = g_slist_append(wrapper->closures_, closure);
+
+  auto events_closure = events_closure_new(obj, callback);
+  auto closure = reinterpret_cast<GClosure*>(events_closure);
+  g_closure_ref(closure);
+  g_closure_sink(closure);
+  wrapper->closures_ = g_slist_append(wrapper->closures_, events_closure);
+
   Runtime::GetUVContext()->IncreaseUsage();
-  Runtime::GetGLibContext()->Schedule([=] () {
-    closure->handler_id = g_signal_connect_closure_by_id(wrapper->handle_,
-        signal_id, 0, reinterpret_cast<GClosure*>(closure), TRUE);
+  Runtime::GetGLibContext()->Schedule([=]() {
+    events_closure->handler_id = g_signal_connect_closure_by_id(
+        wrapper->handle_, signal_id, 0, closure, TRUE);
+    g_assert(events_closure->handler_id != 0);
   });
 }
 
@@ -129,15 +132,26 @@ void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
   Local<Function> callback;
   if (!wrapper->GetSignalArguments(args, signal_id, callback))
     return;
+
   for (GSList* cur = wrapper->closures_; cur != NULL; cur = cur->next) {
-    auto closure = static_cast<EventsClosure*>(cur->data);
-    auto closure_callback = Local<Function>::New(isolate, *closure->callback);
+    auto events_closure = static_cast<EventsClosure*>(cur->data);
+    auto closure = reinterpret_cast<GClosure*>(events_closure);
+    auto closure_callback = Local<Function>::New(isolate,
+        *events_closure->callback);
     if (closure_callback->SameValue(callback)) {
       wrapper->closures_ = g_slist_delete_link(wrapper->closures_, cur);
+
+      auto handler_id = events_closure->handler_id;
+      events_closure->handler_id = 0;
+
       Runtime::GetUVContext()->DecreaseUsage();
-      Runtime::GetGLibContext()->Schedule([=] () {
-        g_signal_handler_disconnect(wrapper->handle_, closure->handler_id);
+      Runtime::GetGLibContext()->Schedule([=]() {
+        g_signal_handler_disconnect(wrapper->handle_, handler_id);
+        Runtime::GetUVContext()->Schedule([=]() {
+          g_closure_unref(closure);
+        });
       });
+
       break;
     }
   }
@@ -193,16 +207,76 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
     gpointer marshal_data) {
   EventsClosure* self = reinterpret_cast<EventsClosure*>(closure);
 
-  auto invocation = g_slice_new(EventsClosureInvocation);
-  invocation->closure = self;
   g_closure_ref(closure);
-  invocation->args = g_array_sized_new(FALSE, FALSE, sizeof (GValue), n_param_values);
-  for (guint i = 0; i != n_param_values; i++) {
+
+  GArray* args = g_array_sized_new(FALSE, FALSE, sizeof (GValue), n_param_values);
+  g_assert_cmpuint(n_param_values, >=, 1);
+  for (guint i = 1; i != n_param_values; i++) {
     GValue val;
     memset(&val, 0, sizeof(val));
     g_value_init(&val, param_values[i].g_type);
     g_value_copy(&param_values[i], &val);
-    g_array_append_val(invocation->args, val);
+    g_array_append_val(args, val);
+  }
+
+  Runtime::GetUVContext()->Schedule([=]() {
+    const bool still_connected = self->handler_id != 0;
+    if (still_connected) {
+      auto isolate = Isolate::GetCurrent();
+
+      const int argc = args->len;
+      Local<Value>* argv = new Local<Value>[argc];
+      for (int i = 0; i != argc; i++) {
+        argv[i] = events_closure_gvalue_to_jsvalue(isolate,
+            &g_array_index(args, GValue, i));
+      }
+
+      auto recv = Local<Object>::New(isolate, *self->parent);
+      auto callback = Local<Function>::New(isolate, *self->callback);
+      callback->Call(recv, argc, argv);
+
+      delete[] argv;
+    }
+
+    for (guint i = 0; i != args->len; i++)
+      g_value_reset(&g_array_index(args, GValue, i));
+    g_array_free(args, TRUE);
+
+    g_closure_unref(closure);
+  });
+}
+
+static Local<Value> events_closure_gvalue_to_jsvalue(Isolate* isolate,
+    const GValue* gvalue) {
+  switch (G_VALUE_TYPE(gvalue)) {
+    case G_TYPE_BOOLEAN:
+      return Boolean::New(isolate, g_value_get_boolean(gvalue));
+    case G_TYPE_INT:
+      return Integer::New(isolate, g_value_get_int(gvalue));
+    case G_TYPE_UINT:
+      return Integer::NewFromUnsigned(isolate, g_value_get_uint(gvalue));
+    case G_TYPE_FLOAT:
+      return Number::New(isolate, g_value_get_float(gvalue));
+    case G_TYPE_DOUBLE:
+      return Number::New(isolate, g_value_get_double(gvalue));
+    case G_TYPE_STRING:
+      return String::NewFromUtf8(isolate, g_value_get_string(gvalue));
+    case G_TYPE_VARIANT: {
+      GVariant* variant = g_value_get_variant(gvalue);
+      if (variant == NULL) {
+        return Null(isolate);
+      } else if (g_variant_is_of_type(variant, G_VARIANT_TYPE("ay"))) {
+        return node::Encode(isolate, g_variant_get_data(variant),
+            g_variant_get_size(variant));
+      } else {
+        // XXX: extend as necessary
+        g_assert_not_reached();
+      }
+      break;
+    }
+    default:
+      // XXX: extend as necessary
+      g_assert_not_reached();
   }
 }
 

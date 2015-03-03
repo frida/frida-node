@@ -29,7 +29,6 @@ class Events : public node::ObjectWrap {
 
   gpointer handle_;
   GSList* closures_;
-  GSList* pending_;
 };
 
 }
