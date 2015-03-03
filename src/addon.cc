@@ -2,6 +2,7 @@
 #include "device_manager.h"
 #include "events.h"
 #include "glib_context.h"
+#include "process.h"
 #include "runtime.h"
 #include "uv_context.h"
 
@@ -23,8 +24,10 @@ static void InitAll(Handle<Object> exports) {
   Runtime::Init(uv_context, glib_context);
 
   Events::Init(exports);
+
   DeviceManager::Init(exports);
   Device::Init(exports);
+  Process::Init(exports);
 }
 
 }
