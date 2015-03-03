@@ -6,7 +6,11 @@
 
 #include <node.h>
 
-using namespace v8;
+using v8::Context;
+using v8::Handle;
+using v8::HandleScope;
+using v8::Isolate;
+using v8::Object;
 
 namespace frida {
 

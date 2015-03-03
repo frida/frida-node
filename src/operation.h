@@ -17,7 +17,8 @@ class Operation {
     handle_ = handle;
     resolver_.Reset(isolate, v8::Promise::Resolver::New(isolate));
 
-    Runtime::GetGLibContext()->schedule([=] () { Begin(); });
+    Runtime::GetUVContext()->IncreaseUsage();
+    Runtime::GetGLibContext()->Schedule([=] () { Begin(); });
   }
 
   v8::Local<v8::Promise> GetPromise(v8::Isolate* isolate) {
@@ -50,20 +51,18 @@ class Operation {
  private:
   void PerformEnd(GAsyncResult* result) {
     End(result, &error_);
-    Runtime::GetUVContext()->schedule([=] () { Deliver(); });
+    Runtime::GetUVContext()->Schedule([=] () { Deliver(); });
   }
 
   void Deliver() {
     auto isolate = v8::Isolate::GetCurrent();
-    v8::HandleScope scope(isolate);
     auto resolver = v8::Local<v8::Promise::Resolver>::New(isolate, resolver_);
-    v8::TryCatch try_catch;
-    try_catch.SetVerbose(true);
     if (error_ == NULL) {
       resolver->Resolve(Result(isolate));
     } else {
       resolver->Reject(v8::Exception::Error(v8::String::NewFromUtf8(isolate, error_->message)));
     }
+    Runtime::GetUVContext()->DecreaseUsage();
     delete this;
   }
 

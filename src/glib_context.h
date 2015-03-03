@@ -12,8 +12,8 @@ public:
   GLibContext(GMainContext* main_context);
   ~GLibContext();
 
-  void schedule(std::function<void ()> f);
-  void perform(std::function<void ()> f);
+  void Schedule(std::function<void ()> f);
+  void Perform(std::function<void ()> f);
 
 private:
   static gboolean InvokeCallback(gpointer data);

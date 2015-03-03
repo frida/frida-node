@@ -7,7 +7,19 @@
 
 #include <cstring>
 
-using namespace v8;
+using v8::Exception;
+using v8::External;
+using v8::Function;
+using v8::FunctionCallbackInfo;
+using v8::FunctionTemplate;
+using v8::Handle;
+using v8::HandleScope;
+using v8::Isolate;
+using v8::Local;
+using v8::Object;
+using v8::Persistent;
+using v8::String;
+using v8::Value;
 
 namespace frida {
 
@@ -101,7 +113,8 @@ void Events::Listen(const FunctionCallbackInfo<Value>& args) {
     return;
   auto closure = events_closure_new(obj, callback);
   wrapper->closures_ = g_slist_append(wrapper->closures_, closure);
-  Runtime::GetGLibContext()->schedule([=] () {
+  Runtime::GetUVContext()->IncreaseUsage();
+  Runtime::GetGLibContext()->Schedule([=] () {
     closure->handler_id = g_signal_connect_closure_by_id(wrapper->handle_,
         signal_id, 0, reinterpret_cast<GClosure*>(closure), TRUE);
   });
@@ -121,7 +134,8 @@ void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
     auto closure_callback = Local<Function>::New(isolate, *closure->callback);
     if (closure_callback->SameValue(callback)) {
       wrapper->closures_ = g_slist_delete_link(wrapper->closures_, cur);
-      Runtime::GetGLibContext()->schedule([=] () {
+      Runtime::GetUVContext()->DecreaseUsage();
+      Runtime::GetGLibContext()->Schedule([=] () {
         g_signal_handler_disconnect(wrapper->handle_, closure->handler_id);
       });
       break;

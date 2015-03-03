@@ -17,7 +17,7 @@ GLibContext::~GLibContext() {
   g_mutex_clear(&mutex_);
 }
 
-void GLibContext::schedule(std::function<void ()> f) {
+void GLibContext::Schedule(std::function<void ()> f) {
   auto source = g_idle_source_new();
   g_source_set_callback(source, InvokeCallback, new std::function<void ()>(f),
       DestroyCallback);
@@ -25,7 +25,7 @@ void GLibContext::schedule(std::function<void ()> f) {
   g_source_unref(source);
 }
 
-void GLibContext::perform(std::function<void ()> f) {
+void GLibContext::Perform(std::function<void ()> f) {
   volatile bool finished = false;
 
   auto work = new std::function<void ()>([this, f, &finished]() {
