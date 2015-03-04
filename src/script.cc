@@ -3,11 +3,14 @@
 #include "events.h"
 #include "operation.h"
 
+#include <node.h>
+
+#define SCRIPT_DATA_CONSTRUCTOR "script:ctor"
+
 using v8::Exception;
 using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
-using v8::FunctionTemplate;
 using v8::Handle;
 using v8::HandleScope;
 using v8::Isolate;
@@ -19,9 +22,8 @@ using v8::Value;
 
 namespace frida {
 
-Persistent<Function> Script::constructor_;
-
-Script::Script(FridaScript* handle) : handle_(handle) {
+Script::Script(FridaScript* handle, Runtime* runtime)
+    : GLibObject(handle, runtime) {
 }
 
 Script::~Script() {
@@ -29,28 +31,29 @@ Script::~Script() {
   frida_unref(handle_);
 }
 
-void Script::Init(Handle<Object> exports) {
+void Script::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto tpl = FunctionTemplate::New(isolate, New);
-  tpl->SetClassName(String::NewFromUtf8(isolate, "Script"));
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
+  auto name = String::NewFromUtf8(isolate, "Script");
+  auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "load", Load);
 
-  exports->Set(String::NewFromUtf8(isolate, "Script"),
-      tpl->GetFunction());
-
-  constructor_.Reset(isolate, tpl->GetFunction());
+  auto ctor = tpl->GetFunction();
+  exports->Set(name, ctor);
+  runtime->SetDataPointer(SCRIPT_DATA_CONSTRUCTOR,
+      new Persistent<Function>(isolate, ctor));
 }
 
-Local<Object> Script::Create(gpointer handle) {
+Local<Object> Script::New(gpointer handle, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto constructor = Local<Function>::New(isolate, constructor_);
+  auto ctor = Local<Function>::New(isolate,
+      *static_cast<Persistent<Function>*>(
+      runtime->GetDataPointer(SCRIPT_DATA_CONSTRUCTOR)));
   const int argc = 1;
   Local<Value> argv[argc] = { External::New(isolate, handle) };
-  return constructor->NewInstance(argc, argv);
+  return ctor->NewInstance(argc, argv);
 }
 
 void Script::New(const FunctionCallbackInfo<Value>& args) {
@@ -63,16 +66,16 @@ void Script::New(const FunctionCallbackInfo<Value>& args) {
           "Bad argument, expected raw handle")));
       return;
     }
+    auto runtime = GetRuntimeFromConstructorArgs(args);
     auto wrapper = new Script(static_cast<FridaScript*>(
-        Local<External>::Cast(args[0])->Value()));
+        Local<External>::Cast(args[0])->Value()), runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
     obj->Set(String::NewFromUtf8(isolate, "events"),
-        Events::Create(g_object_ref(wrapper->handle_)));
+        Events::New(g_object_ref(wrapper->handle_), runtime));
     args.GetReturnValue().Set(obj);
   } else {
-    auto constructor = Local<Function>::New(isolate, constructor_);
-    args.GetReturnValue().Set(constructor->NewInstance(0, NULL));
+    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
   }
 }
 
@@ -98,7 +101,7 @@ void Script::Load(const FunctionCallbackInfo<Value>& args) {
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
   auto operation = new LoadOperation();
-  operation->Schedule(isolate, obj, wrapper->handle_);
+  operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -125,7 +128,7 @@ void Script::Unload(const FunctionCallbackInfo<Value>& args) {
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
   auto operation = new UnloadOperation();
-  operation->Schedule(isolate, obj, wrapper->handle_);
+  operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -168,7 +171,7 @@ void Script::PostMessage(const FunctionCallbackInfo<Value>& args) {
   auto message_obj = Local<Object>::Cast(args[0]);
 
   auto operation = new PostMessageOperation(g_strdup("TODO"));
-  operation->Schedule(isolate, obj, wrapper->handle_);
+  operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
 }

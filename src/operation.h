@@ -3,22 +3,21 @@
 
 #include "runtime.h"
 
-#include <frida-core.h>
-#include <node.h>
-#include <uv.h>
+#include <glib.h>
 
 namespace frida {
 
 template<class T>
 class Operation {
  public:
-  void Schedule(v8::Isolate* isolate, v8::Handle<v8::Object> parent, T* handle) {
-    parent_.Reset(isolate, parent);
-    handle_ = handle;
+  void Schedule(v8::Isolate* isolate, GLibObject* parent) {
+    parent_.Reset(isolate, parent->handle(isolate));
+    handle_ = parent->GetHandle<T>();
     resolver_.Reset(isolate, v8::Promise::Resolver::New(isolate));
+    runtime_ = parent->GetRuntime();
 
-    Runtime::GetUVContext()->IncreaseUsage();
-    Runtime::GetGLibContext()->Schedule([=] () { Begin(); });
+    runtime_->GetUVContext()->IncreaseUsage();
+    runtime_->GetGLibContext()->Schedule([=] () { Begin(); });
   }
 
   v8::Local<v8::Promise> GetPromise(v8::Isolate* isolate) {
@@ -26,8 +25,9 @@ class Operation {
   }
 
  protected:
-  Operation() : handle_(NULL), error_(NULL) {
+  Operation() : handle_(NULL), runtime_(NULL), error_(NULL) {
   }
+
   virtual ~Operation() {
     if (error_ != NULL) {
       g_error_free(error_);
@@ -47,11 +47,12 @@ class Operation {
   v8::Persistent<v8::Value> parent_;
   T* handle_;
   v8::Persistent<v8::Promise::Resolver> resolver_;
+  Runtime* runtime_;
 
  private:
   void PerformEnd(GAsyncResult* result) {
     End(result, &error_);
-    Runtime::GetUVContext()->Schedule([=] () { Deliver(); });
+    runtime_->GetUVContext()->Schedule([=] () { Deliver(); });
   }
 
   void Deliver() {
@@ -62,7 +63,7 @@ class Operation {
     } else {
       resolver->Reject(v8::Exception::Error(v8::String::NewFromUtf8(isolate, error_->message)));
     }
-    Runtime::GetUVContext()->DecreaseUsage();
+    runtime_->GetUVContext()->DecreaseUsage();
     delete this;
   }
 

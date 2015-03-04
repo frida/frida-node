@@ -4,13 +4,16 @@
 #include "operation.h"
 #include "script.h"
 
+#include <node.h>
+
+#define SESSION_DATA_CONSTRUCTOR "session:ctor"
+
 using v8::AccessorSignature;
 using v8::DEFAULT;
 using v8::Exception;
 using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
-using v8::FunctionTemplate;
 using v8::Handle;
 using v8::HandleScope;
 using v8::Integer;
@@ -25,10 +28,8 @@ using v8::Value;
 
 namespace frida {
 
-Persistent<Function> Session::constructor_;
-
-Session::Session(FridaSession* handle)
-    : handle_(handle) {
+Session::Session(FridaSession* handle, Runtime* runtime)
+    : GLibObject(handle, runtime) {
 }
 
 Session::~Session() {
@@ -36,12 +37,11 @@ Session::~Session() {
   frida_unref(handle_);
 }
 
-void Session::Init(Handle<Object> exports) {
+void Session::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto tpl = FunctionTemplate::New(isolate, New);
-  tpl->SetClassName(String::NewFromUtf8(isolate, "Session"));
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
+  auto name = String::NewFromUtf8(isolate, "Session");
+  auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
@@ -52,18 +52,21 @@ void Session::Init(Handle<Object> exports) {
   NODE_SET_PROTOTYPE_METHOD(tpl, "detach", Detach);
   NODE_SET_PROTOTYPE_METHOD(tpl, "createScript", CreateScript);
 
-  exports->Set(String::NewFromUtf8(isolate, "Session"), tpl->GetFunction());
-
-  constructor_.Reset(isolate, tpl->GetFunction());
+  auto ctor = tpl->GetFunction();
+  exports->Set(name, ctor);
+  runtime->SetDataPointer(SESSION_DATA_CONSTRUCTOR,
+      new Persistent<Function>(isolate, ctor));
 }
 
-Local<Object> Session::Create(gpointer handle) {
+Local<Object> Session::New(gpointer handle, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto constructor = Local<Function>::New(isolate, constructor_);
+  auto ctor = Local<Function>::New(isolate,
+      *static_cast<Persistent<Function>*>(
+      runtime->GetDataPointer(SESSION_DATA_CONSTRUCTOR)));
   const int argc = 1;
   Local<Value> argv[argc] = { External::New(isolate, handle) };
-  return constructor->NewInstance(argc, argv);
+  return ctor->NewInstance(argc, argv);
 }
 
 void Session::New(const FunctionCallbackInfo<Value>& args) {
@@ -76,16 +79,16 @@ void Session::New(const FunctionCallbackInfo<Value>& args) {
           "Bad argument, expected raw handle")));
       return;
     }
+    auto runtime = GetRuntimeFromConstructorArgs(args);
     auto wrapper = new Session(static_cast<FridaSession*>(
-        Local<External>::Cast(args[0])->Value()));
+        Local<External>::Cast(args[0])->Value()), runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
     obj->Set(String::NewFromUtf8(isolate, "events"),
-        Events::Create(g_object_ref(wrapper->handle_)));
+        Events::New(g_object_ref(wrapper->handle_), runtime));
     args.GetReturnValue().Set(obj);
   } else {
-    auto constructor = Local<Function>::New(isolate, constructor_);
-    args.GetReturnValue().Set(constructor->NewInstance(0, NULL));
+    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
   }
 }
 
@@ -93,7 +96,8 @@ void Session::GetPid(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
   auto isolate = info.GetIsolate();
   HandleScope scope(isolate);
-  auto handle = ObjectWrap::Unwrap<Session>(info.Holder())->handle_;
+  auto handle = ObjectWrap::Unwrap<Session>(
+      info.Holder())->GetHandle<FridaSession>();
 
   info.GetReturnValue().Set(
       Integer::NewFromUnsigned(isolate, frida_session_get_pid(handle)));
@@ -121,7 +125,7 @@ void Session::Detach(const FunctionCallbackInfo<Value>& args) {
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
   auto operation = new DetachOperation();
-  operation->Schedule(isolate, obj, wrapper->handle_);
+  operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -144,7 +148,7 @@ class CreateScriptOperation : public Operation<FridaSession> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Script::Create(script_);
+    return Script::New(script_, runtime_);
   }
 
   gchar* source_;
@@ -165,7 +169,7 @@ void Session::CreateScript(const FunctionCallbackInfo<Value>& args) {
   String::Utf8Value source(Local<String>::Cast(args[0]));
 
   auto operation = new CreateScriptOperation(g_strdup(*source));
-  operation->Schedule(isolate, obj, wrapper->handle_);
+  operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
 }

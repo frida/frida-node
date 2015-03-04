@@ -30,7 +30,7 @@ private:
   GMutex mutex_;
   GCond cond_;
   GSList* pending_;
-  v8::Persistent<v8::Object> context_;
+  v8::Persistent<v8::Object> module_;
   v8::Persistent<v8::Function> process_pending_;
 };
 

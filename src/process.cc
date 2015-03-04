@@ -1,12 +1,13 @@
 #include "process.h"
 
+#define PROCESS_DATA_CONSTRUCTOR "process:ctor"
+
 using v8::AccessorSignature;
 using v8::DEFAULT;
 using v8::Exception;
 using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
-using v8::FunctionTemplate;
 using v8::Handle;
 using v8::HandleScope;
 using v8::Integer;
@@ -21,21 +22,19 @@ using v8::Value;
 
 namespace frida {
 
-Persistent<Function> Process::constructor_;
-
-Process::Process(FridaProcess* handle) : handle_(handle) {
+Process::Process(FridaProcess* handle, Runtime* runtime)
+    : GLibObject(handle, runtime) {
 }
 
 Process::~Process() {
   g_object_unref(handle_);
 }
 
-void Process::Init(Handle<Object> exports) {
+void Process::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto tpl = FunctionTemplate::New(isolate, New);
-  tpl->SetClassName(String::NewFromUtf8(isolate, "Process"));
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
+  auto name = String::NewFromUtf8(isolate, "Process");
+  auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
@@ -45,18 +44,21 @@ void Process::Init(Handle<Object> exports) {
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "name"), GetName, 0,
       data, DEFAULT, None, signature);
 
-  exports->Set(String::NewFromUtf8(isolate, "Process"), tpl->GetFunction());
-
-  constructor_.Reset(isolate, tpl->GetFunction());
+  auto ctor = tpl->GetFunction();
+  exports->Set(name, ctor);
+  runtime->SetDataPointer(PROCESS_DATA_CONSTRUCTOR,
+      new Persistent<Function>(isolate, ctor));
 }
 
-Local<Object> Process::Create(gpointer handle) {
+Local<Object> Process::New(gpointer handle, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto constructor = Local<Function>::New(isolate, constructor_);
+  auto ctor = Local<Function>::New(isolate,
+      *static_cast<Persistent<Function>*>(
+      runtime->GetDataPointer(PROCESS_DATA_CONSTRUCTOR)));
   const int argc = 1;
   Local<Value> argv[argc] = { External::New(isolate, handle) };
-  return constructor->NewInstance(argc, argv);
+  return ctor->NewInstance(argc, argv);
 }
 
 void Process::New(const FunctionCallbackInfo<Value>& args) {
@@ -69,14 +71,14 @@ void Process::New(const FunctionCallbackInfo<Value>& args) {
           "Bad argument, expected raw handle")));
       return;
     }
+    auto runtime = GetRuntimeFromConstructorArgs(args);
     auto wrapper = new Process(static_cast<FridaProcess*>(
-        Local<External>::Cast(args[0])->Value()));
+        Local<External>::Cast(args[0])->Value()), runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
     args.GetReturnValue().Set(obj);
   } else {
-    auto constructor = Local<Function>::New(isolate, constructor_);
-    args.GetReturnValue().Set(constructor->NewInstance(0, NULL));
+    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
   }
 }
 
@@ -84,7 +86,8 @@ void Process::GetPid(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
   auto isolate = info.GetIsolate();
   HandleScope scope(isolate);
-  auto handle = ObjectWrap::Unwrap<Process>(info.Holder())->handle_;
+  auto handle = ObjectWrap::Unwrap<Process>(
+      info.Holder())->GetHandle<FridaProcess>();
 
   info.GetReturnValue().Set(
       Integer::New(isolate, frida_process_get_pid(handle)));
@@ -94,7 +97,8 @@ void Process::GetName(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
   auto isolate = info.GetIsolate();
   HandleScope scope(isolate);
-  auto handle = ObjectWrap::Unwrap<Process>(info.Holder())->handle_;
+  auto handle = ObjectWrap::Unwrap<Process>(
+      info.Holder())->GetHandle<FridaProcess>();
 
   info.GetReturnValue().Set(
       String::NewFromUtf8(isolate, frida_process_get_name(handle)));

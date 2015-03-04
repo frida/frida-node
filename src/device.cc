@@ -5,6 +5,10 @@
 #include "process.h"
 #include "session.h"
 
+#include <node.h>
+
+#define DEVICE_DATA_CONSTRUCTOR "device:ctor"
+
 using v8::AccessorSignature;
 using v8::Array;
 using v8::DEFAULT;
@@ -12,14 +16,12 @@ using v8::Exception;
 using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
-using v8::FunctionTemplate;
 using v8::Handle;
 using v8::HandleScope;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
 using v8::None;
-using v8::Number;
 using v8::Object;
 using v8::Persistent;
 using v8::PropertyCallbackInfo;
@@ -28,9 +30,8 @@ using v8::Value;
 
 namespace frida {
 
-Persistent<Function> Device::constructor_;
-
-Device::Device(FridaDevice* handle) : handle_(handle) {
+Device::Device(FridaDevice* handle, Runtime* runtime)
+    : GLibObject(handle, runtime) {
 }
 
 Device::~Device() {
@@ -38,12 +39,11 @@ Device::~Device() {
   frida_unref(handle_);
 }
 
-void Device::Init(Handle<Object> exports) {
+void Device::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto tpl = FunctionTemplate::New(isolate, New);
-  tpl->SetClassName(String::NewFromUtf8(isolate, "Device"));
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
+  auto name = String::NewFromUtf8(isolate, "Device");
+  auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
@@ -61,18 +61,21 @@ void Device::Init(Handle<Object> exports) {
   NODE_SET_PROTOTYPE_METHOD(tpl, "kill", Kill);
   NODE_SET_PROTOTYPE_METHOD(tpl, "attach", Attach);
 
-  exports->Set(String::NewFromUtf8(isolate, "Device"), tpl->GetFunction());
-
-  constructor_.Reset(isolate, tpl->GetFunction());
+  auto ctor = tpl->GetFunction();
+  exports->Set(name, ctor);
+  runtime->SetDataPointer(DEVICE_DATA_CONSTRUCTOR,
+      new Persistent<Function>(isolate, ctor));
 }
 
-Local<Object> Device::Create(gpointer handle) {
+Local<Object> Device::New(gpointer handle, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto constructor = Local<Function>::New(isolate, constructor_);
+  auto ctor = Local<Function>::New(isolate,
+      *static_cast<Persistent<Function>*>(
+      runtime->GetDataPointer(DEVICE_DATA_CONSTRUCTOR)));
   const int argc = 1;
   Local<Value> argv[argc] = { External::New(isolate, handle) };
-  return constructor->NewInstance(argc, argv);
+  return ctor->NewInstance(argc, argv);
 }
 
 void Device::New(const FunctionCallbackInfo<Value>& args) {
@@ -85,16 +88,16 @@ void Device::New(const FunctionCallbackInfo<Value>& args) {
           "Bad argument, expected raw handle")));
       return;
     }
+    auto runtime = GetRuntimeFromConstructorArgs(args);
     auto wrapper = new Device(static_cast<FridaDevice*>(
-        Local<External>::Cast(args[0])->Value()));
+        Local<External>::Cast(args[0])->Value()), runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
     obj->Set(String::NewFromUtf8(isolate, "events"),
-        Events::Create(g_object_ref(wrapper->handle_)));
+        Events::New(g_object_ref(wrapper->handle_), runtime));
     args.GetReturnValue().Set(obj);
   } else {
-    auto constructor = Local<Function>::New(isolate, constructor_);
-    args.GetReturnValue().Set(constructor->NewInstance(0, NULL));
+    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
   }
 }
 
@@ -102,7 +105,8 @@ void Device::GetId(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
   auto isolate = info.GetIsolate();
   HandleScope scope(isolate);
-  auto handle = ObjectWrap::Unwrap<Device>(info.Holder())->handle_;
+  auto handle = ObjectWrap::Unwrap<Device>(
+      info.Holder())->GetHandle<FridaDevice>();
 
   info.GetReturnValue().Set(
       Integer::NewFromUnsigned(isolate, frida_device_get_id(handle)));
@@ -112,7 +116,8 @@ void Device::GetName(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
   auto isolate = info.GetIsolate();
   HandleScope scope(isolate);
-  auto handle = ObjectWrap::Unwrap<Device>(info.Holder())->handle_;
+  auto handle = ObjectWrap::Unwrap<Device>(
+      info.Holder())->GetHandle<FridaDevice>();
 
   info.GetReturnValue().Set(
       String::NewFromUtf8(isolate, frida_device_get_name(handle)));
@@ -122,7 +127,8 @@ void Device::GetType(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
   auto isolate = info.GetIsolate();
   HandleScope scope(isolate);
-  auto handle = ObjectWrap::Unwrap<Device>(info.Holder())->handle_;
+  auto handle = ObjectWrap::Unwrap<Device>(
+      info.Holder())->GetHandle<FridaDevice>();
 
   const gchar* type;
   switch (frida_device_get_dtype(handle)) {
@@ -156,7 +162,8 @@ class EnumerateProcessesOperation : public Operation<FridaDevice> {
     auto size = frida_process_list_size(processes_);
     auto processes = Array::New(isolate, size);
     for (auto i = 0; i != size; i++) {
-      auto process = Process::Create(frida_process_list_get(processes_, i));
+      auto process = Process::New(frida_process_list_get(processes_, i),
+          runtime_);
       processes->Set(i, process);
     }
 
@@ -175,7 +182,7 @@ void Device::EnumerateProcesses(const FunctionCallbackInfo<Value>& args) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   auto operation = new EnumerateProcessesOperation();
-  operation->Schedule(isolate, obj, wrapper->handle_);
+  operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -260,7 +267,7 @@ void Device::Spawn(const FunctionCallbackInfo<Value>& args) {
   gchar* path = g_strdup(argv[0]);
 
   auto operation = new SpawnOperation(path, argv, envp);
-  operation->Schedule(isolate, obj, wrapper->handle_);
+  operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -304,7 +311,7 @@ void Device::Resume(const FunctionCallbackInfo<Value>& args) {
   }
 
   auto operation = new ResumeOperation(pid);
-  operation->Schedule(isolate, obj, wrapper->handle_);
+  operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -348,7 +355,7 @@ void Device::Kill(const FunctionCallbackInfo<Value>& args) {
   }
 
   auto operation = new KillOperation(pid);
-  operation->Schedule(isolate, obj, wrapper->handle_);
+  operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -367,7 +374,7 @@ class AttachOperation : public Operation<FridaDevice> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Session::Create(session_);
+    return Session::New(session_, runtime_);
   }
 
   const guint pid_;
@@ -393,7 +400,7 @@ void Device::Attach(const FunctionCallbackInfo<Value>& args) {
   }
 
   auto operation = new AttachOperation(pid);
-  operation->Schedule(isolate, obj, wrapper->handle_);
+  operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
 }

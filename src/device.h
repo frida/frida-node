@@ -1,18 +1,19 @@
 #ifndef FRIDANODE_DEVICE_H
 #define FRIDANODE_DEVICE_H
 
+#include "glib_object.h"
+
 #include <frida-core.h>
-#include <node_object_wrap.h>
 
 namespace frida {
 
-class Device : public node::ObjectWrap {
+class Device : public GLibObject {
  public:
-  static void Init(v8::Handle<v8::Object> exports);
-  static v8::Local<v8::Object> Create(gpointer handle);
+  static void Init(v8::Handle<v8::Object> exports, Runtime* runtime);
+  static v8::Local<v8::Object> New(gpointer handle, Runtime* runtime);
 
  private:
-  explicit Device(FridaDevice* handle);
+  Device(FridaDevice* handle, Runtime* runtime);
   ~Device();
 
   static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -31,9 +32,6 @@ class Device : public node::ObjectWrap {
   static void Kill(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void Attach(const v8::FunctionCallbackInfo<v8::Value>& args);
 
-  static v8::Persistent<v8::Function> constructor_;
-
-  FridaDevice* handle_;
   v8::Persistent<v8::Object> events_;
 };
 

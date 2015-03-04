@@ -8,17 +8,19 @@ namespace frida {
 
 class Runtime {
  public:
-  static void Init(UVContext* uv_context, GLibContext* glib_context) {
-    uv_context_ = uv_context;
-    glib_context_ = glib_context;
-  }
+  Runtime(UVContext* uv_context, GLibContext* glib_context);
+  ~Runtime();
 
-  static UVContext* GetUVContext() { return uv_context_; }
-  static GLibContext* GetGLibContext() { return glib_context_; }
+  UVContext* GetUVContext() const;
+  GLibContext* GetGLibContext() const;
+
+  void* GetDataPointer(const char* id);
+  void SetDataPointer(const char* id, void* value);
 
  private:
-  static UVContext* uv_context_;
-  static GLibContext* glib_context_;
+  UVContext* uv_context_;
+  GLibContext* glib_context_;
+  GHashTable* data_;
 };
 
 }

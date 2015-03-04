@@ -29,19 +29,19 @@ UVContext::UVContext(uv_loop_t* loop) : usage_count_(0), pending_(NULL) {
   g_cond_init(&cond_);
 
   auto isolate = Isolate::GetCurrent();
-  auto context = Object::New(isolate);
+  auto module = Object::New(isolate);
   auto process_pending = Function::New(isolate, ProcessPendingWrapper,
       External::New(isolate, this));
   auto process_pending_name = String::NewFromUtf8(isolate, "processPending");
   process_pending->SetName(process_pending_name);
-  context->Set(process_pending_name, process_pending);
-  context_.Reset(isolate, context);
+  module->Set(process_pending_name, process_pending);
+  module_.Reset(isolate, module);
   process_pending_.Reset(isolate, process_pending);
 }
 
 UVContext::~UVContext() {
   process_pending_.Reset();
-  context_.Reset();
+  module_.Reset();
   g_cond_clear(&cond_);
   g_mutex_clear(&mutex_);
   uv_close(reinterpret_cast<uv_handle_t*>(&async_), NULL);
@@ -107,9 +107,9 @@ void UVContext::ProcessPendingWrapper(uv_async_t* handle) {
   HandleScope handle_scope(isolate);
 
   auto self = static_cast<UVContext*>(handle->data);
-  auto context = Local<Object>::New(isolate, self->context_);
+  auto module = Local<Object>::New(isolate, self->module_);
   auto process_pending = Local<Function>::New(isolate, self->process_pending_);
-  node::MakeCallback(isolate, context, process_pending, 0, NULL);
+  node::MakeCallback(isolate, module, process_pending, 0, NULL);
 }
 
 }

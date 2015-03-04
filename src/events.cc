@@ -1,18 +1,16 @@
 #include "events.h"
 
-#include "runtime.h"
-
-#include <frida-core.h>
 #include <node.h>
 
 #include <cstring>
+
+#define EVENTS_DATA_CONSTRUCTOR "events:ctor"
 
 using v8::Boolean;
 using v8::Exception;
 using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
-using v8::FunctionTemplate;
 using v8::Handle;
 using v8::HandleScope;
 using v8::Integer;
@@ -33,10 +31,11 @@ struct _EventsClosure {
   guint handler_id;
   Persistent<Object>* parent;
   Persistent<Function>* callback;
+  Runtime* runtime;
 };
 
 static EventsClosure* events_closure_new(Handle<Object> parent,
-    Handle<Function> callback);
+    Handle<Function> callback, Runtime* runtime);
 static void events_closure_finalize(gpointer data, GClosure* closure);
 static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
     guint n_param_values, const GValue* param_values, gpointer invocation_hint,
@@ -44,10 +43,8 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
 static Local<Value> events_closure_gvalue_to_jsvalue(Isolate* isolate,
     const GValue* gvalue);
 
-Persistent<Function> Events::constructor_;
-
-Events::Events(gpointer handle)
-    : handle_(handle),
+Events::Events(gpointer handle, Runtime* runtime)
+    : GLibObject(handle, runtime),
       closures_(NULL) {
 }
 
@@ -56,26 +53,30 @@ Events::~Events() {
   frida_unref(handle_);
 }
 
-void Events::Init(Handle<Object> exports) {
+void Events::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto tpl = FunctionTemplate::New(isolate, New);
-  tpl->SetClassName(String::NewFromUtf8(isolate, "Events"));
-  tpl->InstanceTemplate()->SetInternalFieldCount(1);
+  auto name = String::NewFromUtf8(isolate, "Events");
+  auto tpl = CreateTemplate(isolate, name, New, runtime);
+
   NODE_SET_PROTOTYPE_METHOD(tpl, "listen", Listen);
   NODE_SET_PROTOTYPE_METHOD(tpl, "unlisten", Unlisten);
-  exports->Set(String::NewFromUtf8(isolate, "Events"), tpl->GetFunction());
 
-  constructor_.Reset(isolate, tpl->GetFunction());
+  auto ctor = tpl->GetFunction();
+  exports->Set(name, ctor);
+  runtime->SetDataPointer(EVENTS_DATA_CONSTRUCTOR,
+      new Persistent<Function>(isolate, ctor));
 }
 
-Local<Object> Events::Create(gpointer handle) {
+Local<Object> Events::New(gpointer handle, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto constructor = Local<Function>::New(isolate, constructor_);
+  auto ctor = Local<Function>::New(isolate,
+      *static_cast<Persistent<Function>*>(
+      runtime->GetDataPointer(EVENTS_DATA_CONSTRUCTOR)));
   const int argc = 1;
   Local<Value> argv[argc] = { External::New(isolate, handle) };
-  return constructor->NewInstance(argc, argv);
+  return ctor->NewInstance(argc, argv);
 }
 
 void Events::New(const FunctionCallbackInfo<Value>& args) {
@@ -88,13 +89,13 @@ void Events::New(const FunctionCallbackInfo<Value>& args) {
           "Bad argument, expected raw handle")));
       return;
     }
-    auto wrapper = new Events(Local<External>::Cast(args[0])->Value());
+    auto wrapper = new Events(Local<External>::Cast(args[0])->Value(),
+        GetRuntimeFromConstructorArgs(args));
     auto obj = args.This();
     wrapper->Wrap(obj);
     args.GetReturnValue().Set(obj);
   } else {
-    auto constructor = Local<Function>::New(isolate, constructor_);
-    args.GetReturnValue().Set(constructor->NewInstance(0, NULL));
+    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
   }
 }
 
@@ -103,20 +104,21 @@ void Events::Listen(const FunctionCallbackInfo<Value>& args) {
   HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Events>(obj);
+  auto runtime = wrapper->runtime_;
 
   guint signal_id;
   Local<Function> callback;
   if (!wrapper->GetSignalArguments(args, signal_id, callback))
     return;
 
-  auto events_closure = events_closure_new(obj, callback);
+  auto events_closure = events_closure_new(obj, callback, runtime);
   auto closure = reinterpret_cast<GClosure*>(events_closure);
   g_closure_ref(closure);
   g_closure_sink(closure);
   wrapper->closures_ = g_slist_append(wrapper->closures_, events_closure);
 
-  Runtime::GetUVContext()->IncreaseUsage();
-  Runtime::GetGLibContext()->Schedule([=]() {
+  runtime->GetUVContext()->IncreaseUsage();
+  runtime->GetGLibContext()->Schedule([=]() {
     events_closure->handler_id = g_signal_connect_closure_by_id(
         wrapper->handle_, signal_id, 0, closure, TRUE);
     g_assert(events_closure->handler_id != 0);
@@ -145,10 +147,11 @@ void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
       auto handler_id = events_closure->handler_id;
       events_closure->handler_id = 0;
 
-      Runtime::GetUVContext()->DecreaseUsage();
-      Runtime::GetGLibContext()->Schedule([=]() {
+      auto runtime = wrapper->runtime_;
+      runtime->GetUVContext()->DecreaseUsage();
+      runtime->GetGLibContext()->Schedule([=]() {
         g_signal_handler_disconnect(wrapper->handle_, handler_id);
-        Runtime::GetUVContext()->Schedule([=]() {
+        runtime->GetUVContext()->Schedule([=]() {
           g_closure_unref(closure);
         });
       });
@@ -179,7 +182,7 @@ bool Events::GetSignalArguments(const FunctionCallbackInfo<Value>& args,
 }
 
 static EventsClosure* events_closure_new(Handle<Object> parent,
-    Handle<Function> callback) {
+    Handle<Function> callback, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
   GClosure* closure = g_closure_new_simple(sizeof(EventsClosure), NULL);
@@ -190,6 +193,7 @@ static EventsClosure* events_closure_new(Handle<Object> parent,
   self->handler_id = 0;
   self->parent = new Persistent<Object>(isolate, parent);
   self->callback = new Persistent<Function>(isolate, callback);
+  self->runtime = runtime;
 
   return self;
 }
@@ -220,7 +224,7 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
     g_array_append_val(args, val);
   }
 
-  Runtime::GetUVContext()->Schedule([=]() {
+  self->runtime->GetUVContext()->Schedule([=]() {
     const bool still_connected = self->handler_id != 0;
     if (still_connected) {
       auto isolate = Isolate::GetCurrent();

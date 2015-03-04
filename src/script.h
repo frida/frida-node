@@ -1,18 +1,19 @@
 #ifndef FRIDANODE_SCRIPT_H
 #define FRIDANODE_SCRIPT_H
 
+#include "glib_object.h"
+
 #include <frida-core.h>
-#include <node_object_wrap.h>
 
 namespace frida {
 
-class Script : public node::ObjectWrap {
+class Script : public GLibObject {
  public:
-  static void Init(v8::Handle<v8::Object> exports);
-  static v8::Local<v8::Object> Create(gpointer handle);
+  static void Init(v8::Handle<v8::Object> exports, Runtime* runtime);
+  static v8::Local<v8::Object> New(gpointer handle, Runtime* runtime);
 
  private:
-  explicit Script(FridaScript* handle);
+  explicit Script(FridaScript* handle, Runtime* runtime);
   ~Script();
 
   static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
@@ -21,9 +22,6 @@ class Script : public node::ObjectWrap {
   static void Unload(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void PostMessage(const v8::FunctionCallbackInfo<v8::Value>& args);
 
-  static v8::Persistent<v8::Function> constructor_;
-
-  FridaScript* handle_;
   v8::Persistent<v8::Object> events_;
 };
 

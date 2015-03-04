@@ -11,6 +11,7 @@
         "src/session.cc",
         "src/script.cc",
         "src/events.cc",
+        "src/glib_object.cc",
         "src/runtime.cc",
         "src/uv_context.cc",
         "src/glib_context.cc",
