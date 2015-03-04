@@ -169,8 +169,10 @@ void Script::PostMessage(const FunctionCallbackInfo<Value>& args) {
     return;
   }
   auto message_obj = Local<Object>::Cast(args[0]);
+  String::Utf8Value message(
+      wrapper->runtime_->ValueToJson(isolate, message_obj));
 
-  auto operation = new PostMessageOperation(g_strdup("TODO"));
+  auto operation = new PostMessageOperation(g_strdup(*message));
   operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
