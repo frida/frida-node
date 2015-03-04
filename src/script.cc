@@ -38,6 +38,8 @@ void Script::Init(Handle<Object> exports, Runtime* runtime) {
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "load", Load);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "unload", Unload);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "postMessage", PostMessage);
 
   auto ctor = tpl->GetFunction();
   exports->Set(name, ctor);
