@@ -1,6 +1,6 @@
 var frida = require("../build/Release/frida");
 
-var manager = frida.DeviceManager();
+var manager = new frida.DeviceManager();
 manager.enumerateDevices()
 .then(function (devices) {
   console.log("enumerateDevices() succeeded:", devices);
