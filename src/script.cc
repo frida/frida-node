@@ -72,7 +72,8 @@ void Script::New(const FunctionCallbackInfo<Value>& args) {
     auto obj = args.This();
     wrapper->Wrap(obj);
     obj->Set(String::NewFromUtf8(isolate, "events"),
-        Events::New(g_object_ref(wrapper->handle_), runtime));
+        Events::New(g_object_ref(wrapper->handle_), runtime,
+        TransformMessageEvent, wrapper));
     args.GetReturnValue().Set(obj);
   } else {
     args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
@@ -176,6 +177,15 @@ void Script::PostMessage(const FunctionCallbackInfo<Value>& args) {
   operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+Local<Value> Script::TransformMessageEvent(Isolate* isolate,
+    const gchar* name, guint index, const GValue* value, gpointer user_data) {
+  if (index != 0 || strcmp(name, "message") != 0)
+    return Local<Value>();
+  auto self = static_cast<Script*>(user_data);
+  auto json = String::NewFromUtf8(isolate, g_value_get_string(value));
+  return self->runtime_->ValueFromJson(isolate, json);
 }
 
 }

@@ -22,6 +22,9 @@ class Script : public GLibObject {
   static void Unload(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void PostMessage(const v8::FunctionCallbackInfo<v8::Value>& args);
 
+  static v8::Local<v8::Value> TransformMessageEvent(v8::Isolate* isolate,
+      const gchar* name, guint index, const GValue* value, gpointer user_data);
+
   v8::Persistent<v8::Object> events_;
 };
 
