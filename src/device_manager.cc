@@ -102,7 +102,7 @@ class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
       devices->Set(i, device);
     }
 
-    g_object_unref(devices_);
+    frida_unref(devices_);
 
     return devices;
   }
