@@ -2,6 +2,7 @@
 #include "device_manager.h"
 #include "events.h"
 #include "glib_context.h"
+#include "icon.h"
 #include "process.h"
 #include "runtime.h"
 #include "script.h"
@@ -31,6 +32,7 @@ static void InitAll(Handle<Object> exports,
   DeviceManager::Init(exports, runtime);
   Device::Init(exports, runtime);
   Process::Init(exports, runtime);
+  Icon::Init(exports, runtime);
   Session::Init(exports, runtime);
   Script::Init(exports, runtime);
 }

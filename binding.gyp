@@ -8,6 +8,7 @@
         "src/device_manager.cc",
         "src/device.cc",
         "src/process.cc",
+        "src/icon.cc",
         "src/session.cc",
         "src/script.cc",
         "src/events.cc",

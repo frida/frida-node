@@ -22,6 +22,8 @@ class Device : public GLibObject {
       const v8::PropertyCallbackInfo<v8::Value>& info);
   static void GetName(v8::Local<v8::String> property,
       const v8::PropertyCallbackInfo<v8::Value>& info);
+  static void GetIcon(v8::Local<v8::String> property,
+      const v8::PropertyCallbackInfo<v8::Value>& info);
   static void GetType(v8::Local<v8::String> property,
       const v8::PropertyCallbackInfo<v8::Value>& info);
 

@@ -1,6 +1,7 @@
 #include "device.h"
 
 #include "events.h"
+#include "icon.h"
 #include "operation.h"
 #include "process.h"
 #include "session.h"
@@ -51,6 +52,8 @@ void Device::Init(Handle<Object> exports, Runtime* runtime) {
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "id"), GetId, 0,
       data, DEFAULT, None, signature);
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "name"), GetName, 0,
+      data, DEFAULT, None, signature);
+  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "icon"), GetIcon, 0,
       data, DEFAULT, None, signature);
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "type"), GetType, 0,
       data, DEFAULT, None, signature);
@@ -121,6 +124,17 @@ void Device::GetName(Local<String> property,
 
   info.GetReturnValue().Set(
       String::NewFromUtf8(isolate, frida_device_get_name(handle)));
+}
+
+void Device::GetIcon(Local<String> property,
+    const PropertyCallbackInfo<Value>& info) {
+  auto isolate = info.GetIsolate();
+  HandleScope scope(isolate);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
+  auto handle = wrapper->GetHandle<FridaDevice>();
+
+  info.GetReturnValue().Set(
+      Icon::New(frida_device_get_icon(handle), wrapper->runtime_));
 }
 
 void Device::GetType(Local<String> property,

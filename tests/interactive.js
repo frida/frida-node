@@ -4,6 +4,13 @@ var manager = new frida.DeviceManager();
 manager.enumerateDevices()
 .then(function (devices) {
   console.log("enumerateDevices() succeeded:", devices);
+  devices[0].enumerateProcesses()
+  .then(function (processes) {
+    console.log("enumerateProcesses() succeeded:", processes);
+  })
+  .catch(function (error) {
+    console.log("enumerateProcesses() failed:", error);
+  });
   var localDevice = devices[0];
   localDevice.attach(43706)
   .then(function (session) {
@@ -16,7 +23,7 @@ manager.enumerateDevices()
       });
       script.load()
       .then(function () {
-        console.log("script.load() succeeded", arguments);
+        console.log("script.load() succeeded");
         setInterval(function () {
           script.postMessage({ name: 'ping' })
           .then(function () {

@@ -1,11 +1,12 @@
-#include "process.h"
-
 #include "icon.h"
 
-#define PROCESS_DATA_CONSTRUCTOR "process:ctor"
+#include <node.h>
+
+#define ICON_DATA_CONSTRUCTOR "icon:ctor"
 
 using v8::AccessorSignature;
 using v8::DEFAULT;
+using v8::DontEnum;
 using v8::Exception;
 using v8::External;
 using v8::Function;
@@ -15,59 +16,64 @@ using v8::HandleScope;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
-using v8::None;
 using v8::Object;
 using v8::Persistent;
+using v8::PropertyAttribute;
 using v8::PropertyCallbackInfo;
+using v8::ReadOnly;
 using v8::String;
 using v8::Value;
 
 namespace frida {
 
-Process::Process(FridaProcess* handle, Runtime* runtime)
+Icon::Icon(FridaIcon* handle, Runtime* runtime)
     : GLibObject(handle, runtime) {
 }
 
-Process::~Process() {
+Icon::~Icon() {
   g_object_unref(handle_);
 }
 
-void Process::Init(Handle<Object> exports, Runtime* runtime) {
+void Icon::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = String::NewFromUtf8(isolate, "Process");
+  auto name = String::NewFromUtf8(isolate, "Icon");
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "pid"),
-      GetPid, 0, data, DEFAULT, None, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "name"),
-      GetName, 0, data, DEFAULT, None, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "smallIcon"),
-      GetSmallIcon, 0, data, DEFAULT, None, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "largeIcon"),
-      GetLargeIcon, 0, data, DEFAULT, None, signature);
+  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "width"),
+      GetWidth, 0, data, DEFAULT, ReadOnly, signature);
+  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "height"),
+      GetHeight, 0, data, DEFAULT, ReadOnly, signature);
+  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "rowstride"),
+      GetRowstride, 0, data, DEFAULT, ReadOnly, signature);
+  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "pixels"),
+      GetPixels, 0, data, DEFAULT,
+      static_cast<PropertyAttribute>(ReadOnly | DontEnum), signature);
 
   auto ctor = tpl->GetFunction();
   exports->Set(name, ctor);
-  runtime->SetDataPointer(PROCESS_DATA_CONSTRUCTOR,
+  runtime->SetDataPointer(ICON_DATA_CONSTRUCTOR,
       new Persistent<Function>(isolate, ctor));
 }
 
-Local<Object> Process::New(gpointer handle, Runtime* runtime) {
+Local<Value> Icon::New(gpointer handle, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
+
+  if (handle == NULL)
+    return Null(isolate);
 
   auto ctor = Local<Function>::New(isolate,
       *static_cast<Persistent<Function>*>(
-      runtime->GetDataPointer(PROCESS_DATA_CONSTRUCTOR)));
+      runtime->GetDataPointer(ICON_DATA_CONSTRUCTOR)));
   const int argc = 1;
   Local<Value> argv[argc] = { External::New(isolate, handle) };
   return ctor->NewInstance(argc, argv);
 }
 
-void Process::New(const FunctionCallbackInfo<Value>& args) {
+void Icon::New(const FunctionCallbackInfo<Value>& args) {
   auto isolate = args.GetIsolate();
   HandleScope scope(isolate);
 
@@ -78,7 +84,7 @@ void Process::New(const FunctionCallbackInfo<Value>& args) {
       return;
     }
     auto runtime = GetRuntimeFromConstructorArgs(args);
-    auto wrapper = new Process(static_cast<FridaProcess*>(
+    auto wrapper = new Icon(static_cast<FridaIcon*>(
         Local<External>::Cast(args[0])->Value()), runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
@@ -88,48 +94,51 @@ void Process::New(const FunctionCallbackInfo<Value>& args) {
   }
 }
 
-void Process::GetPid(Local<String> property,
+void Icon::GetWidth(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
   auto isolate = info.GetIsolate();
   HandleScope scope(isolate);
-  auto handle = ObjectWrap::Unwrap<Process>(
-      info.Holder())->GetHandle<FridaProcess>();
+  auto handle = ObjectWrap::Unwrap<Icon>(
+      info.Holder())->GetHandle<FridaIcon>();
 
   info.GetReturnValue().Set(
-      Integer::New(isolate, frida_process_get_pid(handle)));
+      Integer::New(isolate, frida_icon_get_width(handle)));
 }
 
-void Process::GetName(Local<String> property,
+void Icon::GetHeight(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
   auto isolate = info.GetIsolate();
   HandleScope scope(isolate);
-  auto handle = ObjectWrap::Unwrap<Process>(
-      info.Holder())->GetHandle<FridaProcess>();
+  auto handle = ObjectWrap::Unwrap<Icon>(
+      info.Holder())->GetHandle<FridaIcon>();
 
   info.GetReturnValue().Set(
-      String::NewFromUtf8(isolate, frida_process_get_name(handle)));
+      Integer::New(isolate, frida_icon_get_height(handle)));
 }
 
-void Process::GetSmallIcon(Local<String> property,
+void Icon::GetRowstride(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
   auto isolate = info.GetIsolate();
   HandleScope scope(isolate);
-  auto wrapper = ObjectWrap::Unwrap<Process>(info.Holder());
-  auto handle = wrapper->GetHandle<FridaProcess>();
+  auto handle = ObjectWrap::Unwrap<Icon>(
+      info.Holder())->GetHandle<FridaIcon>();
 
   info.GetReturnValue().Set(
-      Icon::New(frida_process_get_small_icon(handle), wrapper->runtime_));
+      Integer::New(isolate, frida_icon_get_rowstride(handle)));
 }
 
-void Process::GetLargeIcon(Local<String> property,
+void Icon::GetPixels(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
   auto isolate = info.GetIsolate();
   HandleScope scope(isolate);
-  auto wrapper = ObjectWrap::Unwrap<Process>(info.Holder());
-  auto handle = wrapper->GetHandle<FridaProcess>();
+  auto handle = ObjectWrap::Unwrap<Icon>(
+      info.Holder())->GetHandle<FridaIcon>();
 
-  info.GetReturnValue().Set(
-      Icon::New(frida_process_get_large_icon(handle), wrapper->runtime_));
+  int len;
+  auto buf = frida_icon_get_pixels(handle, &len);
+  auto pixels = node::Encode(isolate, buf, len);
+
+  info.GetReturnValue().Set(pixels);
 }
 
 }
