@@ -24,6 +24,7 @@ namespace frida {
 
 Script::Script(FridaScript* handle, Runtime* runtime)
     : GLibObject(handle, runtime) {
+  g_object_ref(handle_);
 }
 
 Script::~Script() {
@@ -69,13 +70,15 @@ void Script::New(const FunctionCallbackInfo<Value>& args) {
       return;
     }
     auto runtime = GetRuntimeFromConstructorArgs(args);
-    auto wrapper = new Script(static_cast<FridaScript*>(
-        Local<External>::Cast(args[0])->Value()), runtime);
+
+    auto handle = static_cast<FridaScript*>(
+        Local<External>::Cast(args[0])->Value());
+    auto wrapper = new Script(handle, runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
     obj->Set(String::NewFromUtf8(isolate, "events"),
-        Events::New(g_object_ref(wrapper->handle_), runtime,
-        TransformMessageEvent, wrapper));
+        Events::New(handle, runtime, TransformMessageEvent, wrapper));
+
     args.GetReturnValue().Set(obj);
   } else {
     args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));

@@ -28,6 +28,7 @@ namespace frida {
 
 Icon::Icon(FridaIcon* handle, Runtime* runtime)
     : GLibObject(handle, runtime) {
+  g_object_ref(handle_);
 }
 
 Icon::~Icon() {
@@ -84,10 +85,13 @@ void Icon::New(const FunctionCallbackInfo<Value>& args) {
       return;
     }
     auto runtime = GetRuntimeFromConstructorArgs(args);
-    auto wrapper = new Icon(static_cast<FridaIcon*>(
-        Local<External>::Cast(args[0])->Value()), runtime);
+
+    auto handle = static_cast<FridaIcon*>(
+        Local<External>::Cast(args[0])->Value());
+    auto wrapper = new Icon(handle, runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
+
     args.GetReturnValue().Set(obj);
   } else {
     args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));

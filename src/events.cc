@@ -54,6 +54,7 @@ Events::Events(gpointer handle, EventsTransformer transformer,
       transformer_(transformer),
       transformer_data_(transformer_data),
       closures_(NULL) {
+  g_object_ref(handle_);
 }
 
 Events::~Events() {

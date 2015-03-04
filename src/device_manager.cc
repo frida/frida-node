@@ -20,6 +20,7 @@ namespace frida {
 
 DeviceManager::DeviceManager(FridaDeviceManager* handle, Runtime* runtime)
     : GLibObject(handle, runtime) {
+  g_object_ref(handle_);
 }
 
 DeviceManager::~DeviceManager() {
@@ -45,11 +46,15 @@ void DeviceManager::New(const FunctionCallbackInfo<Value>& args) {
 
   if (args.IsConstructCall()) {
     auto runtime = GetRuntimeFromConstructorArgs(args);
-    auto wrapper = new DeviceManager(frida_device_manager_new(), runtime);
+
+    auto handle = frida_device_manager_new();
+    auto wrapper = new DeviceManager(handle, runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
     obj->Set(String::NewFromUtf8(isolate, "events"),
-        Events::New(g_object_ref(wrapper->handle_), runtime));
+        Events::New(handle, runtime));
+    g_object_unref(handle);
+
     args.GetReturnValue().Set(obj);
   } else {
     args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
@@ -98,8 +103,10 @@ class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
     auto size = frida_device_list_size(devices_);
     auto devices = Array::New(isolate, size);
     for (auto i = 0; i != size; i++) {
-      auto device = Device::New(frida_device_list_get(devices_, i), runtime_);
+      auto handle = frida_device_list_get(devices_, i);
+      auto device = Device::New(handle, runtime_);
       devices->Set(i, device);
+      g_object_unref(handle);
     }
 
     frida_unref(devices_);

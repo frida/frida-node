@@ -33,6 +33,7 @@ namespace frida {
 
 Device::Device(FridaDevice* handle, Runtime* runtime)
     : GLibObject(handle, runtime) {
+  g_object_ref(handle_);
 }
 
 Device::~Device() {
@@ -92,12 +93,15 @@ void Device::New(const FunctionCallbackInfo<Value>& args) {
       return;
     }
     auto runtime = GetRuntimeFromConstructorArgs(args);
-    auto wrapper = new Device(static_cast<FridaDevice*>(
-        Local<External>::Cast(args[0])->Value()), runtime);
+
+    auto handle = static_cast<FridaDevice*>(
+        Local<External>::Cast(args[0])->Value());
+    auto wrapper = new Device(handle, runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
     obj->Set(String::NewFromUtf8(isolate, "events"),
-        Events::New(g_object_ref(wrapper->handle_), runtime));
+        Events::New(handle, runtime));
+
     args.GetReturnValue().Set(obj);
   } else {
     args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
@@ -133,8 +137,8 @@ void Device::GetIcon(Local<String> property,
   auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
   auto handle = wrapper->GetHandle<FridaDevice>();
 
-  info.GetReturnValue().Set(
-      Icon::New(frida_device_get_icon(handle), wrapper->runtime_));
+  info.GetReturnValue().Set(Icon::New(frida_device_get_icon(handle),
+      wrapper->runtime_));
 }
 
 void Device::GetType(Local<String> property,
@@ -158,6 +162,7 @@ void Device::GetType(Local<String> property,
     default:
       g_assert_not_reached();
   }
+
   info.GetReturnValue().Set(String::NewFromUtf8(isolate, type));
 }
 
@@ -176,9 +181,10 @@ class EnumerateProcessesOperation : public Operation<FridaDevice> {
     auto size = frida_process_list_size(processes_);
     auto processes = Array::New(isolate, size);
     for (auto i = 0; i != size; i++) {
-      auto process = Process::New(frida_process_list_get(processes_, i),
-          runtime_);
+      auto handle = frida_process_list_get(processes_, i);
+      auto process = Process::New(handle, runtime_);
       processes->Set(i, process);
+      g_object_unref(handle);
     }
 
     g_object_unref(processes_);
@@ -388,7 +394,9 @@ class AttachOperation : public Operation<FridaDevice> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Session::New(session_, runtime_);
+    auto wrapper = Session::New(session_, runtime_);
+    g_object_unref(session_);
+    return wrapper;
   }
 
   const guint pid_;

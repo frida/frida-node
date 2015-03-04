@@ -26,6 +26,7 @@ namespace frida {
 
 Process::Process(FridaProcess* handle, Runtime* runtime)
     : GLibObject(handle, runtime) {
+  g_object_ref(handle_);
 }
 
 Process::~Process() {
@@ -78,10 +79,13 @@ void Process::New(const FunctionCallbackInfo<Value>& args) {
       return;
     }
     auto runtime = GetRuntimeFromConstructorArgs(args);
-    auto wrapper = new Process(static_cast<FridaProcess*>(
-        Local<External>::Cast(args[0])->Value()), runtime);
+
+    auto handle = static_cast<FridaProcess*>(
+        Local<External>::Cast(args[0])->Value());
+    auto wrapper = new Process(handle, runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
+
     args.GetReturnValue().Set(obj);
   } else {
     args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));

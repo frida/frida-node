@@ -30,6 +30,7 @@ namespace frida {
 
 Session::Session(FridaSession* handle, Runtime* runtime)
     : GLibObject(handle, runtime) {
+  g_object_ref(handle_);
 }
 
 Session::~Session() {
@@ -80,12 +81,15 @@ void Session::New(const FunctionCallbackInfo<Value>& args) {
       return;
     }
     auto runtime = GetRuntimeFromConstructorArgs(args);
-    auto wrapper = new Session(static_cast<FridaSession*>(
-        Local<External>::Cast(args[0])->Value()), runtime);
+
+    auto handle = static_cast<FridaSession*>(
+        Local<External>::Cast(args[0])->Value());
+    auto wrapper = new Session(handle, runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
     obj->Set(String::NewFromUtf8(isolate, "events"),
-        Events::New(g_object_ref(wrapper->handle_), runtime));
+        Events::New(handle, runtime));
+
     args.GetReturnValue().Set(obj);
   } else {
     args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
@@ -148,7 +152,9 @@ class CreateScriptOperation : public Operation<FridaSession> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Script::New(script_, runtime_);
+    auto wrapper = Script::New(script_, runtime_);
+    g_object_unref(script_);
+    return wrapper;
   }
 
   gchar* source_;
