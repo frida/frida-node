@@ -22,10 +22,10 @@ using v8::HandleScope;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
-using v8::None;
 using v8::Object;
 using v8::Persistent;
 using v8::PropertyCallbackInfo;
+using v8::ReadOnly;
 using v8::String;
 using v8::Value;
 
@@ -50,13 +50,13 @@ void Device::Init(Handle<Object> exports, Runtime* runtime) {
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "id"), GetId, 0,
-      data, DEFAULT, None, signature);
+      data, DEFAULT, ReadOnly, signature);
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "name"), GetName, 0,
-      data, DEFAULT, None, signature);
+      data, DEFAULT, ReadOnly, signature);
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "icon"), GetIcon, 0,
-      data, DEFAULT, None, signature);
+      data, DEFAULT, ReadOnly, signature);
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "type"), GetType, 0,
-      data, DEFAULT, None, signature);
+      data, DEFAULT, ReadOnly, signature);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "enumerateProcesses", EnumerateProcesses);
   NODE_SET_PROTOTYPE_METHOD(tpl, "spawn", Spawn);
