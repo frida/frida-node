@@ -1,0 +1,39 @@
+{
+  "name": "frida",
+  "version": "0.0.0",
+  "authors": [
+    "Frida Developers"
+  ],
+  "description": "Inject JavaScript to explore native apps on Windows, Mac, Linux, iOS and Android",
+  "keywords": [
+    "debugger",
+    "tracer",
+    "instrumentation",
+    "hooking",
+    "inject",
+    "windows",
+    "mac",
+    "linux",
+    "ios",
+    "iphone",
+    "ipad",
+    "android"
+  ],
+  "homepage": "http://www.frida.re",
+  "engines": {
+    "node": ">=0.12.0"
+  },
+  "main": "./lib/frida",
+  "dependencies": {
+    "bindings": "*",
+    "minimatch": "*"
+  },
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/frida/frida-node.git"
+  },
+  "bugs": {
+    "url": "http://github.com/frida/frida-node/issues"
+  }
+}
