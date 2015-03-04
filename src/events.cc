@@ -28,23 +28,31 @@ typedef struct _EventsClosure EventsClosure;
 
 struct _EventsClosure {
   GClosure closure;
+  guint signal_id;
   guint handler_id;
-  Persistent<Object>* parent;
   Persistent<Function>* callback;
+  Persistent<Object>* parent;
+  EventsTransformer transformer;
+  gpointer transformer_data;
   Runtime* runtime;
 };
 
-static EventsClosure* events_closure_new(Handle<Object> parent,
-    Handle<Function> callback, Runtime* runtime);
+static EventsClosure* events_closure_new(guint signal_id,
+    Handle<Function> callback, Handle<Object> parent,
+    EventsTransformer transformer, gpointer transformer_data,
+    Runtime* runtime);
 static void events_closure_finalize(gpointer data, GClosure* closure);
 static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
     guint n_param_values, const GValue* param_values, gpointer invocation_hint,
     gpointer marshal_data);
-static Local<Value> events_closure_gvalue_to_jsvalue(Isolate* isolate,
-    const GValue* gvalue);
+static Local<Value> events_closure_gvalues_to_jsvalue(Isolate* isolate,
+    const GValue* gvalues, guint count, guint* consumed);
 
-Events::Events(gpointer handle, Runtime* runtime)
+Events::Events(gpointer handle, EventsTransformer transformer,
+    gpointer transformer_data, Runtime* runtime)
     : GLibObject(handle, runtime),
+      transformer_(transformer),
+      transformer_data_(transformer_data),
       closures_(NULL) {
 }
 
@@ -68,14 +76,19 @@ void Events::Init(Handle<Object> exports, Runtime* runtime) {
       new Persistent<Function>(isolate, ctor));
 }
 
-Local<Object> Events::New(gpointer handle, Runtime* runtime) {
+Local<Object> Events::New(gpointer handle, Runtime* runtime,
+    EventsTransformer transformer, gpointer transformer_data) {
   auto isolate = Isolate::GetCurrent();
 
   auto ctor = Local<Function>::New(isolate,
       *static_cast<Persistent<Function>*>(
       runtime->GetDataPointer(EVENTS_DATA_CONSTRUCTOR)));
-  const int argc = 1;
-  Local<Value> argv[argc] = { External::New(isolate, handle) };
+  const int argc = 3;
+  Local<Value> argv[argc] = {
+    External::New(isolate, handle),
+    External::New(isolate, reinterpret_cast<void*>(transformer)),
+    External::New(isolate, transformer_data)
+  };
   return ctor->NewInstance(argc, argv);
 }
 
@@ -84,12 +97,19 @@ void Events::New(const FunctionCallbackInfo<Value>& args) {
   HandleScope scope(isolate);
 
   if (args.IsConstructCall()) {
-    if (args.Length() != 1 || !args[0]->IsExternal()) {
+    if (args.Length() != 3 ||
+        !args[0]->IsExternal() ||
+        !args[1]->IsExternal() ||
+        !args[2]->IsExternal()) {
       isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-          "Bad argument, expected raw handle")));
+          "Bad argument, expected raw handles")));
       return;
     }
-    auto wrapper = new Events(Local<External>::Cast(args[0])->Value(),
+    auto handle = Local<External>::Cast(args[0])->Value();
+    auto transformer = reinterpret_cast<EventsTransformer>(
+        Local<External>::Cast(args[1])->Value());
+    auto transformer_data = Local<External>::Cast(args[2])->Value();
+    auto wrapper = new Events(handle, transformer, transformer_data,
         GetRuntimeFromConstructorArgs(args));
     auto obj = args.This();
     wrapper->Wrap(obj);
@@ -111,7 +131,8 @@ void Events::Listen(const FunctionCallbackInfo<Value>& args) {
   if (!wrapper->GetSignalArguments(args, signal_id, callback))
     return;
 
-  auto events_closure = events_closure_new(obj, callback, runtime);
+  auto events_closure = events_closure_new(signal_id, callback, obj,
+      wrapper->transformer_, wrapper->transformer_data_, runtime);
   auto closure = reinterpret_cast<GClosure*>(events_closure);
   g_closure_ref(closure);
   g_closure_sink(closure);
@@ -140,8 +161,8 @@ void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
     auto closure = reinterpret_cast<GClosure*>(events_closure);
     auto closure_callback = Local<Function>::New(isolate,
         *events_closure->callback);
-    // TODO: also check signal name
-    if (closure_callback->SameValue(callback)) {
+    if (events_closure->signal_id == signal_id &&
+        closure_callback->SameValue(callback)) {
       wrapper->closures_ = g_slist_delete_link(wrapper->closures_, cur);
 
       auto handler_id = events_closure->handler_id;
@@ -181,8 +202,10 @@ bool Events::GetSignalArguments(const FunctionCallbackInfo<Value>& args,
   return true;
 }
 
-static EventsClosure* events_closure_new(Handle<Object> parent,
-    Handle<Function> callback, Runtime* runtime) {
+static EventsClosure* events_closure_new(guint signal_id,
+    Handle<Function> callback, Handle<Object> parent,
+    EventsTransformer transformer, gpointer transformer_data,
+    Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
   GClosure* closure = g_closure_new_simple(sizeof(EventsClosure), NULL);
@@ -190,9 +213,12 @@ static EventsClosure* events_closure_new(Handle<Object> parent,
   g_closure_set_marshal(closure, events_closure_marshal);
 
   EventsClosure* self = reinterpret_cast<EventsClosure*>(closure);
+  self->signal_id = signal_id;
   self->handler_id = 0;
-  self->parent = new Persistent<Object>(isolate, parent);
   self->callback = new Persistent<Function>(isolate, callback);
+  self->parent = new Persistent<Object>(isolate, parent);
+  self->transformer = transformer;
+  self->transformer_data = transformer_data;
   self->runtime = runtime;
 
   return self;
@@ -229,12 +255,27 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
     if (still_connected) {
       auto isolate = Isolate::GetCurrent();
 
-      const int argc = args->len;
-      Local<Value>* argv = new Local<Value>[argc];
-      for (int i = 0; i != argc; i++) {
-        argv[i] = events_closure_gvalue_to_jsvalue(isolate,
-            &g_array_index(args, GValue, i));
+      auto transformer = self->transformer;
+      auto transformer_data = self->transformer_data;
+      auto signal_name = g_signal_name(self->signal_id);
+
+      Local<Value>* argv = new Local<Value>[args->len];
+      guint src = 0;
+      guint dst = 0;
+      while (src != args->len) {
+        auto next = &g_array_index(args, GValue, src);
+        argv[dst] = transformer != NULL
+            ? transformer(isolate, signal_name, src, next, transformer_data)
+            : Local<Value>();
+        guint consumed = 1;
+        if (argv[dst].IsEmpty()) {
+          argv[dst] = events_closure_gvalues_to_jsvalue(isolate,
+              next, args->len - src, &consumed);
+        }
+        src += consumed;
+        dst++;
       }
+      const int argc = dst;
 
       auto recv = Local<Object>::New(isolate, *self->parent);
       auto callback = Local<Function>::New(isolate, *self->callback);
@@ -251,35 +292,29 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
   });
 }
 
-static Local<Value> events_closure_gvalue_to_jsvalue(Isolate* isolate,
-    const GValue* gvalue) {
-  // TODO: parse JSON
-  switch (G_VALUE_TYPE(gvalue)) {
+static Local<Value> events_closure_gvalues_to_jsvalue(Isolate* isolate,
+    const GValue* gvalues, guint count, guint* consumed) {
+  *consumed = 1;
+  switch (G_VALUE_TYPE(gvalues)) {
     case G_TYPE_BOOLEAN:
-      return Boolean::New(isolate, g_value_get_boolean(gvalue));
+      return Boolean::New(isolate, g_value_get_boolean(gvalues));
     case G_TYPE_INT:
-      return Integer::New(isolate, g_value_get_int(gvalue));
+      return Integer::New(isolate, g_value_get_int(gvalues));
     case G_TYPE_UINT:
-      return Integer::NewFromUnsigned(isolate, g_value_get_uint(gvalue));
+      return Integer::NewFromUnsigned(isolate, g_value_get_uint(gvalues));
     case G_TYPE_FLOAT:
-      return Number::New(isolate, g_value_get_float(gvalue));
+      return Number::New(isolate, g_value_get_float(gvalues));
     case G_TYPE_DOUBLE:
-      return Number::New(isolate, g_value_get_double(gvalue));
+      return Number::New(isolate, g_value_get_double(gvalues));
     case G_TYPE_STRING:
-      return String::NewFromUtf8(isolate, g_value_get_string(gvalue));
-    case G_TYPE_VARIANT: {
-      GVariant* variant = g_value_get_variant(gvalue);
-      if (variant == NULL) {
-        return Null(isolate);
-      } else if (g_variant_is_of_type(variant, G_VARIANT_TYPE("ay"))) {
-        return node::Encode(isolate, g_variant_get_data(variant),
-            g_variant_get_size(variant));
-      } else {
-        // XXX: extend as necessary
-        g_assert_not_reached();
-      }
+      return String::NewFromUtf8(isolate, g_value_get_string(gvalues));
+    case G_TYPE_POINTER:
+      g_assert_cmpuint(count, >=, 2);
+      g_assert(G_VALUE_TYPE(&gvalues[1]) == G_TYPE_INT);
+      *consumed = 2;
+      return node::Encode(isolate,
+          g_value_get_pointer(&gvalues[0]), g_value_get_int(&gvalues[1]));
       break;
-    }
     default:
       // XXX: extend as necessary
       g_assert_not_reached();
