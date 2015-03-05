@@ -3,6 +3,7 @@
 #include "events.h"
 #include "operation.h"
 
+#include <cstring>
 #include <node.h>
 
 #define SCRIPT_DATA_CONSTRUCTOR "script:ctor"
