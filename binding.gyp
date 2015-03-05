@@ -1,5 +1,4 @@
 {
-  "variables": { "frida%": '<!(echo $FRIDA)' },
   "targets": [
     {
       "target_name": "frida_binding",
@@ -17,7 +16,86 @@
         "src/uv_context.cc",
         "src/glib_context.cc",
       ],
+      'configurations': {
+        'Debug': {
+          'conditions': [
+            ['OS=="win" and target_arch=="ia32"', {
+              "include_dirs": [
+                "$(FRIDA)/build/tmp-windows/Win32-Debug/frida-core",
+                "$(FRIDA)/build/sdk-windows/Win32-Debug/include/gee-0.8",
+                "$(FRIDA)/build/sdk-windows/Win32-Debug/include/glib-2.0",
+                "$(FRIDA)/build/sdk-windows/Win32-Debug/lib/glib-2.0/include",
+              ],
+              "library_dirs": [
+                "$(FRIDA)/build/tmp-windows/Win32-Debug/frida-core",
+                "$(FRIDA)/build/sdk-windows/Win32-Debug/lib",
+              ],
+            }],
+            ['OS=="win" and target_arch=="x64"', {
+              "include_dirs": [
+                "$(FRIDA)/build/tmp-windows/x64-Debug/frida-core",
+                "$(FRIDA)/build/sdk-windows/x64-Debug/include/gee-0.8",
+                "$(FRIDA)/build/sdk-windows/x64-Debug/include/glib-2.0",
+                "$(FRIDA)/build/sdk-windows/x64-Debug/lib/glib-2.0/include",
+              ],
+              "library_dirs": [
+                "$(FRIDA)/build/tmp-windows/x64-Debug/frida-core",
+                "$(FRIDA)/build/sdk-windows/x64-Debug/lib",
+              ],
+            }],
+          ],
+        },
+        'Release': {
+          'conditions': [
+            ['OS=="win" and target_arch=="ia32"', {
+              "include_dirs": [
+                "$(FRIDA)/build/tmp-windows/Win32-Release/frida-core",
+                "$(FRIDA)/build/sdk-windows/Win32-Release/include/gee-0.8",
+                "$(FRIDA)/build/sdk-windows/Win32-Release/include/glib-2.0",
+                "$(FRIDA)/build/sdk-windows/Win32-Release/lib/glib-2.0/include",
+              ],
+              "library_dirs": [
+                "$(FRIDA)/build/tmp-windows/Win32-Release/frida-core",
+                "$(FRIDA)/build/sdk-windows/Win32-Release/lib",
+              ],
+            }],
+            ['OS=="win" and target_arch=="x64"', {
+              "include_dirs": [
+                "$(FRIDA)/build/tmp-windows/x64-Release/frida-core",
+                "$(FRIDA)/build/sdk-windows/x64-Release/include/gee-0.8",
+                "$(FRIDA)/build/sdk-windows/x64-Release/include/glib-2.0",
+                "$(FRIDA)/build/sdk-windows/x64-Release/lib/glib-2.0/include",
+              ],
+              "library_dirs": [
+                "$(FRIDA)/build/tmp-windows/x64-Release/frida-core",
+                "$(FRIDA)/build/sdk-windows/x64-Release/lib",
+              ],
+            }],
+          ],
+        },
+      },
       'conditions': [
+        ['OS=="win"', {
+          "libraries": [
+            "-lfrida-core.lib",
+            "-lgee-0.8.lib",
+            "-lgio-2.0.lib",
+            "-lgthread-2.0.lib",
+            "-lgobject-2.0.lib",
+            "-lgmodule-2.0.lib",
+            "-lglib-2.0.lib",
+            "-lz.lib",
+            "-lffi.lib",
+            "-lintl.lib",
+            "-ldnsapi.lib",
+            "-liphlpapi.lib",
+            "-lole32.lib",
+            "-lpsapi.lib",
+            "-lshlwapi.lib",
+            "-lwinmm.lib",
+            "-lws2_32.lib",
+          ],
+        }],
         ['OS=="mac"', {
           "xcode_settings": {
             "OTHER_CFLAGS": [
@@ -32,13 +110,13 @@
             ],
           },
           "include_dirs": [
-            "<(frida)/build/frida-mac-x86_64/include/frida-1.0",
-            "<(frida)/build/sdk-mac-x86_64/include/glib-2.0",
-            "<(frida)/build/sdk-mac-x86_64/lib/glib-2.0/include",
+            "$(FRIDA)/build/frida-mac-x86_64/include/frida-1.0",
+            "$(FRIDA)/build/sdk-mac-x86_64/include/glib-2.0",
+            "$(FRIDA)/build/sdk-mac-x86_64/lib/glib-2.0/include",
           ],
           "library_dirs": [
-            "<(frida)/build/frida-mac-x86_64/lib",
-            "<(frida)/build/sdk-mac-x86_64/lib",
+            "$(FRIDA)/build/frida-mac-x86_64/lib",
+            "$(FRIDA)/build/sdk-mac-x86_64/lib",
           ],
           "libraries": [
             "-lfrida-core-1.0",
@@ -63,13 +141,13 @@
             "-Wl,--gc-sections",
           ],
           "include_dirs": [
-            "<(frida)/build/frida-linux-x86_64/include/frida-1.0",
-            "<(frida)/build/sdk-linux-x86_64/include/glib-2.0",
-            "<(frida)/build/sdk-linux-x86_64/lib/glib-2.0/include",
+            "$(FRIDA)/build/frida-linux-x86_64/include/frida-1.0",
+            "$(FRIDA)/build/sdk-linux-x86_64/include/glib-2.0",
+            "$(FRIDA)/build/sdk-linux-x86_64/lib/glib-2.0/include",
           ],
           "library_dirs": [
-            "<(frida)/build/frida-linux-x86_64/lib",
-            "<(frida)/build/sdk-linux-x86_64/lib",
+            "$(FRIDA)/build/frida-linux-x86_64/lib",
+            "$(FRIDA)/build/sdk-linux-x86_64/lib",
           ],
           "libraries": [
             "-lfrida-core-1.0",
