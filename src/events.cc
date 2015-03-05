@@ -242,7 +242,7 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
   g_closure_ref(closure);
 
   GArray* args = g_array_sized_new(FALSE, FALSE, sizeof (GValue), n_param_values);
-  g_assert_cmpuint(n_param_values, >=, 1);
+  g_assert(n_param_values >= 1);
   for (guint i = 1; i != n_param_values; i++) {
     GValue val;
     memset(&val, 0, sizeof(val));
@@ -310,7 +310,7 @@ static Local<Value> events_closure_gvalues_to_jsvalue(Isolate* isolate,
     case G_TYPE_STRING:
       return String::NewFromUtf8(isolate, g_value_get_string(gvalues));
     case G_TYPE_POINTER:
-      g_assert_cmpuint(count, >=, 2);
+      g_assert(count >= 2);
       g_assert(G_VALUE_TYPE(&gvalues[1]) == G_TYPE_INT);
       *consumed = 2;
       return node::Encode(isolate,

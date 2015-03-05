@@ -330,7 +330,7 @@ void Device::Resume(const FunctionCallbackInfo<Value>& args) {
     return;
   }
 
-  auto operation = new ResumeOperation(pid);
+  auto operation = new ResumeOperation(static_cast<guint>(pid));
   operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
@@ -374,7 +374,7 @@ void Device::Kill(const FunctionCallbackInfo<Value>& args) {
     return;
   }
 
-  auto operation = new KillOperation(pid);
+  auto operation = new KillOperation(static_cast<guint>(pid));
   operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
@@ -421,7 +421,7 @@ void Device::Attach(const FunctionCallbackInfo<Value>& args) {
     return;
   }
 
-  auto operation = new AttachOperation(pid);
+  auto operation = new AttachOperation(static_cast<guint>(pid));
   operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
