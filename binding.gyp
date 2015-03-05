@@ -53,6 +53,36 @@
             "-Wl,-framework -Wl,Foundation -Wl,-framework -Wl,AppKit",
           ],
         }],
+        ['OS=="linux"', {
+          "cflags": [
+            "-std=c++11",
+            "-ffunction-sections",
+            "-fdata-sections",
+          ],
+          "ldflags": [
+            "-Wl,--gc-sections",
+          ],
+          "include_dirs": [
+            "<(frida)/build/frida-linux-x86_64/include/frida-1.0",
+            "<(frida)/build/sdk-linux-x86_64/include/glib-2.0",
+            "<(frida)/build/sdk-linux-x86_64/lib/glib-2.0/include",
+          ],
+          "library_dirs": [
+            "<(frida)/build/frida-linux-x86_64/lib",
+            "<(frida)/build/sdk-linux-x86_64/lib",
+          ],
+          "libraries": [
+            "-lfrida-core-1.0",
+            "-lfrida-gum-1.0",
+            "-lgee-0.8",
+            "-lgio-2.0",
+            "-lgthread-2.0",
+            "-lgobject-2.0",
+            "-lgmodule-2.0",
+            "-lglib-2.0",
+            "-lffi",
+          ],
+        }],
       ],
     },
     {
