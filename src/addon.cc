@@ -39,4 +39,4 @@ static void InitAll(Handle<Object> exports,
 
 }
 
-NODE_MODULE_CONTEXT_AWARE(frida, frida::InitAll)
+NODE_MODULE_CONTEXT_AWARE(frida_binding, frida::InitAll)

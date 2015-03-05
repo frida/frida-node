@@ -2,7 +2,7 @@
   "variables": { "frida%": '<!(echo $FRIDA)' },
   "targets": [
     {
-      "target_name": "frida_bindings",
+      "target_name": "frida_binding",
       "sources": [
         "src/addon.cc",
         "src/device_manager.cc",

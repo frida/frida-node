@@ -25,10 +25,20 @@
   },
   "main": "./lib/frida",
   "dependencies": {
-    "bindings": "*",
+    "node-pre-gyp": "0.6.x",
     "minimatch": "*"
   },
   "devDependencies": {},
+  "scripts": {
+    "install": "node-pre-gyp install",
+  },
+  "binary": {
+    "module_name" : "frida_binding",
+    "module_path" : "./lib/binding/{configuration}/{node_abi}-{platform}-{arch}/",
+    "remote_path" : "./node/v{version}/{configuration}/",
+    "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}.tar.gz",
+    "host"        : "http://build.frida.re"
+  },
   "repository": {
     "type": "git",
     "url": "http://github.com/frida/frida-node.git"
