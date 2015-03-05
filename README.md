@@ -2,9 +2,9 @@
 
 It's Greasemonkey for native apps, or, put in more technical terms, it's a
 dynamic code instrumentation toolkit. It lets you inject snippets of JavaScript
-into native apps on Windows, Mac, Linux and iOS. Frida also provides you with
-some simple tools built on top of the Frida API. These can be used as-is,
-tweaked to your needs, or serve as examples of how to use the API.
+into native apps on Windows, Mac, Linux, iOS and Android. Frida also provides
+you with some simple tools built on top of the Frida API. These can be used
+as-is, tweaked to your needs, or serve as examples of how to use the API.
 
 ## Why do I need this?
 
@@ -29,8 +29,4 @@ Great question. We'll try to clarify with some use-cases:
 
 ## So how do I get started?
 
-```bash
-$ npm install frida
-```
-
-Then have a look at our [Quick-start Guide](http://www.frida.re/docs/quickstart/).
+Have a look at our [Quick-start Guide](http://www.frida.re/docs/quickstart/).
