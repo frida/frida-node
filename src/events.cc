@@ -28,18 +28,19 @@ typedef struct _EventsClosure EventsClosure;
 
 struct _EventsClosure {
   GClosure closure;
+  gboolean alive;
   guint signal_id;
   guint handler_id;
   Persistent<Function>* callback;
   Persistent<Object>* parent;
-  EventsTransformer transformer;
-  gpointer transformer_data;
+  Events::TransformCallback transform;
+  gpointer transform_data;
   Runtime* runtime;
 };
 
 static EventsClosure* events_closure_new(guint signal_id,
     Handle<Function> callback, Handle<Object> parent,
-    EventsTransformer transformer, gpointer transformer_data,
+    Events::TransformCallback transform, gpointer transform_data,
     Runtime* runtime);
 static void events_closure_finalize(gpointer data, GClosure* closure);
 static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
@@ -48,11 +49,15 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
 static Local<Value> events_closure_gvalues_to_jsvalue(Isolate* isolate,
     const GValue* gvalues, guint count, guint* consumed);
 
-Events::Events(gpointer handle, EventsTransformer transformer,
-    gpointer transformer_data, Runtime* runtime)
+Events::Events(gpointer handle, TransformCallback transform,
+    gpointer transform_data, Runtime* runtime)
     : GLibObject(handle, runtime),
-      transformer_(transformer),
-      transformer_data_(transformer_data),
+      transform_(transform),
+      transform_data_(transform_data),
+      listen_(NULL),
+      listen_data_(NULL),
+      unlisten_(NULL),
+      unlisten_data_(NULL),
       closures_(NULL) {
   g_object_ref(handle_);
 }
@@ -78,7 +83,7 @@ void Events::Init(Handle<Object> exports, Runtime* runtime) {
 }
 
 Local<Object> Events::New(gpointer handle, Runtime* runtime,
-    EventsTransformer transformer, gpointer transformer_data) {
+    TransformCallback transform, gpointer transform_data) {
   auto isolate = Isolate::GetCurrent();
 
   auto ctor = Local<Function>::New(isolate,
@@ -87,10 +92,22 @@ Local<Object> Events::New(gpointer handle, Runtime* runtime,
   const int argc = 3;
   Local<Value> argv[argc] = {
     External::New(isolate, handle),
-    External::New(isolate, reinterpret_cast<void*>(transformer)),
-    External::New(isolate, transformer_data)
+    External::New(isolate, reinterpret_cast<void*>(transform)),
+    External::New(isolate, transform_data)
   };
   return ctor->NewInstance(argc, argv);
+}
+
+void Events::SetListenCallback(ListenCallback callback,
+    gpointer user_data) {
+  listen_ = callback;
+  listen_data_ = user_data;
+}
+
+void Events::SetUnlistenCallback(UnlistenCallback callback,
+    gpointer user_data) {
+  unlisten_ = callback;
+  unlisten_data_ = user_data;
 }
 
 void Events::New(const FunctionCallbackInfo<Value>& args) {
@@ -107,10 +124,10 @@ void Events::New(const FunctionCallbackInfo<Value>& args) {
       return;
     }
     auto handle = Local<External>::Cast(args[0])->Value();
-    auto transformer = reinterpret_cast<EventsTransformer>(
+    auto transform = reinterpret_cast<TransformCallback>(
         Local<External>::Cast(args[1])->Value());
-    auto transformer_data = Local<External>::Cast(args[2])->Value();
-    auto wrapper = new Events(handle, transformer, transformer_data,
+    auto transform_data = Local<External>::Cast(args[2])->Value();
+    auto wrapper = new Events(handle, transform, transform_data,
         GetRuntimeFromConstructorArgs(args));
     auto obj = args.This();
     wrapper->Wrap(obj);
@@ -133,18 +150,22 @@ void Events::Listen(const FunctionCallbackInfo<Value>& args) {
     return;
 
   auto events_closure = events_closure_new(signal_id, callback, obj,
-      wrapper->transformer_, wrapper->transformer_data_, runtime);
+      wrapper->transform_, wrapper->transform_data_, runtime);
   auto closure = reinterpret_cast<GClosure*>(events_closure);
   g_closure_ref(closure);
   g_closure_sink(closure);
   wrapper->closures_ = g_slist_append(wrapper->closures_, events_closure);
 
-  runtime->GetUVContext()->IncreaseUsage();
   runtime->GetGLibContext()->Schedule([=]() {
+    g_print("connecting\n");
     events_closure->handler_id = g_signal_connect_closure_by_id(
         wrapper->handle_, signal_id, 0, closure, TRUE);
     g_assert(events_closure->handler_id != 0);
   });
+
+  if (wrapper->listen_ != NULL) {
+    wrapper->listen_(g_signal_name(signal_id), wrapper->listen_data_);
+  }
 }
 
 void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
@@ -164,15 +185,20 @@ void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
         *events_closure->callback);
     if (events_closure->signal_id == signal_id &&
         closure_callback->SameValue(callback)) {
+      if (wrapper->unlisten_ != NULL) {
+        wrapper->unlisten_(g_signal_name(signal_id), wrapper->unlisten_data_);
+      }
+
       wrapper->closures_ = g_slist_delete_link(wrapper->closures_, cur);
 
-      auto handler_id = events_closure->handler_id;
-      events_closure->handler_id = 0;
+      events_closure->alive = FALSE;
 
       auto runtime = wrapper->runtime_;
-      runtime->GetUVContext()->DecreaseUsage();
       runtime->GetGLibContext()->Schedule([=]() {
-        g_signal_handler_disconnect(wrapper->handle_, handler_id);
+        g_print("disconnecting\n");
+        g_assert(events_closure->handler_id != 0);
+        g_signal_handler_disconnect(wrapper->handle_,
+            events_closure->handler_id);
         runtime->GetUVContext()->Schedule([=]() {
           g_closure_unref(closure);
         });
@@ -205,7 +231,7 @@ bool Events::GetSignalArguments(const FunctionCallbackInfo<Value>& args,
 
 static EventsClosure* events_closure_new(guint signal_id,
     Handle<Function> callback, Handle<Object> parent,
-    EventsTransformer transformer, gpointer transformer_data,
+    Events::TransformCallback transform, gpointer transform_data,
     Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
@@ -214,12 +240,13 @@ static EventsClosure* events_closure_new(guint signal_id,
   g_closure_set_marshal(closure, events_closure_marshal);
 
   EventsClosure* self = reinterpret_cast<EventsClosure*>(closure);
+  self->alive = TRUE;
   self->signal_id = signal_id;
   self->handler_id = 0;
   self->callback = new Persistent<Function>(isolate, callback);
   self->parent = new Persistent<Object>(isolate, parent);
-  self->transformer = transformer;
-  self->transformer_data = transformer_data;
+  self->transform = transform;
+  self->transform_data = transform_data;
   self->runtime = runtime;
 
   return self;
@@ -252,12 +279,11 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
   }
 
   self->runtime->GetUVContext()->Schedule([=]() {
-    const bool still_connected = self->handler_id != 0;
-    if (still_connected) {
+    if (self->alive) {
       auto isolate = Isolate::GetCurrent();
 
-      auto transformer = self->transformer;
-      auto transformer_data = self->transformer_data;
+      auto transform = self->transform;
+      auto transform_data = self->transform_data;
       auto signal_name = g_signal_name(self->signal_id);
 
       Local<Value>* argv = new Local<Value>[args->len];
@@ -265,8 +291,8 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
       guint dst = 0;
       while (src != args->len) {
         auto next = &g_array_index(args, GValue, src);
-        argv[dst] = transformer != NULL
-            ? transformer(isolate, signal_name, src, next, transformer_data)
+        argv[dst] = transform != NULL
+            ? transform(isolate, signal_name, src, next, transform_data)
             : Local<Value>();
         guint consumed = 1;
         if (argv[dst].IsEmpty()) {

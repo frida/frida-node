@@ -51,9 +51,13 @@ void DeviceManager::New(const FunctionCallbackInfo<Value>& args) {
     auto wrapper = new DeviceManager(handle, runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
-    obj->Set(String::NewFromUtf8(isolate, "events"),
-        Events::New(handle, runtime));
+    auto events_obj = Events::New(handle, runtime);
+    obj->Set(String::NewFromUtf8(isolate, "events"), events_obj);
     g_object_unref(handle);
+
+    auto events_wrapper = ObjectWrap::Unwrap<Events>(events_obj);
+    events_wrapper->SetListenCallback(OnListen, wrapper);
+    events_wrapper->SetUnlistenCallback(OnUnlisten, wrapper);
 
     args.GetReturnValue().Set(obj);
   } else {
@@ -127,6 +131,22 @@ void DeviceManager::EnumerateDevices(const FunctionCallbackInfo<Value>& args) {
   operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+void DeviceManager::OnListen(const gchar* signal, gpointer user_data) {
+  auto wrapper = static_cast<DeviceManager*>(user_data);
+
+  if (strcmp(signal, "changed") == 0) {
+    wrapper->runtime_->GetUVContext()->IncreaseUsage();
+  }
+}
+
+void DeviceManager::OnUnlisten(const gchar* signal, gpointer user_data) {
+  auto wrapper = static_cast<DeviceManager*>(user_data);
+
+  if (strcmp(signal, "changed") == 0) {
+    wrapper->runtime_->GetUVContext()->DecreaseUsage();
+  }
 }
 
 }

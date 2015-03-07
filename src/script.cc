@@ -2,6 +2,7 @@
 
 #include "events.h"
 #include "operation.h"
+#include "usage_monitor.h"
 
 #include <cstring>
 #include <node.h>
@@ -79,6 +80,10 @@ void Script::New(const FunctionCallbackInfo<Value>& args) {
     wrapper->Wrap(obj);
     obj->Set(String::NewFromUtf8(isolate, "events"),
         Events::New(handle, runtime, TransformMessageEvent, wrapper));
+
+    auto monitor =
+        new UsageMonitor<FridaScript>(frida_script_is_destroyed, "destroyed");
+    monitor->Enable(wrapper);
 
     args.GetReturnValue().Set(obj);
   } else {

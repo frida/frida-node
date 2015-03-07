@@ -17,7 +17,7 @@ class Operation {
     runtime_ = parent->GetRuntime();
 
     runtime_->GetUVContext()->IncreaseUsage();
-    runtime_->GetGLibContext()->Schedule([=] () { Begin(); });
+    runtime_->GetGLibContext()->Schedule([=]() { Begin(); });
   }
 
   v8::Local<v8::Promise> GetPromise(v8::Isolate* isolate) {
@@ -52,7 +52,7 @@ class Operation {
  private:
   void PerformEnd(GAsyncResult* result) {
     End(result, &error_);
-    runtime_->GetUVContext()->Schedule([=] () { Deliver(); });
+    runtime_->GetUVContext()->Schedule([=]() { Deliver(); });
   }
 
   void Deliver() {

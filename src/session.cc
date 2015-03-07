@@ -3,6 +3,7 @@
 #include "events.h"
 #include "operation.h"
 #include "script.h"
+#include "usage_monitor.h"
 
 #include <node.h>
 
@@ -89,6 +90,10 @@ void Session::New(const FunctionCallbackInfo<Value>& args) {
     wrapper->Wrap(obj);
     obj->Set(String::NewFromUtf8(isolate, "events"),
         Events::New(handle, runtime));
+
+    auto monitor =
+        new UsageMonitor<FridaSession>(frida_session_is_detached, "detached");
+    monitor->Enable(wrapper);
 
     args.GetReturnValue().Set(obj);
   } else {

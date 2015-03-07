@@ -20,6 +20,9 @@ class DeviceManager : public GLibObject {
   static void Close(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void EnumerateDevices(const v8::FunctionCallbackInfo<v8::Value>& args);
 
+  static void OnListen(const gchar* signal, gpointer user_data);
+  static void OnUnlisten(const gchar* signal, gpointer user_data);
+
   v8::Persistent<v8::Object> events_;
 };
 
