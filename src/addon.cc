@@ -18,6 +18,8 @@ using v8::Value;
 
 namespace frida {
 
+static void DisposeAll(void* data);
+
 static void InitAll(Handle<Object> exports,
     Handle<Value> module,
     Handle<Context> context) {
@@ -35,6 +37,16 @@ static void InitAll(Handle<Object> exports,
   Icon::Init(exports, runtime);
   Session::Init(exports, runtime);
   Script::Init(exports, runtime);
+
+  node::AtExit(DisposeAll, runtime);
+}
+
+static void DisposeAll(void* data) {
+  auto runtime = static_cast<Runtime*>(data);
+
+  DeviceManager::Dispose(runtime);
+
+  delete runtime;
 }
 
 }

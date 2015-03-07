@@ -10,6 +10,7 @@ namespace frida {
 class DeviceManager : public GLibObject {
  public:
   static void Init(v8::Handle<v8::Object> exports, Runtime* runtime);
+  static void Dispose(Runtime* runtime);
 
  private:
   DeviceManager(FridaDeviceManager* handle, Runtime* runtime);

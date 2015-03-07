@@ -6,6 +6,8 @@
 
 #include <node.h>
 
+#define DEVICE_MANAGER_DATA_WRAPPERS "device_manager:wrappers"
+
 using v8::Array;
 using v8::FunctionCallbackInfo;
 using v8::Handle;
@@ -21,9 +23,17 @@ namespace frida {
 DeviceManager::DeviceManager(FridaDeviceManager* handle, Runtime* runtime)
     : GLibObject(handle, runtime) {
   g_object_ref(handle_);
+
+  runtime_->SetDataPointer(DEVICE_MANAGER_DATA_WRAPPERS, g_slist_prepend(
+      static_cast<GSList*>(
+      runtime_->GetDataPointer(DEVICE_MANAGER_DATA_WRAPPERS)), this));
 }
 
 DeviceManager::~DeviceManager() {
+  runtime_->SetDataPointer(DEVICE_MANAGER_DATA_WRAPPERS, g_slist_remove(
+      static_cast<GSList*>(
+      runtime_->GetDataPointer(DEVICE_MANAGER_DATA_WRAPPERS)), this));
+
   events_.Reset();
   frida_unref(handle_);
 }
@@ -38,6 +48,17 @@ void DeviceManager::Init(Handle<Object> exports, Runtime* runtime) {
   NODE_SET_PROTOTYPE_METHOD(tpl, "enumerateDevices", EnumerateDevices);
 
   exports->Set(name, tpl->GetFunction());
+}
+
+void DeviceManager::Dispose(Runtime* runtime) {
+  auto wrappers = static_cast<GSList*>(
+      runtime->GetDataPointer(DEVICE_MANAGER_DATA_WRAPPERS));
+  while (wrappers != NULL) {
+    auto wrapper = static_cast<DeviceManager*>(wrappers->data);
+    frida_device_manager_close_sync(wrapper->GetHandle<FridaDeviceManager>());
+    wrappers = g_slist_delete_link(wrappers, wrappers);
+  }
+  runtime->SetDataPointer(DEVICE_MANAGER_DATA_WRAPPERS, NULL);
 }
 
 void DeviceManager::New(const FunctionCallbackInfo<Value>& args) {
