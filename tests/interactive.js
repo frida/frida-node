@@ -32,7 +32,7 @@ function attachExample() {
       setInterval(function () {
         script.postMessage({ name: 'ping' });
       }, 1000);
-    })
+    });
   })
   .catch(function (error) {
     console.log('error:', error.message);
