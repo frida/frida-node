@@ -25,15 +25,19 @@
   },
   "main": "./lib/frida",
   "dependencies": {
-    "node-pre-gyp": "0.6.x",
-    "minimatch": "*"
+    "big-integer": "^1.4.4",
+    "minimatch": "*",
+    "node-pre-gyp": "0.6.x"
   },
   "devDependencies": {
-    "jshint": "^2.6.3"
+    "jshint": "^2.6.3",
+    "mocha": "^2.2.0",
+    "should": "^5.1.0"
   },
   "scripts": {
     "install": "node-pre-gyp install",
-    "pretest": "jshint lib tests"
+    "pretest": "jshint lib test",
+    "test": "node-pre-gyp rebuild && node --expose-gc node_modules/mocha/bin/_mocha"
   },
   "binary": {
     "module_name": "frida_binding",

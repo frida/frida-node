@@ -1,4 +1,4 @@
-var frida = require('../');
+var frida = require('..');
 
 function spawnExample() {
   frida.spawn(['/bin/cat', '/etc/resolv.conf'])

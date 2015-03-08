@@ -157,7 +157,6 @@ void Events::Listen(const FunctionCallbackInfo<Value>& args) {
   wrapper->closures_ = g_slist_append(wrapper->closures_, events_closure);
 
   runtime->GetGLibContext()->Schedule([=]() {
-    g_print("connecting\n");
     events_closure->handler_id = g_signal_connect_closure_by_id(
         wrapper->handle_, signal_id, 0, closure, TRUE);
     g_assert(events_closure->handler_id != 0);
@@ -195,7 +194,6 @@ void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
 
       auto runtime = wrapper->runtime_;
       runtime->GetGLibContext()->Schedule([=]() {
-        g_print("disconnecting\n");
         g_assert(events_closure->handler_id != 0);
         g_signal_handler_disconnect(wrapper->handle_,
             events_closure->handler_id);
