@@ -46,8 +46,8 @@ static void events_closure_finalize(gpointer data, GClosure* closure);
 static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
     guint n_param_values, const GValue* param_values, gpointer invocation_hint,
     gpointer marshal_data);
-static Local<Value> events_closure_gvalues_to_jsvalue(Isolate* isolate,
-    const GValue* gvalues, guint count, guint* consumed);
+static Local<Value> events_closure_gvalue_to_jsvalue(Isolate* isolate,
+    const GValue* gvalue);
 
 Events::Events(gpointer handle, TransformCallback transform,
     gpointer transform_data, Runtime* runtime)
@@ -271,8 +271,20 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
   for (guint i = 1; i != n_param_values; i++) {
     GValue val;
     memset(&val, 0, sizeof(val));
-    g_value_init(&val, param_values[i].g_type);
-    g_value_copy(&param_values[i], &val);
+    if (param_values[i].g_type == G_TYPE_POINTER) {
+      g_assert(n_param_values - i >= 2);
+      g_assert(G_VALUE_TYPE(&param_values[i + 1]) == G_TYPE_INT);
+      auto bytes = g_bytes_new(g_value_get_pointer(&param_values[i]),
+          g_value_get_int(&param_values[i + 1]));
+      g_value_init(&val, G_TYPE_VARIANT);
+      g_value_set_variant(&val,
+          g_variant_new_from_bytes(G_VARIANT_TYPE("ay"), bytes, TRUE));
+      g_bytes_unref(bytes);
+      i++;
+    } else {
+      g_value_init(&val, param_values[i].g_type);
+      g_value_copy(&param_values[i], &val);
+    }
     g_array_append_val(args, val);
   }
 
@@ -284,23 +296,16 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
       auto transform_data = self->transform_data;
       auto signal_name = g_signal_name(self->signal_id);
 
-      Local<Value>* argv = new Local<Value>[args->len];
-      guint src = 0;
-      guint dst = 0;
-      while (src != args->len) {
-        auto next = &g_array_index(args, GValue, src);
-        argv[dst] = transform != NULL
-            ? transform(isolate, signal_name, src, next, transform_data)
+      const int argc = args->len;
+      Local<Value>* argv = new Local<Value>[argc];
+      for (guint i = 0; i != args->len; i++) {
+        auto value = &g_array_index(args, GValue, i);
+        argv[i] = transform != NULL
+            ? transform(isolate, signal_name, i, value, transform_data)
             : Local<Value>();
-        guint consumed = 1;
-        if (argv[dst].IsEmpty()) {
-          argv[dst] = events_closure_gvalues_to_jsvalue(isolate,
-              next, args->len - src, &consumed);
-        }
-        src += consumed;
-        dst++;
+        if (argv[i].IsEmpty())
+          argv[i] = events_closure_gvalue_to_jsvalue(isolate, value);
       }
-      const int argc = dst;
 
       auto recv = Local<Object>::New(isolate, *self->parent);
       auto callback = Local<Function>::New(isolate, *self->callback);
@@ -317,33 +322,31 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
   });
 }
 
-static Local<Value> events_closure_gvalues_to_jsvalue(Isolate* isolate,
-    const GValue* gvalues, guint count, guint* consumed) {
-  *consumed = 1;
-  switch (G_VALUE_TYPE(gvalues)) {
+static Local<Value> events_closure_gvalue_to_jsvalue(Isolate* isolate,
+    const GValue* gvalue) {
+  switch (G_VALUE_TYPE(gvalue)) {
     case G_TYPE_BOOLEAN:
-      return Boolean::New(isolate, g_value_get_boolean(gvalues));
+      return Boolean::New(isolate, g_value_get_boolean(gvalue));
     case G_TYPE_INT:
-      return Integer::New(isolate, g_value_get_int(gvalues));
+      return Integer::New(isolate, g_value_get_int(gvalue));
     case G_TYPE_UINT:
-      return Integer::NewFromUnsigned(isolate, g_value_get_uint(gvalues));
+      return Integer::NewFromUnsigned(isolate, g_value_get_uint(gvalue));
     case G_TYPE_FLOAT:
-      return Number::New(isolate, g_value_get_float(gvalues));
+      return Number::New(isolate, g_value_get_float(gvalue));
     case G_TYPE_DOUBLE:
-      return Number::New(isolate, g_value_get_double(gvalues));
+      return Number::New(isolate, g_value_get_double(gvalue));
     case G_TYPE_STRING:
-      return String::NewFromUtf8(isolate, g_value_get_string(gvalues));
-    case G_TYPE_POINTER:
-      g_assert(count >= 2);
-      g_assert(G_VALUE_TYPE(&gvalues[1]) == G_TYPE_INT);
-      *consumed = 2;
+      return String::NewFromUtf8(isolate, g_value_get_string(gvalue));
+    case G_TYPE_VARIANT: {
+      auto variant = g_value_get_variant (gvalue);
+      g_assert(variant != NULL);
+      g_assert(g_variant_is_of_type(variant, G_VARIANT_TYPE("ay")));
       return node::Encode(isolate,
-          g_value_get_pointer(&gvalues[0]),
-          g_value_get_int(&gvalues[1]),
+          g_variant_get_data(variant),
+          g_variant_get_size(variant),
           node::BUFFER);
-      break;
+    }
     default:
-      // XXX: extend as necessary
       g_assert_not_reached();
   }
 }
