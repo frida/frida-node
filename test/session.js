@@ -81,13 +81,50 @@ describe('Session', function () {
       getHelloAddress.then(function (helloAddressStr) {
         var helloAddress = frida.ptr(helloAddressStr);
 
+        session.should.have.property('readBytes');
         return session.readBytes(helloAddress, 6)
         .then(function (buf) {
-          console.log(buf.toJSON());
+          should.deepEqual(buf.toJSON().data,
+              [0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x00]);
+
+          session.should.have.property('readUtf8');
+          return session.readUtf8(helloAddress);
+        })
+        .then(function (str) {
+          str.should.equal('Hello');
+
+          session.should.have.property('writeBytes');
+          return session.writeBytes(helloAddress, [0x59, 0x6f, 0x00]);
+        })
+        .then(function () {
+          return session.readBytes(helloAddress, 6);
+        })
+        .then(function (buf) {
+          should.deepEqual(buf.toJSON().data,
+              [0x59, 0x6f, 0x00, 0x6c, 0x6f, 0x00]);
+
+          return session.readUtf8(helloAddress);
+        })
+        .then(function (str) {
+          str.should.equal('Yo');
+
+          session.should.have.property('writeUtf8');
+          return session.writeUtf8(helloAddress, 'Hei');
+        })
+        .then(function () {
+          return session.readBytes(helloAddress, 6);
+        })
+        .then(function (buf) {
+          should.deepEqual(buf.toJSON().data,
+              [0x48, 0x65, 0x69, 0x00, 0x6f, 0x00]);
+
+          return session.readUtf8(helloAddress);
+        })
+        .then(function (str) {
+          str.should.equal('Hei');
+
+          done();
         });
-      })
-      .catch(function () {
-        console.log('ouch:', arguments);
       });
       script.load();
     });
