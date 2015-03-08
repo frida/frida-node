@@ -338,7 +338,9 @@ static Local<Value> events_closure_gvalues_to_jsvalue(Isolate* isolate,
       g_assert(G_VALUE_TYPE(&gvalues[1]) == G_TYPE_INT);
       *consumed = 2;
       return node::Encode(isolate,
-          g_value_get_pointer(&gvalues[0]), g_value_get_int(&gvalues[1]));
+          g_value_get_pointer(&gvalues[0]),
+          g_value_get_int(&gvalues[1]),
+          node::BUFFER);
       break;
     default:
       // XXX: extend as necessary

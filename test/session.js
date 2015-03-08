@@ -51,4 +51,45 @@ describe('Session', function () {
       range.protection.should.be.an.instanceof(String);
     });
   });
+
+  it('should find base address', function () {
+    session.should.have.property('findBaseAddress');
+    return session.enumerateModules().then(function (modules) {
+      var m = modules[0];
+      return session.findBaseAddress(m.name).then(function (baseAddress) {
+        baseAddress.equals(m.baseAddress).should.equal(true);
+        return session.findBaseAddress('_does_not_exist$#@$');
+      })
+      .then(function (baseAddress) {
+        baseAddress.isZero().should.equal(true);
+      });
+    });
+  });
+
+  it('should should provide memory access', function (done) {
+    session.createScript(
+      'hello = Memory.allocUtf8String(\"Hello\");\n' +
+      'send(hello);\n')
+    .then(function (script) {
+      var getHelloAddress = new Promise(function (resolve, reject) {
+        script.events.listen('message', onMessage);
+        function onMessage(message) {
+          script.events.unlisten('message', onMessage);
+          resolve(message.payload);
+        }
+      });
+      getHelloAddress.then(function (helloAddressStr) {
+        var helloAddress = frida.ptr(helloAddressStr);
+
+        return session.readBytes(helloAddress, 6)
+        .then(function (buf) {
+          console.log(buf.toJSON());
+        });
+      })
+      .catch(function () {
+        console.log('ouch:', arguments);
+      });
+      script.load();
+    });
+  });
 });
