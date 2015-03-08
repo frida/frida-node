@@ -28,16 +28,19 @@
     "node-pre-gyp": "0.6.x",
     "minimatch": "*"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "jshint": "^2.6.3"
+  },
   "scripts": {
-    "install": "node-pre-gyp install"
+    "install": "node-pre-gyp install",
+    "pretest": "jshint lib tests"
   },
   "binary": {
-    "module_name" : "frida_binding",
-    "module_path" : "./lib/binding/{configuration}/{node_abi}-{platform}-{arch}/",
-    "remote_path" : "./node/v{version}/{configuration}/",
+    "module_name": "frida_binding",
+    "module_path": "./lib/binding/{configuration}/{node_abi}-{platform}-{arch}/",
+    "remote_path": "./node/v{version}/{configuration}/",
     "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}.tar.gz",
-    "host"        : "https://build.frida.re"
+    "host": "https://build.frida.re"
   },
   "repository": {
     "type": "git",
