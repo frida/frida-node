@@ -41,5 +41,13 @@ describe('Module', function () {
   });
 
   it('should enumerate ranges', function () {
+    module.should.have.property('enumerateRanges');
+    return module.enumerateRanges('r--').then(function (ranges) {
+      ranges.length.should.be.above(0);
+      var r = ranges[0];
+      r.should.have.properties('baseAddress', 'size', 'protection');
+      r.size.should.be.an.instanceof(Number);
+      r.protection.should.be.an.instanceof(String);
+    });
   });
 });
