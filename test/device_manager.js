@@ -1,5 +1,7 @@
 'use strict';
 
+/* global describe, afterEach, gc, it */
+
 var frida = require('..');
 var should = require('should');
 

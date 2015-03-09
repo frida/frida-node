@@ -1,5 +1,7 @@
 'use strict';
 
+/* global describe, before, after, afterEach, gc, it */
+
 var frida = require('..');
 var should = require('should');
 var spawn = require('child_process').spawn;
