@@ -1,0 +1,45 @@
+var frida = require('..');
+var should = require('should');
+var spawn = require('child_process').spawn;
+
+describe('Module', function () {
+  var target;
+  var module;
+
+  before(function () {
+    target = spawn(
+        process.platform === 'win32' ? 'C:\\Windows\\notepad.exe' : '/bin/cat',
+        [], {
+          stdio: 'inherit'
+        });
+    return frida.attach(target.pid)
+    .then(function (session) {
+      return session.enumerateModules();
+    })
+    .then(function (modules) {
+      module = modules[1];
+    });
+  });
+
+  after(function () {
+    target.kill('SIGKILL');
+  });
+
+  afterEach(gc);
+
+  it('should enumerate exports', function () {
+    module.should.have.property('enumerateExports');
+    return module.enumerateExports().then(function (exports) {
+      exports.length.should.be.above(0);
+      var e = exports[0];
+      e.should.have.properties('name', 'absoluteAddress',
+          'module', 'relativeAddress', 'exported');
+      e.name.should.be.an.instanceof(String);
+      e.exported.should.be.an.instanceof(Boolean);
+      e.exported.should.equal(true);
+    });
+  });
+
+  it('should enumerate ranges', function () {
+  });
+});
