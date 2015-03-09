@@ -1,3 +1,5 @@
+'use strict';
+
 var frida = require('..');
 var should = require('should');
 var spawn = require('child_process').spawn;

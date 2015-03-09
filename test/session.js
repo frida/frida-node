@@ -1,3 +1,5 @@
+'use strict';
+
 var frida = require('..');
 var should = require('should');
 var spawn = require('child_process').spawn;
@@ -127,6 +129,20 @@ describe('Session', function () {
         });
       });
       script.load();
+    });
+  });
+
+  it('should act as a function container', function () {
+    return session.enumerateModules().then(function (modules) {
+      var m = modules[1];
+      return m.enumerateExports().then(function (exports) {
+        var e = exports[0];
+
+        return session.ensureFunction(e.absoluteAddress)
+        .then(function (f) {
+          f.should.equal(e);
+        });
+      });
     });
   });
 });
