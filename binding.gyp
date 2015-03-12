@@ -4,10 +4,16 @@
       ['OS=="win"', {
         'frida_host': 'windows',
       }],
-      ['OS=="mac"', {
+      ['OS=="mac" and target_arch=="ia32"', {
+        'frida_host': 'mac-i386',
+      }],
+      ['OS=="mac" and target_arch=="x64"', {
         'frida_host': 'mac-x86_64',
       }],
-      ['OS=="linux"', {
+      ['OS=="linux" and target_arch=="ia32"', {
+        'frida_host': 'linux-i386',
+      }],
+      ['OS=="linux" and target_arch=="x64"', {
         'frida_host': 'linux-x86_64',
       }],
     ],
