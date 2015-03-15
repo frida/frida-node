@@ -124,6 +124,8 @@
           ],
           'ldflags': [
             '-Wl,--gc-sections',
+            '-Wl,--version-script',
+            '-Wl,../binding.version',
           ],
         }],
       ],
