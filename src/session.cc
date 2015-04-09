@@ -141,15 +141,18 @@ void Session::Detach(const FunctionCallbackInfo<Value>& args) {
 
 class CreateScriptOperation : public Operation<FridaSession> {
  public:
-  CreateScriptOperation(gchar* source) : source_(source) {
+  CreateScriptOperation(gchar* name, gchar* source)
+    : name_(name),
+      source_(source) {
   }
 
   ~CreateScriptOperation() {
     g_free(source_);
+    g_free(name_);
   }
 
   void Begin() {
-    frida_session_create_script(handle_, source_, OnReady, this);
+    frida_session_create_script(handle_, name_, source_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -162,6 +165,7 @@ class CreateScriptOperation : public Operation<FridaSession> {
     return wrapper;
   }
 
+  gchar* name_;
   gchar* source_;
   FridaScript* script_;
 };
@@ -172,14 +176,21 @@ void Session::CreateScript(const FunctionCallbackInfo<Value>& args) {
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
-  if (args.Length() < 1 || !args[0]->IsString()) {
+  if (args.Length() < 2 ||
+      !(args[0]->IsString() || args[0]->IsNull()) ||
+      !args[1]->IsString()) {
     isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected string")));
+        "Bad argument, expected string|null and string")));
     return;
   }
-  String::Utf8Value source(Local<String>::Cast(args[0]));
+  gchar* name = NULL;
+  if (args[0]->IsString()) {
+    String::Utf8Value val(Local<String>::Cast(args[0]));
+    name = g_strdup(*val);
+  }
+  String::Utf8Value source(Local<String>::Cast(args[1]));
 
-  auto operation = new CreateScriptOperation(g_strdup(*source));
+  auto operation = new CreateScriptOperation(name, g_strdup(*source));
   operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));
