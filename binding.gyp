@@ -97,6 +97,8 @@
             '-lgmodule-2.0',
             '-lglib-2.0',
             '-lffi',
+            '-liconv',
+            '-lz',
           ],
         }],
         ['OS=="mac"', {
