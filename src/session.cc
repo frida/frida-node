@@ -53,6 +53,8 @@ void Session::Init(Handle<Object> exports, Runtime* runtime) {
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "detach", Detach);
   NODE_SET_PROTOTYPE_METHOD(tpl, "createScript", CreateScript);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "enableDebugger", EnableDebugger);
+  NODE_SET_PROTOTYPE_METHOD(tpl, "disableDebugger", DisableDebugger);
 
   auto ctor = tpl->GetFunction();
   exports->Set(name, ctor);
@@ -191,6 +193,72 @@ void Session::CreateScript(const FunctionCallbackInfo<Value>& args) {
   String::Utf8Value source(Local<String>::Cast(args[1]));
 
   auto operation = new CreateScriptOperation(name, g_strdup(*source));
+  operation->Schedule(isolate, wrapper);
+
+  args.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class EnableDebuggerOperation : public Operation<FridaSession> {
+ public:
+  EnableDebuggerOperation(guint16 port) : port_(port) {
+  }
+
+  void Begin() {
+    frida_session_enable_debugger(handle_, port_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_session_enable_debugger_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Undefined(isolate);
+  }
+
+  guint16 port_;
+};
+
+void Session::EnableDebugger(const FunctionCallbackInfo<Value>& args) {
+  auto isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  auto obj = args.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Session>(obj);
+
+  if (args.Length() < 1 || !args[0]->IsNumber()) {
+    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
+        "Bad argument, expected port number")));
+    return;
+  }
+  guint16 port = static_cast<guint16>(args[0]->ToInteger()->Value());
+
+  auto operation = new EnableDebuggerOperation(port);
+  operation->Schedule(isolate, wrapper);
+
+  args.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class DisableDebuggerOperation : public Operation<FridaSession> {
+ public:
+  void Begin() {
+    frida_session_disable_debugger(handle_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_session_disable_debugger_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Undefined(isolate);
+  }
+};
+
+void Session::DisableDebugger(const FunctionCallbackInfo<Value>& args) {
+  auto isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  auto obj = args.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Session>(obj);
+
+  auto operation = new DisableDebuggerOperation();
   operation->Schedule(isolate, wrapper);
 
   args.GetReturnValue().Set(operation->GetPromise(isolate));

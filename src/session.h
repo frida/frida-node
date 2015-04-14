@@ -23,6 +23,8 @@ class Session : public GLibObject {
 
   static void Detach(const v8::FunctionCallbackInfo<v8::Value>& args);
   static void CreateScript(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void EnableDebugger(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void DisableDebugger(const v8::FunctionCallbackInfo<v8::Value>& args);
 
   v8::Persistent<v8::Object> events_;
 };
