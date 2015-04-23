@@ -247,38 +247,25 @@ void Device::Spawn(const FunctionCallbackInfo<Value>& args) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   gchar** argv = NULL;
-  if (args.Length() >= 1) {
-    if (args[0]->IsArray()) {
-      auto elements = Local<Array>::Cast(args[0]);
-      uint32_t length = elements->Length();
-      argv = g_new0(gchar *, length + 1);
-      for (uint32_t i = 0; i != length; i++) {
-        auto element_value = elements->Get(i);
-        if (element_value->IsString()) {
-          String::Utf8Value element(Local<String>::Cast(element_value));
-          argv[i] = g_strdup(*element);
-        } else {
-          g_strfreev(argv);
-          argv = NULL;
-          break;
-        }
-      }
-    } else if (args[0]->IsString()) {
-      String::Utf8Value command_line(Local<String>::Cast(args[0]));
-      GError* error;
-      if (!g_shell_parse_argv(*command_line, NULL, &argv, &error)) {
-        gchar* message = g_strdup_printf("Bad argv string: %s", error->message);
-        isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(
-            isolate, message)));
-        g_free(message);
-        g_error_free(error);
-        return;
+  if (args.Length() >= 1 && args[0]->IsArray()) {
+    auto elements = Local<Array>::Cast(args[0]);
+    uint32_t length = elements->Length();
+    argv = g_new0(gchar *, length + 1);
+    for (uint32_t i = 0; i != length; i++) {
+      auto element_value = elements->Get(i);
+      if (element_value->IsString()) {
+        String::Utf8Value element(Local<String>::Cast(element_value));
+        argv[i] = g_strdup(*element);
+      } else {
+        g_strfreev(argv);
+        argv = NULL;
+        break;
       }
     }
   }
   if (argv == NULL) {
     isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected argv as a string or array of strings")));
+        "Bad argument, expected argv as an array of strings")));
     return;
   }
 
