@@ -97,7 +97,6 @@
             '-lgmodule-2.0',
             '-lglib-2.0',
             '-lffi',
-            '-liconv',
             '-lz',
           ],
         }],
@@ -116,6 +115,7 @@
             ],
           },
           'libraries': [
+            '-liconv',
             '-Wl,-framework -Wl,Foundation -Wl,-framework -Wl,AppKit',
           ],
         }],
