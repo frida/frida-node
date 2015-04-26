@@ -47,7 +47,7 @@ describe('Session', function () {
 
   it('should enumerate exports for a module', function () {
     return session.enumerateModules().then(function (modules) {
-      return session.enumerateExports(modules[0].name).then(function (exp) {
+      return session.enumerateExports(modules[1].name).then(function (exp) {
         exp.length.should.be.above(0);
         var e = exp[0];
         e.should.have.property('name');
