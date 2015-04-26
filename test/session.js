@@ -56,6 +56,17 @@ describe('Session', function () {
     });
   });
 
+  it('should enumerate ranges scoped to a module', function () {
+    return session.enumerateRanges('r--').then(function (allRanges) {
+      return session.enumerateModules().then(function (modules) {
+        return session.enumerateRanges('r--', { scope: modules[0].name }).then(function (ranges) {
+          ranges.length.should.be.above(0);
+          ranges.length.should.be.below(allRanges.length);
+        });
+      });
+    });
+  });
+
   it('should find base address', function () {
     session.should.have.property('findBaseAddress');
     return session.enumerateModules().then(function (modules) {
