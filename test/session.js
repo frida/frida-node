@@ -45,6 +45,17 @@ describe('Session', function () {
     });
   });
 
+  it('should enumerate exports for a module', function () {
+    return session.enumerateModules().then(function (modules) {
+      return session.enumerateExports(modules[0].name).then(function (exp) {
+        exp.length.should.be.above(0);
+        var e = exp[0];
+        e.should.have.property('name');
+        e.should.have.property('address');
+      });
+    });
+  });
+
   it('should enumerate ranges', function () {
     session.should.have.property('enumerateRanges');
     return session.enumerateRanges('r--').then(function (ranges) {
