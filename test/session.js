@@ -12,7 +12,7 @@ describe('Session', function () {
 
   before(function () {
     target = spawn(
-        [process.platform === 'win32' ? 'C:\\Windows\\notepad.exe' : '/bin/cat'],
+        process.platform === 'win32' ? 'C:\\Windows\\notepad.exe' : '/bin/cat',
         [], {
           stdio: 'inherit'
         });
