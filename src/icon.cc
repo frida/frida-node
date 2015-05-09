@@ -51,8 +51,7 @@ void Icon::Init(Handle<Object> exports, Runtime* runtime) {
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "rowstride"),
       GetRowstride, 0, data, DEFAULT, ReadOnly, signature);
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "pixels"),
-      GetPixels, 0, data, DEFAULT,
-      static_cast<PropertyAttribute>(ReadOnly | DontEnum), signature);
+      GetPixels, 0, data, DEFAULT, ReadOnly, signature);
 
   auto ctor = tpl->GetFunction();
   exports->Set(name, ctor);
