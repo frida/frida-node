@@ -139,7 +139,7 @@ void Icon::GetPixels(Local<String> property,
 
   int len;
   auto buf = frida_icon_get_pixels(handle, &len);
-  auto pixels = node::Encode(isolate, buf, len);
+  auto pixels = node::Encode(isolate, buf, len, node::BUFFER);
 
   info.GetReturnValue().Set(pixels);
 }
