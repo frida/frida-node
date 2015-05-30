@@ -1,5 +1,6 @@
 #include "device.h"
 
+#include "application.h"
 #include "events.h"
 #include "icon.h"
 #include "operation.h"
@@ -59,6 +60,7 @@ void Device::Init(Handle<Object> exports, Runtime* runtime) {
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "type"), GetType, 0,
       data, DEFAULT, ReadOnly, signature);
 
+  NODE_SET_PROTOTYPE_METHOD(tpl, "enumerateApplications", EnumerateApplications);
   NODE_SET_PROTOTYPE_METHOD(tpl, "enumerateProcesses", EnumerateProcesses);
   NODE_SET_PROTOTYPE_METHOD(tpl, "spawn", Spawn);
   NODE_SET_PROTOTYPE_METHOD(tpl, "resume", Resume);
@@ -164,6 +166,47 @@ void Device::GetType(Local<String> property,
   }
 
   info.GetReturnValue().Set(String::NewFromUtf8(isolate, type));
+}
+
+class EnumerateApplicationsOperation : public Operation<FridaDevice> {
+ public:
+  void Begin() {
+    frida_device_enumerate_applications(handle_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    applications_ = frida_device_enumerate_applications_finish(handle_, result,
+        error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    auto size = frida_application_list_size(applications_);
+    auto applications = Array::New(isolate, size);
+    for (auto i = 0; i != size; i++) {
+      auto handle = frida_application_list_get(applications_, i);
+      auto application = Application::New(handle, runtime_);
+      applications->Set(i, application);
+      g_object_unref(handle);
+    }
+
+    g_object_unref(applications_);
+
+    return applications;
+  }
+
+  FridaApplicationList* applications_;
+};
+
+void Device::EnumerateApplications(const FunctionCallbackInfo<Value>& args) {
+  auto isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  auto obj = args.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+
+  auto operation = new EnumerateApplicationsOperation();
+  operation->Schedule(isolate, wrapper);
+
+  args.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
 class EnumerateProcessesOperation : public Operation<FridaDevice> {

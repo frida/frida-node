@@ -36,6 +36,7 @@
         'src/addon.cc',
         'src/device_manager.cc',
         'src/device.cc',
+        'src/application.cc',
         'src/process.cc',
         'src/icon.cc',
         'src/session.cc',

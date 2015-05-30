@@ -1,3 +1,4 @@
+#include "application.h"
 #include "device.h"
 #include "device_manager.h"
 #include "events.h"
@@ -33,6 +34,7 @@ static void InitAll(Handle<Object> exports,
 
   DeviceManager::Init(exports, runtime);
   Device::Init(exports, runtime);
+  Application::Init(exports, runtime);
   Process::Init(exports, runtime);
   Icon::Init(exports, runtime);
   Session::Init(exports, runtime);

@@ -30,6 +30,7 @@
     "node-pre-gyp": "0.6.x"
   },
   "devDependencies": {
+    "co": "^4.5.4",
     "jshint": "^2.6.3",
     "mocha": "^2.2.0",
     "should": "^5.1.0"
