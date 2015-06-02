@@ -22,6 +22,8 @@ class Application : public GLibObject {
       const v8::PropertyCallbackInfo<v8::Value>& info);
   static void GetName(v8::Local<v8::String> property,
       const v8::PropertyCallbackInfo<v8::Value>& info);
+  static void GetPid(v8::Local<v8::String> property,
+      const v8::PropertyCallbackInfo<v8::Value>& info);
   static void GetSmallIcon(v8::Local<v8::String> property,
       const v8::PropertyCallbackInfo<v8::Value>& info);
   static void GetLargeIcon(v8::Local<v8::String> property,

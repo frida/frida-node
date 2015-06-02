@@ -12,6 +12,7 @@ using v8::Function;
 using v8::FunctionCallbackInfo;
 using v8::Handle;
 using v8::HandleScope;
+using v8::Integer;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
@@ -45,6 +46,8 @@ void Application::Init(Handle<Object> exports, Runtime* runtime) {
       GetIdentifier, 0, data, DEFAULT, ReadOnly, signature);
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "name"),
       GetName, 0, data, DEFAULT, ReadOnly, signature);
+  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "pid"),
+      GetPid, 0, data, DEFAULT, ReadOnly, signature);
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "smallIcon"),
       GetSmallIcon, 0, data, DEFAULT, ReadOnly, signature);
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "largeIcon"),
@@ -111,6 +114,17 @@ void Application::GetName(Local<String> property,
 
   info.GetReturnValue().Set(
       String::NewFromUtf8(isolate, frida_application_get_name(handle)));
+}
+
+void Application::GetPid(Local<String> property,
+    const PropertyCallbackInfo<Value>& info) {
+  auto isolate = info.GetIsolate();
+  HandleScope scope(isolate);
+  auto handle = ObjectWrap::Unwrap<Application>(
+      info.Holder())->GetHandle<FridaApplication>();
+
+  info.GetReturnValue().Set(
+      Integer::NewFromUnsigned(isolate, frida_application_get_pid(handle)));
 }
 
 void Application::GetSmallIcon(Local<String> property,
