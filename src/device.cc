@@ -23,6 +23,7 @@ using v8::HandleScope;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
+using v8::Null;
 using v8::Object;
 using v8::Persistent;
 using v8::PropertyCallbackInfo;
@@ -60,6 +61,8 @@ void Device::Init(Handle<Object> exports, Runtime* runtime) {
   instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "type"), GetType, 0,
       data, DEFAULT, ReadOnly, signature);
 
+  NODE_SET_PROTOTYPE_METHOD(tpl, "getFrontmostApplication",
+      GetFrontmostApplication);
   NODE_SET_PROTOTYPE_METHOD(tpl, "enumerateApplications", EnumerateApplications);
   NODE_SET_PROTOTYPE_METHOD(tpl, "enumerateProcesses", EnumerateProcesses);
   NODE_SET_PROTOTYPE_METHOD(tpl, "spawn", Spawn);
@@ -166,6 +169,42 @@ void Device::GetType(Local<String> property,
   }
 
   info.GetReturnValue().Set(String::NewFromUtf8(isolate, type));
+}
+
+class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
+ public:
+  void Begin() {
+    frida_device_get_frontmost_application(handle_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    application_ = frida_device_get_frontmost_application_finish(handle_,
+        result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    if (application_ != NULL) {
+      auto application = Application::New(application_, runtime_);
+      g_object_unref(application_);
+      return application;
+    } else {
+      return Null(isolate);
+    }
+  }
+
+  FridaApplication* application_;
+};
+
+void Device::GetFrontmostApplication(const FunctionCallbackInfo<Value>& args) {
+  auto isolate = args.GetIsolate();
+  HandleScope scope(isolate);
+  auto obj = args.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+
+  auto operation = new GetFrontmostApplicationOperation();
+  operation->Schedule(isolate, wrapper);
+
+  args.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
 class EnumerateApplicationsOperation : public Operation<FridaDevice> {

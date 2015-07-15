@@ -27,6 +27,8 @@ class Device : public GLibObject {
   static void GetType(v8::Local<v8::String> property,
       const v8::PropertyCallbackInfo<v8::Value>& info);
 
+  static void GetFrontmostApplication(
+      const v8::FunctionCallbackInfo<v8::Value>& args);
   static void EnumerateApplications(
       const v8::FunctionCallbackInfo<v8::Value>& args);
   static void EnumerateProcesses(
