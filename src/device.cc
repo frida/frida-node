@@ -106,56 +106,56 @@ void Device::New(const FunctionCallbackInfo<Value>& args) {
     obj->Set(NanNew("events"),
         Events::New(handle, runtime));
 
-    args.GetReturnValue().Set(obj);
+    NanReturnValue(obj);
   } else {
-    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
+    NanReturnValue(args.Callee()->NewInstance(0, NULL));
   }
 }
 
 void Device::GetId(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto isolate = info.GetIsolate();
+  auto isolate = args.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Device>(
-      info.Holder())->GetHandle<FridaDevice>();
+      args.Holder())->GetHandle<FridaDevice>();
 
-  info.GetReturnValue().Set(
+  NanReturnValue(
       Integer::NewFromUnsigned(isolate, frida_device_get_id(handle)));
 }
 
 void Device::GetName(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
   auto handle = ObjectWrap::Unwrap<Device>(
-      info.Holder())->GetHandle<FridaDevice>();
+      args.Holder())->GetHandle<FridaDevice>();
 
-  info.GetReturnValue().Set(
+  NanReturnValue(
       NanNew(frida_device_get_name(handle)));
 }
 
 void Device::GetIcon(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
+  auto wrapper = ObjectWrap::Unwrap<Device>(args.Holder());
   auto handle = wrapper->GetHandle<FridaDevice>();
 
-  info.GetReturnValue().Set(Icon::New(frida_device_get_icon(handle),
+  NanReturnValue(Icon::New(frida_device_get_icon(handle),
       wrapper->runtime_));
 }
 
 void Device::GetType(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
   auto handle = ObjectWrap::Unwrap<Device>(
-      info.Holder())->GetHandle<FridaDevice>();
+      args.Holder())->GetHandle<FridaDevice>();
 
   const gchar* type;
   switch (frida_device_get_dtype(handle)) {
@@ -172,7 +172,7 @@ void Device::GetType(Local<String> property,
       g_assert_not_reached();
   }
 
-  info.GetReturnValue().Set(NanNew(type));
+  NanReturnValue(NanNew(type));
 }
 
 class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
@@ -210,7 +210,7 @@ void Device::GetFrontmostApplication(const FunctionCallbackInfo<Value>& args) {
   auto operation = new GetFrontmostApplicationOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class EnumerateApplicationsOperation : public Operation<FridaDevice> {
@@ -253,7 +253,7 @@ void Device::EnumerateApplications(const FunctionCallbackInfo<Value>& args) {
   auto operation = new EnumerateApplicationsOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class EnumerateProcessesOperation : public Operation<FridaDevice> {
@@ -296,7 +296,7 @@ void Device::EnumerateProcesses(const FunctionCallbackInfo<Value>& args) {
   auto operation = new EnumerateProcessesOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class SpawnOperation : public Operation<FridaDevice> {
@@ -369,7 +369,7 @@ void Device::Spawn(const FunctionCallbackInfo<Value>& args) {
   auto operation = new SpawnOperation(path, argv, envp);
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class ResumeOperation : public Operation<FridaDevice> {
@@ -413,7 +413,7 @@ void Device::Resume(const FunctionCallbackInfo<Value>& args) {
   auto operation = new ResumeOperation(static_cast<guint>(pid));
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class KillOperation : public Operation<FridaDevice> {
@@ -457,7 +457,7 @@ void Device::Kill(const FunctionCallbackInfo<Value>& args) {
   auto operation = new KillOperation(static_cast<guint>(pid));
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class AttachOperation : public Operation<FridaDevice> {
@@ -504,7 +504,7 @@ void Device::Attach(const FunctionCallbackInfo<Value>& args) {
   auto operation = new AttachOperation(static_cast<guint>(pid));
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 }

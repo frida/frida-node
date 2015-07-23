@@ -86,58 +86,58 @@ void Process::New(const FunctionCallbackInfo<Value>& args) {
     auto obj = args.This();
     wrapper->Wrap(obj);
 
-    args.GetReturnValue().Set(obj);
+    NanReturnValue(obj);
   } else {
-    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
+    NanReturnValue(args.Callee()->NewInstance(0, NULL));
   }
 }
 
 void Process::GetPid(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto isolate = info.GetIsolate();
+  auto isolate = args.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Process>(
-      info.Holder())->GetHandle<FridaProcess>();
+      args.Holder())->GetHandle<FridaProcess>();
 
-  info.GetReturnValue().Set(
+  NanReturnValue(
       Integer::New(isolate, frida_process_get_pid(handle)));
 }
 
 void Process::GetName(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
   auto handle = ObjectWrap::Unwrap<Process>(
-      info.Holder())->GetHandle<FridaProcess>();
+      args.Holder())->GetHandle<FridaProcess>();
 
-  info.GetReturnValue().Set(
+  NanReturnValue(
       NanNew(frida_process_get_name(handle)));
 }
 
 void Process::GetSmallIcon(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto wrapper = ObjectWrap::Unwrap<Process>(info.Holder());
+  auto wrapper = ObjectWrap::Unwrap<Process>(args.Holder());
   auto handle = wrapper->GetHandle<FridaProcess>();
 
-  info.GetReturnValue().Set(
+  NanReturnValue(
       Icon::New(frida_process_get_small_icon(handle), wrapper->runtime_));
 }
 
 void Process::GetLargeIcon(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto wrapper = ObjectWrap::Unwrap<Process>(info.Holder());
+  auto wrapper = ObjectWrap::Unwrap<Process>(args.Holder());
   auto handle = wrapper->GetHandle<FridaProcess>();
 
-  info.GetReturnValue().Set(
+  NanReturnValue(
       Icon::New(frida_process_get_large_icon(handle), wrapper->runtime_));
 }
 

@@ -88,72 +88,72 @@ void Application::New(const FunctionCallbackInfo<Value>& args) {
     auto obj = args.This();
     wrapper->Wrap(obj);
 
-    args.GetReturnValue().Set(obj);
+    NanReturnValue(obj);
   } else {
-    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
+    NanReturnValue(args.Callee()->NewInstance(0, NULL));
   }
 }
 
 void Application::GetIdentifier(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto isolate = info.GetIsolate();
+  auto isolate = args.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Application>(
-      info.Holder())->GetHandle<FridaApplication>();
+      args.Holder())->GetHandle<FridaApplication>();
 
-  info.GetReturnValue().Set(
+  NanReturnValue(
       String::NewFromUtf8(isolate, frida_application_get_identifier(handle)));
 }
 
 void Application::GetName(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto isolate = info.GetIsolate();
+  auto isolate = args.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Application>(
-      info.Holder())->GetHandle<FridaApplication>();
+      args.Holder())->GetHandle<FridaApplication>();
 
-  info.GetReturnValue().Set(
+  NanReturnValue(
       String::NewFromUtf8(isolate, frida_application_get_name(handle)));
 }
 
 void Application::GetPid(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto isolate = info.GetIsolate();
+  auto isolate = args.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Application>(
-      info.Holder())->GetHandle<FridaApplication>();
+      args.Holder())->GetHandle<FridaApplication>();
 
-  info.GetReturnValue().Set(
+  NanReturnValue(
       Integer::NewFromUnsigned(isolate, frida_application_get_pid(handle)));
 }
 
 void Application::GetSmallIcon(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto wrapper = ObjectWrap::Unwrap<Application>(info.Holder());
+  auto wrapper = ObjectWrap::Unwrap<Application>(args.Holder());
   auto handle = wrapper->GetHandle<FridaApplication>();
 
-  info.GetReturnValue().Set(
+  NanReturnValue(
       Icon::New(frida_application_get_small_icon(handle), wrapper->runtime_));
 }
 
 void Application::GetLargeIcon(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto wrapper = ObjectWrap::Unwrap<Application>(info.Holder());
+  auto wrapper = ObjectWrap::Unwrap<Application>(args.Holder());
   auto handle = wrapper->GetHandle<FridaApplication>();
 
-  info.GetReturnValue().Set(
+  NanReturnValue(
       Icon::New(frida_application_get_large_icon(handle), wrapper->runtime_));
 }
 

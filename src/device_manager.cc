@@ -81,9 +81,9 @@ void DeviceManager::New(const FunctionCallbackInfo<Value>& args) {
     events_wrapper->SetListenCallback(OnListen, wrapper);
     events_wrapper->SetUnlistenCallback(OnUnlisten, wrapper);
 
-    args.GetReturnValue().Set(obj);
+    NanReturnValue(obj);
   } else {
-    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
+    NanReturnValue(args.Callee()->NewInstance(0, NULL));
   }
 }
 
@@ -113,7 +113,7 @@ void DeviceManager::Close(const FunctionCallbackInfo<Value>& args) {
   auto operation = new CloseOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
@@ -156,7 +156,7 @@ void DeviceManager::EnumerateDevices(const FunctionCallbackInfo<Value>& args) {
   auto operation = new EnumerateDevicesOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 void DeviceManager::OnListen(const gchar* signal, gpointer user_data) {

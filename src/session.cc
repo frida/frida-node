@@ -96,22 +96,22 @@ void Session::New(const FunctionCallbackInfo<Value>& args) {
         new UsageMonitor<FridaSession>(frida_session_is_detached, "detached");
     monitor->Enable(wrapper);
 
-    args.GetReturnValue().Set(obj);
+    NanReturnValue(obj);
   } else {
-    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
+    NanReturnValue(args.Callee()->NewInstance(0, NULL));
   }
 }
 
 void Session::GetPid(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto isolate = info.GetIsolate();
+  auto isolate = args.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Session>(
-      info.Holder())->GetHandle<FridaSession>();
+      args.Holder())->GetHandle<FridaSession>();
 
-  info.GetReturnValue().Set(
+  NanReturnValue(
       Integer::NewFromUnsigned(isolate, frida_session_get_pid(handle)));
 }
 
@@ -141,7 +141,7 @@ void Session::Detach(const FunctionCallbackInfo<Value>& args) {
   auto operation = new DetachOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class CreateScriptOperation : public Operation<FridaSession> {
@@ -199,7 +199,7 @@ void Session::CreateScript(const FunctionCallbackInfo<Value>& args) {
   auto operation = new CreateScriptOperation(name, g_strdup(*source));
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class EnableDebuggerOperation : public Operation<FridaSession> {
@@ -239,7 +239,7 @@ void Session::EnableDebugger(const FunctionCallbackInfo<Value>& args) {
   auto operation = new EnableDebuggerOperation(port);
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class DisableDebuggerOperation : public Operation<FridaSession> {
@@ -268,7 +268,7 @@ void Session::DisableDebugger(const FunctionCallbackInfo<Value>& args) {
   auto operation = new DisableDebuggerOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 }

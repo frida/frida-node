@@ -84,9 +84,9 @@ void Script::New(const FunctionCallbackInfo<Value>& args) {
         new UsageMonitor<FridaScript>(frida_script_is_destroyed, "destroyed");
     monitor->Enable(wrapper);
 
-    args.GetReturnValue().Set(obj);
+    NanReturnValue(obj);
   } else {
-    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
+    NanReturnValue(args.Callee()->NewInstance(0, NULL));
   }
 }
 
@@ -116,7 +116,7 @@ void Script::Load(const FunctionCallbackInfo<Value>& args) {
   auto operation = new LoadOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class UnloadOperation : public Operation<FridaScript> {
@@ -145,7 +145,7 @@ void Script::Unload(const FunctionCallbackInfo<Value>& args) {
   auto operation = new UnloadOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class PostMessageOperation : public Operation<FridaScript> {
@@ -191,7 +191,7 @@ void Script::PostMessage(const FunctionCallbackInfo<Value>& args) {
   auto operation = new PostMessageOperation(g_strdup(*message));
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 Local<Value> Script::TransformMessageEvent(Isolate* isolate,

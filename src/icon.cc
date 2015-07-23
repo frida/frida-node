@@ -90,65 +90,65 @@ void Icon::New(const FunctionCallbackInfo<Value>& args) {
     auto obj = args.This();
     wrapper->Wrap(obj);
 
-    args.GetReturnValue().Set(obj);
+    NanReturnValue(obj);
   } else {
-    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
+    NanReturnValue(args.Callee()->NewInstance(0, NULL));
   }
 }
 
 void Icon::GetWidth(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto isolate = info.GetIsolate();
+  auto isolate = args.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Icon>(
-      info.Holder())->GetHandle<FridaIcon>();
+      args.Holder())->GetHandle<FridaIcon>();
 
-  info.GetReturnValue().Set(
+  NanReturnValue(
       Integer::New(isolate, frida_icon_get_width(handle)));
 }
 
 void Icon::GetHeight(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto isolate = info.GetIsolate();
+  auto isolate = args.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Icon>(
-      info.Holder())->GetHandle<FridaIcon>();
+      args.Holder())->GetHandle<FridaIcon>();
 
-  info.GetReturnValue().Set(
+  NanReturnValue(
       Integer::New(isolate, frida_icon_get_height(handle)));
 }
 
 void Icon::GetRowstride(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto isolate = info.GetIsolate();
+  auto isolate = args.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Icon>(
-      info.Holder())->GetHandle<FridaIcon>();
+      args.Holder())->GetHandle<FridaIcon>();
 
-  info.GetReturnValue().Set(
+  NanReturnValue(
       Integer::New(isolate, frida_icon_get_rowstride(handle)));
 }
 
 void Icon::GetPixels(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
+    const PropertyCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto isolate = info.GetIsolate();
+  auto isolate = args.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Icon>(
-      info.Holder())->GetHandle<FridaIcon>();
+      args.Holder())->GetHandle<FridaIcon>();
 
   int len;
   auto buf = frida_icon_get_pixels(handle, &len);
   auto pixels = node::Encode(isolate, buf, len, node::BUFFER);
 
-  info.GetReturnValue().Set(pixels);
+  NanReturnValue(pixels);
 }
 
 }

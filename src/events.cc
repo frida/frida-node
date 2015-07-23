@@ -131,9 +131,9 @@ void Events::New(const FunctionCallbackInfo<Value>& args) {
         GetRuntimeFromConstructorArgs(args));
     auto obj = args.This();
     wrapper->Wrap(obj);
-    args.GetReturnValue().Set(obj);
+    NanReturnValue(obj);
   } else {
-    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
+    NanReturnValue(args.Callee()->NewInstance(0, NULL));
   }
 }
 
