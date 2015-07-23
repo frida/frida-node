@@ -2,6 +2,8 @@
 
 #include "icon.h"
 
+#include <nan.h>
+
 #define APPLICATION_DATA_CONSTRUCTOR "application:ctor"
 
 using v8::AccessorSignature;
@@ -36,21 +38,21 @@ Application::~Application() {
 void Application::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = String::NewFromUtf8(isolate, "Application");
+  auto name = NanNew("Application");
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "identifier"),
+  instance_tpl->SetAccessor(NanNew("identifier"),
       GetIdentifier, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "name"),
+  instance_tpl->SetAccessor(NanNew("name"),
       GetName, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "pid"),
+  instance_tpl->SetAccessor(NanNew("pid"),
       GetPid, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "smallIcon"),
+  instance_tpl->SetAccessor(NanNew("smallIcon"),
       GetSmallIcon, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "largeIcon"),
+  instance_tpl->SetAccessor(NanNew("largeIcon"),
       GetLargeIcon, 0, data, DEFAULT, ReadOnly, signature);
 
   auto ctor = tpl->GetFunction();
@@ -76,8 +78,8 @@ void Application::New(const FunctionCallbackInfo<Value>& args) {
 
   if (args.IsConstructCall()) {
     if (args.Length() != 1 || !args[0]->IsExternal()) {
-      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-          "Bad argument, expected raw handle")));
+      isolate->ThrowException(Exception::TypeError(NanNew(
+        "Bad argument, expected raw handle")));
       return;
     }
     auto runtime = GetRuntimeFromConstructorArgs(args);

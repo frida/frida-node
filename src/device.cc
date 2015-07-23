@@ -8,6 +8,7 @@
 #include "session.h"
 
 #include <node.h>
+#include <nan.h>
 
 #define DEVICE_DATA_CONSTRUCTOR "device:ctor"
 
@@ -46,19 +47,19 @@ Device::~Device() {
 void Device::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = String::NewFromUtf8(isolate, "Device");
+  auto name = NanNew("Device");
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "id"), GetId, 0,
+  instance_tpl->SetAccessor(NanNew("id"), GetId, 0,
       data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "name"), GetName, 0,
+  instance_tpl->SetAccessor(NanNew("name"), GetName, 0,
       data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "icon"), GetIcon, 0,
+  instance_tpl->SetAccessor(NanNew("icon"), GetIcon, 0,
       data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "type"), GetType, 0,
+  instance_tpl->SetAccessor(NanNew("type"), GetType, 0,
       data, DEFAULT, ReadOnly, signature);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "getFrontmostApplication",
@@ -104,7 +105,7 @@ void Device::New(const FunctionCallbackInfo<Value>& args) {
     auto wrapper = new Device(handle, runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
-    obj->Set(String::NewFromUtf8(isolate, "events"),
+    obj->Set(NanNew("events"),
         Events::New(handle, runtime));
 
     args.GetReturnValue().Set(obj);
@@ -132,7 +133,7 @@ void Device::GetName(Local<String> property,
       info.Holder())->GetHandle<FridaDevice>();
 
   info.GetReturnValue().Set(
-      String::NewFromUtf8(isolate, frida_device_get_name(handle)));
+      NanNew(frida_device_get_name(handle)));
 }
 
 void Device::GetIcon(Local<String> property,
@@ -168,7 +169,7 @@ void Device::GetType(Local<String> property,
       g_assert_not_reached();
   }
 
-  info.GetReturnValue().Set(String::NewFromUtf8(isolate, type));
+  info.GetReturnValue().Set(NanNew(type));
 }
 
 class GetFrontmostApplicationOperation : public Operation<FridaDevice> {

@@ -4,6 +4,8 @@
 
 #include <cstring>
 
+#include <nan.h>
+
 #define EVENTS_DATA_CONSTRUCTOR "events:ctor"
 
 using v8::Boolean;
@@ -70,7 +72,7 @@ Events::~Events() {
 void Events::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = String::NewFromUtf8(isolate, "Events");
+  auto name = NanNew("Events");
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "listen", Listen);
@@ -336,7 +338,7 @@ static Local<Value> events_closure_gvalue_to_jsvalue(Isolate* isolate,
     case G_TYPE_DOUBLE:
       return Number::New(isolate, g_value_get_double(gvalue));
     case G_TYPE_STRING:
-      return String::NewFromUtf8(isolate, g_value_get_string(gvalue));
+      return NanNew(g_value_get_string(gvalue));
     case G_TYPE_VARIANT: {
       auto variant = g_value_get_variant (gvalue);
       g_assert(variant != NULL);

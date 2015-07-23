@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include <node.h>
+#include <nan.h>
 
 #define DEVICE_MANAGER_DATA_WRAPPERS "device_manager:wrappers"
 
@@ -42,7 +43,7 @@ DeviceManager::~DeviceManager() {
 void DeviceManager::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = String::NewFromUtf8(isolate, "DeviceManager");
+  auto name = NanNew("DeviceManager");
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "close", Close);
@@ -74,7 +75,7 @@ void DeviceManager::New(const FunctionCallbackInfo<Value>& args) {
     auto obj = args.This();
     wrapper->Wrap(obj);
     auto events_obj = Events::New(handle, runtime);
-    obj->Set(String::NewFromUtf8(isolate, "events"), events_obj);
+    obj->Set(NanNew("events"), events_obj);
     g_object_unref(handle);
 
     auto events_wrapper = ObjectWrap::Unwrap<Events>(events_obj);

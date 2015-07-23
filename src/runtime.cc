@@ -1,5 +1,7 @@
 #include "runtime.h"
 
+#include <nan.h>
+
 using v8::Function;
 using v8::Handle;
 using v8::Isolate;
@@ -17,11 +19,11 @@ Runtime::Runtime(UVContext* uv_context, GLibContext* glib_context)
   auto isolate = Isolate::GetCurrent();
   auto global = isolate->GetCurrentContext()->Global();
   auto json_module = Local<Object>::Cast(
-      global->Get(String::NewFromUtf8(isolate, "JSON")));
+      global->Get(NanNew("JSON")));
   auto json_stringify = Local<Function>::Cast(
-      json_module->Get(String::NewFromUtf8(isolate, "stringify")));
+      json_module->Get(NanNew("stringify")));
   auto json_parse = Local<Function>::Cast(
-      json_module->Get(String::NewFromUtf8(isolate, "parse")));
+      json_module->Get(NanNew("parse")));
   json_module_.Reset(isolate, json_module);
   json_stringify_.Reset(isolate, json_stringify);
   json_parse_.Reset(isolate, json_parse);

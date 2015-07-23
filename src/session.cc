@@ -6,6 +6,7 @@
 #include "usage_monitor.h"
 
 #include <node.h>
+#include <nan.h>
 
 #define SESSION_DATA_CONSTRUCTOR "session:ctor"
 
@@ -42,13 +43,13 @@ Session::~Session() {
 void Session::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = String::NewFromUtf8(isolate, "Session");
+  auto name = NanNew("Session");
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "pid"), GetPid, 0,
+  instance_tpl->SetAccessor(NanNew("pid"), GetPid, 0,
       data, DEFAULT, ReadOnly, signature);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "detach", Detach);
@@ -90,7 +91,7 @@ void Session::New(const FunctionCallbackInfo<Value>& args) {
     auto wrapper = new Session(handle, runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
-    obj->Set(String::NewFromUtf8(isolate, "events"),
+    obj->Set(NanNew("events"),
         Events::New(handle, runtime));
 
     auto monitor =

@@ -1,6 +1,7 @@
 #include "icon.h"
 
 #include <node.h>
+#include <nan.h>
 
 #define ICON_DATA_CONSTRUCTOR "icon:ctor"
 
@@ -38,19 +39,19 @@ Icon::~Icon() {
 void Icon::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = String::NewFromUtf8(isolate, "Icon");
+  auto name = NanNew("Icon");
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "width"),
+  instance_tpl->SetAccessor(NanNew("width"),
       GetWidth, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "height"),
+  instance_tpl->SetAccessor(NanNew("height"),
       GetHeight, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "rowstride"),
+  instance_tpl->SetAccessor(NanNew("rowstride"),
       GetRowstride, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "pixels"),
+  instance_tpl->SetAccessor(NanNew("pixels"),
       GetPixels, 0, data, DEFAULT, ReadOnly, signature);
 
   auto ctor = tpl->GetFunction();

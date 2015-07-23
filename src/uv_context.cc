@@ -2,6 +2,7 @@
 
 #include <node.h>
 #include <v8.h>
+#include <nan.h>
 
 #define UV_CONTEXT_LOCK()   g_mutex_lock(&mutex_)
 #define UV_CONTEXT_UNLOCK() g_mutex_unlock(&mutex_)
@@ -32,7 +33,7 @@ UVContext::UVContext(uv_loop_t* loop) : usage_count_(0), pending_(NULL) {
   auto module = Object::New(isolate);
   auto process_pending = Function::New(isolate, ProcessPendingWrapper,
       External::New(isolate, this));
-  auto process_pending_name = String::NewFromUtf8(isolate, "processPending");
+  auto process_pending_name = NanNew("processPending");
   process_pending->SetName(process_pending_name);
   module->Set(process_pending_name, process_pending);
   module_.Reset(isolate, module);

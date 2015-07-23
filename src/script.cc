@@ -6,6 +6,7 @@
 
 #include <cstring>
 #include <node.h>
+#include <nan.h>
 
 #define SCRIPT_DATA_CONSTRUCTOR "script:ctor"
 
@@ -37,7 +38,7 @@ Script::~Script() {
 void Script::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = String::NewFromUtf8(isolate, "Script");
+  auto name = NanNew("Script");
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "load", Load);
@@ -78,7 +79,7 @@ void Script::New(const FunctionCallbackInfo<Value>& args) {
     auto wrapper = new Script(handle, runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
-    obj->Set(String::NewFromUtf8(isolate, "events"),
+    obj->Set(NanNew("events"),
         Events::New(handle, runtime, TransformMessageEvent, wrapper));
 
     auto monitor =
@@ -195,7 +196,7 @@ Local<Value> Script::TransformMessageEvent(Isolate* isolate,
   if (index != 0 || strcmp(name, "message") != 0)
     return Local<Value>();
   auto self = static_cast<Script*>(user_data);
-  auto json = String::NewFromUtf8(isolate, g_value_get_string(value));
+  auto json = NanNew(g_value_get_string(value));
   return self->runtime_->ValueFromJson(isolate, json);
 }
 

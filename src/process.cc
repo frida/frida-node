@@ -2,6 +2,8 @@
 
 #include "icon.h"
 
+#include <nan.h>
+
 #define PROCESS_DATA_CONSTRUCTOR "process:ctor"
 
 using v8::AccessorSignature;
@@ -36,19 +38,19 @@ Process::~Process() {
 void Process::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = String::NewFromUtf8(isolate, "Process");
+  auto name = NanNew("Process");
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "pid"),
+  instance_tpl->SetAccessor(NanNew("pid"),
       GetPid, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "name"),
+  instance_tpl->SetAccessor(NanNew("name"),
       GetName, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "smallIcon"),
+  instance_tpl->SetAccessor(NanNew("smallIcon"),
       GetSmallIcon, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "largeIcon"),
+  instance_tpl->SetAccessor(NanNew("largeIcon"),
       GetLargeIcon, 0, data, DEFAULT, ReadOnly, signature);
 
   auto ctor = tpl->GetFunction();
@@ -111,7 +113,7 @@ void Process::GetName(Local<String> property,
       info.Holder())->GetHandle<FridaProcess>();
 
   info.GetReturnValue().Set(
-      String::NewFromUtf8(isolate, frida_process_get_name(handle)));
+      NanNew(frida_process_get_name(handle)));
 }
 
 void Process::GetSmallIcon(Local<String> property,
