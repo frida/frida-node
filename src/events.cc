@@ -115,16 +115,13 @@ void Events::New(const FunctionCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto isolate = args.GetIsolate();
-
   if (args.IsConstructCall()) {
     if (args.Length() != 3 ||
         !args[0]->IsExternal() ||
         !args[1]->IsExternal() ||
         !args[2]->IsExternal()) {
-      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-          "Bad argument, expected raw handles")));
-      return;
+      NanThrowTypeError("Bad argument, expected raw handles");
+      NanReturnUndefined();
     }
     auto handle = Local<External>::Cast(args[0])->Value();
     auto transform = reinterpret_cast<TransformCallback>(
@@ -216,17 +213,13 @@ void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
 bool Events::GetSignalArguments(const FunctionCallbackInfo<Value>& args,
     guint& signal_id, Local<Function>& callback) {
   if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsFunction()) {
-    Isolate* isolate = args.GetIsolate();
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad arguments, expected string and function")));
+    NanThrowTypeError("Bad arguments, expected string and function");
     return false;
   }
   String::Utf8Value signal_name(Local<String>::Cast(args[0]));
   signal_id = g_signal_lookup(*signal_name, G_OBJECT_TYPE(handle_));
   if (signal_id == 0) {
-    Isolate* isolate = args.GetIsolate();
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad event name")));
+    NanThrowTypeError("Bad event name");
     return false;
   }
   callback = Local<Function>::Cast(args[1]);

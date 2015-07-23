@@ -77,13 +77,10 @@ void Session::New(const FunctionCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto isolate = args.GetIsolate();
-
   if (args.IsConstructCall()) {
     if (args.Length() != 1 || !args[0]->IsExternal()) {
-      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-          "Bad argument, expected raw handle")));
-      return;
+      NanThrowTypeError("Bad argument, expected raw handle");
+      NanReturnUndefined();
     }
     auto runtime = GetRuntimeFromConstructorArgs(args);
 
@@ -189,9 +186,8 @@ void Session::CreateScript(const FunctionCallbackInfo<Value>& args) {
   if (args.Length() < 2 ||
       !(args[0]->IsString() || args[0]->IsNull()) ||
       !args[1]->IsString()) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected string|null and string")));
-    return;
+    NanThrowTypeError("Bad argument, expected string|null and string");
+    NanReturnUndefined();
   }
   gchar* name = NULL;
   if (args[0]->IsString()) {
@@ -235,9 +231,8 @@ void Session::EnableDebugger(const FunctionCallbackInfo<Value>& args) {
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
   if (args.Length() < 1 || !args[0]->IsNumber()) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected port number")));
-    return;
+    NanThrowTypeError("Bad argument, expected port number");
+    NanReturnUndefined();
   }
   guint16 port = static_cast<guint16>(args[0]->ToInteger()->Value());
 

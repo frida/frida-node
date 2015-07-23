@@ -91,13 +91,10 @@ void Device::New(const FunctionCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto isolate = args.GetIsolate();
-
   if (args.IsConstructCall()) {
     if (args.Length() != 1 || !args[0]->IsExternal()) {
-      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-          "Bad argument, expected raw handle")));
-      return;
+      NanThrowTypeError("Bad argument, expected raw handle");
+      NanReturnUndefined();
     }
     auto runtime = GetRuntimeFromConstructorArgs(args);
 
@@ -361,9 +358,8 @@ void Device::Spawn(const FunctionCallbackInfo<Value>& args) {
     }
   }
   if (argv == NULL) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected argv as an array of strings")));
-    return;
+    NanThrowTypeError("Bad argument, expected argv as an array of strings");
+    NanReturnUndefined();
   }
 
   gchar** envp = g_get_environ();
@@ -405,15 +401,13 @@ void Device::Resume(const FunctionCallbackInfo<Value>& args) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   if (args.Length() < 1 || !args[0]->IsNumber()) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected pid")));
-    return;
+    NanThrowTypeError("Bad argument, expected pid");
+    NanReturnUndefined();
   }
   auto pid = args[0]->ToInteger()->Value();
   if (pid <= 0) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected pid")));
-    return;
+    NanThrowTypeError("Bad argument, expected pid");
+    NanReturnUndefined();
   }
 
   auto operation = new ResumeOperation(static_cast<guint>(pid));
@@ -451,15 +445,13 @@ void Device::Kill(const FunctionCallbackInfo<Value>& args) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   if (args.Length() < 1 || !args[0]->IsNumber()) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected pid")));
-    return;
+    NanThrowTypeError("Bad argument, expected pid");
+    NanReturnUndefined();
   }
   auto pid = args[0]->ToInteger()->Value();
   if (pid <= 0) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected pid")));
-    return;
+    NanThrowTypeError("Bad argument, expected pid");
+    NanReturnUndefined();
   }
 
   auto operation = new KillOperation(static_cast<guint>(pid));
@@ -500,15 +492,13 @@ void Device::Attach(const FunctionCallbackInfo<Value>& args) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   if (args.Length() < 1 || !args[0]->IsNumber()) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected pid")));
-    return;
+    NanThrowTypeError("Bad argument, expected pid");
+    NanReturnUndefined();
   }
   auto pid = args[0]->ToInteger()->Value();
   if (pid <= 0) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected pid")));
-    return;
+    NanThrowTypeError("Bad argument, expected pid");
+    NanReturnUndefined();
   }
 
   auto operation = new AttachOperation(static_cast<guint>(pid));

@@ -77,13 +77,10 @@ void Icon::New(const FunctionCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto isolate = args.GetIsolate();
-
   if (args.IsConstructCall()) {
     if (args.Length() != 1 || !args[0]->IsExternal()) {
-      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-          "Bad argument, expected raw handle")));
-      return;
+      NanThrowTypeError("Bad argument, expected raw handle");
+      NanReturnUndefined();
     }
     auto runtime = GetRuntimeFromConstructorArgs(args);
 

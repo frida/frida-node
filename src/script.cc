@@ -65,12 +65,10 @@ void Script::New(const FunctionCallbackInfo<Value>& args) {
 
   NanScope();
 
-  auto isolate = args.GetIsolate();
   if (args.IsConstructCall()) {
     if (args.Length() != 1 || !args[0]->IsExternal()) {
-      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-          "Bad argument, expected raw handle")));
-      return;
+      NanThrowTypeError("Bad argument, expected raw handle");
+      NanReturnUndefined();
     }
     auto runtime = GetRuntimeFromConstructorArgs(args);
 
@@ -183,9 +181,8 @@ void Script::PostMessage(const FunctionCallbackInfo<Value>& args) {
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
   if (args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected object")));
-    return;
+    NanThrowTypeError("Bad argument, expected object");
+    NanReturnUndefined();
   }
   auto message_obj = Local<Object>::Cast(args[0]);
   String::Utf8Value message(
