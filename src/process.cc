@@ -13,7 +13,6 @@ using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
 using v8::Handle;
-using v8::HandleScope;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
@@ -71,8 +70,10 @@ Local<Object> Process::New(gpointer handle, Runtime* runtime) {
 }
 
 void Process::New(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
 
   if (args.IsConstructCall()) {
     if (args.Length() != 1 || !args[0]->IsExternal()) {
@@ -96,8 +97,10 @@ void Process::New(const FunctionCallbackInfo<Value>& args) {
 
 void Process::GetPid(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
+
+  NanScope();
+
   auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
   auto handle = ObjectWrap::Unwrap<Process>(
       info.Holder())->GetHandle<FridaProcess>();
 
@@ -107,8 +110,9 @@ void Process::GetPid(Local<String> property,
 
 void Process::GetName(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
-  auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
+
+  NanScope();
+
   auto handle = ObjectWrap::Unwrap<Process>(
       info.Holder())->GetHandle<FridaProcess>();
 
@@ -118,8 +122,9 @@ void Process::GetName(Local<String> property,
 
 void Process::GetSmallIcon(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
-  auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
+
+  NanScope();
+
   auto wrapper = ObjectWrap::Unwrap<Process>(info.Holder());
   auto handle = wrapper->GetHandle<FridaProcess>();
 
@@ -129,8 +134,9 @@ void Process::GetSmallIcon(Local<String> property,
 
 void Process::GetLargeIcon(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
-  auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
+
+  NanScope();
+
   auto wrapper = ObjectWrap::Unwrap<Process>(info.Holder());
   auto handle = wrapper->GetHandle<FridaProcess>();
 

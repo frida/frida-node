@@ -13,7 +13,6 @@ using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
 using v8::Handle;
-using v8::HandleScope;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
@@ -75,8 +74,10 @@ Local<Value> Icon::New(gpointer handle, Runtime* runtime) {
 }
 
 void Icon::New(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
 
   if (args.IsConstructCall()) {
     if (args.Length() != 1 || !args[0]->IsExternal()) {
@@ -100,8 +101,10 @@ void Icon::New(const FunctionCallbackInfo<Value>& args) {
 
 void Icon::GetWidth(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
+
+  NanScope();
+
   auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
   auto handle = ObjectWrap::Unwrap<Icon>(
       info.Holder())->GetHandle<FridaIcon>();
 
@@ -111,8 +114,10 @@ void Icon::GetWidth(Local<String> property,
 
 void Icon::GetHeight(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
+
+  NanScope();
+
   auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
   auto handle = ObjectWrap::Unwrap<Icon>(
       info.Holder())->GetHandle<FridaIcon>();
 
@@ -122,8 +127,10 @@ void Icon::GetHeight(Local<String> property,
 
 void Icon::GetRowstride(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
+
+  NanScope();
+
   auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
   auto handle = ObjectWrap::Unwrap<Icon>(
       info.Holder())->GetHandle<FridaIcon>();
 
@@ -133,8 +140,10 @@ void Icon::GetRowstride(Local<String> property,
 
 void Icon::GetPixels(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
+
+  NanScope();
+
   auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
   auto handle = ObjectWrap::Unwrap<Icon>(
       info.Holder())->GetHandle<FridaIcon>();
 

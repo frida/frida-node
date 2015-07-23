@@ -14,7 +14,6 @@ using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
 using v8::Handle;
-using v8::HandleScope;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
@@ -113,8 +112,10 @@ void Events::SetUnlistenCallback(UnlistenCallback callback,
 }
 
 void Events::New(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
 
   if (args.IsConstructCall()) {
     if (args.Length() != 3 ||
@@ -140,8 +141,9 @@ void Events::New(const FunctionCallbackInfo<Value>& args) {
 }
 
 void Events::Listen(const FunctionCallbackInfo<Value>& args) {
-  auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
+
+  NanScope();
+
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Events>(obj);
   auto runtime = wrapper->runtime_;
@@ -170,8 +172,10 @@ void Events::Listen(const FunctionCallbackInfo<Value>& args) {
 }
 
 void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto wrapper = ObjectWrap::Unwrap<Events>(args.Holder());
 
   guint signal_id;

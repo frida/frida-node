@@ -17,7 +17,6 @@ using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
 using v8::Handle;
-using v8::HandleScope;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
@@ -75,8 +74,10 @@ Local<Object> Session::New(gpointer handle, Runtime* runtime) {
 }
 
 void Session::New(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
 
   if (args.IsConstructCall()) {
     if (args.Length() != 1 || !args[0]->IsExternal()) {
@@ -106,8 +107,10 @@ void Session::New(const FunctionCallbackInfo<Value>& args) {
 
 void Session::GetPid(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
+
+  NanScope();
+
   auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
   auto handle = ObjectWrap::Unwrap<Session>(
       info.Holder())->GetHandle<FridaSession>();
 
@@ -131,8 +134,10 @@ class DetachOperation : public Operation<FridaSession> {
 };
 
 void Session::Detach(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
@@ -174,8 +179,10 @@ class CreateScriptOperation : public Operation<FridaSession> {
 };
 
 void Session::CreateScript(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
@@ -220,8 +227,10 @@ class EnableDebuggerOperation : public Operation<FridaSession> {
 };
 
 void Session::EnableDebugger(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
@@ -254,8 +263,10 @@ class DisableDebuggerOperation : public Operation<FridaSession> {
 };
 
 void Session::DisableDebugger(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 

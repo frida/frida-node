@@ -13,7 +13,6 @@
 using v8::Array;
 using v8::FunctionCallbackInfo;
 using v8::Handle;
-using v8::HandleScope;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
@@ -64,8 +63,8 @@ void DeviceManager::Dispose(Runtime* runtime) {
 }
 
 void DeviceManager::New(const FunctionCallbackInfo<Value>& args) {
-  auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
+
+  NanScope();
 
   if (args.IsConstructCall()) {
     auto runtime = GetRuntimeFromConstructorArgs(args);
@@ -104,8 +103,10 @@ class CloseOperation : public Operation<FridaDeviceManager> {
 };
 
 void DeviceManager::Close(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
 
@@ -145,8 +146,10 @@ class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
 };
 
 void DeviceManager::EnumerateDevices(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
 

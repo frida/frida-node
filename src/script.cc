@@ -15,7 +15,6 @@ using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
 using v8::Handle;
-using v8::HandleScope;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
@@ -63,9 +62,10 @@ Local<Object> Script::New(gpointer handle, Runtime* runtime) {
 }
 
 void Script::New(const FunctionCallbackInfo<Value>& args) {
-  auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
 
+  NanScope();
+
+  auto isolate = args.GetIsolate();
   if (args.IsConstructCall()) {
     if (args.Length() != 1 || !args[0]->IsExternal()) {
       isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
@@ -108,8 +108,10 @@ class LoadOperation : public Operation<FridaScript> {
 };
 
 void Script::Load(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
@@ -135,8 +137,10 @@ class UnloadOperation : public Operation<FridaScript> {
 };
 
 void Script::Unload(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
@@ -171,8 +175,10 @@ class PostMessageOperation : public Operation<FridaScript> {
 };
 
 void Script::PostMessage(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 

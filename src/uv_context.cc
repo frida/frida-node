@@ -13,7 +13,6 @@ using v8::Context;
 using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
-using v8::HandleScope;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
@@ -104,8 +103,10 @@ void UVContext::ProcessPendingWrapper(const FunctionCallbackInfo<Value>& args) {
 }
 
 void UVContext::ProcessPendingWrapper(uv_async_t* handle) {
+
+  NanScope();
+
   auto isolate = Isolate::GetCurrent();
-  HandleScope handle_scope(isolate);
 
   auto self = static_cast<UVContext*>(handle->data);
   auto module = Local<Object>::New(isolate, self->module_);

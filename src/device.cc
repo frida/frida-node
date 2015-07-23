@@ -20,7 +20,6 @@ using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
 using v8::Handle;
-using v8::HandleScope;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
@@ -89,8 +88,10 @@ Local<Object> Device::New(gpointer handle, Runtime* runtime) {
 }
 
 void Device::New(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
 
   if (args.IsConstructCall()) {
     if (args.Length() != 1 || !args[0]->IsExternal()) {
@@ -116,8 +117,10 @@ void Device::New(const FunctionCallbackInfo<Value>& args) {
 
 void Device::GetId(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
+
+  NanScope();
+
   auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
   auto handle = ObjectWrap::Unwrap<Device>(
       info.Holder())->GetHandle<FridaDevice>();
 
@@ -127,8 +130,9 @@ void Device::GetId(Local<String> property,
 
 void Device::GetName(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
-  auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
+
+  NanScope();
+
   auto handle = ObjectWrap::Unwrap<Device>(
       info.Holder())->GetHandle<FridaDevice>();
 
@@ -138,8 +142,9 @@ void Device::GetName(Local<String> property,
 
 void Device::GetIcon(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
-  auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
+
+  NanScope();
+
   auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
   auto handle = wrapper->GetHandle<FridaDevice>();
 
@@ -149,8 +154,9 @@ void Device::GetIcon(Local<String> property,
 
 void Device::GetType(Local<String> property,
     const PropertyCallbackInfo<Value>& info) {
-  auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
+
+  NanScope();
+
   auto handle = ObjectWrap::Unwrap<Device>(
       info.Holder())->GetHandle<FridaDevice>();
 
@@ -197,8 +203,10 @@ class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
 };
 
 void Device::GetFrontmostApplication(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
@@ -238,8 +246,10 @@ class EnumerateApplicationsOperation : public Operation<FridaDevice> {
 };
 
 void Device::EnumerateApplications(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
@@ -279,8 +289,10 @@ class EnumerateProcessesOperation : public Operation<FridaDevice> {
 };
 
 void Device::EnumerateProcesses(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
@@ -324,8 +336,10 @@ class SpawnOperation : public Operation<FridaDevice> {
 };
 
 void Device::Spawn(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
@@ -383,8 +397,10 @@ class ResumeOperation : public Operation<FridaDevice> {
 };
 
 void Device::Resume(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
@@ -427,8 +443,10 @@ class KillOperation : public Operation<FridaDevice> {
 };
 
 void Device::Kill(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
@@ -474,8 +492,10 @@ class AttachOperation : public Operation<FridaDevice> {
 };
 
 void Device::Attach(const FunctionCallbackInfo<Value>& args) {
+
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
