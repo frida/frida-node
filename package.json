@@ -27,6 +27,7 @@
   "dependencies": {
     "big-integer": "^1.4.4",
     "minimatch": "*",
+    "nan": "^1.8.4",
     "node-pre-gyp": "0.6.x"
   },
   "devDependencies": {
