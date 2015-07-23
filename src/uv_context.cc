@@ -1,8 +1,8 @@
 #include "uv_context.h"
 
+#include <nan.h>
 #include <node.h>
 #include <v8.h>
-#include <nan.h>
 
 #define UV_CONTEXT_LOCK()   g_mutex_lock(&mutex_)
 #define UV_CONTEXT_UNLOCK() g_mutex_unlock(&mutex_)
@@ -103,7 +103,6 @@ void UVContext::ProcessPendingWrapper(const FunctionCallbackInfo<Value>& args) {
 }
 
 void UVContext::ProcessPendingWrapper(uv_async_t* handle) {
-
   NanScope();
 
   auto isolate = Isolate::GetCurrent();

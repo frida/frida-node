@@ -70,7 +70,6 @@ Local<Object> Process::New(gpointer handle, Runtime* runtime) {
 }
 
 void Process::New(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   if (args.IsConstructCall()) {
@@ -94,7 +93,6 @@ void Process::New(const FunctionCallbackInfo<Value>& args) {
 
 void Process::GetPid(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -107,7 +105,6 @@ void Process::GetPid(Local<String> property,
 
 void Process::GetName(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto handle = ObjectWrap::Unwrap<Process>(
@@ -119,7 +116,6 @@ void Process::GetName(Local<String> property,
 
 void Process::GetSmallIcon(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto wrapper = ObjectWrap::Unwrap<Process>(args.Holder());
@@ -131,7 +127,6 @@ void Process::GetSmallIcon(Local<String> property,
 
 void Process::GetLargeIcon(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto wrapper = ObjectWrap::Unwrap<Process>(args.Holder());

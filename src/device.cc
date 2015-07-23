@@ -7,8 +7,8 @@
 #include "process.h"
 #include "session.h"
 
-#include <node.h>
 #include <nan.h>
+#include <node.h>
 
 #define DEVICE_DATA_CONSTRUCTOR "device:ctor"
 
@@ -88,7 +88,6 @@ Local<Object> Device::New(gpointer handle, Runtime* runtime) {
 }
 
 void Device::New(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   if (args.IsConstructCall()) {
@@ -114,7 +113,6 @@ void Device::New(const FunctionCallbackInfo<Value>& args) {
 
 void Device::GetId(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -127,7 +125,6 @@ void Device::GetId(Local<String> property,
 
 void Device::GetName(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto handle = ObjectWrap::Unwrap<Device>(
@@ -139,7 +136,6 @@ void Device::GetName(Local<String> property,
 
 void Device::GetIcon(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto wrapper = ObjectWrap::Unwrap<Device>(args.Holder());
@@ -151,7 +147,6 @@ void Device::GetIcon(Local<String> property,
 
 void Device::GetType(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto handle = ObjectWrap::Unwrap<Device>(
@@ -200,7 +195,6 @@ class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
 };
 
 void Device::GetFrontmostApplication(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -243,7 +237,6 @@ class EnumerateApplicationsOperation : public Operation<FridaDevice> {
 };
 
 void Device::EnumerateApplications(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -286,7 +279,6 @@ class EnumerateProcessesOperation : public Operation<FridaDevice> {
 };
 
 void Device::EnumerateProcesses(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -333,7 +325,6 @@ class SpawnOperation : public Operation<FridaDevice> {
 };
 
 void Device::Spawn(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -393,7 +384,6 @@ class ResumeOperation : public Operation<FridaDevice> {
 };
 
 void Device::Resume(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -437,7 +427,6 @@ class KillOperation : public Operation<FridaDevice> {
 };
 
 void Device::Kill(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -484,7 +473,6 @@ class AttachOperation : public Operation<FridaDevice> {
 };
 
 void Device::Attach(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();

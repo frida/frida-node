@@ -1,10 +1,8 @@
 #include "events.h"
 
-#include <node.h>
-
 #include <cstring>
-
 #include <nan.h>
+#include <node.h>
 
 #define EVENTS_DATA_CONSTRUCTOR "events:ctor"
 
@@ -112,7 +110,6 @@ void Events::SetUnlistenCallback(UnlistenCallback callback,
 }
 
 void Events::New(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   if (args.IsConstructCall()) {
@@ -138,7 +135,6 @@ void Events::New(const FunctionCallbackInfo<Value>& args) {
 }
 
 void Events::Listen(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto obj = args.Holder();
@@ -169,7 +165,6 @@ void Events::Listen(const FunctionCallbackInfo<Value>& args) {
 }
 
 void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();

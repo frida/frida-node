@@ -5,8 +5,8 @@
 #include "usage_monitor.h"
 
 #include <cstring>
-#include <node.h>
 #include <nan.h>
+#include <node.h>
 
 #define SCRIPT_DATA_CONSTRUCTOR "script:ctor"
 
@@ -62,7 +62,6 @@ Local<Object> Script::New(gpointer handle, Runtime* runtime) {
 }
 
 void Script::New(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   if (args.IsConstructCall()) {
@@ -106,7 +105,6 @@ class LoadOperation : public Operation<FridaScript> {
 };
 
 void Script::Load(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -135,7 +133,6 @@ class UnloadOperation : public Operation<FridaScript> {
 };
 
 void Script::Unload(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -173,7 +170,6 @@ class PostMessageOperation : public Operation<FridaScript> {
 };
 
 void Script::PostMessage(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();

@@ -72,7 +72,6 @@ Local<Object> Application::New(gpointer handle, Runtime* runtime) {
 }
 
 void Application::New(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   if (args.IsConstructCall()) {
@@ -96,7 +95,6 @@ void Application::New(const FunctionCallbackInfo<Value>& args) {
 
 void Application::GetIdentifier(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -109,7 +107,6 @@ void Application::GetIdentifier(Local<String> property,
 
 void Application::GetName(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -122,7 +119,6 @@ void Application::GetName(Local<String> property,
 
 void Application::GetPid(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -135,7 +131,6 @@ void Application::GetPid(Local<String> property,
 
 void Application::GetSmallIcon(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto wrapper = ObjectWrap::Unwrap<Application>(args.Holder());
@@ -147,7 +142,6 @@ void Application::GetSmallIcon(Local<String> property,
 
 void Application::GetLargeIcon(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto wrapper = ObjectWrap::Unwrap<Application>(args.Holder());

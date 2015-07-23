@@ -5,8 +5,8 @@
 #include "script.h"
 #include "usage_monitor.h"
 
-#include <node.h>
 #include <nan.h>
+#include <node.h>
 
 #define SESSION_DATA_CONSTRUCTOR "session:ctor"
 
@@ -74,7 +74,6 @@ Local<Object> Session::New(gpointer handle, Runtime* runtime) {
 }
 
 void Session::New(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   if (args.IsConstructCall()) {
@@ -104,7 +103,6 @@ void Session::New(const FunctionCallbackInfo<Value>& args) {
 
 void Session::GetPid(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -131,7 +129,6 @@ class DetachOperation : public Operation<FridaSession> {
 };
 
 void Session::Detach(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -176,7 +173,6 @@ class CreateScriptOperation : public Operation<FridaSession> {
 };
 
 void Session::CreateScript(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -223,7 +219,6 @@ class EnableDebuggerOperation : public Operation<FridaSession> {
 };
 
 void Session::EnableDebugger(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -258,7 +253,6 @@ class DisableDebuggerOperation : public Operation<FridaSession> {
 };
 
 void Session::DisableDebugger(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();

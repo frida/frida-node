@@ -1,7 +1,7 @@
 #include "icon.h"
 
-#include <node.h>
 #include <nan.h>
+#include <node.h>
 
 #define ICON_DATA_CONSTRUCTOR "icon:ctor"
 
@@ -74,7 +74,6 @@ Local<Value> Icon::New(gpointer handle, Runtime* runtime) {
 }
 
 void Icon::New(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   if (args.IsConstructCall()) {
@@ -98,7 +97,6 @@ void Icon::New(const FunctionCallbackInfo<Value>& args) {
 
 void Icon::GetWidth(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -111,7 +109,6 @@ void Icon::GetWidth(Local<String> property,
 
 void Icon::GetHeight(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -124,7 +121,6 @@ void Icon::GetHeight(Local<String> property,
 
 void Icon::GetRowstride(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -137,7 +133,6 @@ void Icon::GetRowstride(Local<String> property,
 
 void Icon::GetPixels(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();

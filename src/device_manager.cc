@@ -5,8 +5,8 @@
 #include "operation.h"
 
 #include <cstring>
-#include <node.h>
 #include <nan.h>
+#include <node.h>
 
 #define DEVICE_MANAGER_DATA_WRAPPERS "device_manager:wrappers"
 
@@ -63,7 +63,6 @@ void DeviceManager::Dispose(Runtime* runtime) {
 }
 
 void DeviceManager::New(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   if (args.IsConstructCall()) {
@@ -103,7 +102,6 @@ class CloseOperation : public Operation<FridaDeviceManager> {
 };
 
 void DeviceManager::Close(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
@@ -146,7 +144,6 @@ class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
 };
 
 void DeviceManager::EnumerateDevices(const FunctionCallbackInfo<Value>& args) {
-
   NanScope();
 
   auto isolate = args.GetIsolate();
