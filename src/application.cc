@@ -97,24 +97,22 @@ void Application::GetIdentifier(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
   NanScope();
 
-  auto isolate = args.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Application>(
       args.Holder())->GetHandle<FridaApplication>();
 
   NanReturnValue(
-      String::NewFromUtf8(isolate, frida_application_get_identifier(handle)));
+      NanNew(frida_application_get_identifier(handle)));
 }
 
 void Application::GetName(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
   NanScope();
 
-  auto isolate = args.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Application>(
       args.Holder())->GetHandle<FridaApplication>();
 
   NanReturnValue(
-      String::NewFromUtf8(isolate, frida_application_get_name(handle)));
+      NanNew(frida_application_get_name(handle)));
 }
 
 void Application::GetPid(Local<String> property,
