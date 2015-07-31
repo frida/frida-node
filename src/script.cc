@@ -176,13 +176,12 @@ void Script::PostMessage(const FunctionCallbackInfo<Value>& args) {
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
-  if (args.Length() < 1 || !args[0]->IsObject()) {
-    NanThrowTypeError("Bad argument, expected object");
+  if (args.Length() < 1) {
+    NanThrowTypeError("Expected value serializable to JSON");
     NanReturnUndefined();
   }
-  auto message_obj = Local<Object>::Cast(args[0]);
   String::Utf8Value message(
-      wrapper->runtime_->ValueToJson(isolate, message_obj));
+      wrapper->runtime_->ValueToJson(isolate, args[0]));
 
   auto operation = new PostMessageOperation(g_strdup(*message));
   operation->Schedule(isolate, wrapper);
