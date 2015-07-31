@@ -335,10 +335,9 @@ static Local<Value> events_closure_gvalue_to_jsvalue(Isolate* isolate,
       auto variant = g_value_get_variant (gvalue);
       g_assert(variant != NULL);
       g_assert(g_variant_is_of_type(variant, G_VARIANT_TYPE("ay")));
-      return node::Encode(isolate,
-          g_variant_get_data(variant),
-          g_variant_get_size(variant),
-          node::BUFFER);
+      return NanNewBufferHandle(
+        reinterpret_cast<const char*>(g_variant_get_data(variant)),
+        g_variant_get_size(variant));
     }
     default:
       g_assert_not_reached();

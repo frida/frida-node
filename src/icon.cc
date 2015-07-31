@@ -135,13 +135,12 @@ void Icon::GetPixels(Local<String> property,
     const PropertyCallbackInfo<Value>& args) {
   NanScope();
 
-  auto isolate = args.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Icon>(
       args.Holder())->GetHandle<FridaIcon>();
 
   int len;
   auto buf = frida_icon_get_pixels(handle, &len);
-  auto pixels = node::Encode(isolate, buf, len, node::BUFFER);
+  auto pixels = NanNewBufferHandle(reinterpret_cast<const char*>(buf), len);
 
   NanReturnValue(pixels);
 }
