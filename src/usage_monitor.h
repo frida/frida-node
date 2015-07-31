@@ -4,6 +4,7 @@
 #include "glib_object.h"
 
 #include <v8.h>
+#include <nan.h>
 
 namespace frida {
 
@@ -81,8 +82,7 @@ class UsageMonitor {
 
   static void OnWeakNotifyWrapper(
       const v8::WeakCallbackData<v8::Object, UsageMonitor<T>>& data) {
-    auto isolate = data.GetIsolate();
-    v8::HandleScope scope(isolate);
+    NanScope();
     data.GetParameter()->OnWeakNotify();
   }
 

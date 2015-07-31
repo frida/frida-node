@@ -4,6 +4,7 @@
 #include "runtime.h"
 
 #include <glib.h>
+#include <nan.h>
 
 namespace frida {
 
@@ -61,7 +62,7 @@ class Operation {
     if (error_ == NULL) {
       resolver->Resolve(Result(isolate));
     } else {
-      resolver->Reject(v8::Exception::Error(v8::String::NewFromUtf8(isolate, error_->message)));
+      resolver->Reject(v8::Exception::Error(NanNew(error_->message)));
     }
     runtime_->GetUVContext()->DecreaseUsage();
     delete this;

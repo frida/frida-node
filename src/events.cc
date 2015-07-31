@@ -1,8 +1,8 @@
 #include "events.h"
 
-#include <node.h>
-
 #include <cstring>
+#include <nan.h>
+#include <node.h>
 
 #define EVENTS_DATA_CONSTRUCTOR "events:ctor"
 
@@ -12,7 +12,6 @@ using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
 using v8::Handle;
-using v8::HandleScope;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
@@ -70,7 +69,7 @@ Events::~Events() {
 void Events::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = String::NewFromUtf8(isolate, "Events");
+  auto name = NanNew("Events");
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "listen", Listen);
@@ -111,17 +110,15 @@ void Events::SetUnlistenCallback(UnlistenCallback callback,
 }
 
 void Events::New(const FunctionCallbackInfo<Value>& args) {
-  auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
+  NanScope();
 
   if (args.IsConstructCall()) {
     if (args.Length() != 3 ||
         !args[0]->IsExternal() ||
         !args[1]->IsExternal() ||
         !args[2]->IsExternal()) {
-      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-          "Bad argument, expected raw handles")));
-      return;
+      NanThrowTypeError("Bad argument, expected raw handles");
+      NanReturnUndefined();
     }
     auto handle = Local<External>::Cast(args[0])->Value();
     auto transform = reinterpret_cast<TransformCallback>(
@@ -131,15 +128,15 @@ void Events::New(const FunctionCallbackInfo<Value>& args) {
         GetRuntimeFromConstructorArgs(args));
     auto obj = args.This();
     wrapper->Wrap(obj);
-    args.GetReturnValue().Set(obj);
+    NanReturnValue(obj);
   } else {
-    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
+    NanReturnValue(args.Callee()->NewInstance(0, NULL));
   }
 }
 
 void Events::Listen(const FunctionCallbackInfo<Value>& args) {
-  auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
+  NanScope();
+
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Events>(obj);
   auto runtime = wrapper->runtime_;
@@ -168,8 +165,9 @@ void Events::Listen(const FunctionCallbackInfo<Value>& args) {
 }
 
 void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto wrapper = ObjectWrap::Unwrap<Events>(args.Holder());
 
   guint signal_id;
@@ -210,17 +208,13 @@ void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
 bool Events::GetSignalArguments(const FunctionCallbackInfo<Value>& args,
     guint& signal_id, Local<Function>& callback) {
   if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsFunction()) {
-    Isolate* isolate = args.GetIsolate();
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad arguments, expected string and function")));
+    NanThrowTypeError("Bad arguments, expected string and function");
     return false;
   }
   String::Utf8Value signal_name(Local<String>::Cast(args[0]));
   signal_id = g_signal_lookup(*signal_name, G_OBJECT_TYPE(handle_));
   if (signal_id == 0) {
-    Isolate* isolate = args.GetIsolate();
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad event name")));
+    NanThrowTypeError("Bad event name");
     return false;
   }
   callback = Local<Function>::Cast(args[1]);
@@ -336,15 +330,14 @@ static Local<Value> events_closure_gvalue_to_jsvalue(Isolate* isolate,
     case G_TYPE_DOUBLE:
       return Number::New(isolate, g_value_get_double(gvalue));
     case G_TYPE_STRING:
-      return String::NewFromUtf8(isolate, g_value_get_string(gvalue));
+      return NanNew(g_value_get_string(gvalue));
     case G_TYPE_VARIANT: {
       auto variant = g_value_get_variant (gvalue);
       g_assert(variant != NULL);
       g_assert(g_variant_is_of_type(variant, G_VARIANT_TYPE("ay")));
-      return node::Encode(isolate,
-          g_variant_get_data(variant),
-          g_variant_get_size(variant),
-          node::BUFFER);
+      return NanNewBufferHandle(
+        reinterpret_cast<const char*>(g_variant_get_data(variant)),
+        g_variant_get_size(variant));
     }
     default:
       g_assert_not_reached();

@@ -5,6 +5,7 @@
 #include "usage_monitor.h"
 
 #include <cstring>
+#include <nan.h>
 #include <node.h>
 
 #define SCRIPT_DATA_CONSTRUCTOR "script:ctor"
@@ -14,7 +15,6 @@ using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
 using v8::Handle;
-using v8::HandleScope;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
@@ -37,7 +37,7 @@ Script::~Script() {
 void Script::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = String::NewFromUtf8(isolate, "Script");
+  auto name = NanNew("Script");
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "load", Load);
@@ -62,14 +62,12 @@ Local<Object> Script::New(gpointer handle, Runtime* runtime) {
 }
 
 void Script::New(const FunctionCallbackInfo<Value>& args) {
-  auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
+  NanScope();
 
   if (args.IsConstructCall()) {
     if (args.Length() != 1 || !args[0]->IsExternal()) {
-      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-          "Bad argument, expected raw handle")));
-      return;
+      NanThrowTypeError("Bad argument, expected raw handle");
+      NanReturnUndefined();
     }
     auto runtime = GetRuntimeFromConstructorArgs(args);
 
@@ -78,16 +76,16 @@ void Script::New(const FunctionCallbackInfo<Value>& args) {
     auto wrapper = new Script(handle, runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
-    obj->Set(String::NewFromUtf8(isolate, "events"),
+    obj->Set(NanNew("events"),
         Events::New(handle, runtime, TransformMessageEvent, wrapper));
 
     auto monitor =
         new UsageMonitor<FridaScript>(frida_script_is_destroyed, "destroyed");
     monitor->Enable(wrapper);
 
-    args.GetReturnValue().Set(obj);
+    NanReturnValue(obj);
   } else {
-    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
+    NanReturnValue(args.Callee()->NewInstance(0, NULL));
   }
 }
 
@@ -107,15 +105,16 @@ class LoadOperation : public Operation<FridaScript> {
 };
 
 void Script::Load(const FunctionCallbackInfo<Value>& args) {
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
   auto operation = new LoadOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class UnloadOperation : public Operation<FridaScript> {
@@ -134,15 +133,16 @@ class UnloadOperation : public Operation<FridaScript> {
 };
 
 void Script::Unload(const FunctionCallbackInfo<Value>& args) {
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
   auto operation = new UnloadOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class PostMessageOperation : public Operation<FridaScript> {
@@ -170,15 +170,15 @@ class PostMessageOperation : public Operation<FridaScript> {
 };
 
 void Script::PostMessage(const FunctionCallbackInfo<Value>& args) {
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
   if (args.Length() < 1 || !args[0]->IsObject()) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected object")));
-    return;
+    NanThrowTypeError("Bad argument, expected object");
+    NanReturnUndefined();
   }
   auto message_obj = Local<Object>::Cast(args[0]);
   String::Utf8Value message(
@@ -187,7 +187,7 @@ void Script::PostMessage(const FunctionCallbackInfo<Value>& args) {
   auto operation = new PostMessageOperation(g_strdup(*message));
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 Local<Value> Script::TransformMessageEvent(Isolate* isolate,
@@ -195,7 +195,7 @@ Local<Value> Script::TransformMessageEvent(Isolate* isolate,
   if (index != 0 || strcmp(name, "message") != 0)
     return Local<Value>();
   auto self = static_cast<Script*>(user_data);
-  auto json = String::NewFromUtf8(isolate, g_value_get_string(value));
+  auto json = NanNew(g_value_get_string(value));
   return self->runtime_->ValueFromJson(isolate, json);
 }
 

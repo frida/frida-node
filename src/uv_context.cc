@@ -1,5 +1,6 @@
 #include "uv_context.h"
 
+#include <nan.h>
 #include <node.h>
 #include <v8.h>
 
@@ -12,7 +13,6 @@ using v8::Context;
 using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
-using v8::HandleScope;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
@@ -32,7 +32,7 @@ UVContext::UVContext(uv_loop_t* loop) : usage_count_(0), pending_(NULL) {
   auto module = Object::New(isolate);
   auto process_pending = Function::New(isolate, ProcessPendingWrapper,
       External::New(isolate, this));
-  auto process_pending_name = String::NewFromUtf8(isolate, "processPending");
+  auto process_pending_name = NanNew("processPending");
   process_pending->SetName(process_pending_name);
   module->Set(process_pending_name, process_pending);
   module_.Reset(isolate, module);
@@ -103,8 +103,9 @@ void UVContext::ProcessPendingWrapper(const FunctionCallbackInfo<Value>& args) {
 }
 
 void UVContext::ProcessPendingWrapper(uv_async_t* handle) {
+  NanScope();
+
   auto isolate = Isolate::GetCurrent();
-  HandleScope handle_scope(isolate);
 
   auto self = static_cast<UVContext*>(handle->data);
   auto module = Local<Object>::New(isolate, self->module_);

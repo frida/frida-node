@@ -1,5 +1,6 @@
 #include "icon.h"
 
+#include <nan.h>
 #include <node.h>
 
 #define ICON_DATA_CONSTRUCTOR "icon:ctor"
@@ -12,7 +13,6 @@ using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
 using v8::Handle;
-using v8::HandleScope;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
@@ -38,19 +38,19 @@ Icon::~Icon() {
 void Icon::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = String::NewFromUtf8(isolate, "Icon");
+  auto name = NanNew("Icon");
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "width"),
+  instance_tpl->SetAccessor(NanNew("width"),
       GetWidth, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "height"),
+  instance_tpl->SetAccessor(NanNew("height"),
       GetHeight, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "rowstride"),
+  instance_tpl->SetAccessor(NanNew("rowstride"),
       GetRowstride, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "pixels"),
+  instance_tpl->SetAccessor(NanNew("pixels"),
       GetPixels, 0, data, DEFAULT, ReadOnly, signature);
 
   auto ctor = tpl->GetFunction();
@@ -74,14 +74,12 @@ Local<Value> Icon::New(gpointer handle, Runtime* runtime) {
 }
 
 void Icon::New(const FunctionCallbackInfo<Value>& args) {
-  auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
+  NanScope();
 
   if (args.IsConstructCall()) {
     if (args.Length() != 1 || !args[0]->IsExternal()) {
-      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-          "Bad argument, expected raw handle")));
-      return;
+      NanThrowTypeError("Bad argument, expected raw handle");
+      NanReturnUndefined();
     }
     auto runtime = GetRuntimeFromConstructorArgs(args);
 
@@ -91,57 +89,60 @@ void Icon::New(const FunctionCallbackInfo<Value>& args) {
     auto obj = args.This();
     wrapper->Wrap(obj);
 
-    args.GetReturnValue().Set(obj);
+    NanReturnValue(obj);
   } else {
-    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
+    NanReturnValue(args.Callee()->NewInstance(0, NULL));
   }
 }
 
 void Icon::GetWidth(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
-  auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
-  auto handle = ObjectWrap::Unwrap<Icon>(
-      info.Holder())->GetHandle<FridaIcon>();
+    const PropertyCallbackInfo<Value>& args) {
+  NanScope();
 
-  info.GetReturnValue().Set(
+  auto isolate = args.GetIsolate();
+  auto handle = ObjectWrap::Unwrap<Icon>(
+      args.Holder())->GetHandle<FridaIcon>();
+
+  NanReturnValue(
       Integer::New(isolate, frida_icon_get_width(handle)));
 }
 
 void Icon::GetHeight(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
-  auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
-  auto handle = ObjectWrap::Unwrap<Icon>(
-      info.Holder())->GetHandle<FridaIcon>();
+    const PropertyCallbackInfo<Value>& args) {
+  NanScope();
 
-  info.GetReturnValue().Set(
+  auto isolate = args.GetIsolate();
+  auto handle = ObjectWrap::Unwrap<Icon>(
+      args.Holder())->GetHandle<FridaIcon>();
+
+  NanReturnValue(
       Integer::New(isolate, frida_icon_get_height(handle)));
 }
 
 void Icon::GetRowstride(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
-  auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
-  auto handle = ObjectWrap::Unwrap<Icon>(
-      info.Holder())->GetHandle<FridaIcon>();
+    const PropertyCallbackInfo<Value>& args) {
+  NanScope();
 
-  info.GetReturnValue().Set(
+  auto isolate = args.GetIsolate();
+  auto handle = ObjectWrap::Unwrap<Icon>(
+      args.Holder())->GetHandle<FridaIcon>();
+
+  NanReturnValue(
       Integer::New(isolate, frida_icon_get_rowstride(handle)));
 }
 
 void Icon::GetPixels(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
-  auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
+    const PropertyCallbackInfo<Value>& args) {
+  NanScope();
+
   auto handle = ObjectWrap::Unwrap<Icon>(
-      info.Holder())->GetHandle<FridaIcon>();
+      args.Holder())->GetHandle<FridaIcon>();
 
   int len;
   auto buf = frida_icon_get_pixels(handle, &len);
-  auto pixels = node::Encode(isolate, buf, len, node::BUFFER);
+  auto pixels = NanNewBufferHandle(reinterpret_cast<const char*>(buf), len);
 
-  info.GetReturnValue().Set(pixels);
+  NanReturnValue(pixels);
 }
 
 }

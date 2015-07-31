@@ -7,6 +7,7 @@
 #include "process.h"
 #include "session.h"
 
+#include <nan.h>
 #include <node.h>
 
 #define DEVICE_DATA_CONSTRUCTOR "device:ctor"
@@ -19,7 +20,6 @@ using v8::External;
 using v8::Function;
 using v8::FunctionCallbackInfo;
 using v8::Handle;
-using v8::HandleScope;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
@@ -46,19 +46,19 @@ Device::~Device() {
 void Device::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = String::NewFromUtf8(isolate, "Device");
+  auto name = NanNew("Device");
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "id"), GetId, 0,
+  instance_tpl->SetAccessor(NanNew("id"), GetId, 0,
       data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "name"), GetName, 0,
+  instance_tpl->SetAccessor(NanNew("name"), GetName, 0,
       data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "icon"), GetIcon, 0,
+  instance_tpl->SetAccessor(NanNew("icon"), GetIcon, 0,
       data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(String::NewFromUtf8(isolate, "type"), GetType, 0,
+  instance_tpl->SetAccessor(NanNew("type"), GetType, 0,
       data, DEFAULT, ReadOnly, signature);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "getFrontmostApplication",
@@ -88,14 +88,12 @@ Local<Object> Device::New(gpointer handle, Runtime* runtime) {
 }
 
 void Device::New(const FunctionCallbackInfo<Value>& args) {
-  auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
+  NanScope();
 
   if (args.IsConstructCall()) {
     if (args.Length() != 1 || !args[0]->IsExternal()) {
-      isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-          "Bad argument, expected raw handle")));
-      return;
+      NanThrowTypeError("Bad argument, expected raw handle");
+      NanReturnUndefined();
     }
     auto runtime = GetRuntimeFromConstructorArgs(args);
 
@@ -104,54 +102,55 @@ void Device::New(const FunctionCallbackInfo<Value>& args) {
     auto wrapper = new Device(handle, runtime);
     auto obj = args.This();
     wrapper->Wrap(obj);
-    obj->Set(String::NewFromUtf8(isolate, "events"),
+    obj->Set(NanNew("events"),
         Events::New(handle, runtime));
 
-    args.GetReturnValue().Set(obj);
+    NanReturnValue(obj);
   } else {
-    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
+    NanReturnValue(args.Callee()->NewInstance(0, NULL));
   }
 }
 
 void Device::GetId(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
-  auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
-  auto handle = ObjectWrap::Unwrap<Device>(
-      info.Holder())->GetHandle<FridaDevice>();
+    const PropertyCallbackInfo<Value>& args) {
+  NanScope();
 
-  info.GetReturnValue().Set(
+  auto isolate = args.GetIsolate();
+  auto handle = ObjectWrap::Unwrap<Device>(
+      args.Holder())->GetHandle<FridaDevice>();
+
+  NanReturnValue(
       Integer::NewFromUnsigned(isolate, frida_device_get_id(handle)));
 }
 
 void Device::GetName(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
-  auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
-  auto handle = ObjectWrap::Unwrap<Device>(
-      info.Holder())->GetHandle<FridaDevice>();
+    const PropertyCallbackInfo<Value>& args) {
+  NanScope();
 
-  info.GetReturnValue().Set(
-      String::NewFromUtf8(isolate, frida_device_get_name(handle)));
+  auto handle = ObjectWrap::Unwrap<Device>(
+      args.Holder())->GetHandle<FridaDevice>();
+
+  NanReturnValue(
+      NanNew(frida_device_get_name(handle)));
 }
 
 void Device::GetIcon(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
-  auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
-  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
+    const PropertyCallbackInfo<Value>& args) {
+  NanScope();
+
+  auto wrapper = ObjectWrap::Unwrap<Device>(args.Holder());
   auto handle = wrapper->GetHandle<FridaDevice>();
 
-  info.GetReturnValue().Set(Icon::New(frida_device_get_icon(handle),
+  NanReturnValue(Icon::New(frida_device_get_icon(handle),
       wrapper->runtime_));
 }
 
 void Device::GetType(Local<String> property,
-    const PropertyCallbackInfo<Value>& info) {
-  auto isolate = info.GetIsolate();
-  HandleScope scope(isolate);
+    const PropertyCallbackInfo<Value>& args) {
+  NanScope();
+
   auto handle = ObjectWrap::Unwrap<Device>(
-      info.Holder())->GetHandle<FridaDevice>();
+      args.Holder())->GetHandle<FridaDevice>();
 
   const gchar* type;
   switch (frida_device_get_dtype(handle)) {
@@ -168,7 +167,7 @@ void Device::GetType(Local<String> property,
       g_assert_not_reached();
   }
 
-  info.GetReturnValue().Set(String::NewFromUtf8(isolate, type));
+  NanReturnValue(NanNew(type));
 }
 
 class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
@@ -196,15 +195,16 @@ class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
 };
 
 void Device::GetFrontmostApplication(const FunctionCallbackInfo<Value>& args) {
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   auto operation = new GetFrontmostApplicationOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class EnumerateApplicationsOperation : public Operation<FridaDevice> {
@@ -237,15 +237,16 @@ class EnumerateApplicationsOperation : public Operation<FridaDevice> {
 };
 
 void Device::EnumerateApplications(const FunctionCallbackInfo<Value>& args) {
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   auto operation = new EnumerateApplicationsOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class EnumerateProcessesOperation : public Operation<FridaDevice> {
@@ -278,15 +279,16 @@ class EnumerateProcessesOperation : public Operation<FridaDevice> {
 };
 
 void Device::EnumerateProcesses(const FunctionCallbackInfo<Value>& args) {
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   auto operation = new EnumerateProcessesOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class SpawnOperation : public Operation<FridaDevice> {
@@ -323,8 +325,9 @@ class SpawnOperation : public Operation<FridaDevice> {
 };
 
 void Device::Spawn(const FunctionCallbackInfo<Value>& args) {
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
@@ -346,9 +349,8 @@ void Device::Spawn(const FunctionCallbackInfo<Value>& args) {
     }
   }
   if (argv == NULL) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected argv as an array of strings")));
-    return;
+    NanThrowTypeError("Bad argument, expected argv as an array of strings");
+    NanReturnUndefined();
   }
 
   gchar** envp = g_get_environ();
@@ -358,7 +360,7 @@ void Device::Spawn(const FunctionCallbackInfo<Value>& args) {
   auto operation = new SpawnOperation(path, argv, envp);
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class ResumeOperation : public Operation<FridaDevice> {
@@ -382,27 +384,26 @@ class ResumeOperation : public Operation<FridaDevice> {
 };
 
 void Device::Resume(const FunctionCallbackInfo<Value>& args) {
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   if (args.Length() < 1 || !args[0]->IsNumber()) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected pid")));
-    return;
+    NanThrowTypeError("Bad argument, expected pid");
+    NanReturnUndefined();
   }
   auto pid = args[0]->ToInteger()->Value();
   if (pid <= 0) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected pid")));
-    return;
+    NanThrowTypeError("Bad argument, expected pid");
+    NanReturnUndefined();
   }
 
   auto operation = new ResumeOperation(static_cast<guint>(pid));
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class KillOperation : public Operation<FridaDevice> {
@@ -426,27 +427,26 @@ class KillOperation : public Operation<FridaDevice> {
 };
 
 void Device::Kill(const FunctionCallbackInfo<Value>& args) {
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   if (args.Length() < 1 || !args[0]->IsNumber()) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected pid")));
-    return;
+    NanThrowTypeError("Bad argument, expected pid");
+    NanReturnUndefined();
   }
   auto pid = args[0]->ToInteger()->Value();
   if (pid <= 0) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected pid")));
-    return;
+    NanThrowTypeError("Bad argument, expected pid");
+    NanReturnUndefined();
   }
 
   auto operation = new KillOperation(static_cast<guint>(pid));
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class AttachOperation : public Operation<FridaDevice> {
@@ -473,27 +473,26 @@ class AttachOperation : public Operation<FridaDevice> {
 };
 
 void Device::Attach(const FunctionCallbackInfo<Value>& args) {
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   if (args.Length() < 1 || !args[0]->IsNumber()) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected pid")));
-    return;
+    NanThrowTypeError("Bad argument, expected pid");
+    NanReturnUndefined();
   }
   auto pid = args[0]->ToInteger()->Value();
   if (pid <= 0) {
-    isolate->ThrowException(Exception::TypeError(String::NewFromUtf8(isolate,
-        "Bad argument, expected pid")));
-    return;
+    NanThrowTypeError("Bad argument, expected pid");
+    NanReturnUndefined();
   }
 
   auto operation = new AttachOperation(static_cast<guint>(pid));
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 }

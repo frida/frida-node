@@ -5,6 +5,7 @@
 #include "operation.h"
 
 #include <cstring>
+#include <nan.h>
 #include <node.h>
 
 #define DEVICE_MANAGER_DATA_WRAPPERS "device_manager:wrappers"
@@ -12,7 +13,6 @@
 using v8::Array;
 using v8::FunctionCallbackInfo;
 using v8::Handle;
-using v8::HandleScope;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
@@ -42,7 +42,7 @@ DeviceManager::~DeviceManager() {
 void DeviceManager::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = String::NewFromUtf8(isolate, "DeviceManager");
+  auto name = NanNew("DeviceManager");
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   NODE_SET_PROTOTYPE_METHOD(tpl, "close", Close);
@@ -63,8 +63,7 @@ void DeviceManager::Dispose(Runtime* runtime) {
 }
 
 void DeviceManager::New(const FunctionCallbackInfo<Value>& args) {
-  auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
+  NanScope();
 
   if (args.IsConstructCall()) {
     auto runtime = GetRuntimeFromConstructorArgs(args);
@@ -74,16 +73,16 @@ void DeviceManager::New(const FunctionCallbackInfo<Value>& args) {
     auto obj = args.This();
     wrapper->Wrap(obj);
     auto events_obj = Events::New(handle, runtime);
-    obj->Set(String::NewFromUtf8(isolate, "events"), events_obj);
+    obj->Set(NanNew("events"), events_obj);
     g_object_unref(handle);
 
     auto events_wrapper = ObjectWrap::Unwrap<Events>(events_obj);
     events_wrapper->SetListenCallback(OnListen, wrapper);
     events_wrapper->SetUnlistenCallback(OnUnlisten, wrapper);
 
-    args.GetReturnValue().Set(obj);
+    NanReturnValue(obj);
   } else {
-    args.GetReturnValue().Set(args.Callee()->NewInstance(0, NULL));
+    NanReturnValue(args.Callee()->NewInstance(0, NULL));
   }
 }
 
@@ -103,15 +102,16 @@ class CloseOperation : public Operation<FridaDeviceManager> {
 };
 
 void DeviceManager::Close(const FunctionCallbackInfo<Value>& args) {
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
 
   auto operation = new CloseOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
@@ -144,15 +144,16 @@ class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
 };
 
 void DeviceManager::EnumerateDevices(const FunctionCallbackInfo<Value>& args) {
+  NanScope();
+
   auto isolate = args.GetIsolate();
-  HandleScope scope(isolate);
   auto obj = args.Holder();
   auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
 
   auto operation = new EnumerateDevicesOperation();
   operation->Schedule(isolate, wrapper);
 
-  args.GetReturnValue().Set(operation->GetPromise(isolate));
+  NanReturnValue(operation->GetPromise(isolate));
 }
 
 void DeviceManager::OnListen(const gchar* signal, gpointer user_data) {
