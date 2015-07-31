@@ -32,14 +32,17 @@ describe('Script', function () {
     var script, exp;
     session.createScript(
       '"use strict";' +
-      'rpc.exports.add = (a, b) => {' +
-        'var result = a + b;' +
-        'if (result < 0)' +
-          'throw new Error("No");' +
-        'return result;' +
-      '};' +
-      'rpc.exports.sub = (a, b) => {' +
-        'return a - b;' +
+      '' +
+      'rpc.exports = {' +
+        'add(a, b) {' +
+          'const result = a + b;' +
+          'if (result < 0)' +
+            'throw new Error("No");' +
+          'return result;' +
+        '},' +
+        'sub(a, b) {' +
+          'return a - b;' +
+        '}' +
       '};')
     .then(function (s) {
       script = s;
