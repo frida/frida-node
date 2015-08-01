@@ -26,9 +26,10 @@
   "main": "./lib/frida",
   "dependencies": {
     "big-integer": "^1.4.4",
+    "bindings": "^1.2.1",
     "minimatch": "*",
     "nan": "^2.0.5",
-    "node-pre-gyp": "0.6.x"
+    "prebuild": "^2.5.1"
   },
   "devDependencies": {
     "co": "^4.5.4",
@@ -37,15 +38,14 @@
     "should": "^5.1.0"
   },
   "scripts": {
-    "install": "node-pre-gyp install",
+    "install": "prebuild --download",
     "pretest": "jshint lib test",
-    "test": "node-pre-gyp rebuild && node --expose-gc node_modules/mocha/bin/_mocha"
+    "prebuild": "prebuild --verbose --strip",
+    "test": "npm run prebuild && node --expose-gc node_modules/mocha/bin/_mocha"
   },
   "binary": {
     "module_name": "frida_binding",
-    "module_path": "./lib/binding/{configuration}/{node_abi}-{platform}-{arch}/",
-    "remote_path": "./node/v{version}/{configuration}/",
-    "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}.tar.gz",
+    "remote_path": "node/v{version}",
     "host": "https://build.frida.re"
   },
   "repository": {
