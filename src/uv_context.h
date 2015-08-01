@@ -22,7 +22,7 @@ public:
 
 private:
   void ProcessPending();
-  static void ProcessPendingWrapper(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void ProcessPendingWrapper(const v8::FunctionCallbackInfo<v8::Value>& info);
   static void ProcessPendingWrapper(uv_async_t* handle);
 
   int usage_count_;

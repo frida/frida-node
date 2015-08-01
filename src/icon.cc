@@ -11,7 +11,6 @@ using v8::DontEnum;
 using v8::Exception;
 using v8::External;
 using v8::Function;
-using v8::FunctionCallbackInfo;
 using v8::Handle;
 using v8::Integer;
 using v8::Isolate;
@@ -19,10 +18,10 @@ using v8::Local;
 using v8::Object;
 using v8::Persistent;
 using v8::PropertyAttribute;
-using v8::PropertyCallbackInfo;
 using v8::ReadOnly;
 using v8::String;
 using v8::Value;
+using Nan::HandleScope;
 
 namespace frida {
 
@@ -38,25 +37,25 @@ Icon::~Icon() {
 void Icon::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = NanNew("Icon");
+  auto name = Nan::New("Icon").ToLocalChecked();
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  instance_tpl->SetAccessor(NanNew("width"),
+  Nan::SetAccessor(instance_tpl, Nan::New("width").ToLocalChecked(),
       GetWidth, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(NanNew("height"),
+  Nan::SetAccessor(instance_tpl, Nan::New("height").ToLocalChecked(),
       GetHeight, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(NanNew("rowstride"),
+  Nan::SetAccessor(instance_tpl, Nan::New("rowstride").ToLocalChecked(),
       GetRowstride, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(NanNew("pixels"),
+  Nan::SetAccessor(instance_tpl, Nan::New("pixels").ToLocalChecked(),
       GetPixels, 0, data, DEFAULT, ReadOnly, signature);
 
-  auto ctor = tpl->GetFunction();
-  exports->Set(name, ctor);
+  auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
+  Nan::Set(exports, name, ctor);
   runtime->SetDataPointer(ICON_DATA_CONSTRUCTOR,
-      new Persistent<Function>(isolate, ctor));
+      new v8::Persistent<Function>(isolate, ctor));
 }
 
 Local<Value> Icon::New(gpointer handle, Runtime* runtime) {
@@ -66,83 +65,83 @@ Local<Value> Icon::New(gpointer handle, Runtime* runtime) {
     return Null(isolate);
 
   auto ctor = Local<Function>::New(isolate,
-      *static_cast<Persistent<Function>*>(
+      *static_cast<v8::Persistent<Function>*>(
       runtime->GetDataPointer(ICON_DATA_CONSTRUCTOR)));
   const int argc = 1;
   Local<Value> argv[argc] = { External::New(isolate, handle) };
   return ctor->NewInstance(argc, argv);
 }
 
-void Icon::New(const FunctionCallbackInfo<Value>& args) {
-  NanScope();
+void Icon::New(const Nan::FunctionCallbackInfo<Value>& info) {
+  HandleScope();
 
-  if (args.IsConstructCall()) {
-    if (args.Length() != 1 || !args[0]->IsExternal()) {
-      NanThrowTypeError("Bad argument, expected raw handle");
-      NanReturnUndefined();
+  if (info.IsConstructCall()) {
+    if (info.Length() != 1 || !info[0]->IsExternal()) {
+      Nan::ThrowTypeError("Bad argument, expected raw handle");
+      return;
     }
-    auto runtime = GetRuntimeFromConstructorArgs(args);
+    auto runtime = GetRuntimeFromConstructorArgs(info);
 
     auto handle = static_cast<FridaIcon*>(
-        Local<External>::Cast(args[0])->Value());
+        Local<External>::Cast(info[0])->Value());
     auto wrapper = new Icon(handle, runtime);
-    auto obj = args.This();
+    auto obj = info.This();
     wrapper->Wrap(obj);
 
-    NanReturnValue(obj);
+    info.GetReturnValue().Set(obj);
   } else {
-    NanReturnValue(args.Callee()->NewInstance(0, NULL));
+    info.GetReturnValue().Set(info.Callee()->NewInstance(0, NULL));
   }
 }
 
 void Icon::GetWidth(Local<String> property,
-    const PropertyCallbackInfo<Value>& args) {
-  NanScope();
+    const Nan::PropertyCallbackInfo<Value>& info) {
+  HandleScope();
 
-  auto isolate = args.GetIsolate();
+  auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Icon>(
-      args.Holder())->GetHandle<FridaIcon>();
+      info.Holder())->GetHandle<FridaIcon>();
 
-  NanReturnValue(
+  info.GetReturnValue().Set(
       Integer::New(isolate, frida_icon_get_width(handle)));
 }
 
 void Icon::GetHeight(Local<String> property,
-    const PropertyCallbackInfo<Value>& args) {
-  NanScope();
+    const Nan::PropertyCallbackInfo<Value>& info) {
+  HandleScope();
 
-  auto isolate = args.GetIsolate();
+  auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Icon>(
-      args.Holder())->GetHandle<FridaIcon>();
+      info.Holder())->GetHandle<FridaIcon>();
 
-  NanReturnValue(
+  info.GetReturnValue().Set(
       Integer::New(isolate, frida_icon_get_height(handle)));
 }
 
 void Icon::GetRowstride(Local<String> property,
-    const PropertyCallbackInfo<Value>& args) {
-  NanScope();
+    const Nan::PropertyCallbackInfo<Value>& info) {
+  HandleScope();
 
-  auto isolate = args.GetIsolate();
+  auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Icon>(
-      args.Holder())->GetHandle<FridaIcon>();
+      info.Holder())->GetHandle<FridaIcon>();
 
-  NanReturnValue(
+  info.GetReturnValue().Set(
       Integer::New(isolate, frida_icon_get_rowstride(handle)));
 }
 
 void Icon::GetPixels(Local<String> property,
-    const PropertyCallbackInfo<Value>& args) {
-  NanScope();
+    const Nan::PropertyCallbackInfo<Value>& info) {
+  HandleScope();
 
   auto handle = ObjectWrap::Unwrap<Icon>(
-      args.Holder())->GetHandle<FridaIcon>();
+      info.Holder())->GetHandle<FridaIcon>();
 
   int len;
   auto buf = frida_icon_get_pixels(handle, &len);
-  auto pixels = NanNewBufferHandle(reinterpret_cast<const char*>(buf), len);
+  auto pixels = Nan::NewBuffer(reinterpret_cast<char*>(buf), len).ToLocalChecked();
 
-  NanReturnValue(pixels);
+  info.GetReturnValue().Set(pixels);
 }
 
 }

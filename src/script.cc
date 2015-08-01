@@ -13,7 +13,6 @@
 using v8::Exception;
 using v8::External;
 using v8::Function;
-using v8::FunctionCallbackInfo;
 using v8::Handle;
 using v8::Isolate;
 using v8::Local;
@@ -21,6 +20,7 @@ using v8::Object;
 using v8::Persistent;
 using v8::String;
 using v8::Value;
+using Nan::HandleScope;
 
 namespace frida {
 
@@ -37,55 +37,55 @@ Script::~Script() {
 void Script::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = NanNew("Script");
+  auto name = Nan::New("Script").ToLocalChecked();
   auto tpl = CreateTemplate(isolate, name, New, runtime);
 
-  NODE_SET_PROTOTYPE_METHOD(tpl, "load", Load);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "unload", Unload);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "postMessage", PostMessage);
+  Nan::SetPrototypeMethod(tpl, "load", Load);
+  Nan::SetPrototypeMethod(tpl, "unload", Unload);
+  Nan::SetPrototypeMethod(tpl, "postMessage", PostMessage);
 
-  auto ctor = tpl->GetFunction();
-  exports->Set(name, ctor);
+  auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
+  Nan::Set(exports, name, ctor);
   runtime->SetDataPointer(SCRIPT_DATA_CONSTRUCTOR,
-      new Persistent<Function>(isolate, ctor));
+      new v8::Persistent<Function>(isolate, ctor));
 }
 
 Local<Object> Script::New(gpointer handle, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
   auto ctor = Local<Function>::New(isolate,
-      *static_cast<Persistent<Function>*>(
+      *static_cast<v8::Persistent<Function>*>(
       runtime->GetDataPointer(SCRIPT_DATA_CONSTRUCTOR)));
   const int argc = 1;
   Local<Value> argv[argc] = { External::New(isolate, handle) };
   return ctor->NewInstance(argc, argv);
 }
 
-void Script::New(const FunctionCallbackInfo<Value>& args) {
-  NanScope();
+void Script::New(const Nan::FunctionCallbackInfo<Value>& info) {
+  HandleScope();
 
-  if (args.IsConstructCall()) {
-    if (args.Length() != 1 || !args[0]->IsExternal()) {
-      NanThrowTypeError("Bad argument, expected raw handle");
-      NanReturnUndefined();
+  if (info.IsConstructCall()) {
+    if (info.Length() != 1 || !info[0]->IsExternal()) {
+      Nan::ThrowTypeError("Bad argument, expected raw handle");
+      return;
     }
-    auto runtime = GetRuntimeFromConstructorArgs(args);
+    auto runtime = GetRuntimeFromConstructorArgs(info);
 
     auto handle = static_cast<FridaScript*>(
-        Local<External>::Cast(args[0])->Value());
+        Local<External>::Cast(info[0])->Value());
     auto wrapper = new Script(handle, runtime);
-    auto obj = args.This();
+    auto obj = info.This();
     wrapper->Wrap(obj);
-    obj->Set(NanNew("events"),
+    Nan::Set(obj, Nan::New("events").ToLocalChecked(),
         Events::New(handle, runtime, TransformMessageEvent, wrapper));
 
     auto monitor =
         new UsageMonitor<FridaScript>(frida_script_is_destroyed, "destroyed");
     monitor->Enable(wrapper);
 
-    NanReturnValue(obj);
+    info.GetReturnValue().Set(obj);
   } else {
-    NanReturnValue(args.Callee()->NewInstance(0, NULL));
+    info.GetReturnValue().Set(info.Callee()->NewInstance(0, NULL));
   }
 }
 
@@ -104,17 +104,17 @@ class LoadOperation : public Operation<FridaScript> {
   }
 };
 
-void Script::Load(const FunctionCallbackInfo<Value>& args) {
-  NanScope();
+void Script::Load(const Nan::FunctionCallbackInfo<Value>& info) {
+  HandleScope();
 
-  auto isolate = args.GetIsolate();
-  auto obj = args.Holder();
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
   auto operation = new LoadOperation();
   operation->Schedule(isolate, wrapper);
 
-  NanReturnValue(operation->GetPromise(isolate));
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
 class UnloadOperation : public Operation<FridaScript> {
@@ -132,17 +132,17 @@ class UnloadOperation : public Operation<FridaScript> {
   }
 };
 
-void Script::Unload(const FunctionCallbackInfo<Value>& args) {
-  NanScope();
+void Script::Unload(const Nan::FunctionCallbackInfo<Value>& info) {
+  HandleScope();
 
-  auto isolate = args.GetIsolate();
-  auto obj = args.Holder();
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
   auto operation = new UnloadOperation();
   operation->Schedule(isolate, wrapper);
 
-  NanReturnValue(operation->GetPromise(isolate));
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
 class PostMessageOperation : public Operation<FridaScript> {
@@ -169,24 +169,25 @@ class PostMessageOperation : public Operation<FridaScript> {
   gchar* message_;
 };
 
-void Script::PostMessage(const FunctionCallbackInfo<Value>& args) {
-  NanScope();
+void Script::PostMessage(const Nan::FunctionCallbackInfo<Value>& info) {
+  HandleScope();
 
-  auto isolate = args.GetIsolate();
-  auto obj = args.Holder();
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
-  if (args.Length() < 1) {
-    NanThrowTypeError("Expected value serializable to JSON");
-    NanReturnUndefined();
+  if (info.Length() < 1) {
+    Nan::ThrowTypeError("Expected value serializable to JSON");
+    return;
   }
+
   String::Utf8Value message(
-      wrapper->runtime_->ValueToJson(isolate, args[0]));
+      wrapper->runtime_->ValueToJson(isolate, info[0]));
 
   auto operation = new PostMessageOperation(g_strdup(*message));
   operation->Schedule(isolate, wrapper);
 
-  NanReturnValue(operation->GetPromise(isolate));
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
 Local<Value> Script::TransformMessageEvent(Isolate* isolate,
@@ -194,7 +195,7 @@ Local<Value> Script::TransformMessageEvent(Isolate* isolate,
   if (index != 0 || strcmp(name, "message") != 0)
     return Local<Value>();
   auto self = static_cast<Script*>(user_data);
-  auto json = NanNew(g_value_get_string(value));
+  auto json = Nan::New(g_value_get_string(value)).ToLocalChecked();
   return self->runtime_->ValueFromJson(isolate, json);
 }
 

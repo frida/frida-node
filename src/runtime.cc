@@ -19,11 +19,13 @@ Runtime::Runtime(UVContext* uv_context, GLibContext* glib_context)
   auto isolate = Isolate::GetCurrent();
   auto global = isolate->GetCurrentContext()->Global();
   auto json_module = Local<Object>::Cast(
-      global->Get(NanNew("JSON")));
+      Nan::Get(global, Nan::New("JSON").ToLocalChecked()).ToLocalChecked());
   auto json_stringify = Local<Function>::Cast(
-      json_module->Get(NanNew("stringify")));
+      Nan::Get(json_module,
+        Nan::New("stringify").ToLocalChecked()).ToLocalChecked());
   auto json_parse = Local<Function>::Cast(
-      json_module->Get(NanNew("parse")));
+      Nan::Get(json_module,
+        Nan::New("parse").ToLocalChecked()).ToLocalChecked());
   json_module_.Reset(isolate, json_module);
   json_stringify_.Reset(isolate, json_stringify);
   json_parse_.Reset(isolate, json_parse);

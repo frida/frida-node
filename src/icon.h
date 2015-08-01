@@ -4,6 +4,7 @@
 #include "glib_object.h"
 
 #include <frida-core.h>
+#include <nan.h>
 
 namespace frida {
 
@@ -16,16 +17,16 @@ class Icon : public GLibObject {
   explicit Icon(FridaIcon* handle, Runtime* runtime);
   ~Icon();
 
-  static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
 
   static void GetWidth(v8::Local<v8::String> property,
-      const v8::PropertyCallbackInfo<v8::Value>& info);
+      const Nan::PropertyCallbackInfo<v8::Value>& info);
   static void GetHeight(v8::Local<v8::String> property,
-      const v8::PropertyCallbackInfo<v8::Value>& info);
+      const Nan::PropertyCallbackInfo<v8::Value>& info);
   static void GetRowstride(v8::Local<v8::String> property,
-      const v8::PropertyCallbackInfo<v8::Value>& info);
+      const Nan::PropertyCallbackInfo<v8::Value>& info);
   static void GetPixels(v8::Local<v8::String> property,
-      const v8::PropertyCallbackInfo<v8::Value>& info);
+      const Nan::PropertyCallbackInfo<v8::Value>& info);
 };
 
 }

@@ -24,13 +24,13 @@ class Events : public GLibObject {
       Runtime* runtime);
   ~Events();
 
-  static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
 
-  static void Listen(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void Unlisten(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void Listen(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static void Unlisten(const Nan::FunctionCallbackInfo<v8::Value>& info);
 
   bool GetSignalArguments(
-      const v8::FunctionCallbackInfo<v8::Value>& args,
+      const Nan::FunctionCallbackInfo<v8::Value>& info,
       guint& signal_id, v8::Local<v8::Function>& callback);
 
   TransformCallback transform_;

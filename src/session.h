@@ -4,6 +4,7 @@
 #include "glib_object.h"
 
 #include <frida-core.h>
+#include <nan.h>
 
 namespace frida {
 
@@ -16,15 +17,15 @@ class Session : public GLibObject {
   explicit Session(FridaSession* handle, Runtime* runtime);
   ~Session();
 
-  static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
 
   static void GetPid(v8::Local<v8::String> property,
-      const v8::PropertyCallbackInfo<v8::Value>& info);
+      const Nan::PropertyCallbackInfo<v8::Value>& info);
 
-  static void Detach(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void CreateScript(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void EnableDebugger(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void DisableDebugger(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static void Detach(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static void CreateScript(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static void EnableDebugger(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static void DisableDebugger(const Nan::FunctionCallbackInfo<v8::Value>& info);
 
   v8::Persistent<v8::Object> events_;
 };

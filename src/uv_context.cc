@@ -12,12 +12,12 @@
 using v8::Context;
 using v8::External;
 using v8::Function;
-using v8::FunctionCallbackInfo;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
 using v8::String;
 using v8::Value;
+using Nan::HandleScope;
 
 namespace frida {
 
@@ -32,9 +32,9 @@ UVContext::UVContext(uv_loop_t* loop) : usage_count_(0), pending_(NULL) {
   auto module = Object::New(isolate);
   auto process_pending = Function::New(isolate, ProcessPendingWrapper,
       External::New(isolate, this));
-  auto process_pending_name = NanNew("processPending");
+  auto process_pending_name = Nan::New("processPending").ToLocalChecked();
   process_pending->SetName(process_pending_name);
-  module->Set(process_pending_name, process_pending);
+  Nan::Set(module, process_pending_name, process_pending);
   module_.Reset(isolate, module);
   process_pending_.Reset(isolate, process_pending);
 }
@@ -96,14 +96,14 @@ void UVContext::ProcessPending() {
   UV_CONTEXT_UNLOCK();
 }
 
-void UVContext::ProcessPendingWrapper(const FunctionCallbackInfo<Value>& args) {
+void UVContext::ProcessPendingWrapper(const v8::FunctionCallbackInfo<Value>& info) {
   UVContext* self = static_cast<UVContext*>(
-      args.Data().As<External>()->Value ());
+      info.Data().As<External>()->Value ());
   self->ProcessPending();
 }
 
 void UVContext::ProcessPendingWrapper(uv_async_t* handle) {
-  NanScope();
+  HandleScope();
 
   auto isolate = Isolate::GetCurrent();
 
