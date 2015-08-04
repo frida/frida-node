@@ -87,7 +87,7 @@ Local<Object> Device::New(gpointer handle, Runtime* runtime) {
 }
 
 NAN_METHOD(Device::New) {
-  HandleScope();
+  HandleScope scope;
 
   if (info.IsConstructCall()) {
     if (info.Length() != 1 || !info[0]->IsExternal()) {
@@ -111,7 +111,7 @@ NAN_METHOD(Device::New) {
 }
 
 NAN_PROPERTY_GETTER(Device::GetId) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Device>(
@@ -122,7 +122,7 @@ NAN_PROPERTY_GETTER(Device::GetId) {
 }
 
 NAN_PROPERTY_GETTER(Device::GetName) {
-  HandleScope();
+  HandleScope scope;
 
   auto handle = ObjectWrap::Unwrap<Device>(
       info.Holder())->GetHandle<FridaDevice>();
@@ -132,7 +132,7 @@ NAN_PROPERTY_GETTER(Device::GetName) {
 }
 
 NAN_PROPERTY_GETTER(Device::GetIcon) {
-  HandleScope();
+  HandleScope scope;
 
   auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
   auto handle = wrapper->GetHandle<FridaDevice>();
@@ -142,7 +142,7 @@ NAN_PROPERTY_GETTER(Device::GetIcon) {
 }
 
 NAN_PROPERTY_GETTER(Device::GetType) {
-  HandleScope();
+  HandleScope scope;
 
   auto handle = ObjectWrap::Unwrap<Device>(
       info.Holder())->GetHandle<FridaDevice>();
@@ -190,7 +190,7 @@ class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::GetFrontmostApplication) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -232,7 +232,7 @@ class EnumerateApplicationsOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::EnumerateApplications) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -274,7 +274,7 @@ class EnumerateProcessesOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::EnumerateProcesses) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -320,7 +320,7 @@ class SpawnOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::Spawn) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -379,7 +379,7 @@ class ResumeOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::Resume) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -422,7 +422,7 @@ class KillOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::Kill) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -468,7 +468,7 @@ class AttachOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::Attach) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();

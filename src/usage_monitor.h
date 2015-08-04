@@ -84,7 +84,7 @@ class UsageMonitor {
 
   static void OnWeakNotifyWrapper(
       const v8::WeakCallbackData<v8::Object, UsageMonitor<T>>& data) {
-    HandleScope();
+    HandleScope scope;
     data.GetParameter()->OnWeakNotify();
   }
 

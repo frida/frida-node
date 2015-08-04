@@ -73,7 +73,7 @@ Local<Value> Icon::New(gpointer handle, Runtime* runtime) {
 }
 
 NAN_METHOD(Icon::New) {
-  HandleScope();
+  HandleScope scope;
 
   if (info.IsConstructCall()) {
     if (info.Length() != 1 || !info[0]->IsExternal()) {
@@ -95,7 +95,7 @@ NAN_METHOD(Icon::New) {
 }
 
 NAN_PROPERTY_GETTER(Icon::GetWidth) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Icon>(
@@ -106,7 +106,7 @@ NAN_PROPERTY_GETTER(Icon::GetWidth) {
 }
 
 NAN_PROPERTY_GETTER(Icon::GetHeight) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Icon>(
@@ -117,7 +117,7 @@ NAN_PROPERTY_GETTER(Icon::GetHeight) {
 }
 
 NAN_PROPERTY_GETTER(Icon::GetRowstride) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Icon>(
@@ -128,7 +128,7 @@ NAN_PROPERTY_GETTER(Icon::GetRowstride) {
 }
 
 NAN_PROPERTY_GETTER(Icon::GetPixels) {
-  HandleScope();
+  HandleScope scope;
 
   auto handle = ObjectWrap::Unwrap<Icon>(
       info.Holder())->GetHandle<FridaIcon>();

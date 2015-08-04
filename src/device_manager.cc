@@ -64,7 +64,7 @@ void DeviceManager::Dispose(Runtime* runtime) {
 }
 
 NAN_METHOD(DeviceManager::New) {
-  HandleScope();
+  HandleScope scope;
 
   if (info.IsConstructCall()) {
     auto runtime = GetRuntimeFromConstructorArgs(info);
@@ -104,7 +104,7 @@ class CloseOperation : public Operation<FridaDeviceManager> {
 };
 
 NAN_METHOD(DeviceManager::Close) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -146,7 +146,7 @@ class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
 };
 
 NAN_METHOD(DeviceManager::EnumerateDevices) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();

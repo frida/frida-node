@@ -110,7 +110,7 @@ void Events::SetUnlistenCallback(UnlistenCallback callback,
 }
 
 NAN_METHOD(Events::New) {
-  HandleScope();
+  HandleScope scope;
 
   if (info.IsConstructCall()) {
     if (info.Length() != 3 ||
@@ -135,7 +135,7 @@ NAN_METHOD(Events::New) {
 }
 
 NAN_METHOD(Events::Listen) {
-  HandleScope();
+  HandleScope scope;
 
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Events>(obj);
@@ -165,7 +165,7 @@ NAN_METHOD(Events::Listen) {
 }
 
 NAN_METHOD(Events::Unlisten) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto wrapper = ObjectWrap::Unwrap<Events>(info.Holder());

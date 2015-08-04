@@ -103,7 +103,7 @@ void UVContext::ProcessPendingWrapper(const v8::FunctionCallbackInfo<Value>& inf
 }
 
 void UVContext::ProcessPendingWrapper(uv_async_t* handle) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = Isolate::GetCurrent();
 

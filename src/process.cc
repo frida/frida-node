@@ -69,7 +69,7 @@ Local<Object> Process::New(gpointer handle, Runtime* runtime) {
 }
 
 NAN_METHOD(Process::New) {
-  HandleScope();
+  HandleScope scope;
 
   if (info.IsConstructCall()) {
     if (info.Length() != 1 || !info[0]->IsExternal()) {
@@ -91,7 +91,7 @@ NAN_METHOD(Process::New) {
 }
 
 NAN_PROPERTY_GETTER(Process::GetPid) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Process>(
@@ -102,7 +102,7 @@ NAN_PROPERTY_GETTER(Process::GetPid) {
 }
 
 NAN_PROPERTY_GETTER(Process::GetName) {
-  HandleScope();
+  HandleScope scope;
 
   auto handle = ObjectWrap::Unwrap<Process>(
       info.Holder())->GetHandle<FridaProcess>();
@@ -112,7 +112,7 @@ NAN_PROPERTY_GETTER(Process::GetName) {
 }
 
 NAN_PROPERTY_GETTER(Process::GetSmallIcon) {
-  HandleScope();
+  HandleScope scope;
 
   auto wrapper = ObjectWrap::Unwrap<Process>(info.Holder());
   auto handle = wrapper->GetHandle<FridaProcess>();
@@ -122,7 +122,7 @@ NAN_PROPERTY_GETTER(Process::GetSmallIcon) {
 }
 
 NAN_PROPERTY_GETTER(Process::GetLargeIcon) {
-  HandleScope();
+  HandleScope scope;
 
   auto wrapper = ObjectWrap::Unwrap<Process>(info.Holder());
   auto handle = wrapper->GetHandle<FridaProcess>();

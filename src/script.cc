@@ -62,7 +62,7 @@ Local<Object> Script::New(gpointer handle, Runtime* runtime) {
 }
 
 NAN_METHOD(Script::New) {
-  HandleScope();
+  HandleScope scope;
 
   if (info.IsConstructCall()) {
     if (info.Length() != 1 || !info[0]->IsExternal()) {
@@ -105,7 +105,7 @@ class LoadOperation : public Operation<FridaScript> {
 };
 
 NAN_METHOD(Script::Load) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -133,7 +133,7 @@ class UnloadOperation : public Operation<FridaScript> {
 };
 
 NAN_METHOD(Script::Unload) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -170,7 +170,7 @@ class PostMessageOperation : public Operation<FridaScript> {
 };
 
 NAN_METHOD(Script::PostMessage) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();

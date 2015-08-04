@@ -70,7 +70,7 @@ Local<Object> Application::New(gpointer handle, Runtime* runtime) {
 }
 
 NAN_METHOD(Application::New) {
-  HandleScope();
+  HandleScope scope;
 
   if (info.IsConstructCall()) {
     if (info.Length() != 1 || !info[0]->IsExternal()) {
@@ -92,7 +92,7 @@ NAN_METHOD(Application::New) {
 }
 
 NAN_PROPERTY_GETTER(Application::GetIdentifier) {
-  HandleScope();
+  HandleScope scope;
 
   auto handle = ObjectWrap::Unwrap<Application>(
       info.Holder())->GetHandle<FridaApplication>();
@@ -102,7 +102,7 @@ NAN_PROPERTY_GETTER(Application::GetIdentifier) {
 }
 
 NAN_PROPERTY_GETTER(Application::GetName) {
-  HandleScope();
+  HandleScope scope;
 
   auto handle = ObjectWrap::Unwrap<Application>(
       info.Holder())->GetHandle<FridaApplication>();
@@ -112,7 +112,7 @@ NAN_PROPERTY_GETTER(Application::GetName) {
 }
 
 NAN_PROPERTY_GETTER(Application::GetPid) {
-  HandleScope();
+  HandleScope scope;
 
   auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Application>(
@@ -123,7 +123,7 @@ NAN_PROPERTY_GETTER(Application::GetPid) {
 }
 
 NAN_PROPERTY_GETTER(Application::GetSmallIcon) {
-  HandleScope();
+  HandleScope scope;
 
   auto wrapper = ObjectWrap::Unwrap<Application>(info.Holder());
   auto handle = wrapper->GetHandle<FridaApplication>();
@@ -133,7 +133,7 @@ NAN_PROPERTY_GETTER(Application::GetSmallIcon) {
 }
 
 NAN_PROPERTY_GETTER(Application::GetLargeIcon) {
-  HandleScope();
+  HandleScope scope;
 
   auto wrapper = ObjectWrap::Unwrap<Application>(info.Holder());
   auto handle = wrapper->GetHandle<FridaApplication>();
