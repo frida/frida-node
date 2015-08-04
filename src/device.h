@@ -17,27 +17,21 @@ class Device : public GLibObject {
   Device(FridaDevice* handle, Runtime* runtime);
   ~Device();
 
-  static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static NAN_METHOD(New);
 
-  static void GetId(v8::Local<v8::String> property,
-      const Nan::PropertyCallbackInfo<v8::Value>& info);
-  static void GetName(v8::Local<v8::String> property,
-      const Nan::PropertyCallbackInfo<v8::Value>& info);
-  static void GetIcon(v8::Local<v8::String> property,
-      const Nan::PropertyCallbackInfo<v8::Value>& info);
-  static void GetType(v8::Local<v8::String> property,
-      const Nan::PropertyCallbackInfo<v8::Value>& info);
+  static NAN_PROPERTY_GETTER(GetId);
+  static NAN_PROPERTY_GETTER(GetName);
+  static NAN_PROPERTY_GETTER(GetIcon);
+  static NAN_PROPERTY_GETTER(GetType);
 
-  static void GetFrontmostApplication(
-      const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static void EnumerateApplications(
-      const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static void EnumerateProcesses(
-      const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static void Spawn(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static void Resume(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static void Kill(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static void Attach(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static NAN_METHOD(GetFrontmostApplication);
+  static NAN_METHOD(EnumerateApplications);
+  static NAN_METHOD(EnumerateProcesses);
+
+  static NAN_METHOD(Spawn);
+  static NAN_METHOD(Resume);
+  static NAN_METHOD(Kill);
+  static NAN_METHOD(Attach);
 
   v8::Persistent<v8::Object> events_;
 };

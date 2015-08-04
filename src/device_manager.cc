@@ -11,7 +11,6 @@
 #define DEVICE_MANAGER_DATA_WRAPPERS "device_manager:wrappers"
 
 using v8::Array;
-using v8::FunctionCallbackInfo;
 using v8::Handle;
 using v8::Isolate;
 using v8::Local;
@@ -19,9 +18,6 @@ using v8::Object;
 using v8::String;
 using v8::Value;
 using Nan::HandleScope;
-using Nan::New;
-using Nan::NewInstance;
-using Nan::Set;
 
 namespace frida {
 
@@ -67,7 +63,7 @@ void DeviceManager::Dispose(Runtime* runtime) {
   runtime->SetDataPointer(DEVICE_MANAGER_DATA_WRAPPERS, NULL);
 }
 
-void DeviceManager::New(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(DeviceManager::New) {
   HandleScope();
 
   if (info.IsConstructCall()) {
@@ -107,7 +103,7 @@ class CloseOperation : public Operation<FridaDeviceManager> {
   }
 };
 
-void DeviceManager::Close(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(DeviceManager::Close) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -149,7 +145,7 @@ class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
   FridaDeviceList* devices_;
 };
 
-void DeviceManager::EnumerateDevices(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(DeviceManager::EnumerateDevices) {
   HandleScope();
 
   auto isolate = info.GetIsolate();

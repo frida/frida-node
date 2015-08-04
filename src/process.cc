@@ -68,7 +68,7 @@ Local<Object> Process::New(gpointer handle, Runtime* runtime) {
   return ctor->NewInstance(argc, argv);
 }
 
-void Process::New(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Process::New) {
   HandleScope();
 
   if (info.IsConstructCall()) {
@@ -90,8 +90,7 @@ void Process::New(const Nan::FunctionCallbackInfo<Value>& info) {
   }
 }
 
-void Process::GetPid(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Process::GetPid) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -102,8 +101,7 @@ void Process::GetPid(Local<String> property,
       Integer::New(isolate, frida_process_get_pid(handle)));
 }
 
-void Process::GetName(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Process::GetName) {
   HandleScope();
 
   auto handle = ObjectWrap::Unwrap<Process>(
@@ -113,8 +111,7 @@ void Process::GetName(Local<String> property,
       Nan::New(frida_process_get_name(handle)).ToLocalChecked());
 }
 
-void Process::GetSmallIcon(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Process::GetSmallIcon) {
   HandleScope();
 
   auto wrapper = ObjectWrap::Unwrap<Process>(info.Holder());
@@ -124,8 +121,7 @@ void Process::GetSmallIcon(Local<String> property,
       Icon::New(frida_process_get_small_icon(handle), wrapper->runtime_));
 }
 
-void Process::GetLargeIcon(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Process::GetLargeIcon) {
   HandleScope();
 
   auto wrapper = ObjectWrap::Unwrap<Process>(info.Holder());

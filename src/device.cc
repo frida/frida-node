@@ -18,7 +18,6 @@ using v8::DEFAULT;
 using v8::Exception;
 using v8::External;
 using v8::Function;
-using v8::FunctionCallbackInfo;
 using v8::Handle;
 using v8::Integer;
 using v8::Isolate;
@@ -26,7 +25,6 @@ using v8::Local;
 using v8::Null;
 using v8::Object;
 using v8::Persistent;
-using v8::PropertyCallbackInfo;
 using v8::ReadOnly;
 using v8::String;
 using v8::Value;
@@ -88,7 +86,7 @@ Local<Object> Device::New(gpointer handle, Runtime* runtime) {
   return ctor->NewInstance(argc, argv);
 }
 
-void Device::New(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Device::New) {
   HandleScope();
 
   if (info.IsConstructCall()) {
@@ -112,8 +110,7 @@ void Device::New(const Nan::FunctionCallbackInfo<Value>& info) {
   }
 }
 
-void Device::GetId(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Device::GetId) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -124,8 +121,7 @@ void Device::GetId(Local<String> property,
       Integer::NewFromUnsigned(isolate, frida_device_get_id(handle)));
 }
 
-void Device::GetName(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Device::GetName) {
   HandleScope();
 
   auto handle = ObjectWrap::Unwrap<Device>(
@@ -135,8 +131,7 @@ void Device::GetName(Local<String> property,
       Nan::New(frida_device_get_name(handle)).ToLocalChecked());
 }
 
-void Device::GetIcon(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Device::GetIcon) {
   HandleScope();
 
   auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
@@ -146,8 +141,7 @@ void Device::GetIcon(Local<String> property,
       wrapper->runtime_));
 }
 
-void Device::GetType(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Device::GetType) {
   HandleScope();
 
   auto handle = ObjectWrap::Unwrap<Device>(
@@ -195,7 +189,7 @@ class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
   FridaApplication* application_;
 };
 
-void Device::GetFrontmostApplication(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Device::GetFrontmostApplication) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -237,7 +231,7 @@ class EnumerateApplicationsOperation : public Operation<FridaDevice> {
   FridaApplicationList* applications_;
 };
 
-void Device::EnumerateApplications(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Device::EnumerateApplications) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -279,7 +273,7 @@ class EnumerateProcessesOperation : public Operation<FridaDevice> {
   FridaProcessList* processes_;
 };
 
-void Device::EnumerateProcesses(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Device::EnumerateProcesses) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -325,7 +319,7 @@ class SpawnOperation : public Operation<FridaDevice> {
   guint pid_;
 };
 
-void Device::Spawn(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Device::Spawn) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -384,7 +378,7 @@ class ResumeOperation : public Operation<FridaDevice> {
   const guint pid_;
 };
 
-void Device::Resume(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Device::Resume) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -427,7 +421,7 @@ class KillOperation : public Operation<FridaDevice> {
   const guint pid_;
 };
 
-void Device::Kill(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Device::Kill) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -473,7 +467,7 @@ class AttachOperation : public Operation<FridaDevice> {
   FridaSession* session_;
 };
 
-void Device::Attach(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Device::Attach) {
   HandleScope();
 
   auto isolate = info.GetIsolate();

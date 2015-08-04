@@ -72,7 +72,7 @@ Local<Object> Session::New(gpointer handle, Runtime* runtime) {
   return ctor->NewInstance(argc, argv);
 }
 
-void Session::New(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Session::New) {
   HandleScope();
 
   if (info.IsConstructCall()) {
@@ -100,8 +100,7 @@ void Session::New(const Nan::FunctionCallbackInfo<Value>& info) {
   }
 }
 
-void Session::GetPid(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Session::GetPid) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -127,7 +126,7 @@ class DetachOperation : public Operation<FridaSession> {
   }
 };
 
-void Session::Detach(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Session::Detach) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -170,8 +169,7 @@ class CreateScriptOperation : public Operation<FridaSession> {
   gchar* source_;
   FridaScript* script_;
 };
-
-void Session::CreateScript(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Session::CreateScript) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -217,7 +215,7 @@ class EnableDebuggerOperation : public Operation<FridaSession> {
   guint16 port_;
 };
 
-void Session::EnableDebugger(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Session::EnableDebugger) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -251,7 +249,7 @@ class DisableDebuggerOperation : public Operation<FridaSession> {
   }
 };
 
-void Session::DisableDebugger(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Session::DisableDebugger) {
   HandleScope();
 
   auto isolate = info.GetIsolate();

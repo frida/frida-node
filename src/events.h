@@ -24,10 +24,10 @@ class Events : public GLibObject {
       Runtime* runtime);
   ~Events();
 
-  static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static NAN_METHOD(New);
 
-  static void Listen(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static void Unlisten(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static NAN_METHOD(Listen);
+  static NAN_METHOD(Unlisten);
 
   bool GetSignalArguments(
       const Nan::FunctionCallbackInfo<v8::Value>& info,

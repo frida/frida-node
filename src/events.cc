@@ -109,7 +109,7 @@ void Events::SetUnlistenCallback(UnlistenCallback callback,
   unlisten_data_ = user_data;
 }
 
-void Events::New(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Events::New) {
   HandleScope();
 
   if (info.IsConstructCall()) {
@@ -134,7 +134,7 @@ void Events::New(const Nan::FunctionCallbackInfo<Value>& info) {
   }
 }
 
-void Events::Listen(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Events::Listen) {
   HandleScope();
 
   auto obj = info.Holder();
@@ -164,7 +164,7 @@ void Events::Listen(const Nan::FunctionCallbackInfo<Value>& info) {
   }
 }
 
-void Events::Unlisten(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Events::Unlisten) {
   HandleScope();
 
   auto isolate = info.GetIsolate();

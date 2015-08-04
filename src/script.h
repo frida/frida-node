@@ -17,11 +17,11 @@ class Script : public GLibObject {
   explicit Script(FridaScript* handle, Runtime* runtime);
   ~Script();
 
-  static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static NAN_METHOD(New);
 
-  static void Load(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static void Unload(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static void PostMessage(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static NAN_METHOD(Load);
+  static NAN_METHOD(Unload);
+  static NAN_METHOD(PostMessage);
 
   static v8::Local<v8::Value> TransformMessageEvent(v8::Isolate* isolate,
       const gchar* name, guint index, const GValue* value, gpointer user_data);

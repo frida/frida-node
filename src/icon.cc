@@ -72,7 +72,7 @@ Local<Value> Icon::New(gpointer handle, Runtime* runtime) {
   return ctor->NewInstance(argc, argv);
 }
 
-void Icon::New(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Icon::New) {
   HandleScope();
 
   if (info.IsConstructCall()) {
@@ -94,8 +94,7 @@ void Icon::New(const Nan::FunctionCallbackInfo<Value>& info) {
   }
 }
 
-void Icon::GetWidth(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Icon::GetWidth) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -106,8 +105,7 @@ void Icon::GetWidth(Local<String> property,
       Integer::New(isolate, frida_icon_get_width(handle)));
 }
 
-void Icon::GetHeight(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Icon::GetHeight) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -118,8 +116,7 @@ void Icon::GetHeight(Local<String> property,
       Integer::New(isolate, frida_icon_get_height(handle)));
 }
 
-void Icon::GetRowstride(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Icon::GetRowstride) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -130,8 +127,7 @@ void Icon::GetRowstride(Local<String> property,
       Integer::New(isolate, frida_icon_get_rowstride(handle)));
 }
 
-void Icon::GetPixels(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Icon::GetPixels) {
   HandleScope();
 
   auto handle = ObjectWrap::Unwrap<Icon>(

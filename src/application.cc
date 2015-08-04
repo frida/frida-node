@@ -69,7 +69,7 @@ Local<Object> Application::New(gpointer handle, Runtime* runtime) {
   return ctor->NewInstance(argc, argv);
 }
 
-void Application::New(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Application::New) {
   HandleScope();
 
   if (info.IsConstructCall()) {
@@ -91,8 +91,7 @@ void Application::New(const Nan::FunctionCallbackInfo<Value>& info) {
   }
 }
 
-void Application::GetIdentifier(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Application::GetIdentifier) {
   HandleScope();
 
   auto handle = ObjectWrap::Unwrap<Application>(
@@ -102,8 +101,7 @@ void Application::GetIdentifier(Local<String> property,
       Nan::New(frida_application_get_identifier(handle)).ToLocalChecked());
 }
 
-void Application::GetName(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Application::GetName) {
   HandleScope();
 
   auto handle = ObjectWrap::Unwrap<Application>(
@@ -113,8 +111,7 @@ void Application::GetName(Local<String> property,
       Nan::New(frida_application_get_name(handle)).ToLocalChecked());
 }
 
-void Application::GetPid(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Application::GetPid) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -125,8 +122,7 @@ void Application::GetPid(Local<String> property,
       Integer::NewFromUnsigned(isolate, frida_application_get_pid(handle)));
 }
 
-void Application::GetSmallIcon(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Application::GetSmallIcon) {
   HandleScope();
 
   auto wrapper = ObjectWrap::Unwrap<Application>(info.Holder());
@@ -136,8 +132,7 @@ void Application::GetSmallIcon(Local<String> property,
       Icon::New(frida_application_get_small_icon(handle), wrapper->runtime_));
 }
 
-void Application::GetLargeIcon(Local<String> property,
-    const Nan::PropertyCallbackInfo<Value>& info) {
+NAN_PROPERTY_GETTER(Application::GetLargeIcon) {
   HandleScope();
 
   auto wrapper = ObjectWrap::Unwrap<Application>(info.Holder());

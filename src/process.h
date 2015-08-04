@@ -16,16 +16,12 @@ class Process : public GLibObject {
   explicit Process(FridaProcess* handle, Runtime* runtime);
   ~Process();
 
-  static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static NAN_METHOD(New);
 
-  static void GetPid(v8::Local<v8::String> property,
-      const Nan::PropertyCallbackInfo<v8::Value>& info);
-  static void GetName(v8::Local<v8::String> property,
-      const Nan::PropertyCallbackInfo<v8::Value>& info);
-  static void GetSmallIcon(v8::Local<v8::String> property,
-      const Nan::PropertyCallbackInfo<v8::Value>& info);
-  static void GetLargeIcon(v8::Local<v8::String> property,
-      const Nan::PropertyCallbackInfo<v8::Value>& info);
+  static NAN_PROPERTY_GETTER(GetPid);
+  static NAN_PROPERTY_GETTER(GetName);
+  static NAN_PROPERTY_GETTER(GetSmallIcon);
+  static NAN_PROPERTY_GETTER(GetLargeIcon);
 };
 
 }

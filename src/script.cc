@@ -61,7 +61,7 @@ Local<Object> Script::New(gpointer handle, Runtime* runtime) {
   return ctor->NewInstance(argc, argv);
 }
 
-void Script::New(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Script::New) {
   HandleScope();
 
   if (info.IsConstructCall()) {
@@ -104,7 +104,7 @@ class LoadOperation : public Operation<FridaScript> {
   }
 };
 
-void Script::Load(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Script::Load) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -132,7 +132,7 @@ class UnloadOperation : public Operation<FridaScript> {
   }
 };
 
-void Script::Unload(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Script::Unload) {
   HandleScope();
 
   auto isolate = info.GetIsolate();
@@ -169,7 +169,7 @@ class PostMessageOperation : public Operation<FridaScript> {
   gchar* message_;
 };
 
-void Script::PostMessage(const Nan::FunctionCallbackInfo<Value>& info) {
+NAN_METHOD(Script::PostMessage) {
   HandleScope();
 
   auto isolate = info.GetIsolate();

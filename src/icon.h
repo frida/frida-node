@@ -17,16 +17,13 @@ class Icon : public GLibObject {
   explicit Icon(FridaIcon* handle, Runtime* runtime);
   ~Icon();
 
-  static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static NAN_METHOD(New);
 
-  static void GetWidth(v8::Local<v8::String> property,
-      const Nan::PropertyCallbackInfo<v8::Value>& info);
-  static void GetHeight(v8::Local<v8::String> property,
-      const Nan::PropertyCallbackInfo<v8::Value>& info);
-  static void GetRowstride(v8::Local<v8::String> property,
-      const Nan::PropertyCallbackInfo<v8::Value>& info);
-  static void GetPixels(v8::Local<v8::String> property,
-      const Nan::PropertyCallbackInfo<v8::Value>& info);
+  static NAN_PROPERTY_GETTER(GetWidth);
+  static NAN_PROPERTY_GETTER(GetHeight);
+  static NAN_PROPERTY_GETTER(GetRowstride);
+  static NAN_PROPERTY_GETTER(GetPixels);
+
 };
 
 }

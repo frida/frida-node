@@ -17,15 +17,14 @@ class Session : public GLibObject {
   explicit Session(FridaSession* handle, Runtime* runtime);
   ~Session();
 
-  static void New(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static NAN_METHOD(New);
 
-  static void GetPid(v8::Local<v8::String> property,
-      const Nan::PropertyCallbackInfo<v8::Value>& info);
+  static NAN_PROPERTY_GETTER(GetPid);
 
-  static void Detach(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static void CreateScript(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static void EnableDebugger(const Nan::FunctionCallbackInfo<v8::Value>& info);
-  static void DisableDebugger(const Nan::FunctionCallbackInfo<v8::Value>& info);
+  static NAN_METHOD(Detach);
+  static NAN_METHOD(CreateScript);
+  static NAN_METHOD(EnableDebugger);
+  static NAN_METHOD(DisableDebugger);
 
   v8::Persistent<v8::Object> events_;
 };
