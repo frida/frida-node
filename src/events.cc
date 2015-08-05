@@ -45,8 +45,7 @@ static void events_closure_finalize(gpointer data, GClosure* closure);
 static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
     guint n_param_values, const GValue* param_values, gpointer invocation_hint,
     gpointer marshal_data);
-static Local<Value> events_closure_gvalue_to_jsvalue(Isolate* isolate,
-    const GValue* gvalue);
+static Local<Value> events_closure_gvalue_to_jsvalue(const GValue* gvalue);
 
 Events::Events(gpointer handle, TransformCallback transform,
     gpointer transform_data, Runtime* runtime)
@@ -70,7 +69,7 @@ void Events::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
   auto name = Nan::New("Events").ToLocalChecked();
-  auto tpl = CreateTemplate(isolate, name, Events::New, runtime);
+  auto tpl = CreateTemplate(name, Events::New, runtime);
 
   Nan::SetPrototypeMethod(tpl, "listen", Listen);
   Nan::SetPrototypeMethod(tpl, "unlisten", Unlisten);
@@ -83,16 +82,15 @@ void Events::Init(Handle<Object> exports, Runtime* runtime) {
 
 Local<Object> Events::New(gpointer handle, Runtime* runtime,
     TransformCallback transform, gpointer transform_data) {
-  auto isolate = Isolate::GetCurrent();
 
-  auto ctor = Local<Function>::New(isolate,
+  auto ctor = Nan::New<v8::Function>(
       *static_cast<v8::Persistent<Function>*>(
       runtime->GetDataPointer(EVENTS_DATA_CONSTRUCTOR)));
   const int argc = 3;
   Local<Value> argv[argc] = {
-    External::New(isolate, handle),
-    External::New(isolate, reinterpret_cast<void*>(transform)),
-    External::New(isolate, transform_data)
+    Nan::New<v8::External>(handle),
+    Nan::New<v8::External>(reinterpret_cast<void*>(transform)),
+    Nan::New<v8::External>(transform_data)
   };
   return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
@@ -167,7 +165,6 @@ NAN_METHOD(Events::Listen) {
 NAN_METHOD(Events::Unlisten) {
   HandleScope scope;
 
-  auto isolate = info.GetIsolate();
   auto wrapper = ObjectWrap::Unwrap<Events>(info.Holder());
 
   guint signal_id;
@@ -178,8 +175,7 @@ NAN_METHOD(Events::Unlisten) {
   for (GSList* cur = wrapper->closures_; cur != NULL; cur = cur->next) {
     auto events_closure = static_cast<EventsClosure*>(cur->data);
     auto closure = reinterpret_cast<GClosure*>(events_closure);
-    auto closure_callback = Local<Function>::New(isolate,
-        *events_closure->callback);
+    auto closure_callback = Nan::New<v8::Function>(*events_closure->callback);
     if (events_closure->signal_id == signal_id &&
         closure_callback->SameValue(callback)) {
       if (wrapper->unlisten_ != NULL) {
@@ -284,8 +280,6 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
 
   self->runtime->GetUVContext()->Schedule([=]() {
     if (self->alive) {
-      auto isolate = Isolate::GetCurrent();
-
       auto transform = self->transform;
       auto transform_data = self->transform_data;
       auto signal_name = g_signal_name(self->signal_id);
@@ -295,14 +289,14 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
       for (guint i = 0; i != args->len; i++) {
         auto value = &g_array_index(args, GValue, i);
         argv[i] = transform != NULL
-            ? transform(isolate, signal_name, i, value, transform_data)
+            ? transform(signal_name, i, value, transform_data)
             : Local<Value>();
         if (argv[i].IsEmpty())
-          argv[i] = events_closure_gvalue_to_jsvalue(isolate, value);
+          argv[i] = events_closure_gvalue_to_jsvalue(value);
       }
 
-      auto recv = Local<Object>::New(isolate, *self->parent);
-      auto callback = Local<Function>::New(isolate, *self->callback);
+      auto recv = Nan::New<v8::Object>(*self->parent);
+      auto callback = Nan::New<v8::Function>(*self->callback);
       callback->Call(recv, argc, argv);
 
       delete[] argv;
@@ -316,21 +310,20 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
   });
 }
 
-static Local<Value> events_closure_gvalue_to_jsvalue(Isolate* isolate,
-    const GValue* gvalue) {
+static Local<Value> events_closure_gvalue_to_jsvalue(const GValue* gvalue) {
   switch (G_VALUE_TYPE(gvalue)) {
     case G_TYPE_BOOLEAN:
-      return Boolean::New(isolate, g_value_get_boolean(gvalue));
+      return Nan::New<v8::Boolean>(g_value_get_boolean(gvalue));
     case G_TYPE_INT:
-      return Integer::New(isolate, g_value_get_int(gvalue));
+      return Nan::New<v8::Integer>(g_value_get_int(gvalue));
     case G_TYPE_UINT:
-      return Integer::NewFromUnsigned(isolate, g_value_get_uint(gvalue));
+      return Nan::New<v8::Uint32>(g_value_get_uint(gvalue));
     case G_TYPE_FLOAT:
-      return Number::New(isolate, g_value_get_float(gvalue));
+      return Nan::New<v8::Number>(g_value_get_float(gvalue));
     case G_TYPE_DOUBLE:
-      return Number::New(isolate, g_value_get_double(gvalue));
+      return Nan::New<v8::Number>(g_value_get_float(gvalue));
     case G_TYPE_STRING:
-      return Nan::New(g_value_get_string(gvalue)).ToLocalChecked();
+      return Nan::New<v8::String>(g_value_get_string(gvalue)).ToLocalChecked();
     case G_TYPE_VARIANT: {
       auto variant = g_value_get_variant (gvalue);
       g_assert(variant != NULL);

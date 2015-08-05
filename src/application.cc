@@ -16,9 +16,7 @@ using v8::Isolate;
 using v8::Local;
 using v8::Object;
 using v8::ReadOnly;
-using v8::String;
 using v8::Value;
-using v8::Persistent;
 using Nan::HandleScope;
 
 namespace frida {
@@ -36,7 +34,7 @@ void Application::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
   auto name = Nan::New("Application").ToLocalChecked();
-  auto tpl = CreateTemplate(isolate, name, Application::New, runtime);
+  auto tpl = CreateTemplate(name, Application::New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
@@ -55,17 +53,16 @@ void Application::Init(Handle<Object> exports, Runtime* runtime) {
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
   runtime->SetDataPointer(APPLICATION_DATA_CONSTRUCTOR,
-      new v8::Persistent<Function>(isolate, ctor));
+      new v8::Persistent<v8::Function>(isolate, ctor));
 }
 
 Local<Object> Application::New(gpointer handle, Runtime* runtime) {
-  auto isolate = Isolate::GetCurrent();
-
-  auto ctor = Local<Function>::New(isolate,
-      *static_cast<v8::Persistent<Function>*>(
+  auto ctor = Nan::New<v8::Function>(
+    *static_cast<v8::Persistent<v8::Function>*>(
       runtime->GetDataPointer(APPLICATION_DATA_CONSTRUCTOR)));
+
   const int argc = 1;
-  Local<Value> argv[argc] = { External::New(isolate, handle) };
+  Local<Value> argv[argc] = { Nan::New<v8::External>(handle) };
   return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
 

@@ -12,15 +12,12 @@
 
 using v8::AccessorSignature;
 using v8::DEFAULT;
-using v8::Exception;
 using v8::External;
 using v8::Function;
 using v8::Handle;
-using v8::Integer;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
-using v8::Persistent;
 using v8::ReadOnly;
 using v8::String;
 using v8::Value;
@@ -42,7 +39,7 @@ void Session::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
   auto name = Nan::New("Session").ToLocalChecked();
-  auto tpl = CreateTemplate(isolate, name, Session::New, runtime);
+  auto tpl = CreateTemplate(name, Session::New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
@@ -62,13 +59,11 @@ void Session::Init(Handle<Object> exports, Runtime* runtime) {
 }
 
 Local<Object> Session::New(gpointer handle, Runtime* runtime) {
-  auto isolate = Isolate::GetCurrent();
-
-  auto ctor = Local<Function>::New(isolate,
-      *static_cast<v8::Persistent<Function>*>(
+  auto ctor = Nan::New<v8::Function>(
+    *static_cast<v8::Persistent<Function>*>(
       runtime->GetDataPointer(SESSION_DATA_CONSTRUCTOR)));
   const int argc = 1;
-  Local<Value> argv[argc] = { External::New(isolate, handle) };
+  Local<Value> argv[argc] = { Nan::New<v8::External>(handle) };
   return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
 
@@ -103,12 +98,11 @@ NAN_METHOD(Session::New) {
 NAN_PROPERTY_GETTER(Session::GetPid) {
   HandleScope scope;
 
-  auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Session>(
       info.Holder())->GetHandle<FridaSession>();
 
-  info.GetReturnValue().Set(
-      Integer::NewFromUnsigned(isolate, frida_session_get_pid(handle)));
+  info.GetReturnValue().Set(Nan::New<v8::Uint32>(
+      frida_session_get_pid(handle)));
 }
 
 class DetachOperation : public Operation<FridaSession> {
@@ -122,7 +116,7 @@ class DetachOperation : public Operation<FridaSession> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Undefined(isolate);
+    return Nan::Undefined();
   }
 };
 
@@ -209,7 +203,7 @@ class EnableDebuggerOperation : public Operation<FridaSession> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Undefined(isolate);
+    return Nan::Undefined();
   }
 
   guint16 port_;
@@ -245,7 +239,7 @@ class DisableDebuggerOperation : public Operation<FridaSession> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Undefined(isolate);
+    return Nan::Undefined();
   }
 };
 

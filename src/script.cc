@@ -10,14 +10,12 @@
 
 #define SCRIPT_DATA_CONSTRUCTOR "script:ctor"
 
-using v8::Exception;
 using v8::External;
 using v8::Function;
 using v8::Handle;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
-using v8::Persistent;
 using v8::String;
 using v8::Value;
 using Nan::HandleScope;
@@ -38,7 +36,7 @@ void Script::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
   auto name = Nan::New("Script").ToLocalChecked();
-  auto tpl = CreateTemplate(isolate, name, New, runtime);
+  auto tpl = CreateTemplate(name, New, runtime);
 
   Nan::SetPrototypeMethod(tpl, "load", Load);
   Nan::SetPrototypeMethod(tpl, "unload", Unload);
@@ -51,13 +49,11 @@ void Script::Init(Handle<Object> exports, Runtime* runtime) {
 }
 
 Local<Object> Script::New(gpointer handle, Runtime* runtime) {
-  auto isolate = Isolate::GetCurrent();
-
-  auto ctor = Local<Function>::New(isolate,
+  auto ctor = Nan::New<v8::Function>(
       *static_cast<v8::Persistent<Function>*>(
       runtime->GetDataPointer(SCRIPT_DATA_CONSTRUCTOR)));
   const int argc = 1;
-  Local<Value> argv[argc] = { External::New(isolate, handle) };
+  Local<Value> argv[argc] = { Nan::New<v8::External>(handle) };
   return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
 
@@ -100,7 +96,7 @@ class LoadOperation : public Operation<FridaScript> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Undefined(isolate);
+    return Nan::Undefined();
   }
 };
 
@@ -128,7 +124,7 @@ class UnloadOperation : public Operation<FridaScript> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Undefined(isolate);
+    return Nan::Undefined();
   }
 };
 
@@ -163,7 +159,7 @@ class PostMessageOperation : public Operation<FridaScript> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Undefined(isolate);
+    return Nan::Undefined();
   }
 
   gchar* message_;
@@ -182,7 +178,7 @@ NAN_METHOD(Script::PostMessage) {
   }
 
   String::Utf8Value message(
-      wrapper->runtime_->ValueToJson(isolate, info[0]));
+      wrapper->runtime_->ValueToJson(info[0]));
 
   auto operation = new PostMessageOperation(g_strdup(*message));
   operation->Schedule(isolate, wrapper);
@@ -190,13 +186,13 @@ NAN_METHOD(Script::PostMessage) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
-Local<Value> Script::TransformMessageEvent(Isolate* isolate,
-    const gchar* name, guint index, const GValue* value, gpointer user_data) {
+Local<Value> Script::TransformMessageEvent(const gchar* name, guint index,
+    const GValue* value, gpointer user_data) {
   if (index != 0 || strcmp(name, "message") != 0)
     return Local<Value>();
   auto self = static_cast<Script*>(user_data);
   auto json = Nan::New(g_value_get_string(value)).ToLocalChecked();
-  return self->runtime_->ValueFromJson(isolate, json);
+  return self->runtime_->ValueFromJson(json);
 }
 
 }

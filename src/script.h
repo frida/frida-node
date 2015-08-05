@@ -23,8 +23,8 @@ class Script : public GLibObject {
   static NAN_METHOD(Unload);
   static NAN_METHOD(PostMessage);
 
-  static v8::Local<v8::Value> TransformMessageEvent(v8::Isolate* isolate,
-      const gchar* name, guint index, const GValue* value, gpointer user_data);
+  static v8::Local<v8::Value> TransformMessageEvent(const gchar* name,
+      guint index, const GValue* value, gpointer user_data);
 
   v8::Persistent<v8::Object> events_;
 };

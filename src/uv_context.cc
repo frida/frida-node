@@ -15,7 +15,6 @@ using v8::Function;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
-using v8::String;
 using v8::Value;
 using Nan::HandleScope;
 
@@ -29,7 +28,7 @@ UVContext::UVContext(uv_loop_t* loop) : usage_count_(0), pending_(NULL) {
   g_cond_init(&cond_);
 
   auto isolate = Isolate::GetCurrent();
-  auto module = Object::New(isolate);
+  auto module = Nan::New<v8::Object>();
   auto process_pending = Function::New(isolate, ProcessPendingWrapper,
       External::New(isolate, this));
   auto process_pending_name = Nan::New("processPending").ToLocalChecked();
@@ -108,8 +107,8 @@ void UVContext::ProcessPendingWrapper(uv_async_t* handle) {
   auto isolate = Isolate::GetCurrent();
 
   auto self = static_cast<UVContext*>(handle->data);
-  auto module = Local<Object>::New(isolate, self->module_);
-  auto process_pending = Local<Function>::New(isolate, self->process_pending_);
+  auto module = Nan::New<v8::Object>(self->module_);
+  auto process_pending = Nan::New<v8::Function>(self->process_pending_);
   node::MakeCallback(isolate, module, process_pending, 0, NULL);
 }
 

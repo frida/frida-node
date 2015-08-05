@@ -7,8 +7,6 @@
 
 using v8::AccessorSignature;
 using v8::DEFAULT;
-using v8::DontEnum;
-using v8::Exception;
 using v8::External;
 using v8::Function;
 using v8::Handle;
@@ -16,10 +14,7 @@ using v8::Integer;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
-using v8::Persistent;
-using v8::PropertyAttribute;
 using v8::ReadOnly;
-using v8::String;
 using v8::Value;
 using Nan::HandleScope;
 
@@ -38,7 +33,7 @@ void Icon::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
   auto name = Nan::New("Icon").ToLocalChecked();
-  auto tpl = CreateTemplate(isolate, name, New, runtime);
+  auto tpl = CreateTemplate(name, New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
@@ -59,16 +54,14 @@ void Icon::Init(Handle<Object> exports, Runtime* runtime) {
 }
 
 Local<Value> Icon::New(gpointer handle, Runtime* runtime) {
-  auto isolate = Isolate::GetCurrent();
-
   if (handle == NULL)
-    return Null(isolate);
+    return Nan::Null();
 
-  auto ctor = Local<Function>::New(isolate,
+  auto ctor = Nan::New<Function>(
       *static_cast<v8::Persistent<Function>*>(
       runtime->GetDataPointer(ICON_DATA_CONSTRUCTOR)));
   const int argc = 1;
-  Local<Value> argv[argc] = { External::New(isolate, handle) };
+  Local<Value> argv[argc] = { Nan::New<v8::External>(handle) };
   return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
 
@@ -97,34 +90,31 @@ NAN_METHOD(Icon::New) {
 NAN_PROPERTY_GETTER(Icon::GetWidth) {
   HandleScope scope;
 
-  auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Icon>(
       info.Holder())->GetHandle<FridaIcon>();
 
-  info.GetReturnValue().Set(
-      Integer::New(isolate, frida_icon_get_width(handle)));
+  info.GetReturnValue().Set(Nan::New<v8::Integer>(
+    frida_icon_get_width(handle)));
 }
 
 NAN_PROPERTY_GETTER(Icon::GetHeight) {
   HandleScope scope;
 
-  auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Icon>(
       info.Holder())->GetHandle<FridaIcon>();
 
-  info.GetReturnValue().Set(
-      Integer::New(isolate, frida_icon_get_height(handle)));
+  info.GetReturnValue().Set(Nan::New<v8::Integer>(
+    frida_icon_get_height(handle)));
 }
 
 NAN_PROPERTY_GETTER(Icon::GetRowstride) {
   HandleScope scope;
 
-  auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Icon>(
       info.Holder())->GetHandle<FridaIcon>();
 
-  info.GetReturnValue().Set(
-      Integer::New(isolate, frida_icon_get_rowstride(handle)));
+  info.GetReturnValue().Set(Nan::New<v8::Integer>(
+    frida_icon_get_rowstride(handle)));
 }
 
 NAN_PROPERTY_GETTER(Icon::GetPixels) {

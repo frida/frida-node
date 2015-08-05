@@ -16,9 +16,8 @@ class GLibObject : public node::ObjectWrap {
       runtime_(runtime) {
   }
 
-  static v8::Local<v8::FunctionTemplate> CreateTemplate(v8::Isolate* isolate,
-      v8::Local<v8::String> name, Nan::FunctionCallback callback,
-      Runtime* runtime);
+  static v8::Local<v8::FunctionTemplate> CreateTemplate(v8::Local<v8::String> name,
+      Nan::FunctionCallback callback, Runtime* runtime);
   static Runtime* GetRuntimeFromConstructorArgs(
       const Nan::FunctionCallbackInfo<v8::Value>& info);
 

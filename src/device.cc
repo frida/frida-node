@@ -13,18 +13,13 @@
 #define DEVICE_DATA_CONSTRUCTOR "device:ctor"
 
 using v8::AccessorSignature;
-using v8::Array;
 using v8::DEFAULT;
-using v8::Exception;
 using v8::External;
 using v8::Function;
 using v8::Handle;
-using v8::Integer;
 using v8::Isolate;
 using v8::Local;
-using v8::Null;
 using v8::Object;
-using v8::Persistent;
 using v8::ReadOnly;
 using v8::String;
 using v8::Value;
@@ -46,7 +41,7 @@ void Device::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
   auto name = Nan::New("Device").ToLocalChecked();
-  auto tpl = CreateTemplate(isolate, name, New, runtime);
+  auto tpl = CreateTemplate(name, New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
@@ -72,17 +67,15 @@ void Device::Init(Handle<Object> exports, Runtime* runtime) {
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
   runtime->SetDataPointer(DEVICE_DATA_CONSTRUCTOR,
-      new v8::Persistent<Function>(isolate, ctor));
+      new v8::Persistent<v8::Function>(isolate, ctor));
 }
 
 Local<Object> Device::New(gpointer handle, Runtime* runtime) {
-  auto isolate = Isolate::GetCurrent();
-
-  auto ctor = Local<Function>::New(isolate,
+  auto ctor = Nan::New<Function>(
       *static_cast<v8::Persistent<Function>*>(
       runtime->GetDataPointer(DEVICE_DATA_CONSTRUCTOR)));
   const int argc = 1;
-  Local<Value> argv[argc] = { External::New(isolate, handle) };
+  Local<Value> argv[argc] = { Nan::New<v8::External>(handle) };
   return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
 
@@ -113,12 +106,11 @@ NAN_METHOD(Device::New) {
 NAN_PROPERTY_GETTER(Device::GetId) {
   HandleScope scope;
 
-  auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Device>(
       info.Holder())->GetHandle<FridaDevice>();
 
-  info.GetReturnValue().Set(
-      Integer::NewFromUnsigned(isolate, frida_device_get_id(handle)));
+  info.GetReturnValue().Set(Nan::New<v8::Uint32>(
+    frida_device_get_id(handle)));
 }
 
 NAN_PROPERTY_GETTER(Device::GetName) {
@@ -182,7 +174,7 @@ class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
       g_object_unref(application_);
       return application;
     } else {
-      return Null(isolate);
+      return Nan::Null();
     }
   }
 
@@ -215,7 +207,7 @@ class EnumerateApplicationsOperation : public Operation<FridaDevice> {
 
   Local<Value> Result(Isolate* isolate) {
     auto size = frida_application_list_size(applications_);
-    auto applications = Array::New(isolate, size);
+    auto applications = Nan::New<v8::Array>(size);
     for (auto i = 0; i != size; i++) {
       auto handle = frida_application_list_get(applications_, i);
       auto application = Application::New(handle, runtime_);
@@ -257,7 +249,7 @@ class EnumerateProcessesOperation : public Operation<FridaDevice> {
 
   Local<Value> Result(Isolate* isolate) {
     auto size = frida_process_list_size(processes_);
-    auto processes = Array::New(isolate, size);
+    auto processes = Nan::New<v8::Array>(size);
     for (auto i = 0; i != size; i++) {
       auto handle = frida_process_list_get(processes_, i);
       auto process = Process::New(handle, runtime_);
@@ -310,7 +302,7 @@ class SpawnOperation : public Operation<FridaDevice> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Integer::NewFromUnsigned(isolate, pid_);
+    return Nan::New<v8::Uint32>(pid_);
   }
 
   gchar* path_;
@@ -328,7 +320,7 @@ NAN_METHOD(Device::Spawn) {
 
   gchar** argv = NULL;
   if (info.Length() >= 1 && info[0]->IsArray()) {
-    auto elements = Local<Array>::Cast(info[0]);
+    auto elements = Local<v8::Array>::Cast(info[0]);
     uint32_t length = elements->Length();
     argv = g_new0(gchar *, length + 1);
     for (uint32_t i = 0; i != length; i++) {
@@ -372,7 +364,7 @@ class ResumeOperation : public Operation<FridaDevice> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Undefined(isolate);
+    return Nan::Undefined();
   }
 
   const guint pid_;
@@ -415,7 +407,7 @@ class KillOperation : public Operation<FridaDevice> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Undefined(isolate);
+    return Nan::Undefined();
   }
 
   const guint pid_;
