@@ -94,7 +94,7 @@ Local<Object> Events::New(gpointer handle, Runtime* runtime,
     External::New(isolate, reinterpret_cast<void*>(transform)),
     External::New(isolate, transform_data)
   };
-  return ctor->NewInstance(argc, argv);
+  return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
 
 void Events::SetListenCallback(ListenCallback callback,

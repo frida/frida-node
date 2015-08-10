@@ -65,7 +65,7 @@ Local<Object> Process::New(gpointer handle, Runtime* runtime) {
       runtime->GetDataPointer(PROCESS_DATA_CONSTRUCTOR)));
   const int argc = 1;
   Local<Value> argv[argc] = { External::New(isolate, handle) };
-  return ctor->NewInstance(argc, argv);
+  return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
 
 NAN_METHOD(Process::New) {
