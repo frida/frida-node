@@ -16,10 +16,10 @@ class DeviceManager : public GLibObject {
   DeviceManager(FridaDeviceManager* handle, Runtime* runtime);
   ~DeviceManager();
 
-  static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static NAN_METHOD(New);
 
-  static void Close(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void EnumerateDevices(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static NAN_METHOD(Close);
+  static NAN_METHOD(EnumerateDevices);
 
   static void OnListen(const gchar* signal, gpointer user_data);
   static void OnUnlisten(const gchar* signal, gpointer user_data);

@@ -4,6 +4,7 @@
 #include "runtime.h"
 
 #include <glib.h>
+#include <nan.h>
 #include <node_object_wrap.h>
 
 namespace frida {
@@ -15,11 +16,10 @@ class GLibObject : public node::ObjectWrap {
       runtime_(runtime) {
   }
 
-  static v8::Local<v8::FunctionTemplate> CreateTemplate(v8::Isolate* isolate,
-      v8::Handle<v8::String> name, v8::FunctionCallback callback,
-      Runtime* runtime);
+  static v8::Local<v8::FunctionTemplate> CreateTemplate(v8::Local<v8::String> name,
+      Nan::FunctionCallback callback, Runtime* runtime);
   static Runtime* GetRuntimeFromConstructorArgs(
-      const v8::FunctionCallbackInfo<v8::Value>& args);
+      const Nan::FunctionCallbackInfo<v8::Value>& info);
 
  public:
   template<typename T>

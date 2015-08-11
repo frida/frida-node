@@ -19,11 +19,13 @@ Runtime::Runtime(UVContext* uv_context, GLibContext* glib_context)
   auto isolate = Isolate::GetCurrent();
   auto global = isolate->GetCurrentContext()->Global();
   auto json_module = Local<Object>::Cast(
-      global->Get(NanNew("JSON")));
+      Nan::Get(global, Nan::New("JSON").ToLocalChecked()).ToLocalChecked());
   auto json_stringify = Local<Function>::Cast(
-      json_module->Get(NanNew("stringify")));
+      Nan::Get(json_module,
+        Nan::New("stringify").ToLocalChecked()).ToLocalChecked());
   auto json_parse = Local<Function>::Cast(
-      json_module->Get(NanNew("parse")));
+      Nan::Get(json_module,
+        Nan::New("parse").ToLocalChecked()).ToLocalChecked());
   json_module_.Reset(isolate, json_module);
   json_stringify_.Reset(isolate, json_stringify);
   json_parse_.Reset(isolate, json_parse);
@@ -56,16 +58,16 @@ void Runtime::SetDataPointer(const char* id, void* value) {
   g_hash_table_insert(data_, const_cast<char*>(id), value);
 }
 
-Local<String> Runtime::ValueToJson(Isolate* isolate, Handle<Value> value) {
-  auto module = Local<Object>::New(isolate, json_module_);
-  auto stringify = Local<Function>::New(isolate, json_stringify_);
+Local<String> Runtime::ValueToJson(Handle<Value> value) {
+  auto module = Nan::New<v8::Object>(json_module_);
+  auto stringify = Nan::New<v8::Function>(json_stringify_);
   Local<Value> argv[] = { value };
   return Local<String>::Cast(stringify->Call(module, 1, argv));
 }
 
-Local<Value> Runtime::ValueFromJson(Isolate* isolate, Handle<String> json) {
-  auto module = Local<Object>::New(isolate, json_module_);
-  auto parse = Local<Function>::New(isolate, json_parse_);
+Local<Value> Runtime::ValueFromJson(Handle<String> json) {
+  auto module = Nan::New<v8::Object>(json_module_);
+  auto parse = Nan::New<v8::Function>(json_parse_);
   Local<Value> argv[] = { json };
   return parse->Call(module, 1, argv);
 }

@@ -4,6 +4,7 @@
 #include "glib_object.h"
 
 #include <frida-core.h>
+#include <nan.h>
 
 namespace frida {
 
@@ -16,27 +17,21 @@ class Device : public GLibObject {
   Device(FridaDevice* handle, Runtime* runtime);
   ~Device();
 
-  static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static NAN_METHOD(New);
 
-  static void GetId(v8::Local<v8::String> property,
-      const v8::PropertyCallbackInfo<v8::Value>& info);
-  static void GetName(v8::Local<v8::String> property,
-      const v8::PropertyCallbackInfo<v8::Value>& info);
-  static void GetIcon(v8::Local<v8::String> property,
-      const v8::PropertyCallbackInfo<v8::Value>& info);
-  static void GetType(v8::Local<v8::String> property,
-      const v8::PropertyCallbackInfo<v8::Value>& info);
+  static NAN_PROPERTY_GETTER(GetId);
+  static NAN_PROPERTY_GETTER(GetName);
+  static NAN_PROPERTY_GETTER(GetIcon);
+  static NAN_PROPERTY_GETTER(GetType);
 
-  static void GetFrontmostApplication(
-      const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void EnumerateApplications(
-      const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void EnumerateProcesses(
-      const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void Spawn(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void Resume(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void Kill(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void Attach(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static NAN_METHOD(GetFrontmostApplication);
+  static NAN_METHOD(EnumerateApplications);
+  static NAN_METHOD(EnumerateProcesses);
+
+  static NAN_METHOD(Spawn);
+  static NAN_METHOD(Resume);
+  static NAN_METHOD(Kill);
+  static NAN_METHOD(Attach);
 
   v8::Persistent<v8::Object> events_;
 };

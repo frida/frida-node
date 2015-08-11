@@ -6,6 +6,8 @@
 #include <v8.h>
 #include <nan.h>
 
+using Nan::HandleScope;
+
 namespace frida {
 
 template<typename T>
@@ -82,7 +84,7 @@ class UsageMonitor {
 
   static void OnWeakNotifyWrapper(
       const v8::WeakCallbackData<v8::Object, UsageMonitor<T>>& data) {
-    NanScope();
+    HandleScope scope;
     data.GetParameter()->OnWeakNotify();
   }
 

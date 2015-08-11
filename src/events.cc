@@ -10,7 +10,6 @@ using v8::Boolean;
 using v8::Exception;
 using v8::External;
 using v8::Function;
-using v8::FunctionCallbackInfo;
 using v8::Handle;
 using v8::Integer;
 using v8::Isolate;
@@ -20,6 +19,7 @@ using v8::Object;
 using v8::Persistent;
 using v8::String;
 using v8::Value;
+using Nan::HandleScope;
 
 namespace frida {
 
@@ -30,8 +30,8 @@ struct _EventsClosure {
   gboolean alive;
   guint signal_id;
   guint handler_id;
-  Persistent<Function>* callback;
-  Persistent<Object>* parent;
+  v8::Persistent<Function>* callback;
+  v8::Persistent<Object>* parent;
   Events::TransformCallback transform;
   gpointer transform_data;
   Runtime* runtime;
@@ -45,8 +45,7 @@ static void events_closure_finalize(gpointer data, GClosure* closure);
 static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
     guint n_param_values, const GValue* param_values, gpointer invocation_hint,
     gpointer marshal_data);
-static Local<Value> events_closure_gvalue_to_jsvalue(Isolate* isolate,
-    const GValue* gvalue);
+static Local<Value> events_closure_gvalue_to_jsvalue(const GValue* gvalue);
 
 Events::Events(gpointer handle, TransformCallback transform,
     gpointer transform_data, Runtime* runtime)
@@ -69,32 +68,31 @@ Events::~Events() {
 void Events::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = NanNew("Events");
-  auto tpl = CreateTemplate(isolate, name, New, runtime);
+  auto name = Nan::New("Events").ToLocalChecked();
+  auto tpl = CreateTemplate(name, Events::New, runtime);
 
-  NODE_SET_PROTOTYPE_METHOD(tpl, "listen", Listen);
-  NODE_SET_PROTOTYPE_METHOD(tpl, "unlisten", Unlisten);
+  Nan::SetPrototypeMethod(tpl, "listen", Listen);
+  Nan::SetPrototypeMethod(tpl, "unlisten", Unlisten);
 
-  auto ctor = tpl->GetFunction();
-  exports->Set(name, ctor);
+  auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
+  Nan::Set(exports, name, ctor);
   runtime->SetDataPointer(EVENTS_DATA_CONSTRUCTOR,
-      new Persistent<Function>(isolate, ctor));
+      new v8::Persistent<Function>(isolate, ctor));
 }
 
 Local<Object> Events::New(gpointer handle, Runtime* runtime,
     TransformCallback transform, gpointer transform_data) {
-  auto isolate = Isolate::GetCurrent();
 
-  auto ctor = Local<Function>::New(isolate,
-      *static_cast<Persistent<Function>*>(
+  auto ctor = Nan::New<v8::Function>(
+      *static_cast<v8::Persistent<Function>*>(
       runtime->GetDataPointer(EVENTS_DATA_CONSTRUCTOR)));
   const int argc = 3;
   Local<Value> argv[argc] = {
-    External::New(isolate, handle),
-    External::New(isolate, reinterpret_cast<void*>(transform)),
-    External::New(isolate, transform_data)
+    Nan::New<v8::External>(handle),
+    Nan::New<v8::External>(reinterpret_cast<void*>(transform)),
+    Nan::New<v8::External>(transform_data)
   };
-  return ctor->NewInstance(argc, argv);
+  return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
 
 void Events::SetListenCallback(ListenCallback callback,
@@ -109,41 +107,41 @@ void Events::SetUnlistenCallback(UnlistenCallback callback,
   unlisten_data_ = user_data;
 }
 
-void Events::New(const FunctionCallbackInfo<Value>& args) {
-  NanScope();
+NAN_METHOD(Events::New) {
+  HandleScope scope;
 
-  if (args.IsConstructCall()) {
-    if (args.Length() != 3 ||
-        !args[0]->IsExternal() ||
-        !args[1]->IsExternal() ||
-        !args[2]->IsExternal()) {
-      NanThrowTypeError("Bad argument, expected raw handles");
-      NanReturnUndefined();
+  if (info.IsConstructCall()) {
+    if (info.Length() != 3 ||
+        !info[0]->IsExternal() ||
+        !info[1]->IsExternal() ||
+        !info[2]->IsExternal()) {
+      Nan::ThrowTypeError("Bad argument, expected raw handles");
+      return;
     }
-    auto handle = Local<External>::Cast(args[0])->Value();
+    auto handle = Local<External>::Cast(info[0])->Value();
     auto transform = reinterpret_cast<TransformCallback>(
-        Local<External>::Cast(args[1])->Value());
-    auto transform_data = Local<External>::Cast(args[2])->Value();
+        Local<External>::Cast(info[1])->Value());
+    auto transform_data = Local<External>::Cast(info[2])->Value();
     auto wrapper = new Events(handle, transform, transform_data,
-        GetRuntimeFromConstructorArgs(args));
-    auto obj = args.This();
+        GetRuntimeFromConstructorArgs(info));
+    auto obj = info.This();
     wrapper->Wrap(obj);
-    NanReturnValue(obj);
+    info.GetReturnValue().Set(obj);
   } else {
-    NanReturnValue(args.Callee()->NewInstance(0, NULL));
+    info.GetReturnValue().Set(info.Callee()->NewInstance(0, NULL));
   }
 }
 
-void Events::Listen(const FunctionCallbackInfo<Value>& args) {
-  NanScope();
+NAN_METHOD(Events::Listen) {
+  HandleScope scope;
 
-  auto obj = args.Holder();
+  auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Events>(obj);
   auto runtime = wrapper->runtime_;
 
   guint signal_id;
   Local<Function> callback;
-  if (!wrapper->GetSignalArguments(args, signal_id, callback))
+  if (!wrapper->GetSignalArguments(info, signal_id, callback))
     return;
 
   auto events_closure = events_closure_new(signal_id, callback, obj,
@@ -164,22 +162,20 @@ void Events::Listen(const FunctionCallbackInfo<Value>& args) {
   }
 }
 
-void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
-  NanScope();
+NAN_METHOD(Events::Unlisten) {
+  HandleScope scope;
 
-  auto isolate = args.GetIsolate();
-  auto wrapper = ObjectWrap::Unwrap<Events>(args.Holder());
+  auto wrapper = ObjectWrap::Unwrap<Events>(info.Holder());
 
   guint signal_id;
   Local<Function> callback;
-  if (!wrapper->GetSignalArguments(args, signal_id, callback))
+  if (!wrapper->GetSignalArguments(info, signal_id, callback))
     return;
 
   for (GSList* cur = wrapper->closures_; cur != NULL; cur = cur->next) {
     auto events_closure = static_cast<EventsClosure*>(cur->data);
     auto closure = reinterpret_cast<GClosure*>(events_closure);
-    auto closure_callback = Local<Function>::New(isolate,
-        *events_closure->callback);
+    auto closure_callback = Nan::New<v8::Function>(*events_closure->callback);
     if (events_closure->signal_id == signal_id &&
         closure_callback->SameValue(callback)) {
       if (wrapper->unlisten_ != NULL) {
@@ -205,19 +201,19 @@ void Events::Unlisten(const FunctionCallbackInfo<Value>& args) {
   }
 }
 
-bool Events::GetSignalArguments(const FunctionCallbackInfo<Value>& args,
+bool Events::GetSignalArguments(const Nan::FunctionCallbackInfo<Value>& info,
     guint& signal_id, Local<Function>& callback) {
-  if (args.Length() < 2 || !args[0]->IsString() || !args[1]->IsFunction()) {
-    NanThrowTypeError("Bad arguments, expected string and function");
+  if (info.Length() < 2 || !info[0]->IsString() || !info[1]->IsFunction()) {
+    Nan::ThrowTypeError("Bad arguments, expected string and function");
     return false;
   }
-  String::Utf8Value signal_name(Local<String>::Cast(args[0]));
+  String::Utf8Value signal_name(Local<String>::Cast(info[0]));
   signal_id = g_signal_lookup(*signal_name, G_OBJECT_TYPE(handle_));
   if (signal_id == 0) {
-    NanThrowTypeError("Bad event name");
+    Nan::ThrowTypeError("Bad event name");
     return false;
   }
-  callback = Local<Function>::Cast(args[1]);
+  callback = Local<Function>::Cast(info[1]);
   return true;
 }
 
@@ -235,8 +231,8 @@ static EventsClosure* events_closure_new(guint signal_id,
   self->alive = TRUE;
   self->signal_id = signal_id;
   self->handler_id = 0;
-  self->callback = new Persistent<Function>(isolate, callback);
-  self->parent = new Persistent<Object>(isolate, parent);
+  self->callback = new v8::Persistent<Function>(isolate, callback);
+  self->parent = new v8::Persistent<Object>(isolate, parent);
   self->transform = transform;
   self->transform_data = transform_data;
   self->runtime = runtime;
@@ -284,8 +280,6 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
 
   self->runtime->GetUVContext()->Schedule([=]() {
     if (self->alive) {
-      auto isolate = Isolate::GetCurrent();
-
       auto transform = self->transform;
       auto transform_data = self->transform_data;
       auto signal_name = g_signal_name(self->signal_id);
@@ -295,14 +289,14 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
       for (guint i = 0; i != args->len; i++) {
         auto value = &g_array_index(args, GValue, i);
         argv[i] = transform != NULL
-            ? transform(isolate, signal_name, i, value, transform_data)
+            ? transform(signal_name, i, value, transform_data)
             : Local<Value>();
         if (argv[i].IsEmpty())
-          argv[i] = events_closure_gvalue_to_jsvalue(isolate, value);
+          argv[i] = events_closure_gvalue_to_jsvalue(value);
       }
 
-      auto recv = Local<Object>::New(isolate, *self->parent);
-      auto callback = Local<Function>::New(isolate, *self->callback);
+      auto recv = Nan::New<v8::Object>(*self->parent);
+      auto callback = Nan::New<v8::Function>(*self->callback);
       callback->Call(recv, argc, argv);
 
       delete[] argv;
@@ -316,28 +310,32 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
   });
 }
 
-static Local<Value> events_closure_gvalue_to_jsvalue(Isolate* isolate,
-    const GValue* gvalue) {
+static void events_buffer_free(char* data, void* hint) {
+  g_variant_unref (static_cast<GVariant *>(hint));
+}
+
+static Local<Value> events_closure_gvalue_to_jsvalue(const GValue* gvalue) {
   switch (G_VALUE_TYPE(gvalue)) {
     case G_TYPE_BOOLEAN:
-      return Boolean::New(isolate, g_value_get_boolean(gvalue));
+      return Nan::New<v8::Boolean>(g_value_get_boolean(gvalue));
     case G_TYPE_INT:
-      return Integer::New(isolate, g_value_get_int(gvalue));
+      return Nan::New<v8::Integer>(g_value_get_int(gvalue));
     case G_TYPE_UINT:
-      return Integer::NewFromUnsigned(isolate, g_value_get_uint(gvalue));
+      return Nan::New<v8::Uint32>(g_value_get_uint(gvalue));
     case G_TYPE_FLOAT:
-      return Number::New(isolate, g_value_get_float(gvalue));
+      return Nan::New<v8::Number>(g_value_get_float(gvalue));
     case G_TYPE_DOUBLE:
-      return Number::New(isolate, g_value_get_double(gvalue));
+      return Nan::New<v8::Number>(g_value_get_float(gvalue));
     case G_TYPE_STRING:
-      return NanNew(g_value_get_string(gvalue));
+      return Nan::New<v8::String>(g_value_get_string(gvalue)).ToLocalChecked();
     case G_TYPE_VARIANT: {
-      auto variant = g_value_get_variant (gvalue);
+      auto variant = g_value_dup_variant (gvalue);
       g_assert(variant != NULL);
       g_assert(g_variant_is_of_type(variant, G_VARIANT_TYPE("ay")));
-      return NanNewBufferHandle(
-        reinterpret_cast<const char*>(g_variant_get_data(variant)),
-        g_variant_get_size(variant));
+      return Nan::NewBuffer(
+        reinterpret_cast<char*>(const_cast<void*>(g_variant_get_data(
+          variant))), g_variant_get_size(variant), events_buffer_free,
+          variant).ToLocalChecked();
     }
     default:
       g_assert_not_reached();

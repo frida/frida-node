@@ -62,7 +62,7 @@ class Operation {
     if (error_ == NULL) {
       resolver->Resolve(Result(isolate));
     } else {
-      resolver->Reject(v8::Exception::Error(NanNew(error_->message)));
+      resolver->Reject(Nan::Error(error_->message));
     }
     runtime_->GetUVContext()->DecreaseUsage();
     delete this;

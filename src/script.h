@@ -4,6 +4,7 @@
 #include "glib_object.h"
 
 #include <frida-core.h>
+#include <nan.h>
 
 namespace frida {
 
@@ -16,14 +17,14 @@ class Script : public GLibObject {
   explicit Script(FridaScript* handle, Runtime* runtime);
   ~Script();
 
-  static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static NAN_METHOD(New);
 
-  static void Load(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void Unload(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void PostMessage(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static NAN_METHOD(Load);
+  static NAN_METHOD(Unload);
+  static NAN_METHOD(PostMessage);
 
-  static v8::Local<v8::Value> TransformMessageEvent(v8::Isolate* isolate,
-      const gchar* name, guint index, const GValue* value, gpointer user_data);
+  static v8::Local<v8::Value> TransformMessageEvent(const gchar* name,
+      guint index, const GValue* value, gpointer user_data);
 
   v8::Persistent<v8::Object> events_;
 };

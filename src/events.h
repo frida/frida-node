@@ -7,8 +7,8 @@ namespace frida {
 
 class Events : public GLibObject {
  public:
-  typedef v8::Local<v8::Value>(*TransformCallback)(v8::Isolate* isolate,
-      const gchar* name, guint index, const GValue* value, gpointer user_data);
+  typedef v8::Local<v8::Value>(*TransformCallback)(const gchar* name,
+      guint index, const GValue* value, gpointer user_data);
   typedef void (*ListenCallback)(const gchar* signal, gpointer user_data);
   typedef void (*UnlistenCallback)(const gchar* signal, gpointer user_data);
 
@@ -24,13 +24,13 @@ class Events : public GLibObject {
       Runtime* runtime);
   ~Events();
 
-  static void New(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static NAN_METHOD(New);
 
-  static void Listen(const v8::FunctionCallbackInfo<v8::Value>& args);
-  static void Unlisten(const v8::FunctionCallbackInfo<v8::Value>& args);
+  static NAN_METHOD(Listen);
+  static NAN_METHOD(Unlisten);
 
   bool GetSignalArguments(
-      const v8::FunctionCallbackInfo<v8::Value>& args,
+      const Nan::FunctionCallbackInfo<v8::Value>& info,
       guint& signal_id, v8::Local<v8::Function>& callback);
 
   TransformCallback transform_;

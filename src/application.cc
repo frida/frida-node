@@ -8,20 +8,16 @@
 
 using v8::AccessorSignature;
 using v8::DEFAULT;
-using v8::Exception;
 using v8::External;
 using v8::Function;
-using v8::FunctionCallbackInfo;
 using v8::Handle;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
-using v8::Persistent;
-using v8::PropertyCallbackInfo;
 using v8::ReadOnly;
-using v8::String;
 using v8::Value;
+using Nan::HandleScope;
 
 namespace frida {
 
@@ -37,115 +33,109 @@ Application::~Application() {
 void Application::Init(Handle<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
-  auto name = NanNew("Application");
-  auto tpl = CreateTemplate(isolate, name, New, runtime);
+  auto name = Nan::New("Application").ToLocalChecked();
+  auto tpl = CreateTemplate(name, Application::New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  instance_tpl->SetAccessor(NanNew("identifier"),
+  Nan::SetAccessor(instance_tpl, Nan::New("identifier").ToLocalChecked(),
       GetIdentifier, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(NanNew("name"),
+  Nan::SetAccessor(instance_tpl, Nan::New("name").ToLocalChecked(),
       GetName, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(NanNew("pid"),
+  Nan::SetAccessor(instance_tpl, Nan::New("pid").ToLocalChecked(),
       GetPid, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(NanNew("smallIcon"),
+  Nan::SetAccessor(instance_tpl, Nan::New("smallIcon").ToLocalChecked(),
       GetSmallIcon, 0, data, DEFAULT, ReadOnly, signature);
-  instance_tpl->SetAccessor(NanNew("largeIcon"),
+  Nan::SetAccessor(instance_tpl, Nan::New("largeIcon").ToLocalChecked(),
       GetLargeIcon, 0, data, DEFAULT, ReadOnly, signature);
 
-  auto ctor = tpl->GetFunction();
-  exports->Set(name, ctor);
+  auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
+  Nan::Set(exports, name, ctor);
   runtime->SetDataPointer(APPLICATION_DATA_CONSTRUCTOR,
-      new Persistent<Function>(isolate, ctor));
+      new v8::Persistent<v8::Function>(isolate, ctor));
 }
 
 Local<Object> Application::New(gpointer handle, Runtime* runtime) {
-  auto isolate = Isolate::GetCurrent();
-
-  auto ctor = Local<Function>::New(isolate,
-      *static_cast<Persistent<Function>*>(
+  auto ctor = Nan::New<v8::Function>(
+    *static_cast<v8::Persistent<v8::Function>*>(
       runtime->GetDataPointer(APPLICATION_DATA_CONSTRUCTOR)));
+
   const int argc = 1;
-  Local<Value> argv[argc] = { External::New(isolate, handle) };
-  return ctor->NewInstance(argc, argv);
+  Local<Value> argv[argc] = { Nan::New<v8::External>(handle) };
+  return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
 
-void Application::New(const FunctionCallbackInfo<Value>& args) {
-  NanScope();
+NAN_METHOD(Application::New) {
+  HandleScope scope;
 
-  if (args.IsConstructCall()) {
-    if (args.Length() != 1 || !args[0]->IsExternal()) {
-      NanThrowTypeError("Bad argument, expected raw handle");
-      NanReturnUndefined();
+  if (info.IsConstructCall()) {
+    if (info.Length() != 1 || !info[0]->IsExternal()) {
+      Nan::ThrowTypeError("Bad argument, expected raw handle");
+      return;
     }
-    auto runtime = GetRuntimeFromConstructorArgs(args);
+    auto runtime = GetRuntimeFromConstructorArgs(info);
 
     auto handle = static_cast<FridaApplication*>(
-        Local<External>::Cast(args[0])->Value());
+        Local<External>::Cast(info[0])->Value());
     auto wrapper = new Application(handle, runtime);
-    auto obj = args.This();
+    auto obj = info.This();
     wrapper->Wrap(obj);
 
-    NanReturnValue(obj);
+    info.GetReturnValue().Set(obj);
   } else {
-    NanReturnValue(args.Callee()->NewInstance(0, NULL));
+    info.GetReturnValue().Set(info.Callee()->NewInstance(0, NULL));
   }
 }
 
-void Application::GetIdentifier(Local<String> property,
-    const PropertyCallbackInfo<Value>& args) {
-  NanScope();
+NAN_PROPERTY_GETTER(Application::GetIdentifier) {
+  HandleScope scope;
 
   auto handle = ObjectWrap::Unwrap<Application>(
-      args.Holder())->GetHandle<FridaApplication>();
+      info.Holder())->GetHandle<FridaApplication>();
 
-  NanReturnValue(
-      NanNew(frida_application_get_identifier(handle)));
+  info.GetReturnValue().Set(
+      Nan::New(frida_application_get_identifier(handle)).ToLocalChecked());
 }
 
-void Application::GetName(Local<String> property,
-    const PropertyCallbackInfo<Value>& args) {
-  NanScope();
+NAN_PROPERTY_GETTER(Application::GetName) {
+  HandleScope scope;
 
   auto handle = ObjectWrap::Unwrap<Application>(
-      args.Holder())->GetHandle<FridaApplication>();
+      info.Holder())->GetHandle<FridaApplication>();
 
-  NanReturnValue(
-      NanNew(frida_application_get_name(handle)));
+  info.GetReturnValue().Set(
+      Nan::New(frida_application_get_name(handle)).ToLocalChecked());
 }
 
-void Application::GetPid(Local<String> property,
-    const PropertyCallbackInfo<Value>& args) {
-  NanScope();
+NAN_PROPERTY_GETTER(Application::GetPid) {
+  HandleScope scope;
 
-  auto isolate = args.GetIsolate();
+  auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Application>(
-      args.Holder())->GetHandle<FridaApplication>();
+      info.Holder())->GetHandle<FridaApplication>();
 
-  NanReturnValue(
+  info.GetReturnValue().Set(
       Integer::NewFromUnsigned(isolate, frida_application_get_pid(handle)));
 }
 
-void Application::GetSmallIcon(Local<String> property,
-    const PropertyCallbackInfo<Value>& args) {
-  NanScope();
+NAN_PROPERTY_GETTER(Application::GetSmallIcon) {
+  HandleScope scope;
 
-  auto wrapper = ObjectWrap::Unwrap<Application>(args.Holder());
+  auto wrapper = ObjectWrap::Unwrap<Application>(info.Holder());
   auto handle = wrapper->GetHandle<FridaApplication>();
 
-  NanReturnValue(
+  info.GetReturnValue().Set(
       Icon::New(frida_application_get_small_icon(handle), wrapper->runtime_));
 }
 
-void Application::GetLargeIcon(Local<String> property,
-    const PropertyCallbackInfo<Value>& args) {
-  NanScope();
+NAN_PROPERTY_GETTER(Application::GetLargeIcon) {
+  HandleScope scope;
 
-  auto wrapper = ObjectWrap::Unwrap<Application>(args.Holder());
+  auto wrapper = ObjectWrap::Unwrap<Application>(info.Holder());
   auto handle = wrapper->GetHandle<FridaApplication>();
 
-  NanReturnValue(
+  info.GetReturnValue().Set(
       Icon::New(frida_application_get_large_icon(handle), wrapper->runtime_));
 }
 

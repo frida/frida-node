@@ -19,10 +19,8 @@ class Runtime {
   void* GetDataPointer(const char* id);
   void SetDataPointer(const char* id, void* value);
 
-  v8::Local<v8::String> ValueToJson(v8::Isolate* isolate,
-      v8::Handle<v8::Value> value);
-  v8::Local<v8::Value> ValueFromJson(v8::Isolate* isolate,
-      v8::Handle<v8::String> json);
+  v8::Local<v8::String> ValueToJson(v8::Handle<v8::Value> value);
+  v8::Local<v8::Value> ValueFromJson(v8::Handle<v8::String> json);
 
  private:
   UVContext* uv_context_;
