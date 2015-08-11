@@ -310,6 +310,10 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
   });
 }
 
+static void events_buffer_free(char* data, void* hint) {
+  g_variant_unref (static_cast<GVariant *>(hint));
+}
+
 static Local<Value> events_closure_gvalue_to_jsvalue(const GValue* gvalue) {
   switch (G_VALUE_TYPE(gvalue)) {
     case G_TYPE_BOOLEAN:
@@ -325,13 +329,13 @@ static Local<Value> events_closure_gvalue_to_jsvalue(const GValue* gvalue) {
     case G_TYPE_STRING:
       return Nan::New<v8::String>(g_value_get_string(gvalue)).ToLocalChecked();
     case G_TYPE_VARIANT: {
-      auto variant = g_value_get_variant (gvalue);
+      auto variant = g_value_dup_variant (gvalue);
       g_assert(variant != NULL);
       g_assert(g_variant_is_of_type(variant, G_VARIANT_TYPE("ay")));
       return Nan::NewBuffer(
         reinterpret_cast<char*>(const_cast<void*>(g_variant_get_data(
-          variant))),
-        g_variant_get_size(variant)).ToLocalChecked();
+          variant))), g_variant_get_size(variant), events_buffer_free,
+          variant).ToLocalChecked();
     }
     default:
       g_assert_not_reached();
