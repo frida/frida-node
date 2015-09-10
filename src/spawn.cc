@@ -1,0 +1,105 @@
+#include "spawn.h"
+
+#include <nan.h>
+
+#define SPAWN_DATA_CONSTRUCTOR "spawn:ctor"
+
+using v8::AccessorSignature;
+using v8::DEFAULT;
+using v8::External;
+using v8::Function;
+using v8::Handle;
+using v8::Integer;
+using v8::Isolate;
+using v8::Local;
+using v8::Object;
+using v8::Persistent;
+using v8::ReadOnly;
+using v8::Value;
+using Nan::HandleScope;
+
+namespace frida {
+
+Spawn::Spawn(FridaSpawn* handle, Runtime* runtime)
+    : GLibObject(handle, runtime) {
+  g_object_ref(handle_);
+}
+
+Spawn::~Spawn() {
+  g_object_unref(handle_);
+}
+
+void Spawn::Init(Handle<Object> exports, Runtime* runtime) {
+  auto isolate = Isolate::GetCurrent();
+
+  auto name = Nan::New("Spawn").ToLocalChecked();
+  auto tpl = CreateTemplate(name, Spawn::New, runtime);
+
+  auto instance_tpl = tpl->InstanceTemplate();
+  auto data = Handle<Value>();
+  auto signature = AccessorSignature::New(isolate, tpl);
+  Nan::SetAccessor(instance_tpl, Nan::New("pid").ToLocalChecked(),
+      GetPid, 0, data, DEFAULT, ReadOnly, signature);
+  Nan::SetAccessor(instance_tpl, Nan::New("identifier").ToLocalChecked(),
+      GetIdentifier, 0, data, DEFAULT, ReadOnly, signature);
+
+  auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
+  Nan::Set(exports, name, ctor);
+  runtime->SetDataPointer(SPAWN_DATA_CONSTRUCTOR,
+      new Persistent<Function>(isolate, ctor));
+}
+
+Local<Object> Spawn::New(gpointer handle, Runtime* runtime) {
+  auto ctor = Nan::New<Function>(
+      *static_cast<Persistent<Function>*>(
+      runtime->GetDataPointer(SPAWN_DATA_CONSTRUCTOR)));
+  const int argc = 1;
+  Local<Value> argv[argc] = { Nan::New<External>(handle) };
+  return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
+}
+
+NAN_METHOD(Spawn::New) {
+  HandleScope scope;
+
+  if (info.IsConstructCall()) {
+    if (info.Length() != 1 || !info[0]->IsExternal()) {
+      Nan::ThrowTypeError("Bad argument, expected raw handle");
+      return;
+    }
+    auto runtime = GetRuntimeFromConstructorArgs(info);
+
+    auto handle = static_cast<FridaSpawn*>(
+        Local<External>::Cast(info[0])->Value());
+    auto wrapper = new Spawn(handle, runtime);
+    auto obj = info.This();
+    wrapper->Wrap(obj);
+
+    info.GetReturnValue().Set(obj);
+  } else {
+    info.GetReturnValue().Set(info.Callee()->NewInstance(0, NULL));
+  }
+}
+
+NAN_PROPERTY_GETTER(Spawn::GetPid) {
+  HandleScope scope;
+
+  auto handle = ObjectWrap::Unwrap<Spawn>(
+      info.Holder())->GetHandle<FridaSpawn>();
+
+  info.GetReturnValue().Set(Nan::New<Integer>(frida_spawn_get_pid(handle)));
+}
+
+NAN_PROPERTY_GETTER(Spawn::GetIdentifier) {
+  HandleScope scope;
+
+  auto handle = ObjectWrap::Unwrap<Spawn>(
+      info.Holder())->GetHandle<FridaSpawn>();
+
+  auto identifier = frida_spawn_get_identifier(handle);
+  if (identifier != NULL)
+    info.GetReturnValue().Set(Nan::New(identifier).ToLocalChecked());
+  else
+    info.GetReturnValue().Set(Nan::Null());
+}
+
+}

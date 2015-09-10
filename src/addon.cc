@@ -8,6 +8,7 @@
 #include "runtime.h"
 #include "script.h"
 #include "session.h"
+#include "spawn.h"
 #include "uv_context.h"
 
 #include <node.h>
@@ -36,6 +37,7 @@ static void InitAll(Handle<Object> exports,
   Device::Init(exports, runtime);
   Application::Init(exports, runtime);
   Process::Init(exports, runtime);
+  Spawn::Init(exports, runtime);
   Icon::Init(exports, runtime);
   Session::Init(exports, runtime);
   Script::Init(exports, runtime);

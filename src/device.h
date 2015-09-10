@@ -27,11 +27,18 @@ class Device : public GLibObject {
   static NAN_METHOD(GetFrontmostApplication);
   static NAN_METHOD(EnumerateApplications);
   static NAN_METHOD(EnumerateProcesses);
-
+  static NAN_METHOD(EnableSpawnGating);
+  static NAN_METHOD(DisableSpawnGating);
+  static NAN_METHOD(EnumeratePendingSpawns);
   static NAN_METHOD(Spawn);
   static NAN_METHOD(Resume);
   static NAN_METHOD(Kill);
   static NAN_METHOD(Attach);
+
+  static v8::Local<v8::Value> TransformSpawnedEvent(const gchar* name,
+      guint index, const GValue* value, gpointer user_data);
+  static void OnListen(const gchar* signal, gpointer user_data);
+  static void OnUnlisten(const gchar* signal, gpointer user_data);
 
   v8::Persistent<v8::Object> events_;
 };

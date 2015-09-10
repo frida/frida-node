@@ -6,6 +6,7 @@
 #include "operation.h"
 #include "process.h"
 #include "session.h"
+#include "spawn.h"
 
 #include <nan.h>
 #include <node.h>
@@ -59,6 +60,9 @@ void Device::Init(Handle<Object> exports, Runtime* runtime) {
       GetFrontmostApplication);
   Nan::SetPrototypeMethod(tpl, "enumerateApplications", EnumerateApplications);
   Nan::SetPrototypeMethod(tpl, "enumerateProcesses", EnumerateProcesses);
+  Nan::SetPrototypeMethod(tpl, "enableSpawnGating", EnableSpawnGating);
+  Nan::SetPrototypeMethod(tpl, "disableSpawnGating", DisableSpawnGating);
+  Nan::SetPrototypeMethod(tpl, "enumeratePendingSpawns", EnumeratePendingSpawns);
   Nan::SetPrototypeMethod(tpl, "spawn", Spawn);
   Nan::SetPrototypeMethod(tpl, "resume", Resume);
   Nan::SetPrototypeMethod(tpl, "kill", Kill);
@@ -94,8 +98,14 @@ NAN_METHOD(Device::New) {
     auto wrapper = new Device(handle, runtime);
     auto obj = info.This();
     wrapper->Wrap(obj);
-    Nan::Set(obj, Nan::New("events").ToLocalChecked(),
-        Events::New(handle, runtime));
+    auto events_obj = Events::New(handle, runtime, TransformSpawnedEvent,
+        wrapper);
+
+    Nan::Set(obj, Nan::New("events").ToLocalChecked(), events_obj);
+
+    auto events_wrapper = ObjectWrap::Unwrap<Events>(events_obj);
+    events_wrapper->SetListenCallback(OnListen, wrapper);
+    events_wrapper->SetUnlistenCallback(OnUnlisten, wrapper);
 
     info.GetReturnValue().Set(obj);
   } else {
@@ -273,6 +283,104 @@ NAN_METHOD(Device::EnumerateProcesses) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   auto operation = new EnumerateProcessesOperation();
+  operation->Schedule(isolate, wrapper);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class EnableSpawnGatingOperation : public Operation<FridaDevice> {
+ public:
+  void Begin() {
+    frida_device_enable_spawn_gating(handle_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_device_enable_spawn_gating_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Nan::Undefined();
+  }
+};
+
+NAN_METHOD(Device::EnableSpawnGating) {
+  HandleScope scope;
+
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+
+  auto operation = new EnableSpawnGatingOperation();
+  operation->Schedule(isolate, wrapper);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class DisableSpawnGatingOperation : public Operation<FridaDevice> {
+ public:
+  void Begin() {
+    frida_device_disable_spawn_gating(handle_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_device_disable_spawn_gating_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Nan::Undefined();
+  }
+};
+
+NAN_METHOD(Device::DisableSpawnGating) {
+  HandleScope scope;
+
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+
+  auto operation = new DisableSpawnGatingOperation();
+  operation->Schedule(isolate, wrapper);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class EnumeratePendingSpawnsOperation : public Operation<FridaDevice> {
+ public:
+  void Begin() {
+    frida_device_enumerate_pending_spawns(handle_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    pending_spawns_ = frida_device_enumerate_pending_spawns_finish(handle_,
+        result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    auto size = frida_spawn_list_size(pending_spawns_);
+    auto pending_spawns = Nan::New<v8::Array>(size);
+    for (auto i = 0; i != size; i++) {
+      auto handle = frida_spawn_list_get(pending_spawns_, i);
+      auto spawn = Spawn::New(handle, runtime_);
+      Nan::Set(pending_spawns, i, spawn);
+      g_object_unref(handle);
+    }
+
+    g_object_unref(pending_spawns_);
+
+    return pending_spawns;
+  }
+
+  FridaSpawnList* pending_spawns_;
+};
+
+NAN_METHOD(Device::EnumeratePendingSpawns) {
+  HandleScope scope;
+
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+
+  auto operation = new EnumeratePendingSpawnsOperation();
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
@@ -480,6 +588,30 @@ NAN_METHOD(Device::Attach) {
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+Local<Value> Device::TransformSpawnedEvent(const gchar* name, guint index,
+    const GValue* value, gpointer user_data) {
+  if (index != 0 || strcmp(name, "spawned") != 0)
+    return Local<Value>();
+  auto self = static_cast<Device*>(user_data);
+  return Spawn::New(g_value_get_object(value), self->runtime_);
+}
+
+void Device::OnListen(const gchar* signal, gpointer user_data) {
+  auto wrapper = static_cast<Device*>(user_data);
+
+  if (strcmp(signal, "spawned") == 0) {
+    wrapper->runtime_->GetUVContext()->IncreaseUsage();
+  }
+}
+
+void Device::OnUnlisten(const gchar* signal, gpointer user_data) {
+  auto wrapper = static_cast<Device*>(user_data);
+
+  if (strcmp(signal, "spawned") == 0) {
+    wrapper->runtime_->GetUVContext()->DecreaseUsage();
+  }
 }
 
 }
