@@ -48,6 +48,7 @@
     "package_name": "{module_name}-v{version}-{node_abi}-{platform}-{arch}.tar.gz",
     "host": "https://build.frida.re"
   },
+  "license": "LGPL-2.0 WITH WxWindows-exception-3.1",
   "repository": {
     "type": "git",
     "url": "http://github.com/frida/frida-node.git"
