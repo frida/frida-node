@@ -119,8 +119,8 @@ NAN_PROPERTY_GETTER(Device::GetId) {
   auto handle = ObjectWrap::Unwrap<Device>(
       info.Holder())->GetHandle<FridaDevice>();
 
-  info.GetReturnValue().Set(Nan::New<v8::Uint32>(
-    frida_device_get_id(handle)));
+  info.GetReturnValue().Set(
+      Nan::New(frida_device_get_id(handle)).ToLocalChecked());
 }
 
 NAN_PROPERTY_GETTER(Device::GetName) {
