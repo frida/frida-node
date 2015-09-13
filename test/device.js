@@ -11,7 +11,7 @@ describe('Device', function () {
   it('should have some metadata', function () {
     return frida.getLocalDevice().then(function (device) {
       device.should.have.properties('id', 'name', 'icon', 'type', 'events');
-      device.id.should.be.an.instanceof(Number);
+      device.id.should.be.an.instanceof(String);
       device.name.should.be.an.instanceof(String);
       device.name.should.equal('Local System');
       device.type.should.be.an.instanceof(String);
