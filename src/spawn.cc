@@ -16,7 +16,6 @@ using v8::Object;
 using v8::Persistent;
 using v8::ReadOnly;
 using v8::Value;
-using Nan::HandleScope;
 
 namespace frida {
 
@@ -59,8 +58,6 @@ Local<Object> Spawn::New(gpointer handle, Runtime* runtime) {
 }
 
 NAN_METHOD(Spawn::New) {
-  HandleScope scope;
-
   if (info.IsConstructCall()) {
     if (info.Length() != 1 || !info[0]->IsExternal()) {
       Nan::ThrowTypeError("Bad argument, expected raw handle");
@@ -81,8 +78,6 @@ NAN_METHOD(Spawn::New) {
 }
 
 NAN_PROPERTY_GETTER(Spawn::GetPid) {
-  HandleScope scope;
-
   auto handle = ObjectWrap::Unwrap<Spawn>(
       info.Holder())->GetHandle<FridaSpawn>();
 
@@ -90,8 +85,6 @@ NAN_PROPERTY_GETTER(Spawn::GetPid) {
 }
 
 NAN_PROPERTY_GETTER(Spawn::GetIdentifier) {
-  HandleScope scope;
-
   auto handle = ObjectWrap::Unwrap<Spawn>(
       info.Holder())->GetHandle<FridaSpawn>();
 

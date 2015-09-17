@@ -21,7 +21,6 @@ using v8::Object;
 using v8::ReadOnly;
 using v8::String;
 using v8::Value;
-using Nan::HandleScope;
 
 namespace frida {
 
@@ -68,8 +67,6 @@ Local<Object> Session::New(gpointer handle, Runtime* runtime) {
 }
 
 NAN_METHOD(Session::New) {
-  HandleScope scope;
-
   if (info.IsConstructCall()) {
     if (info.Length() != 1 || !info[0]->IsExternal()) {
       Nan::ThrowTypeError("Bad argument, expected raw handle");
@@ -96,8 +93,6 @@ NAN_METHOD(Session::New) {
 }
 
 NAN_PROPERTY_GETTER(Session::GetPid) {
-  HandleScope scope;
-
   auto handle = ObjectWrap::Unwrap<Session>(
       info.Holder())->GetHandle<FridaSession>();
 
@@ -121,8 +116,6 @@ class DetachOperation : public Operation<FridaSession> {
 };
 
 NAN_METHOD(Session::Detach) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
@@ -164,8 +157,6 @@ class CreateScriptOperation : public Operation<FridaSession> {
   FridaScript* script_;
 };
 NAN_METHOD(Session::CreateScript) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
@@ -210,8 +201,6 @@ class EnableDebuggerOperation : public Operation<FridaSession> {
 };
 
 NAN_METHOD(Session::EnableDebugger) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
@@ -244,8 +233,6 @@ class DisableDebuggerOperation : public Operation<FridaSession> {
 };
 
 NAN_METHOD(Session::DisableDebugger) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);

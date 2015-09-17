@@ -15,7 +15,6 @@ using v8::Isolate;
 using v8::Local;
 using v8::Object;
 using v8::Value;
-using Nan::HandleScope;
 
 namespace frida {
 
@@ -60,8 +59,6 @@ void DeviceManager::Dispose(Runtime* runtime) {
 }
 
 NAN_METHOD(DeviceManager::New) {
-  HandleScope scope;
-
   if (info.IsConstructCall()) {
     auto runtime = GetRuntimeFromConstructorArgs(info);
 
@@ -100,8 +97,6 @@ class CloseOperation : public Operation<FridaDeviceManager> {
 };
 
 NAN_METHOD(DeviceManager::Close) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
@@ -142,8 +137,6 @@ class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
 };
 
 NAN_METHOD(DeviceManager::EnumerateDevices) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);

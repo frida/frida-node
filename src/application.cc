@@ -17,7 +17,6 @@ using v8::Local;
 using v8::Object;
 using v8::ReadOnly;
 using v8::Value;
-using Nan::HandleScope;
 
 namespace frida {
 
@@ -67,8 +66,6 @@ Local<Object> Application::New(gpointer handle, Runtime* runtime) {
 }
 
 NAN_METHOD(Application::New) {
-  HandleScope scope;
-
   if (info.IsConstructCall()) {
     if (info.Length() != 1 || !info[0]->IsExternal()) {
       Nan::ThrowTypeError("Bad argument, expected raw handle");
@@ -89,8 +86,6 @@ NAN_METHOD(Application::New) {
 }
 
 NAN_PROPERTY_GETTER(Application::GetIdentifier) {
-  HandleScope scope;
-
   auto handle = ObjectWrap::Unwrap<Application>(
       info.Holder())->GetHandle<FridaApplication>();
 
@@ -99,8 +94,6 @@ NAN_PROPERTY_GETTER(Application::GetIdentifier) {
 }
 
 NAN_PROPERTY_GETTER(Application::GetName) {
-  HandleScope scope;
-
   auto handle = ObjectWrap::Unwrap<Application>(
       info.Holder())->GetHandle<FridaApplication>();
 
@@ -109,8 +102,6 @@ NAN_PROPERTY_GETTER(Application::GetName) {
 }
 
 NAN_PROPERTY_GETTER(Application::GetPid) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto handle = ObjectWrap::Unwrap<Application>(
       info.Holder())->GetHandle<FridaApplication>();
@@ -120,8 +111,6 @@ NAN_PROPERTY_GETTER(Application::GetPid) {
 }
 
 NAN_PROPERTY_GETTER(Application::GetSmallIcon) {
-  HandleScope scope;
-
   auto wrapper = ObjectWrap::Unwrap<Application>(info.Holder());
   auto handle = wrapper->GetHandle<FridaApplication>();
 
@@ -130,8 +119,6 @@ NAN_PROPERTY_GETTER(Application::GetSmallIcon) {
 }
 
 NAN_PROPERTY_GETTER(Application::GetLargeIcon) {
-  HandleScope scope;
-
   auto wrapper = ObjectWrap::Unwrap<Application>(info.Holder());
   auto handle = wrapper->GetHandle<FridaApplication>();
 

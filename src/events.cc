@@ -19,7 +19,6 @@ using v8::Object;
 using v8::Persistent;
 using v8::String;
 using v8::Value;
-using Nan::HandleScope;
 
 namespace frida {
 
@@ -108,8 +107,6 @@ void Events::SetUnlistenCallback(UnlistenCallback callback,
 }
 
 NAN_METHOD(Events::New) {
-  HandleScope scope;
-
   if (info.IsConstructCall()) {
     if (info.Length() != 3 ||
         !info[0]->IsExternal() ||
@@ -133,8 +130,6 @@ NAN_METHOD(Events::New) {
 }
 
 NAN_METHOD(Events::Listen) {
-  HandleScope scope;
-
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Events>(obj);
   auto runtime = wrapper->runtime_;
@@ -163,8 +158,6 @@ NAN_METHOD(Events::Listen) {
 }
 
 NAN_METHOD(Events::Unlisten) {
-  HandleScope scope;
-
   auto wrapper = ObjectWrap::Unwrap<Events>(info.Holder());
 
   guint signal_id;
