@@ -18,7 +18,6 @@ using v8::Local;
 using v8::Object;
 using v8::String;
 using v8::Value;
-using Nan::HandleScope;
 
 namespace frida {
 
@@ -58,8 +57,6 @@ Local<Object> Script::New(gpointer handle, Runtime* runtime) {
 }
 
 NAN_METHOD(Script::New) {
-  HandleScope scope;
-
   if (info.IsConstructCall()) {
     if (info.Length() != 1 || !info[0]->IsExternal()) {
       Nan::ThrowTypeError("Bad argument, expected raw handle");
@@ -101,8 +98,6 @@ class LoadOperation : public Operation<FridaScript> {
 };
 
 NAN_METHOD(Script::Load) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
@@ -129,8 +124,6 @@ class UnloadOperation : public Operation<FridaScript> {
 };
 
 NAN_METHOD(Script::Unload) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
@@ -166,8 +159,6 @@ class PostMessageOperation : public Operation<FridaScript> {
 };
 
 NAN_METHOD(Script::PostMessage) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);

@@ -24,7 +24,6 @@ using v8::Object;
 using v8::ReadOnly;
 using v8::String;
 using v8::Value;
-using Nan::HandleScope;
 
 namespace frida {
 
@@ -84,8 +83,6 @@ Local<Object> Device::New(gpointer handle, Runtime* runtime) {
 }
 
 NAN_METHOD(Device::New) {
-  HandleScope scope;
-
   if (info.IsConstructCall()) {
     if (info.Length() != 1 || !info[0]->IsExternal()) {
       Nan::ThrowTypeError("Bad argument, expected raw handle");
@@ -114,8 +111,6 @@ NAN_METHOD(Device::New) {
 }
 
 NAN_PROPERTY_GETTER(Device::GetId) {
-  HandleScope scope;
-
   auto handle = ObjectWrap::Unwrap<Device>(
       info.Holder())->GetHandle<FridaDevice>();
 
@@ -124,8 +119,6 @@ NAN_PROPERTY_GETTER(Device::GetId) {
 }
 
 NAN_PROPERTY_GETTER(Device::GetName) {
-  HandleScope scope;
-
   auto handle = ObjectWrap::Unwrap<Device>(
       info.Holder())->GetHandle<FridaDevice>();
 
@@ -134,8 +127,6 @@ NAN_PROPERTY_GETTER(Device::GetName) {
 }
 
 NAN_PROPERTY_GETTER(Device::GetIcon) {
-  HandleScope scope;
-
   auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
   auto handle = wrapper->GetHandle<FridaDevice>();
 
@@ -144,8 +135,6 @@ NAN_PROPERTY_GETTER(Device::GetIcon) {
 }
 
 NAN_PROPERTY_GETTER(Device::GetType) {
-  HandleScope scope;
-
   auto handle = ObjectWrap::Unwrap<Device>(
       info.Holder())->GetHandle<FridaDevice>();
 
@@ -192,8 +181,6 @@ class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::GetFrontmostApplication) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
@@ -234,8 +221,6 @@ class EnumerateApplicationsOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::EnumerateApplications) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
@@ -276,8 +261,6 @@ class EnumerateProcessesOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::EnumerateProcesses) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
@@ -304,8 +287,6 @@ class EnableSpawnGatingOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::EnableSpawnGating) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
@@ -332,8 +313,6 @@ class DisableSpawnGatingOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::DisableSpawnGating) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
@@ -374,8 +353,6 @@ class EnumeratePendingSpawnsOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::EnumeratePendingSpawns) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
@@ -420,8 +397,6 @@ class SpawnOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::Spawn) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
@@ -479,15 +454,12 @@ class ResumeOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::Resume) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   if (info.Length() < 1 || !info[0]->IsNumber()) {
     Nan::ThrowTypeError("Bad argument, expected pid");
-    return;
   }
   auto pid = info[0]->ToInteger()->Value();
   if (pid <= 0) {
@@ -522,8 +494,6 @@ class KillOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::Kill) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
@@ -568,8 +538,6 @@ class AttachOperation : public Operation<FridaDevice> {
 };
 
 NAN_METHOD(Device::Attach) {
-  HandleScope scope;
-
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);

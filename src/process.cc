@@ -16,7 +16,6 @@ using v8::Local;
 using v8::Object;
 using v8::ReadOnly;
 using v8::Value;
-using Nan::HandleScope;
 
 namespace frida {
 
@@ -63,8 +62,6 @@ Local<Object> Process::New(gpointer handle, Runtime* runtime) {
 }
 
 NAN_METHOD(Process::New) {
-  HandleScope scope;
-
   if (info.IsConstructCall()) {
     if (info.Length() != 1 || !info[0]->IsExternal()) {
       Nan::ThrowTypeError("Bad argument, expected raw handle");
@@ -85,8 +82,6 @@ NAN_METHOD(Process::New) {
 }
 
 NAN_PROPERTY_GETTER(Process::GetPid) {
-  HandleScope scope;
-
   auto handle = ObjectWrap::Unwrap<Process>(
       info.Holder())->GetHandle<FridaProcess>();
 
@@ -95,8 +90,6 @@ NAN_PROPERTY_GETTER(Process::GetPid) {
 }
 
 NAN_PROPERTY_GETTER(Process::GetName) {
-  HandleScope scope;
-
   auto handle = ObjectWrap::Unwrap<Process>(
       info.Holder())->GetHandle<FridaProcess>();
 
@@ -105,8 +98,6 @@ NAN_PROPERTY_GETTER(Process::GetName) {
 }
 
 NAN_PROPERTY_GETTER(Process::GetSmallIcon) {
-  HandleScope scope;
-
   auto wrapper = ObjectWrap::Unwrap<Process>(info.Holder());
   auto handle = wrapper->GetHandle<FridaProcess>();
 
@@ -115,8 +106,6 @@ NAN_PROPERTY_GETTER(Process::GetSmallIcon) {
 }
 
 NAN_PROPERTY_GETTER(Process::GetLargeIcon) {
-  HandleScope scope;
-
   auto wrapper = ObjectWrap::Unwrap<Process>(info.Holder());
   auto handle = wrapper->GetHandle<FridaProcess>();
 
