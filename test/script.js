@@ -98,9 +98,10 @@ describe('Script', function () {
       script.events.listen('message', function (message) {
         message.type.should.equal('error');
         message.description.should.equal('Error: Oops!');
-        // TODO: make use of the inline source-map in GumJS
-        // message.lineNumber.should.equal(15);
-        // message.fileName.should.not.equal('script1.js');
+        message.stack.should.equal('Error: Oops!\n    at index.js:15:1');
+        message.fileName.should.equal('index.js');
+        message.lineNumber.should.equal(15);
+        message.columnNumber.should.equal(1);
         done();
       });
       return exp.crashLater();
