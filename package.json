@@ -28,7 +28,7 @@
     "big-integer": "^1.4.4",
     "browserify": "^11.1.0",
     "concat-stream": "^1.5.0",
-    "minimatch": "*",
+    "minimatch": "^2.0.10",
     "mold-source-map": "^0.4.0",
     "nan": "^2.0.9",
     "node-pre-gyp": "0.6.x"
@@ -36,7 +36,6 @@
   "devDependencies": {
     "co": "^4.5.4",
     "jshint": "^2.6.3",
-    "minimatch": "^2.0.10",
     "mocha": "^2.2.0",
     "should": "^5.1.0"
   },
