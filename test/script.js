@@ -70,4 +70,44 @@ describe('Script', function () {
       done();
     });
   });
+
+  it('should support common-js', function (done) {
+    var script, exp;
+
+    frida.load(require.resolve('./cjs'))
+    .then(function (source) {
+      console.log('source:', source);
+      return session.createScript(source);
+    })
+    .then(function (s) {
+      script = s;
+      return script.load();
+    })
+    .then(function () {
+      return script.getExports();
+    })
+    .then(function (e) {
+      exp = e;
+      return exp.add(5, 2);
+    })
+    .then(function (result) {
+      result.should.equal(7);
+      return exp.match('bar.foo', '*.foo');
+    })
+    .then(function (result) {
+      result.should.equal(true);
+      script.events.listen('message', function (message) {
+        message.type.should.equal('error');
+        message.description.should.equal('Error: Oops!');
+        // TODO: make use of the inline source-map in GumJS
+        // message.lineNumber.should.equal(15);
+        // message.fileName.should.not.equal('script1.js');
+        done();
+      });
+      return exp.crashLater();
+    })
+    .catch(function (error) {
+      console.error(error.message);
+    });
+  });
 });
