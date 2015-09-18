@@ -76,7 +76,6 @@ describe('Script', function () {
 
     frida.load(require.resolve('./cjs'))
     .then(function (source) {
-      console.log('source:', source);
       return session.createScript(source);
     })
     .then(function (s) {
