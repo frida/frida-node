@@ -41,6 +41,10 @@ describe('Script', function () {
         '},' +
         'sub(a, b) {' +
           'return a - b;' +
+        '},' +
+        'speak() {' +
+          'const buf = Memory.allocUtf8String("Yo");' +
+          'return Memory.readByteArray(buf, 2);' +
         '}' +
       '};')
     .then(function (s) {
@@ -66,7 +70,14 @@ describe('Script', function () {
     })
     .catch(function (error) {
       error.message.should.equal('No');
+      return exp.speak();
+    })
+    .then(function (buf) {
+      should.deepEqual(buf.toJSON().data, [0x59, 0x6f]);
       done();
+    })
+    .catch(function (error) {
+      console.error(error.message);
     });
   });
 
