@@ -80,44 +80,4 @@ describe('Script', function () {
       console.error(error.message);
     });
   });
-
-  it('should support common-js', function (done) {
-    var script, exp;
-
-    frida.load(require.resolve('./cjs'))
-    .then(function (source) {
-      return session.createScript(source);
-    })
-    .then(function (s) {
-      script = s;
-      return script.load();
-    })
-    .then(function () {
-      return script.getExports();
-    })
-    .then(function (e) {
-      exp = e;
-      return exp.add(5, 2);
-    })
-    .then(function (result) {
-      result.should.equal(7);
-      return exp.match('bar.foo', '*.foo');
-    })
-    .then(function (result) {
-      result.should.equal(true);
-      script.events.listen('message', function (message) {
-        message.type.should.equal('error');
-        message.description.should.equal('Error: Oops!');
-        message.stack.should.equal('Error: Oops!\n    at index.js:15:1');
-        message.fileName.should.equal('index.js');
-        message.lineNumber.should.equal(15);
-        message.columnNumber.should.equal(1);
-        done();
-      });
-      return exp.crashLater();
-    })
-    .catch(function (error) {
-      console.error(error.message);
-    });
-  });
 });
