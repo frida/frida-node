@@ -14,7 +14,7 @@ Install from binary:
 
 Install from source:
 
-    FRIDA=/absolute/path/to/fully/compiled/frida/repo npm install --build-from-source
+    FRIDA=/absolute/path/to/fully/compiled/frida/repo npm install
 
 ## Examples
 
