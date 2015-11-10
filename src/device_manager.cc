@@ -66,7 +66,8 @@ NAN_METHOD(DeviceManager::New) {
     auto wrapper = new DeviceManager(handle, runtime);
     auto obj = info.This();
     wrapper->Wrap(obj);
-    auto events_obj = Events::New(handle, runtime);
+    auto events_obj = Events::New(handle, runtime, TransformDeviceEvents,
+        runtime);
 
     Nan::Set(obj, Nan::New("events").ToLocalChecked(), events_obj);
     g_object_unref(handle);
@@ -147,10 +148,26 @@ NAN_METHOD(DeviceManager::EnumerateDevices) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
+Local<Value> DeviceManager::TransformDeviceEvents(const gchar* name,
+    guint index, const GValue* value, gpointer user_data) {
+  if (index == 0 && (strcmp(name, "added") == 0 ||
+      strcmp(name, "removed") == 0)) {
+    auto runtime = static_cast<Runtime*>(user_data);
+    return Device::New(g_value_get_object(value), runtime);
+  }
+  return Local<Value>();
+}
+
+static bool IsDeviceChangeSignal(const gchar* signal) {
+  return strcmp(signal, "added") == 0 ||
+      strcmp(signal, "removed") == 0 ||
+      strcmp(signal, "changed") == 0;
+}
+
 void DeviceManager::OnListen(const gchar* signal, gpointer user_data) {
   auto wrapper = static_cast<DeviceManager*>(user_data);
 
-  if (strcmp(signal, "changed") == 0) {
+  if (IsDeviceChangeSignal(signal)) {
     wrapper->runtime_->GetUVContext()->IncreaseUsage();
   }
 }
@@ -158,7 +175,7 @@ void DeviceManager::OnListen(const gchar* signal, gpointer user_data) {
 void DeviceManager::OnUnlisten(const gchar* signal, gpointer user_data) {
   auto wrapper = static_cast<DeviceManager*>(user_data);
 
-  if (strcmp(signal, "changed") == 0) {
+  if (IsDeviceChangeSignal(signal)) {
     wrapper->runtime_->GetUVContext()->DecreaseUsage();
   }
 }

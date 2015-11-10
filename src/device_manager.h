@@ -21,6 +21,8 @@ class DeviceManager : public GLibObject {
   static NAN_METHOD(Close);
   static NAN_METHOD(EnumerateDevices);
 
+  static v8::Local<v8::Value> TransformDeviceEvents(const gchar* name,
+      guint index, const GValue* value, gpointer user_data);
   static void OnListen(const gchar* signal, gpointer user_data);
   static void OnUnlisten(const gchar* signal, gpointer user_data);
 
