@@ -1,2 +1,5 @@
+# abi 46
+target[] = 4.0.0
+
 # abi 47
 target[] = 5.0.0
