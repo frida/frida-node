@@ -134,6 +134,10 @@
             "-Wl,--version-script",
             "-Wl,../binding.version",
           ],
+          "library_dirs": [
+            "$(FRIDA)/build/sdk-<(frida_host)/lib32",
+            "$(FRIDA)/build/sdk-<(frida_host)/lib64",
+          ],
         }],
       ],
     },
