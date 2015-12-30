@@ -304,7 +304,7 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
 }
 
 static void events_buffer_free(char* data, void* hint) {
-  g_variant_unref (static_cast<GVariant *>(hint));
+  g_variant_unref(static_cast<GVariant*>(hint));
 }
 
 static Local<Value> events_closure_gvalue_to_jsvalue(const GValue* gvalue) {
@@ -326,7 +326,7 @@ static Local<Value> events_closure_gvalue_to_jsvalue(const GValue* gvalue) {
       g_assert(variant != NULL);
       g_assert(g_variant_is_of_type(variant, G_VARIANT_TYPE("ay")));
       return Nan::NewBuffer(
-        reinterpret_cast<char*>(const_cast<void*>(g_variant_get_data(
+          reinterpret_cast<char*>(const_cast<void*>(g_variant_get_data(
           variant))), g_variant_get_size(variant), events_buffer_free,
           variant).ToLocalChecked();
     }
