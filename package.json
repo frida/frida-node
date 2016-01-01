@@ -29,7 +29,7 @@
     "bindings": "^1.2.1",
     "minimatch": "^2.0.10",
     "nan": "^2.0.9",
-    "prebuild": "^2.5.1"
+    "prebuild": "^2.8.0"
   },
   "devDependencies": {
     "co": "^4.5.4",
@@ -38,7 +38,7 @@
     "should": "^5.1.0"
   },
   "scripts": {
-    "install": "prebuild --download",
+    "install": "prebuild --install",
     "pretest": "jshint lib test/*.js",
     "prebuild": "prebuild --verbose --strip",
     "test": "npm run prebuild && node --expose-gc node_modules/mocha/bin/_mocha"
