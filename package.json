@@ -38,7 +38,7 @@
     "should": "^5.1.0"
   },
   "scripts": {
-    "install": "prebuild --download",
+    "install": "prebuild --install",
     "pretest": "jshint lib test/*.js",
     "prebuild": "prebuild --verbose --strip",
     "test": "npm run prebuild && node --expose-gc node_modules/mocha/bin/_mocha"
