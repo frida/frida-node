@@ -29,7 +29,7 @@
     "bindings": "^1.2.1",
     "minimatch": "^2.0.10",
     "nan": "^2.0.9",
-    "prebuild": "^2.5.1"
+    "prebuild": "^2.8.0"
   },
   "devDependencies": {
     "co": "^4.5.4",
