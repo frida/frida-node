@@ -547,7 +547,7 @@ NAN_METHOD(Device::Attach) {
     return;
   }
   auto pid = info[0]->ToInteger()->Value();
-  if (pid <= 0) {
+  if (pid < 0) {
     Nan::ThrowTypeError("Bad argument, expected pid");
     return;
   }
