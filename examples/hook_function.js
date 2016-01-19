@@ -7,7 +7,7 @@ const processAddress = process.argv[3];
 
 var script = 
 `Interceptor.attach(ptr('%addr%'), {
-  onEnter: function (args) {
+  onEnter (args) {
     send(args[0].toInt32());
   }
 });`;

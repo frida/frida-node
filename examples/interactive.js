@@ -3,11 +3,10 @@
 const frida = require('..');
 
 var scriptText = 
-`function onMessage(message) {"
-  send({ name: \"pong\", payload: message });
+`recv(function onMessage(message) {
+  send({ name: "pong", payload: message });
   recv(onMessage);
-}
-recv(onMessage);`;
+});`;
 
 function spawnExample() {
   frida.spawn(['/bin/cat', '/etc/resolv.conf'])
