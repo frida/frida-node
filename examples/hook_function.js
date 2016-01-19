@@ -12,15 +12,20 @@ var script =
 + "  }"
 + "});";
 
-frida.attach(processName).then(session => {
+frida.attach(processName)
+.then(session => {
   return session.createScript(script.replace('%addr%', processAddress));
-}).then(script => {
+})
+.then(script => {
   script.events.listen('message', message => {
     console.log(message);
   });
-  script.load().then(() => {
-    console.log("script loaded");
-  });
-}).catch(err => {
+
+  return script.load();
+})
+.then(() => {
+  console.log("script loaded");
+})
+.catch(err => {
   console.error(err);
 });

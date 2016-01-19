@@ -35,13 +35,14 @@ function attachExample() {
     script.events.listen('message', (message, data) => {
       console.log('message from script:', message, data);
     });
-    script.load()
-    .then(() => {
-      console.log('script loaded');
-      setInterval(() => {
-        script.postMessage({ name: 'ping' });
-      }, 1000);
-    });
+
+    return script.load();
+  })
+  .then(() => {
+    console.log('script loaded');
+    setInterval(() => {
+      script.postMessage({ name: 'ping' });
+    }, 1000);
   })
   .catch(error => {
     console.log('error:', error.message);

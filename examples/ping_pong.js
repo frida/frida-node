@@ -9,18 +9,21 @@ var script =
 + "  send('pokeBack');"
 + "});";
 
-frida.attach(processName).then(session => {
+frida.attach(processName)
+.then(session => {
   return session.createScript(script);
-}).then(script => {
+})
+.then(script => {
   script.events.listen('message', message => {
     console.log(message);
   });
-  script.load().then(() => {
-    console.log("script loaded");
-    script.postMessage({ "type": "poke" });
-  }).catch(err => {
-    console.error(err);
-  });
-}).catch(err => {
+
+  return script.load();
+})
+.then(() => {
+  console.log("script loaded");
+  script.postMessage({ "type": "poke" });
+})
+.catch(err => {
   console.error(err);
 });

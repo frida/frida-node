@@ -11,14 +11,16 @@ var script =
 + "fn(1);"
 + "fn(1);";
 
-frida.attach(processName).then(session => {
+frida.attach(processName)
+.then(session => {
   return session.createScript(script.replace('%addr%', processAddress));
-}).then(script => {
-  script.load().then(() => {
-    console.log("script loaded");
-  }).catch(err => {
-    console.error(err);
-  });
-}).catch(err => {
+})
+.then(script => {
+  return script.load();
+})
+.then(() => {
+  console.log("script loaded");
+})
+.catch(err => {
   console.error(err);
 });
