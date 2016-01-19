@@ -10,9 +10,7 @@ var script =
 + "});";
 
 frida.attach(processName)
-.then(session => {
-  return session.createScript(script);
-})
+.then(session => session.createScript(script))
 .then(script => {
   script.events.listen('message', message => {
     console.log(message);

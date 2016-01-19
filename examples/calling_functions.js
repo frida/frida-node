@@ -12,12 +12,8 @@ var script =
 + "fn(1);";
 
 frida.attach(processName)
-.then(session => {
-  return session.createScript(script.replace('%addr%', processAddress));
-})
-.then(script => {
-  return script.load();
-})
+.then(session => session.createScript(script.replace("%addr%", processAddress)))
+.then(script => script.load())
 .then(() => {
   console.log("script loaded");
 })
