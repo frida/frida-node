@@ -1,8 +1,8 @@
 'use strict';
 
-var frida = require('..');
+const frida = require('..');
 
-var processName = process.argv[2];
+const processName = process.argv[2];
 
 var script = "send(1337);";
 

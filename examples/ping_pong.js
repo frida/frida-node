@@ -1,13 +1,13 @@
 'use strict';
 
-var frida = require('..');
+const frida = require('..');
 
-var processName = process.argv[2];
+const processName = process.argv[2];
 
 var script =
-  "recv('poke', function onMessage(pokeMessage) {"
-+ "  send('pokeBack');"
-+ "});";
+`recv('poke', function onMessage(pokeMessage) {
+  send('pokeBack');
+});`;
 
 frida.attach(processName)
 .then(session => session.createScript(script))

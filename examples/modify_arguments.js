@@ -1,16 +1,16 @@
 'use strict';
 
-var frida = require('..');
+const frida = require('..');
 
-var processName    = process.argv[2];
-var processAddress = process.argv[3];
+const processName    = process.argv[2];
+const processAddress = process.argv[3];
 
 var script = 
-  "Interceptor.attach(ptr('%addr%'), {"
-+ "  onEnter: function (args) {"
-+ "    args[0] = ptr('1337');"
-+ "  }"
-+ "});";
+`Interceptor.attach(ptr('%addr%'), {
+  onEnter: function (args) {
+    args[0] = ptr('1337');
+  }
+});`;
 
 frida.attach(processName)
 .then(session => session.createScript(script.replace("%addr%", processAddress)))

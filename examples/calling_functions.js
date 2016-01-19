@@ -1,15 +1,15 @@
 'use strict';
 
-var frida = require('..');
+const frida = require('..');
 
-var processName    = process.argv[2];
-var processAddress = process.argv[3];
+const processName    = process.argv[2];
+const processAddress = process.argv[3];
 
 var script = 
-  "var fn = new NativeFunction(ptr('%addr%'), 'void', [ 'int' ]);"
-+ "fn(1);"
-+ "fn(1);"
-+ "fn(1);";
+`var fn = new NativeFunction(ptr('%addr%'), 'void', [ 'int' ]);
+fn(1);
+fn(1);
+fn(1);`;
 
 frida.attach(processName)
 .then(session => session.createScript(script.replace("%addr%", processAddress)))

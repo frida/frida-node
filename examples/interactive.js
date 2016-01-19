@@ -1,13 +1,13 @@
 'use strict';
 
-var frida = require('..');
+const frida = require('..');
 
 var scriptText = 
-  "function onMessage(message) {"
-+ "  send({ name: \"pong\", payload: message });"
-+ "  recv(onMessage);"
-+ "}"
-+ "recv(onMessage);";
+`function onMessage(message) {"
+  send({ name: \"pong\", payload: message });
+  recv(onMessage);
+}
+recv(onMessage);`;
 
 function spawnExample() {
   frida.spawn(['/bin/cat', '/etc/resolv.conf'])
