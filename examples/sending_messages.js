@@ -1,20 +1,22 @@
+'use strict';
+
 var frida = require('..');
 
 var processName = process.argv[2];
 
 var script = "send(1337);";
 
-frida.attach(processName).then(function (session) {
+frida.attach(processName).then(session => {
   return session.createScript(script);
-}).then(function (script) {
-  script.events.listen('message', function (message) {
+}).then(script => {
+  script.events.listen('message', message => {
     console.log(message);
   });
-  script.load().then(function () {
+  script.load().then(() => {
     console.log("script loaded");
-  }).catch(function (err) {
+  }).catch(err => {
     console.error(err);
   });
-}).catch(function (err) {
+}).catch(err => {
   console.error(err);
 });

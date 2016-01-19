@@ -8,8 +8,6 @@ co(function *() {
   const application = yield device.getFrontmostApplication();
   console.log('application:', application);
 })
-.catch(onError);
-
-function onError(error) {
-  console.error(error);
-}
+.catch(error => {
+    console.error(error);
+});
