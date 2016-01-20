@@ -4,7 +4,7 @@ const frida = require('..');
 
 const processName = process.argv[2];
 
-var script =
+let script =
 `recv('poke', function onMessage(pokeMessage) {
   send('pokeBack');
 });`;

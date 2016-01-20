@@ -5,7 +5,7 @@ const frida = require('..');
 const processName    = process.argv[2];
 const processAddress = process.argv[3];
 
-var script = 
+let script = 
 `Interceptor.attach(ptr('%addr%'), {
   onEnter(args) {
     send(args[0].toInt32());

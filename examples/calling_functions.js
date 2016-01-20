@@ -5,8 +5,8 @@ const frida = require('..');
 const processName    = process.argv[2];
 const processAddress = process.argv[3];
 
-var script = 
-`var fn = new NativeFunction(ptr('%addr%'), 'void', [ 'int' ]);
+let script = 
+`const fn = new NativeFunction(ptr('%addr%'), 'void', [ 'int' ]);
 fn(1);
 fn(1);
 fn(1);`;

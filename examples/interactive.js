@@ -2,7 +2,7 @@
 
 const frida = require('..');
 
-var scriptText = 
+let scriptText = 
 `recv(function onMessage(message) {
   send({ name: "pong", payload: message });
   recv(onMessage);

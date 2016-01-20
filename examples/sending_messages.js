@@ -4,7 +4,7 @@ const frida = require('..');
 
 const processName = process.argv[2];
 
-var script = "send(1337);";
+let script = "send(1337);";
 
 frida.attach(processName)
 .then(session => session.createScript(script))
