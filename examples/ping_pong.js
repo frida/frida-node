@@ -1,25 +1,26 @@
 'use strict';
 
+const co = require('co');
 const frida = require('..');
 
 const processName = process.argv[2];
 
-let script =
+const source =
 `recv('poke', function onMessage(pokeMessage) {
   send('pokeBack');
 });`;
 
-frida.attach(processName)
-.then(session => session.createScript(script))
-.then(script => {
+co(function *() {
+  const session = yield frida.attach(processName);
+  const script = yield session.createScript(source);
+
   script.events.listen('message', message => {
     console.log(message);
   });
 
-  return script.load();
-})
-.then(() => {
+  yield script.load();
   console.log("script loaded");
+  
   script.postMessage({ "type": "poke" });
 })
 .catch(err => {
