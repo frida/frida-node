@@ -41,7 +41,8 @@
     "install": "prebuild --install",
     "pretest": "jshint lib test/*.js",
     "prebuild": "prebuild --verbose --strip",
-    "test": "npm run prebuild && node --expose-gc node_modules/mocha/bin/_mocha"
+    "test": "npm run prebuild && node --expose-gc node_modules/mocha/bin/_mocha",
+    "test-ci": "npm run prebuild && istanbul cover ./node_modules/mocha/bin/_mocha"
   },
   "binary": {
     "module_name": "frida_binding",

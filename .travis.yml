@@ -1,0 +1,13 @@
+language: node_js
+node_js:
+  - "0.12"
+  - "4"
+  - "5"
+  - "iojs"
+before_install:
+  - "npm install -g istanbul"
+script:
+  - "npm run test-ci"
+after_script:
+  - "npm install -g coveralls"
+  - "cat ./coverage/lcov.info | coveralls"
