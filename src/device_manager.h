@@ -20,6 +20,8 @@ class DeviceManager : public GLibObject {
 
   static NAN_METHOD(Close);
   static NAN_METHOD(EnumerateDevices);
+  static NAN_METHOD(AddRemoteDevice);
+  static NAN_METHOD(RemoveRemoteDevice);
 
   static v8::Local<v8::Value> TransformDeviceEvents(const gchar* name,
       guint index, const GValue* value, gpointer user_data);

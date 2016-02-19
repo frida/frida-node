@@ -14,6 +14,7 @@ using v8::Handle;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
+using v8::String;
 using v8::Value;
 
 namespace frida {
@@ -43,6 +44,8 @@ void DeviceManager::Init(Handle<Object> exports, Runtime* runtime) {
 
   Nan::SetPrototypeMethod(tpl, "close", Close);
   Nan::SetPrototypeMethod(tpl, "enumerateDevices", EnumerateDevices);
+  Nan::SetPrototypeMethod(tpl, "addRemoteDevice", AddRemoteDevice);
+  Nan::SetPrototypeMethod(tpl, "removeRemoteDevice", RemoveRemoteDevice);
 
   Nan::Set(exports, name, Nan::GetFunction(tpl).ToLocalChecked());
 }
@@ -143,6 +146,94 @@ NAN_METHOD(DeviceManager::EnumerateDevices) {
   auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
 
   auto operation = new EnumerateDevicesOperation();
+  operation->Schedule(isolate, wrapper);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class AddRemoteDeviceOperation : public Operation<FridaDeviceManager> {
+ public:
+  AddRemoteDeviceOperation(gchar* host) : host_(host) {
+  }
+
+  ~AddRemoteDeviceOperation() {
+    g_free(host_);
+  }
+
+  void Begin() {
+    frida_device_manager_add_remote_device(handle_, host_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    device_ = frida_device_manager_add_remote_device_finish(handle_, result,
+        error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    auto wrapper = Device::New(device_, runtime_);
+    g_object_unref(device_);
+    return wrapper;
+  }
+
+  gchar* host_;
+  FridaDevice* device_;
+};
+
+NAN_METHOD(DeviceManager::AddRemoteDevice) {
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
+  auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
+
+  if (info.Length() < 1 || !info[0]->IsString()) {
+    Nan::ThrowTypeError("Expected host");
+    return;
+  }
+
+  String::Utf8Value host(Local<String>::Cast(info[0]));
+
+  auto operation = new AddRemoteDeviceOperation(g_strdup(*host));
+  operation->Schedule(isolate, wrapper);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class RemoveRemoteDeviceOperation : public Operation<FridaDeviceManager> {
+ public:
+  RemoveRemoteDeviceOperation(gchar* host) : host_(host) {
+  }
+
+  ~RemoveRemoteDeviceOperation() {
+    g_free(host_);
+  }
+
+  void Begin() {
+    frida_device_manager_remove_remote_device(handle_, host_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_device_manager_remove_remote_device_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Nan::Undefined();
+  }
+
+  gchar* host_;
+};
+
+NAN_METHOD(DeviceManager::RemoveRemoteDevice) {
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
+  auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
+
+  if (info.Length() < 1 || !info[0]->IsString()) {
+    Nan::ThrowTypeError("Expected host");
+    return;
+  }
+
+  String::Utf8Value host(Local<String>::Cast(info[0]));
+
+  auto operation = new RemoveRemoteDeviceOperation(g_strdup(*host));
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));

@@ -157,6 +157,7 @@ class CreateScriptOperation : public Operation<FridaSession> {
   gchar* source_;
   FridaScript* script_;
 };
+
 NAN_METHOD(Session::CreateScript) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
