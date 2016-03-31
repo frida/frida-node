@@ -52,6 +52,7 @@
         ["OS=='win'", {
           "include_dirs": [
             "$(FRIDA)/build/tmp-windows/<(frida_host_msvs)/frida-core",
+            "$(FRIDA)/build/sdk-windows/<(frida_host_msvs)/include/json-glib-1.0",
             "$(FRIDA)/build/sdk-windows/<(frida_host_msvs)/include/gee-0.8",
             "$(FRIDA)/build/sdk-windows/<(frida_host_msvs)/include/glib-2.0",
             "$(FRIDA)/build/sdk-windows/<(frida_host_msvs)/lib/glib-2.0/include",
@@ -63,6 +64,7 @@
           ],
           "libraries": [
             "-lfrida-core.lib",
+            "-ljson-glib-1.0.lib",
             "-lgee-0.8.lib",
             "-lgio-2.0.lib",
             "-lgthread-2.0.lib",
@@ -83,6 +85,7 @@
         }, {
           "include_dirs": [
             "$(FRIDA)/build/frida-<(frida_host)/include/frida-1.0",
+            "$(FRIDA)/build/sdk-<(frida_host)/include/json-glib-1.0",
             "$(FRIDA)/build/sdk-<(frida_host)/include/glib-2.0",
             "$(FRIDA)/build/sdk-<(frida_host)/lib/glib-2.0/include",
             "<!(node -e \"require(\'nan\')\")",
@@ -93,6 +96,7 @@
           ],
           "libraries": [
             "-lfrida-core-1.0",
+            "-ljson-glib-1.0",
             "-lfrida-gum-1.0",
             "-lgee-0.8",
             "-lgio-2.0",
