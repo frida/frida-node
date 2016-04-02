@@ -460,6 +460,7 @@ NAN_METHOD(Device::Resume) {
 
   if (info.Length() < 1 || !info[0]->IsNumber()) {
     Nan::ThrowTypeError("Bad argument, expected pid");
+    return;
   }
   auto pid = info[0]->ToInteger()->Value();
   if (pid <= 0) {
