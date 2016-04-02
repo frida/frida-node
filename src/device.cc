@@ -570,7 +570,7 @@ Local<Value> Device::TransformSpawnedEvent(const gchar* name, guint index,
 void Device::OnListen(const gchar* signal, gpointer user_data) {
   auto wrapper = static_cast<Device*>(user_data);
 
-  if (strcmp(signal, "spawned") == 0) {
+  if (strcmp(signal, "spawned") == 0 || strcmp(signal, "output") == 0) {
     wrapper->runtime_->GetUVContext()->IncreaseUsage();
   }
 }
@@ -578,7 +578,7 @@ void Device::OnListen(const gchar* signal, gpointer user_data) {
 void Device::OnUnlisten(const gchar* signal, gpointer user_data) {
   auto wrapper = static_cast<Device*>(user_data);
 
-  if (strcmp(signal, "spawned") == 0) {
+  if (strcmp(signal, "spawned") == 0 || strcmp(signal, "output") == 0) {
     wrapper->runtime_->GetUVContext()->DecreaseUsage();
   }
 }
