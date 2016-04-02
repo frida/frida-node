@@ -31,6 +31,7 @@ class Device : public GLibObject {
   static NAN_METHOD(DisableSpawnGating);
   static NAN_METHOD(EnumeratePendingSpawns);
   static NAN_METHOD(Spawn);
+  static NAN_METHOD(Input);
   static NAN_METHOD(Resume);
   static NAN_METHOD(Kill);
   static NAN_METHOD(Attach);

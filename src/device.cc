@@ -63,6 +63,7 @@ void Device::Init(Handle<Object> exports, Runtime* runtime) {
   Nan::SetPrototypeMethod(tpl, "disableSpawnGating", DisableSpawnGating);
   Nan::SetPrototypeMethod(tpl, "enumeratePendingSpawns", EnumeratePendingSpawns);
   Nan::SetPrototypeMethod(tpl, "spawn", Spawn);
+  Nan::SetPrototypeMethod(tpl, "input", Input);
   Nan::SetPrototypeMethod(tpl, "resume", Resume);
   Nan::SetPrototypeMethod(tpl, "kill", Kill);
   Nan::SetPrototypeMethod(tpl, "attach", Attach);
@@ -428,6 +429,61 @@ NAN_METHOD(Device::Spawn) {
   gchar* path = g_strdup(argv[0]);
 
   auto operation = new SpawnOperation(path, argv, envp);
+  operation->Schedule(isolate, wrapper);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class InputOperation : public Operation<FridaDevice> {
+ public:
+  InputOperation(guint pid, guint8* data, gint data_length)
+    : pid_(pid),
+      data_(data),
+      data_length_(data_length) {
+  }
+
+  ~InputOperation() {
+    g_free(data_);
+  }
+
+  void Begin() {
+    frida_device_input(handle_, pid_, data_, data_length_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_device_input_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Nan::Undefined();
+  }
+
+  const guint pid_;
+  guint8* data_;
+  const gint data_length_;
+};
+
+NAN_METHOD(Device::Input) {
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+
+  if (info.Length() < 2 || !info[0]->IsNumber() ||
+      !node::Buffer::HasInstance(info[1])) {
+    Nan::ThrowTypeError("Bad argument, expected pid and data");
+    return;
+  }
+  auto pid = info[0]->ToInteger()->Value();
+  if (pid <= 0) {
+    Nan::ThrowTypeError("Bad pid");
+    return;
+  }
+  auto buffer = info[1];
+  char* data = node::Buffer::Data(buffer);
+  int length = node::Buffer::Length(buffer);
+
+  auto operation = new InputOperation(static_cast<guint>(pid),
+      static_cast<guint8 *>(g_memdup(data, length)), length);
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
