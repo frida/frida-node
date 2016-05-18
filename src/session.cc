@@ -83,10 +83,6 @@ NAN_METHOD(Session::New) {
     Nan::Set(obj, Nan::New("events").ToLocalChecked(),
         Events::New(handle, runtime));
 
-    auto monitor =
-        new UsageMonitor<FridaSession>(frida_session_is_detached, "detached");
-    monitor->Enable(wrapper);
-
     info.GetReturnValue().Set(obj);
   } else {
     info.GetReturnValue().Set(info.Callee()->NewInstance(0, NULL));
