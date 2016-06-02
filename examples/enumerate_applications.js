@@ -8,8 +8,6 @@ co(function *() {
   const applications = yield device.enumerateApplications();
   console.log('Applications:', applications);
 })
-.catch(onError);
-
-function onError(error) {
+.catch(error => {
   console.error(error);
-}
+});

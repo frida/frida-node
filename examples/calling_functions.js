@@ -1,22 +1,24 @@
-var frida = require('..');
+'use strict';
 
-var processName    = process.argv[2];
-var processAddress = process.argv[3];
+const co = require('co');
+const frida = require('..');
 
-var script = 
-"var fn = new NativeFunction(ptr('%addr%'), 'void', [ 'int' ]);" +
-"fn(1);" +
-"fn(1);" +
-"fn(1);";
+const processName    = process.argv[2];
+const processAddress = process.argv[3];
 
-frida.attach(processName).then(function (session) {
-  return session.createScript(script.replace('%addr%', processAddress));
-}).then(function (script) {
-  script.load().then(function () {
-    console.log("script loaded");
-  }).catch(function (err) {
-    console.error(err);
-  });
-}).catch(function (err) {
+const source = 
+`const fn = new NativeFunction(ptr('%addr%'), 'void', [ 'int' ]);
+fn(1);
+fn(1);
+fn(1);`;
+
+co(function *() {
+  const session = yield frida.attach(processName);
+  const script = yield session.createScript(source.replace("%addr%", processAddress));
+
+  yield script.load();
+  console.log("script loaded");
+})
+.catch(err => {
   console.error(err);
 });

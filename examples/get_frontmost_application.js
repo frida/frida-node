@@ -6,10 +6,8 @@ const frida = require('..');
 co(function *() {
   const device = yield frida.getUsbDevice();
   const application = yield device.getFrontmostApplication();
-  console.log('application:', application);
+  console.log('Application:', application);
 })
-.catch(onError);
-
-function onError(error) {
+.catch(error => {
   console.error(error);
-}
+});

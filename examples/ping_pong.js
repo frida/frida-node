@@ -1,24 +1,28 @@
-var frida = require('..');
+'use strict';
 
-var processName = process.argv[2];
+const co = require('co');
+const frida = require('..');
 
-var script =
-"recv('poke', function onMessage(pokeMessage) {" +
-"  send('pokeBack');"                            +
-"});";
+const processName = process.argv[2];
 
-frida.attach(processName).then(function (session) {
-  return session.createScript(script);
-}).then(function (script) {
-  script.events.listen('message', function (message) {
+const source =
+`recv('poke', function onMessage(pokeMessage) {
+  send('pokeBack');
+});`;
+
+co(function *() {
+  const session = yield frida.attach(processName);
+  const script = yield session.createScript(source);
+
+  script.events.listen('message', message => {
     console.log(message);
   });
-  script.load().then(function () {
-    console.log("script loaded");
-    script.postMessage({ "type": "poke" });
-  }).catch(function (err) {
-    console.error(err);
-  });
-}).catch(function (err) {
+
+  yield script.load();
+  console.log("script loaded");
+  
+  script.postMessage({ "type": "poke" });
+})
+.catch(err => {
   console.error(err);
 });

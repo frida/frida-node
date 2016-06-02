@@ -1,35 +1,38 @@
-var frida = require('..');
+'use strict';
 
-var processName    = process.argv[2];
-var processAddress = process.argv[3];
+const co = require('co');
+const frida = require('..');
 
-var script =
-"Interceptor.attach(ptr('%addr%'), {"           +
-"  onEnter: function (args) {"                  +
-"    send(args[0].toString());"                 +
-"    var op = recv('input', function (value) {" +
-"      args[0] = ptr(value.payload);"           +
-"    });"                                       +
-"    op.wait();"                                +
-"  }"                                           +
-"});";
+const processName    = process.argv[2];
+const processAddress = process.argv[3];
 
-frida.attach(processName).then(function (session) {
-  return session.createScript(script.replace("%addr%", processAddress));
-}).then(function (script) {
-  script.events.listen('message', function (message) {
+const source =
+`Interceptor.attach(ptr('%addr%'), {
+  onEnter(args) {
+    send(args[0].toString());
+    const op = recv('input', function (value) {
+      args[0] = ptr(value.payload);
+    });
+    op.wait();
+  }
+});`;
+
+co(function *() {
+  const session = yield frida.attach(processName);
+  const script = yield session.createScript(source.replace("%addr%", processAddress));
+
+  script.events.listen('message', message => {
     console.log(message);
-    var val = parseInt(message.payload);
+    const val = parseInt(message.payload);
     script.postMessage({
       type:    'input',
-      payload: (val * 2).toString()
+      payload: `${(val * 2)}`
     });
   });
-  script.load().then(function () {
-    console.log("script loaded");
-  }).catch(function (err) {
-    console.error(err);
-  });
-}).catch(function (err) {
+
+  yield script.load();
+  console.log("script loaded");
+})
+.catch(err => {
   console.error(err);
 });

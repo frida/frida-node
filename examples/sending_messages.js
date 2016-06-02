@@ -1,20 +1,23 @@
-var frida = require('..');
+'use strict';
 
-var processName = process.argv[2];
+const co = require('co');
+const frida = require('..');
 
-var script = "send(1337);";
+const processName = process.argv[2];
 
-frida.attach(processName).then(function (session) {
-  return session.createScript(script);
-}).then(function (script) {
-  script.events.listen('message', function (message) {
+const source = "send(1337);";
+
+co(function *() {
+  const session = yield frida.attach(processName);
+  const script = yield session.createScript(source);
+
+  script.events.listen('message', message => {
     console.log(message);
   });
-  script.load().then(function () {
-    console.log("script loaded");
-  }).catch(function (err) {
-    console.error(err);
-  });
-}).catch(function (err) {
+
+  yield script.load();
+  console.log("script loaded");
+})
+.catch(err => {
   console.error(err);
 });

@@ -1,24 +1,29 @@
-var frida = require('..');
+'use strict';
 
-var processName    = process.argv[2];
-var processAddress = process.argv[3];
+const co = require('co');
+const frida = require('..');
 
-var script = 
-"Interceptor.attach(ptr('%addr%'), {" +
-"  onEnter: function (args) {"        +
-"    args[0] = ptr('1337');"          +
-"  }"                                 +
-"});";
+const processName    = process.argv[2];
+const processAddress = process.argv[3];
 
-frida.attach(processName).then(function (session) {
-  return session.createScript(script.replace('%addr%', processAddress));
-}).then(function (script) {
-  script.events.listen('message', function (message) {
+const source = 
+`Interceptor.attach(ptr('%addr%'), {
+  onEnter(args) {
+    args[0] = ptr('1337');
+  }
+});`;
+
+co(function *() {
+  const session = yield frida.attach(processName);
+  const script = yield session.createScript(source.replace("%addr%", processAddress));
+
+  script.events.listen('message', message => {
     console.log(message);
   });
-  script.load().then(function () {
-    console.log("script loaded");
-  });
-}).catch(function (err) {
+  
+  yield script.load();
+  console.log("script loaded");
+})
+.catch(err => {
   console.error(err);
 })
