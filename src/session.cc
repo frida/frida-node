@@ -48,6 +48,8 @@ void Session::Init(Handle<Object> exports, Runtime* runtime) {
 
   Nan::SetPrototypeMethod(tpl, "detach", Detach);
   Nan::SetPrototypeMethod(tpl, "createScript", CreateScript);
+  Nan::SetPrototypeMethod(tpl, "createScriptFromBytes", CreateScriptFromBytes);
+  Nan::SetPrototypeMethod(tpl, "compileScript", CompileScript);
   Nan::SetPrototypeMethod(tpl, "enableDebugger", EnableDebugger);
   Nan::SetPrototypeMethod(tpl, "disableDebugger", DisableDebugger);
   Nan::SetPrototypeMethod(tpl, "disableJit", DisableJit);
@@ -173,6 +175,115 @@ NAN_METHOD(Session::CreateScript) {
   String::Utf8Value source(Local<String>::Cast(info[1]));
 
   auto operation = new CreateScriptOperation(name, g_strdup(*source));
+  operation->Schedule(isolate, wrapper);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class CreateScriptFromBytesOperation : public Operation<FridaSession> {
+ public:
+  CreateScriptFromBytesOperation(gchar* name, GBytes* bytes)
+    : name_(name),
+      bytes_(bytes) {
+  }
+
+  ~CreateScriptFromBytesOperation() {
+    g_bytes_unref(bytes_);
+    g_free(name_);
+  }
+
+  void Begin() {
+    frida_session_create_script_from_bytes(handle_, name_, bytes_, OnReady,
+        this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    script_ = frida_session_create_script_from_bytes_finish(handle_, result,
+        error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    auto wrapper = Script::New(script_, runtime_);
+    g_object_unref(script_);
+    return wrapper;
+  }
+
+  gchar* name_;
+  GBytes* bytes_;
+  FridaScript* script_;
+};
+
+NAN_METHOD(Session::CreateScriptFromBytes) {
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Session>(obj);
+
+  if (info.Length() < 2 ||
+      !(info[0]->IsString() || info[0]->IsNull()) ||
+      !node::Buffer::HasInstance(info[1])) {
+    Nan::ThrowTypeError("Bad argument, expected string|null and Buffer");
+    return;
+  }
+  gchar* name = NULL;
+  if (info[0]->IsString()) {
+    String::Utf8Value val(Local<String>::Cast(info[0]));
+    name = g_strdup(*val);
+  }
+  auto buffer = info[1];
+  auto bytes = g_bytes_new(node::Buffer::Data(buffer),
+      node::Buffer::Length(buffer));
+
+  auto operation = new CreateScriptFromBytesOperation(name, bytes);
+  operation->Schedule(isolate, wrapper);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+static void bytes_buffer_free(char* data, void* hint) {
+  g_bytes_unref(static_cast<GBytes*>(hint));
+}
+
+class CompileScriptOperation : public Operation<FridaSession> {
+ public:
+  CompileScriptOperation(gchar* source)
+    : source_(source) {
+  }
+
+  ~CompileScriptOperation() {
+    g_free(source_);
+  }
+
+  void Begin() {
+    frida_session_compile_script(handle_, source_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    bytes_ = frida_session_compile_script_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    gsize size;
+    auto data = g_bytes_get_data(bytes_, &size);
+    return Nan::NewBuffer(static_cast<char*>(const_cast<void*>(data)), size,
+        bytes_buffer_free, bytes_).ToLocalChecked();
+  }
+
+  gchar* source_;
+  GBytes* bytes_;
+};
+
+NAN_METHOD(Session::CompileScript) {
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Session>(obj);
+
+  if (info.Length() == 0 || !info[0]->IsString()) {
+    Nan::ThrowTypeError("Bad argument, expected string");
+    return;
+  }
+  String::Utf8Value source(Local<String>::Cast(info[0]));
+
+  auto operation = new CompileScriptOperation(g_strdup(*source));
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
