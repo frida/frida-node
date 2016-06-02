@@ -479,11 +479,11 @@ NAN_METHOD(Device::Input) {
     return;
   }
   auto buffer = info[1];
-  char* data = node::Buffer::Data(buffer);
-  int length = node::Buffer::Length(buffer);
+  auto data = node::Buffer::Data(buffer);
+  auto length = node::Buffer::Length(buffer);
 
   auto operation = new InputOperation(static_cast<guint>(pid),
-      static_cast<guint8 *>(g_memdup(data, length)), length);
+      static_cast<guint8*>(g_memdup(data, length)), length);
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
