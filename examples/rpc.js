@@ -19,11 +19,6 @@ rpc.exports = {
 co(function *() {
   const session = yield frida.attach(processName);
   const script = yield session.createScript(source);
-
-  script.events.listen('message', message => {
-    console.log(message);
-  });
-
   yield script.load();
 
   const api = yield script.getExports();
