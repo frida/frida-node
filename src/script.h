@@ -21,7 +21,7 @@ class Script : public GLibObject {
 
   static NAN_METHOD(Load);
   static NAN_METHOD(Unload);
-  static NAN_METHOD(PostMessage);
+  static NAN_METHOD(Post);
 
   static v8::Local<v8::Value> TransformMessageEvent(const gchar* name,
       guint index, const GValue* value, gpointer user_data);

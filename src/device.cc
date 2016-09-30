@@ -438,18 +438,16 @@ NAN_METHOD(Device::Spawn) {
 
 class InputOperation : public Operation<FridaDevice> {
  public:
-  InputOperation(guint pid, guint8* data, gint data_length)
-    : pid_(pid),
-      data_(data),
-      data_length_(data_length) {
+  InputOperation(guint pid, GBytes* data)
+    : pid_(pid), data_(data) {
   }
 
   ~InputOperation() {
-    g_free(data_);
+    g_bytes_unref(data_);
   }
 
   void Begin() {
-    frida_device_input(handle_, pid_, data_, data_length_, OnReady, this);
+    frida_device_input(handle_, pid_, data_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -461,8 +459,7 @@ class InputOperation : public Operation<FridaDevice> {
   }
 
   const guint pid_;
-  guint8* data_;
-  const gint data_length_;
+  GBytes* data_;
 };
 
 NAN_METHOD(Device::Input) {
@@ -475,17 +472,18 @@ NAN_METHOD(Device::Input) {
     Nan::ThrowTypeError("Bad argument, expected pid and data");
     return;
   }
+
   auto pid = info[0]->ToInteger()->Value();
   if (pid <= 0) {
     Nan::ThrowTypeError("Bad pid");
     return;
   }
-  auto buffer = info[1];
-  auto data = node::Buffer::Data(buffer);
-  auto length = node::Buffer::Length(buffer);
 
-  auto operation = new InputOperation(static_cast<guint>(pid),
-      static_cast<guint8*>(g_memdup(data, length)), length);
+  auto buffer = info[1];
+  auto data = g_bytes_new(node::Buffer::Data(buffer),
+      node::Buffer::Length(buffer));
+
+  auto operation = new InputOperation(static_cast<guint>(pid), data);
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));

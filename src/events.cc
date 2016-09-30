@@ -251,25 +251,14 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
 
   g_closure_ref(closure);
 
-  GArray* args = g_array_sized_new(FALSE, FALSE, sizeof (GValue), n_param_values);
+  GArray* args = g_array_sized_new(FALSE, FALSE, sizeof(GValue),
+      n_param_values);
   g_assert(n_param_values >= 1);
   for (guint i = 1; i != n_param_values; i++) {
     GValue val;
     memset(&val, 0, sizeof(val));
-    if (param_values[i].g_type == G_TYPE_POINTER) {
-      g_assert(n_param_values - i >= 2);
-      g_assert(G_VALUE_TYPE(&param_values[i + 1]) == G_TYPE_INT);
-      auto bytes = g_bytes_new(g_value_get_pointer(&param_values[i]),
-          g_value_get_int(&param_values[i + 1]));
-      g_value_init(&val, G_TYPE_VARIANT);
-      g_value_set_variant(&val,
-          g_variant_new_from_bytes(G_VARIANT_TYPE("ay"), bytes, TRUE));
-      g_bytes_unref(bytes);
-      i++;
-    } else {
-      g_value_init(&val, param_values[i].g_type);
-      g_value_copy(&param_values[i], &val);
-    }
+    g_value_init(&val, param_values[i].g_type);
+    g_value_copy(&param_values[i], &val);
     g_array_append_val(args, val);
   }
 
@@ -306,11 +295,12 @@ static void events_closure_marshal(GClosure* closure, GValue* return_gvalue,
 }
 
 static void events_buffer_free(char* data, void* hint) {
-  g_variant_unref(static_cast<GVariant*>(hint));
+  g_bytes_unref(static_cast<GBytes*>(hint));
 }
 
 static Local<Value> events_closure_gvalue_to_jsvalue(const GValue* gvalue) {
-  switch (G_VALUE_TYPE(gvalue)) {
+  auto gtype = G_VALUE_TYPE(gvalue);
+  switch (gtype) {
     case G_TYPE_BOOLEAN:
       return Nan::New<v8::Boolean>(g_value_get_boolean(gvalue));
     case G_TYPE_INT:
@@ -323,17 +313,18 @@ static Local<Value> events_closure_gvalue_to_jsvalue(const GValue* gvalue) {
       return Nan::New<v8::Number>(g_value_get_float(gvalue));
     case G_TYPE_STRING:
       return Nan::New<v8::String>(g_value_get_string(gvalue)).ToLocalChecked();
-    case G_TYPE_VARIANT: {
-      auto variant = g_value_dup_variant (gvalue);
-      g_assert(variant != NULL);
-      g_assert(g_variant_is_of_type(variant, G_VARIANT_TYPE("ay")));
-      return Nan::NewBuffer(
-          static_cast<char*>(const_cast<void*>(g_variant_get_data(
-          variant))), g_variant_get_size(variant), events_buffer_free,
-          variant).ToLocalChecked();
+    default: {
+      g_assert_cmpuint(gtype, ==, G_TYPE_BYTES);
+      auto bytes = static_cast<GBytes*>(g_value_get_boxed(gvalue));
+      if (bytes != NULL) {
+        gsize size;
+        auto data = g_bytes_get_data(bytes, &size);
+        return Nan::NewBuffer(static_cast<char*>(const_cast<void*>(data)), size,
+            events_buffer_free, g_bytes_ref(bytes)).ToLocalChecked();
+      } else {
+        return Nan::Null();
+      }
     }
-    default:
-      g_assert_not_reached();
   }
 }
 

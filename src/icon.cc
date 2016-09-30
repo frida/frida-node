@@ -111,18 +111,19 @@ NAN_PROPERTY_GETTER(Icon::GetRowstride) {
 }
 
 static void icon_pixels_free(char* data, void* hint) {
-  auto icon = static_cast<FridaIcon*>(hint);
-  g_object_unref(icon);
+  auto bytes = static_cast<GBytes*>(hint);
+  g_bytes_unref(bytes);
 }
 
 NAN_PROPERTY_GETTER(Icon::GetPixels) {
   auto handle = ObjectWrap::Unwrap<Icon>(
       info.Holder())->GetHandle<FridaIcon>();
 
-  int len;
-  auto buf = frida_icon_get_pixels(handle, &len);
-  auto pixels = Nan::NewBuffer(reinterpret_cast<char*>(buf), len,
-      icon_pixels_free, g_object_ref(handle)).ToLocalChecked();
+  auto bytes = frida_icon_get_pixels(handle);
+  gsize size;
+  auto data = g_bytes_get_data(bytes, &size);
+  auto pixels = Nan::NewBuffer(static_cast<char*>(const_cast<void*>(data)),
+      size, icon_pixels_free, g_bytes_ref(bytes)).ToLocalChecked();
 
   info.GetReturnValue().Set(pixels);
 }

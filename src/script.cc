@@ -39,7 +39,7 @@ void Script::Init(Handle<Object> exports, Runtime* runtime) {
 
   Nan::SetPrototypeMethod(tpl, "load", Load);
   Nan::SetPrototypeMethod(tpl, "unload", Unload);
-  Nan::SetPrototypeMethod(tpl, "postMessage", PostMessage);
+  Nan::SetPrototypeMethod(tpl, "postMessage", Post);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
@@ -136,21 +136,22 @@ NAN_METHOD(Script::Unload) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
-class PostMessageOperation : public Operation<FridaScript> {
+class PostOperation : public Operation<FridaScript> {
  public:
-  PostMessageOperation(gchar* message) : message_(message) {
+  PostOperation(gchar* message, GBytes* data) : message_(message), data_(data) {
   }
 
-  ~PostMessageOperation() {
+  ~PostOperation() {
     g_free(message_);
+    g_bytes_unref(data_);
   }
 
   void Begin() {
-    frida_script_post_message(handle_, message_, OnReady, this);
+    frida_script_post(handle_, message_, data_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
-    frida_script_post_message_finish(handle_, result, error);
+    frida_script_post_finish(handle_, result, error);
   }
 
   Local<Value> Result(Isolate* isolate) {
@@ -158,14 +159,16 @@ class PostMessageOperation : public Operation<FridaScript> {
   }
 
   gchar* message_;
+  GBytes* data_;
 };
 
-NAN_METHOD(Script::PostMessage) {
+NAN_METHOD(Script::Post) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
-  if (info.Length() < 1) {
+  auto num_args = info.Length();
+  if (num_args < 1) {
     Nan::ThrowTypeError("Expected value serializable to JSON");
     return;
   }
@@ -173,7 +176,18 @@ NAN_METHOD(Script::PostMessage) {
   String::Utf8Value message(
       wrapper->runtime_->ValueToJson(info[0]));
 
-  auto operation = new PostMessageOperation(g_strdup(*message));
+  GBytes* data = NULL;
+  if (num_args >= 2) {
+    auto buffer = info[1];
+    if (!node::Buffer::HasInstance(buffer)) {
+      Nan::ThrowTypeError("Expected a buffer");
+      return;
+    }
+    data = g_bytes_new(node::Buffer::Data(buffer),
+        node::Buffer::Length(buffer));
+  }
+
+  auto operation = new PostOperation(g_strdup(*message), data);
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
