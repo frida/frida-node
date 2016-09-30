@@ -47,8 +47,8 @@ class UsageMonitor {
     g_assert(instance_ == NULL);
 
     auto isolate = v8::Isolate::GetCurrent();
-    object_.Reset(isolate, wrapper->handle(isolate));
-    object_.SetWeak(this, OnWeakNotifyWrapper);
+    object_.Reset(wrapper->handle(isolate));
+    object_.SetWeak(this, OnWeakNotifyWrapper, Nan::WeakCallbackType::kParameter);
     object_.MarkIndependent();
     instance_ = wrapper->GetHandle<T>();
     g_object_ref(instance_);
@@ -83,7 +83,7 @@ class UsageMonitor {
   }
 
   static void OnWeakNotifyWrapper(
-      const v8::WeakCallbackData<v8::Object, UsageMonitor<T>>& data) {
+      const Nan::WeakCallbackInfo<UsageMonitor<T>>& data) {
     HandleScope scope;
     data.GetParameter()->OnWeakNotify();
   }
@@ -107,7 +107,7 @@ class UsageMonitor {
   volatile gint ref_count_;
   CheckCallback check_;
   const gchar* signal_;
-  v8::Persistent<v8::Object> object_;
+  Nan::Persistent<v8::Object> object_;
   T* instance_;
   guint handler_id_;
   Runtime* runtime_;
