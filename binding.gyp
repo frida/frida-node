@@ -116,6 +116,7 @@
               "-mmacosx-version-min=10.7",
             ],
             "OTHER_LDFLAGS": [
+              "-stdlib=libc++",
               "-Wl,-macosx_version_min,10.7",
               "-Wl,-dead_strip",
               "-Wl,-no_compact_unwind",
