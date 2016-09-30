@@ -57,29 +57,31 @@ Local<Object> Script::New(gpointer handle, Runtime* runtime) {
 }
 
 NAN_METHOD(Script::New) {
-  if (info.IsConstructCall()) {
-    if (info.Length() != 1 || !info[0]->IsExternal()) {
-      Nan::ThrowTypeError("Bad argument, expected raw handle");
-      return;
-    }
-    auto runtime = GetRuntimeFromConstructorArgs(info);
-
-    auto handle = static_cast<FridaScript*>(
-        Local<External>::Cast(info[0])->Value());
-    auto wrapper = new Script(handle, runtime);
-    auto obj = info.This();
-    wrapper->Wrap(obj);
-    Nan::Set(obj, Nan::New("events").ToLocalChecked(),
-        Events::New(handle, runtime, TransformMessageEvent, wrapper));
-
-    auto monitor =
-        new UsageMonitor<FridaScript>(frida_script_is_destroyed, "destroyed");
-    monitor->Enable(wrapper);
-
-    info.GetReturnValue().Set(obj);
-  } else {
-    info.GetReturnValue().Set(info.Callee()->NewInstance(0, NULL));
+  if (!info.IsConstructCall()) {
+    Nan::ThrowError("Use the `new` keyword to create a new instance");
+    return;
   }
+
+  if (info.Length() != 1 || !info[0]->IsExternal()) {
+    Nan::ThrowTypeError("Bad argument, expected raw handle");
+    return;
+  }
+
+  auto runtime = GetRuntimeFromConstructorArgs(info);
+
+  auto handle = static_cast<FridaScript*>(
+      Local<External>::Cast(info[0])->Value());
+  auto wrapper = new Script(handle, runtime);
+  auto obj = info.This();
+  wrapper->Wrap(obj);
+  Nan::Set(obj, Nan::New("events").ToLocalChecked(),
+      Events::New(handle, runtime, TransformMessageEvent, wrapper));
+
+  auto monitor =
+      new UsageMonitor<FridaScript>(frida_script_is_destroyed, "destroyed");
+  monitor->Enable(wrapper);
+
+  info.GetReturnValue().Set(obj);
 }
 
 class LoadOperation : public Operation<FridaScript> {

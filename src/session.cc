@@ -70,25 +70,27 @@ Local<Object> Session::New(gpointer handle, Runtime* runtime) {
 }
 
 NAN_METHOD(Session::New) {
-  if (info.IsConstructCall()) {
-    if (info.Length() != 1 || !info[0]->IsExternal()) {
-      Nan::ThrowTypeError("Bad argument, expected raw handle");
-      return;
-    }
-    auto runtime = GetRuntimeFromConstructorArgs(info);
-
-    auto handle = static_cast<FridaSession*>(
-        Local<External>::Cast(info[0])->Value());
-    auto wrapper = new Session(handle, runtime);
-    auto obj = info.This();
-    wrapper->Wrap(obj);
-    Nan::Set(obj, Nan::New("events").ToLocalChecked(),
-        Events::New(handle, runtime));
-
-    info.GetReturnValue().Set(obj);
-  } else {
-    info.GetReturnValue().Set(info.Callee()->NewInstance(0, NULL));
+  if (!info.IsConstructCall()) {
+    Nan::ThrowError("Use the `new` keyword to create a new instance");
+    return;
   }
+
+  if (info.Length() != 1 || !info[0]->IsExternal()) {
+    Nan::ThrowTypeError("Bad argument, expected raw handle");
+    return;
+  }
+
+  auto runtime = GetRuntimeFromConstructorArgs(info);
+
+  auto handle = static_cast<FridaSession*>(
+      Local<External>::Cast(info[0])->Value());
+  auto wrapper = new Session(handle, runtime);
+  auto obj = info.This();
+  wrapper->Wrap(obj);
+  Nan::Set(obj, Nan::New("events").ToLocalChecked(),
+      Events::New(handle, runtime));
+
+  info.GetReturnValue().Set(obj);
 }
 
 NAN_PROPERTY_GETTER(Session::GetPid) {

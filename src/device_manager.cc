@@ -62,27 +62,28 @@ void DeviceManager::Dispose(Runtime* runtime) {
 }
 
 NAN_METHOD(DeviceManager::New) {
-  if (info.IsConstructCall()) {
-    auto runtime = GetRuntimeFromConstructorArgs(info);
-
-    auto handle = frida_device_manager_new();
-    auto wrapper = new DeviceManager(handle, runtime);
-    auto obj = info.This();
-    wrapper->Wrap(obj);
-    auto events_obj = Events::New(handle, runtime, TransformDeviceEvents,
-        runtime);
-
-    Nan::Set(obj, Nan::New("events").ToLocalChecked(), events_obj);
-    g_object_unref(handle);
-
-    auto events_wrapper = ObjectWrap::Unwrap<Events>(events_obj);
-    events_wrapper->SetListenCallback(OnListen, wrapper);
-    events_wrapper->SetUnlistenCallback(OnUnlisten, wrapper);
-
-    info.GetReturnValue().Set(obj);
-  } else {
-    info.GetReturnValue().Set(info.Callee()->NewInstance(0, NULL));
+  if (!info.IsConstructCall()) {
+    Nan::ThrowError("Use the `new` keyword to create a new instance");
+    return;
   }
+
+  auto runtime = GetRuntimeFromConstructorArgs(info);
+
+  auto handle = frida_device_manager_new();
+  auto wrapper = new DeviceManager(handle, runtime);
+  auto obj = info.This();
+  wrapper->Wrap(obj);
+  auto events_obj = Events::New(handle, runtime, TransformDeviceEvents,
+      runtime);
+
+  Nan::Set(obj, Nan::New("events").ToLocalChecked(), events_obj);
+  g_object_unref(handle);
+
+  auto events_wrapper = ObjectWrap::Unwrap<Events>(events_obj);
+  events_wrapper->SetListenCallback(OnListen, wrapper);
+  events_wrapper->SetUnlistenCallback(OnUnlisten, wrapper);
+
+  info.GetReturnValue().Set(obj);
 }
 
 class CloseOperation : public Operation<FridaDeviceManager> {

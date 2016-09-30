@@ -107,26 +107,28 @@ void Events::SetUnlistenCallback(UnlistenCallback callback,
 }
 
 NAN_METHOD(Events::New) {
-  if (info.IsConstructCall()) {
-    if (info.Length() != 3 ||
-        !info[0]->IsExternal() ||
-        !info[1]->IsExternal() ||
-        !info[2]->IsExternal()) {
-      Nan::ThrowTypeError("Bad argument, expected raw handles");
-      return;
-    }
-    auto handle = Local<External>::Cast(info[0])->Value();
-    auto transform = reinterpret_cast<TransformCallback>(
-        Local<External>::Cast(info[1])->Value());
-    auto transform_data = Local<External>::Cast(info[2])->Value();
-    auto wrapper = new Events(handle, transform, transform_data,
-        GetRuntimeFromConstructorArgs(info));
-    auto obj = info.This();
-    wrapper->Wrap(obj);
-    info.GetReturnValue().Set(obj);
-  } else {
-    info.GetReturnValue().Set(info.Callee()->NewInstance(0, NULL));
+  if (!info.IsConstructCall()) {
+    Nan::ThrowError("Use the `new` keyword to create a new instance");
+    return;
   }
+
+  if (info.Length() != 3 ||
+      !info[0]->IsExternal() ||
+      !info[1]->IsExternal() ||
+      !info[2]->IsExternal()) {
+    Nan::ThrowTypeError("Bad argument, expected raw handles");
+    return;
+  }
+
+  auto handle = Local<External>::Cast(info[0])->Value();
+  auto transform = reinterpret_cast<TransformCallback>(
+      Local<External>::Cast(info[1])->Value());
+  auto transform_data = Local<External>::Cast(info[2])->Value();
+  auto wrapper = new Events(handle, transform, transform_data,
+      GetRuntimeFromConstructorArgs(info));
+  auto obj = info.This();
+  wrapper->Wrap(obj);
+  info.GetReturnValue().Set(obj);
 }
 
 NAN_METHOD(Events::Listen) {

@@ -58,23 +58,25 @@ Local<Object> Spawn::New(gpointer handle, Runtime* runtime) {
 }
 
 NAN_METHOD(Spawn::New) {
-  if (info.IsConstructCall()) {
-    if (info.Length() != 1 || !info[0]->IsExternal()) {
-      Nan::ThrowTypeError("Bad argument, expected raw handle");
-      return;
-    }
-    auto runtime = GetRuntimeFromConstructorArgs(info);
-
-    auto handle = static_cast<FridaSpawn*>(
-        Local<External>::Cast(info[0])->Value());
-    auto wrapper = new Spawn(handle, runtime);
-    auto obj = info.This();
-    wrapper->Wrap(obj);
-
-    info.GetReturnValue().Set(obj);
-  } else {
-    info.GetReturnValue().Set(info.Callee()->NewInstance(0, NULL));
+  if (!info.IsConstructCall()) {
+    Nan::ThrowError("Use the `new` keyword to create a new instance");
+    return;
   }
+
+  if (info.Length() != 1 || !info[0]->IsExternal()) {
+    Nan::ThrowTypeError("Bad argument, expected raw handle");
+    return;
+  }
+
+  auto runtime = GetRuntimeFromConstructorArgs(info);
+
+  auto handle = static_cast<FridaSpawn*>(
+      Local<External>::Cast(info[0])->Value());
+  auto wrapper = new Spawn(handle, runtime);
+  auto obj = info.This();
+  wrapper->Wrap(obj);
+
+  info.GetReturnValue().Set(obj);
 }
 
 NAN_PROPERTY_GETTER(Spawn::GetPid) {

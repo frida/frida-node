@@ -84,31 +84,33 @@ Local<Object> Device::New(gpointer handle, Runtime* runtime) {
 }
 
 NAN_METHOD(Device::New) {
-  if (info.IsConstructCall()) {
-    if (info.Length() != 1 || !info[0]->IsExternal()) {
-      Nan::ThrowTypeError("Bad argument, expected raw handle");
-      return;
-    }
-    auto runtime = GetRuntimeFromConstructorArgs(info);
-
-    auto handle = static_cast<FridaDevice*>(
-        Local<External>::Cast(info[0])->Value());
-    auto wrapper = new Device(handle, runtime);
-    auto obj = info.This();
-    wrapper->Wrap(obj);
-    auto events_obj = Events::New(handle, runtime, TransformSpawnedEvent,
-        wrapper);
-
-    Nan::Set(obj, Nan::New("events").ToLocalChecked(), events_obj);
-
-    auto events_wrapper = ObjectWrap::Unwrap<Events>(events_obj);
-    events_wrapper->SetListenCallback(OnListen, wrapper);
-    events_wrapper->SetUnlistenCallback(OnUnlisten, wrapper);
-
-    info.GetReturnValue().Set(obj);
-  } else {
-    info.GetReturnValue().Set(info.Callee()->NewInstance(0, NULL));
+  if (!info.IsConstructCall()) {
+    Nan::ThrowError("Use the `new` keyword to create a new instance");
+    return;
   }
+
+  if (info.Length() != 1 || !info[0]->IsExternal()) {
+    Nan::ThrowTypeError("Bad argument, expected raw handle");
+    return;
+  }
+
+  auto runtime = GetRuntimeFromConstructorArgs(info);
+
+  auto handle = static_cast<FridaDevice*>(
+      Local<External>::Cast(info[0])->Value());
+  auto wrapper = new Device(handle, runtime);
+  auto obj = info.This();
+  wrapper->Wrap(obj);
+  auto events_obj = Events::New(handle, runtime, TransformSpawnedEvent,
+      wrapper);
+
+  Nan::Set(obj, Nan::New("events").ToLocalChecked(), events_obj);
+
+  auto events_wrapper = ObjectWrap::Unwrap<Events>(events_obj);
+  events_wrapper->SetListenCallback(OnListen, wrapper);
+  events_wrapper->SetUnlistenCallback(OnUnlisten, wrapper);
+
+  info.GetReturnValue().Set(obj);
 }
 
 NAN_PROPERTY_GETTER(Device::GetId) {
