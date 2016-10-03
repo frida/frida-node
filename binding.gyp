@@ -126,6 +126,7 @@
           "libraries": [
             "-liconv",
             "-Wl,-framework -Wl,Foundation -Wl,-framework -Wl,AppKit",
+            "-mmacosx-version-min=10.7",
           ],
         }],
         ["OS=='linux'", {
