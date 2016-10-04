@@ -113,11 +113,11 @@
             "OTHER_CFLAGS": [
               "-std=c++11",
               "-stdlib=libc++",
-              "-mmacosx-version-min=10.7",
+              "-mmacosx-version-min=10.9",
             ],
             "OTHER_LDFLAGS": [
               "-stdlib=libc++",
-              "-Wl,-macosx_version_min,10.7",
+              "-Wl,-macosx_version_min,10.9",
               "-Wl,-dead_strip",
               "-Wl,-no_compact_unwind",
               "-Wl,-exported_symbols_list,binding.symbols",
@@ -126,7 +126,7 @@
           "libraries": [
             "-liconv",
             "-Wl,-framework -Wl,Foundation -Wl,-framework -Wl,AppKit",
-            "-mmacosx-version-min=10.7",
+            "-mmacosx-version-min=10.9",
           ],
         }],
         ["OS=='linux'", {
