@@ -24,7 +24,7 @@ co(function *() {
   script.events.listen('message', message => {
     console.log(message);
     const val = parseInt(message.payload);
-    script.postMessage({
+    script.post({
       type:    'input',
       payload: `${(val * 2)}`
     });

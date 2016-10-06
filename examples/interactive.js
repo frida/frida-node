@@ -34,7 +34,7 @@ const attachExample = co.wrap(function *() {
 
   console.log('script loaded');
   setInterval(() => {
-    script.postMessage({ name: 'ping' });
+    script.post({ name: 'ping' });
   }, 1000);
 });
 

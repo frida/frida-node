@@ -39,7 +39,7 @@ void Script::Init(Handle<Object> exports, Runtime* runtime) {
 
   Nan::SetPrototypeMethod(tpl, "load", Load);
   Nan::SetPrototypeMethod(tpl, "unload", Unload);
-  Nan::SetPrototypeMethod(tpl, "postMessage", Post);
+  Nan::SetPrototypeMethod(tpl, "post", Post);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
@@ -168,8 +168,8 @@ NAN_METHOD(Script::Post) {
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
   auto num_args = info.Length();
-  if (num_args < 1) {
-    Nan::ThrowTypeError("Expected value serializable to JSON");
+  if (num_args < 2) {
+    Nan::ThrowTypeError("Expected message and data");
     return;
   }
 
@@ -177,8 +177,8 @@ NAN_METHOD(Script::Post) {
       wrapper->runtime_->ValueToJson(info[0]));
 
   GBytes* data = NULL;
-  if (num_args >= 2) {
-    auto buffer = info[1];
+  auto buffer = info[1];
+  if (!buffer->IsNull()) {
     if (!node::Buffer::HasInstance(buffer)) {
       Nan::ThrowTypeError("Expected a buffer");
       return;

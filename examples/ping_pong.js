@@ -20,8 +20,8 @@ co(function *() {
 
   yield script.load();
   console.log("script loaded");
-  
-  script.postMessage({ "type": "poke" });
+
+  script.post({ type: "poke" });
 })
 .catch(err => {
   console.error(err);
