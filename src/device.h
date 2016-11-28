@@ -35,6 +35,8 @@ class Device : public GLibObject {
   static NAN_METHOD(Resume);
   static NAN_METHOD(Kill);
   static NAN_METHOD(Attach);
+  static NAN_METHOD(InjectLibraryFile);
+  static NAN_METHOD(InjectLibraryBlob);
 
   static v8::Local<v8::Value> TransformSpawnedEvent(const gchar* name,
       guint index, const GValue* value, gpointer user_data);

@@ -67,6 +67,8 @@ void Device::Init(Handle<Object> exports, Runtime* runtime) {
   Nan::SetPrototypeMethod(tpl, "resume", Resume);
   Nan::SetPrototypeMethod(tpl, "kill", Kill);
   Nan::SetPrototypeMethod(tpl, "attach", Attach);
+  Nan::SetPrototypeMethod(tpl, "injectLibraryFile", InjectLibraryFile);
+  Nan::SetPrototypeMethod(tpl, "injectLibraryBlob", InjectLibraryBlob);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
@@ -615,6 +617,135 @@ NAN_METHOD(Device::Attach) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
+class InjectLibraryFileOperation : public Operation<FridaDevice> {
+ public:
+  InjectLibraryFileOperation(guint pid, gchar* path, gchar* entrypoint,
+      gchar* data)
+    : pid_(pid),
+      path_(path),
+      entrypoint_(entrypoint),
+      data_(data) {
+  }
+
+  ~InjectLibraryFileOperation() {
+    g_free(data_);
+    g_free(entrypoint_);
+    g_free(path_);
+  }
+
+  void Begin() {
+    frida_device_inject_library_file(handle_, pid_, path_, entrypoint_, data_,
+        OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    id_ = frida_device_inject_library_file_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Nan::New<v8::Uint32>(id_);
+  }
+
+  const guint pid_;
+  gchar* path_;
+  gchar* entrypoint_;
+  gchar* data_;
+  guint id_;
+};
+
+NAN_METHOD(Device::InjectLibraryFile) {
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+
+  if (info.Length() < 4 || !info[0]->IsNumber() || !info[1]->IsString() ||
+      !info[2]->IsString() || !info[3]->IsString()) {
+    Nan::ThrowTypeError("Bad argument");
+    return;
+  }
+
+  auto pid = info[0]->ToInteger()->Value();
+  if (pid < 0) {
+    Nan::ThrowTypeError("Bad argument, expected pid");
+    return;
+  }
+  String::Utf8Value path(Local<String>::Cast(info[1]));
+  String::Utf8Value entrypoint(Local<String>::Cast(info[2]));
+  String::Utf8Value data(Local<String>::Cast(info[3]));
+
+  auto operation = new InjectLibraryFileOperation(static_cast<guint>(pid),
+      g_strdup(*path), g_strdup(*entrypoint), g_strdup(*data));
+  operation->Schedule(isolate, wrapper);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class InjectLibraryBlobOperation : public Operation<FridaDevice> {
+ public:
+  InjectLibraryBlobOperation(guint pid, GBytes* blob, gchar* entrypoint,
+      gchar* data)
+    : pid_(pid),
+      blob_(blob),
+      entrypoint_(entrypoint),
+      data_(data) {
+  }
+
+  ~InjectLibraryBlobOperation() {
+    g_free(data_);
+    g_free(entrypoint_);
+    g_bytes_unref(blob_);
+  }
+
+  void Begin() {
+    frida_device_inject_library_blob(handle_, pid_, blob_, entrypoint_, data_,
+        OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    id_ = frida_device_inject_library_blob_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Nan::New<v8::Uint32>(id_);
+  }
+
+  const guint pid_;
+  GBytes* blob_;
+  gchar* entrypoint_;
+  gchar* data_;
+  guint id_;
+};
+
+NAN_METHOD(Device::InjectLibraryBlob) {
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+
+  if (info.Length() < 4 || !info[0]->IsNumber() ||
+      !node::Buffer::HasInstance(info[1]) || !info[2]->IsString() ||
+      !info[3]->IsString()) {
+    Nan::ThrowTypeError("Bad argument");
+    return;
+  }
+
+  auto pid = info[0]->ToInteger()->Value();
+  if (pid < 0) {
+    Nan::ThrowTypeError("Bad argument, expected pid");
+    return;
+  }
+  auto buffer = info[1];
+  auto blob = g_bytes_new(node::Buffer::Data(buffer),
+      node::Buffer::Length(buffer));
+  String::Utf8Value entrypoint(Local<String>::Cast(info[2]));
+  String::Utf8Value data(Local<String>::Cast(info[3]));
+
+  auto operation = new InjectLibraryBlobOperation(static_cast<guint>(pid),
+      blob, g_strdup(*entrypoint), g_strdup(*data));
+  operation->Schedule(isolate, wrapper);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
 Local<Value> Device::TransformSpawnedEvent(const gchar* name, guint index,
     const GValue* value, gpointer user_data) {
   if (index != 0 || strcmp(name, "spawned") != 0)
@@ -626,7 +757,8 @@ Local<Value> Device::TransformSpawnedEvent(const gchar* name, guint index,
 void Device::OnListen(const gchar* signal, gpointer user_data) {
   auto wrapper = static_cast<Device*>(user_data);
 
-  if (strcmp(signal, "spawned") == 0 || strcmp(signal, "output") == 0) {
+  if (strcmp(signal, "spawned") == 0 || strcmp(signal, "output") == 0 ||
+      strcmp(signal, "uninjected") == 0) {
     wrapper->runtime_->GetUVContext()->IncreaseUsage();
   }
 }
@@ -634,7 +766,8 @@ void Device::OnListen(const gchar* signal, gpointer user_data) {
 void Device::OnUnlisten(const gchar* signal, gpointer user_data) {
   auto wrapper = static_cast<Device*>(user_data);
 
-  if (strcmp(signal, "spawned") == 0 || strcmp(signal, "output") == 0) {
+  if (strcmp(signal, "spawned") == 0 || strcmp(signal, "output") == 0 ||
+      strcmp(signal, "uninjected") == 0) {
     wrapper->runtime_->GetUVContext()->DecreaseUsage();
   }
 }
