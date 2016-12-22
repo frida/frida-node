@@ -13,7 +13,7 @@ describe('Module', function () {
 
   before(function () {
     target = spawn(data.targetProgram, [], {
-      stdio: 'inherit'
+      stdio: ['pipe', process.stdout, process.stderr]
     });
     return frida.attach(target.pid)
     .then(function (session) {
