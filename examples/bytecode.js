@@ -16,11 +16,9 @@ rpc.exports = {
 
 co(function *() {
   const systemSession = yield frida.attach(0);
-  yield systemSession.disableJit();
   const bytecode = yield systemSession.compileScript(source);
 
   const session = yield frida.attach(processName);
-  yield session.disableJit();
   const script = yield session.createScriptFromBytes(bytecode);
   yield script.load();
 

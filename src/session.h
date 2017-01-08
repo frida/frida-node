@@ -27,7 +27,7 @@ class Session : public GLibObject {
   static NAN_METHOD(CompileScript);
   static NAN_METHOD(EnableDebugger);
   static NAN_METHOD(DisableDebugger);
-  static NAN_METHOD(DisableJit);
+  static NAN_METHOD(EnableJit);
 
   v8::Persistent<v8::Object> events_;
 };

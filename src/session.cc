@@ -52,7 +52,7 @@ void Session::Init(Handle<Object> exports, Runtime* runtime) {
   Nan::SetPrototypeMethod(tpl, "compileScript", CompileScript);
   Nan::SetPrototypeMethod(tpl, "enableDebugger", EnableDebugger);
   Nan::SetPrototypeMethod(tpl, "disableDebugger", DisableDebugger);
-  Nan::SetPrototypeMethod(tpl, "disableJit", DisableJit);
+  Nan::SetPrototypeMethod(tpl, "enableJit", EnableJit);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
@@ -354,14 +354,14 @@ NAN_METHOD(Session::DisableDebugger) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
-class DisableJitOperation : public Operation<FridaSession> {
+class EnableJitOperation : public Operation<FridaSession> {
  public:
   void Begin() {
-    frida_session_disable_jit(handle_, OnReady, this);
+    frida_session_enable_jit(handle_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
-    frida_session_disable_jit_finish(handle_, result, error);
+    frida_session_enable_jit_finish(handle_, result, error);
   }
 
   Local<Value> Result(Isolate* isolate) {
@@ -369,12 +369,12 @@ class DisableJitOperation : public Operation<FridaSession> {
   }
 };
 
-NAN_METHOD(Session::DisableJit) {
+NAN_METHOD(Session::EnableJit) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
-  auto operation = new DisableJitOperation();
+  auto operation = new EnableJitOperation();
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
