@@ -27,9 +27,8 @@ describe('Script', function () {
     gc();
   });
 
-  it('should support rpc', function (done) {
-    var script, exp;
-    session.createScript(
+  it('should support rpc', co.wrap(function *() {
+    const script = yield session.createScript(
       '"use strict";' +
       '' +
       'rpc.exports = {' +
@@ -46,40 +45,29 @@ describe('Script', function () {
           'var buf = Memory.allocUtf8String("Yo");' +
           'return Memory.readByteArray(buf, 2);' +
         '}' +
-      '};')
-    .then(function (s) {
-      script = s;
-      return script.load();
-    })
-    .then(function () {
-      return script.getExports();
-    })
-    .then(function (e) {
-      exp = e;
-      exp.should.have.property('add');
-      exp.should.have.property('sub');
-      return exp.add(2, 3);
-    })
-    .then(function (result) {
-      result.should.equal(5);
-      return exp.sub(5, 3);
-    })
-    .then(function (result) {
-      result.should.equal(2);
-      return exp.add(1, -2);
-    })
-    .catch(function (error) {
-      error.message.should.equal('No');
-      return exp.speak();
-    })
-    .then(function (buf) {
-      should.deepEqual(buf.toJSON().data, [0x59, 0x6f]);
-      done();
-    })
-    .catch(function (error) {
-      console.error(error.message);
-    });
-  });
+      '};');
+    yield script.load();
+
+    const agent = yield script.getExports();
+
+    agent.should.have.property('add');
+    agent.should.have.property('sub');
+
+    (yield agent.add(2, 3)).should.equal(5);
+    (yield agent.sub(5, 3)).should.equal(2);
+
+    let thrownError = null;
+    try {
+      yield agent.add(1, -2);
+    } catch (e) {
+      thrownError = e;
+    }
+    should(thrownError).not.equal(null);
+    thrownError.message.should.equal('No');
+
+    const buf = yield agent.speak();
+    should.deepEqual(buf.toJSON().data, [0x59, 0x6f]);
+  }));
 
   it('should fail rpc request if post() fails', co.wrap(function *() {
     const script = yield session.createScript(
@@ -91,13 +79,13 @@ describe('Script', function () {
       '};');
     yield script.load();
 
-    const api = yield script.getExports();
+    const agent = yield script.getExports();
 
     yield session.detach();
 
     let thrownException = null;
     try {
-      yield api.init();
+      yield agent.init();
     } catch (e) {
       thrownException = e;
     }
