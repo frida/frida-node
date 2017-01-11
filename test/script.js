@@ -89,9 +89,7 @@ describe('Script', function () {
     } catch (e) {
       thrownException = e;
     }
-
-    if (thrownException === null)
-      throw new Error('Should not succeed');
+    should(thrownError).not.equal(null);
     thrownException.message.should.equal('Script is destroyed');
   }));
 });
