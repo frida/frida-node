@@ -56,14 +56,14 @@ describe('Script', function () {
     (yield agent.add(2, 3)).should.equal(5);
     (yield agent.sub(5, 3)).should.equal(2);
 
-    let thrownError = null;
+    let thrownException = null;
     try {
       yield agent.add(1, -2);
     } catch (e) {
-      thrownError = e;
+      thrownException = e;
     }
-    should(thrownError).not.equal(null);
-    thrownError.message.should.equal('No');
+    should(thrownException).not.equal(null);
+    thrownException.message.should.equal('No');
 
     const buf = yield agent.speak();
     should.deepEqual(buf.toJSON().data, [0x59, 0x6f]);
@@ -89,7 +89,32 @@ describe('Script', function () {
     } catch (e) {
       thrownException = e;
     }
-    should(thrownError).not.equal(null);
+    should(thrownException).not.equal(null);
+    thrownException.message.should.equal('Script is destroyed');
+  }));
+
+  it('should fail rpc request if detached mid-request', co.wrap(function *() {
+    const script = yield session.createScript(
+      '"use strict";' +
+      '' +
+      'rpc.exports = {' +
+        'waitForever: function () {' +
+          'return new Promise(function () {});' +
+        '}' +
+      '};');
+    yield script.load();
+
+    const agent = yield script.getExports();
+
+    setTimeout(() => target.kill('SIGKILL'), 100);
+
+    let thrownException = null;
+    try {
+      yield agent.waitForever();
+    } catch (e) {
+      thrownException = e;
+    }
+    should(thrownException).not.equal(null);
     thrownException.message.should.equal('Script is destroyed');
   }));
 });
