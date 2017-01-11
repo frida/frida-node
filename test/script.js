@@ -1,17 +1,18 @@
 'use strict';
 
-/* global describe, before, after, afterEach, gc, it */
+/* global describe, beforeEach, afterEach, gc, it */
 
-var data = require('./data');
-var frida = require('..');
-var should = require('should');
-var spawn = require('child_process').spawn;
+const co = require('co');
+const data = require('./data');
+const frida = require('..');
+const should = require('should');
+const spawn = require('child_process').spawn;
 
 describe('Script', function () {
   var target;
   var session;
 
-  before(function () {
+  beforeEach(function () {
     target = spawn(data.targetProgram, [], {
       stdio: ['pipe', process.stdout, process.stderr]
     });
@@ -21,11 +22,10 @@ describe('Script', function () {
     });
   });
 
-  after(function () {
+  afterEach(function () {
     target.kill('SIGKILL');
+    gc();
   });
-
-  afterEach(gc);
 
   it('should support rpc', function (done) {
     var script, exp;
@@ -80,4 +80,30 @@ describe('Script', function () {
       console.error(error.message);
     });
   });
+
+  it('should fail rpc request if post() fails', co.wrap(function *() {
+    const script = yield session.createScript(
+      '"use strict";' +
+      '' +
+      'rpc.exports = {' +
+        'init: function () {' +
+        '}' +
+      '};');
+    yield script.load();
+
+    const api = yield script.getExports();
+
+    yield session.detach();
+
+    let thrownException = null;
+    try {
+      yield api.init();
+    } catch (e) {
+      thrownException = e;
+    }
+
+    if (thrownException === null)
+      throw new Error('Should not succeed');
+    thrownException.message.should.equal('Script is destroyed');
+  }));
 });
