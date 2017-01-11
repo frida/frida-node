@@ -93,7 +93,32 @@ describe('Script', function () {
     thrownException.message.should.equal('Script is destroyed');
   }));
 
-  it('should fail rpc request if detached mid-request', co.wrap(function *() {
+  it('should fail rpc request if script is unloaded mid-request', co.wrap(function *() {
+    const script = yield session.createScript(
+      '"use strict";' +
+      '' +
+      'rpc.exports = {' +
+        'waitForever: function () {' +
+          'return new Promise(function () {});' +
+        '}' +
+      '};');
+    yield script.load();
+
+    const agent = yield script.getExports();
+
+    setTimeout(() => script.unload(), 100);
+
+    let thrownException = null;
+    try {
+      yield agent.waitForever();
+    } catch (e) {
+      thrownException = e;
+    }
+    should(thrownException).not.equal(null);
+    thrownException.message.should.equal('Script is destroyed');
+  }));
+
+  it('should fail rpc request if session gets detached mid-request', co.wrap(function *() {
     const script = yield session.createScript(
       '"use strict";' +
       '' +
