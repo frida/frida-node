@@ -310,7 +310,7 @@ static Local<Value> events_closure_gvalue_to_jsvalue(const GValue* gvalue) {
     case G_TYPE_FLOAT:
       return Nan::New<v8::Number>(g_value_get_float(gvalue));
     case G_TYPE_DOUBLE:
-      return Nan::New<v8::Number>(g_value_get_float(gvalue));
+      return Nan::New<v8::Number>(g_value_get_double(gvalue));
     case G_TYPE_STRING:
       return Nan::New<v8::String>(g_value_get_string(gvalue)).ToLocalChecked();
     default: {
