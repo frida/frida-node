@@ -29,23 +29,23 @@
     "bindings": "^1.2.1",
     "minimatch": "^3.0.3",
     "nan": "^2.4.0",
-    "prebuild": "^4.4.0"
+    "prebuild-install": "^2.1.0"
   },
   "devDependencies": {
     "co": "^4.6.0",
     "jshint": "^2.9.4",
     "mocha": "^3.1.2",
+    "prebuild": "^6.0.0",
     "should": "^11.1.1"
   },
   "scripts": {
-    "install": "prebuild --install",
+    "install": "prebuild-install || node-gyp rebuild",
     "pretest": "jshint lib test/*.js",
     "prebuild": "prebuild --verbose --strip",
     "test": "npm run prebuild && node --expose-gc node_modules/mocha/bin/_mocha",
     "test-ci": "npm run prebuild && istanbul cover ./node_modules/mocha/bin/_mocha"
   },
   "binary": {
-    "module_name": "frida_binding",
     "remote_path": "node/v{version}",
     "host": "https://build.frida.re"
   },
