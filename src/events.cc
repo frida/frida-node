@@ -324,7 +324,7 @@ static Local<Value> events_closure_gvalue_to_jsvalue(const GValue* gvalue) {
         return result;
       }
 
-      g_assert_cmpuint(gtype, ==, G_TYPE_BYTES);
+      g_assert(gtype == G_TYPE_BYTES);
       auto bytes = static_cast<GBytes*>(g_value_get_boxed(gvalue));
       if (bytes != NULL) {
         gsize size;
