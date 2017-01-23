@@ -46,8 +46,8 @@
     "test-ci": "npm run prebuild && istanbul cover ./node_modules/mocha/bin/_mocha"
   },
   "binary": {
-    "remote_path": "node/v{version}",
-    "host": "https://build.frida.re"
+    "host": "https://github.com",
+    "remote_path": "frida/frida/releases/download/{version}"
   },
   "license": "LGPL-2.0 WITH WxWindows-exception-3.1",
   "repository": {
