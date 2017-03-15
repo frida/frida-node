@@ -21,12 +21,13 @@ public:
   void Perform(std::function<void ()> f);
 
 private:
+  static void DeleteAsyncHandle(uv_handle_t* handle);
   void ProcessPending();
   static void ProcessPendingWrapper(const v8::FunctionCallbackInfo<v8::Value>& info);
   static void ProcessPendingWrapper(uv_async_t* handle);
 
   int usage_count_;
-  uv_async_t async_;
+  uv_async_t* async_;
   GMutex mutex_;
   GCond cond_;
   GSList* pending_;

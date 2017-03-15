@@ -20,10 +20,12 @@ using Nan::HandleScope;
 
 namespace frida {
 
-UVContext::UVContext(uv_loop_t* loop) : usage_count_(0), pending_(NULL) {
-  uv_async_init(loop, &async_, ProcessPendingWrapper);
-  uv_unref(reinterpret_cast<uv_handle_t*>(&async_));
-  async_.data = this;
+UVContext::UVContext(uv_loop_t* loop)
+    : usage_count_(0), async_(new uv_async_t), pending_(NULL) {
+  async_->data = this;
+  uv_async_init(loop, async_, ProcessPendingWrapper);
+  uv_unref(reinterpret_cast<uv_handle_t*>(async_));
+
   g_mutex_init(&mutex_);
   g_cond_init(&cond_);
 
@@ -43,17 +45,21 @@ UVContext::~UVContext() {
   module_.Reset();
   g_cond_clear(&cond_);
   g_mutex_clear(&mutex_);
-  uv_close(reinterpret_cast<uv_handle_t*>(&async_), NULL);
+  uv_close(reinterpret_cast<uv_handle_t*>(async_), DeleteAsyncHandle);
+}
+
+void UVContext::DeleteAsyncHandle(uv_handle_t* handle) {
+  delete reinterpret_cast<uv_async_t*>(handle);
 }
 
 void UVContext::IncreaseUsage() {
   if (++usage_count_ == 1)
-    uv_ref(reinterpret_cast<uv_handle_t*>(&async_));
+    uv_ref(reinterpret_cast<uv_handle_t*>(async_));
 }
 
 void UVContext::DecreaseUsage() {
   if (usage_count_-- == 1)
-    uv_unref(reinterpret_cast<uv_handle_t*>(&async_));
+    uv_unref(reinterpret_cast<uv_handle_t*>(async_));
 }
 
 void UVContext::Schedule(std::function<void ()> f) {
@@ -61,7 +67,7 @@ void UVContext::Schedule(std::function<void ()> f) {
   UV_CONTEXT_LOCK();
   pending_ = g_slist_append(pending_, work);
   UV_CONTEXT_UNLOCK();
-  uv_async_send(&async_);
+  uv_async_send(async_);
 }
 
 void UVContext::Perform(std::function<void ()> f) {
