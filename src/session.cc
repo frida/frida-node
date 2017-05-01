@@ -184,19 +184,16 @@ NAN_METHOD(Session::CreateScript) {
 
 class CreateScriptFromBytesOperation : public Operation<FridaSession> {
  public:
-  CreateScriptFromBytesOperation(gchar* name, GBytes* bytes)
-    : name_(name),
-      bytes_(bytes) {
+  CreateScriptFromBytesOperation(GBytes* bytes)
+    : bytes_(bytes) {
   }
 
   ~CreateScriptFromBytesOperation() {
     g_bytes_unref(bytes_);
-    g_free(name_);
   }
 
   void Begin() {
-    frida_session_create_script_from_bytes(handle_, name_, bytes_, OnReady,
-        this);
+    frida_session_create_script_from_bytes(handle_, bytes_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -210,7 +207,6 @@ class CreateScriptFromBytesOperation : public Operation<FridaSession> {
     return wrapper;
   }
 
-  gchar* name_;
   GBytes* bytes_;
   FridaScript* script_;
 };
@@ -220,22 +216,15 @@ NAN_METHOD(Session::CreateScriptFromBytes) {
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
-  if (info.Length() < 2 ||
-      !(info[0]->IsString() || info[0]->IsNull()) ||
-      !node::Buffer::HasInstance(info[1])) {
-    Nan::ThrowTypeError("Bad argument, expected string|null and Buffer");
+  if (info.Length() == 0 || !node::Buffer::HasInstance(info[0])) {
+    Nan::ThrowTypeError("Bad argument, expected Buffer");
     return;
   }
-  gchar* name = NULL;
-  if (info[0]->IsString()) {
-    String::Utf8Value val(Local<String>::Cast(info[0]));
-    name = g_strdup(*val);
-  }
-  auto buffer = info[1];
+  auto buffer = info[0];
   auto bytes = g_bytes_new(node::Buffer::Data(buffer),
       node::Buffer::Length(buffer));
 
-  auto operation = new CreateScriptFromBytesOperation(name, bytes);
+  auto operation = new CreateScriptFromBytesOperation(bytes);
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
@@ -247,16 +236,18 @@ static void bytes_buffer_free(char* data, void* hint) {
 
 class CompileScriptOperation : public Operation<FridaSession> {
  public:
-  CompileScriptOperation(gchar* source)
-    : source_(source) {
+  CompileScriptOperation(gchar* name, gchar* source)
+    : name_(name),
+      source_(source) {
   }
 
   ~CompileScriptOperation() {
     g_free(source_);
+    g_free(name_);
   }
 
   void Begin() {
-    frida_session_compile_script(handle_, source_, OnReady, this);
+    frida_session_compile_script(handle_, name_, source_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -270,6 +261,7 @@ class CompileScriptOperation : public Operation<FridaSession> {
         bytes_buffer_free, bytes_).ToLocalChecked();
   }
 
+  gchar* name_;
   gchar* source_;
   GBytes* bytes_;
 };
@@ -279,13 +271,20 @@ NAN_METHOD(Session::CompileScript) {
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
-  if (info.Length() == 0 || !info[0]->IsString()) {
-    Nan::ThrowTypeError("Bad argument, expected string");
+  if (info.Length() < 2 ||
+      !(info[0]->IsString() || info[0]->IsNull()) ||
+      !info[1]->IsString()) {
+    Nan::ThrowTypeError("Bad argument, expected string|null and string");
     return;
   }
-  String::Utf8Value source(Local<String>::Cast(info[0]));
+  gchar* name = NULL;
+  if (info[0]->IsString()) {
+    String::Utf8Value val(Local<String>::Cast(info[0]));
+    name = g_strdup(*val);
+  }
+  String::Utf8Value source(Local<String>::Cast(info[1]));
 
-  auto operation = new CompileScriptOperation(g_strdup(*source));
+  auto operation = new CompileScriptOperation(name, g_strdup(*source));
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
