@@ -98,6 +98,7 @@
             "-lfrida-core-1.0",
             "-ljson-glib-1.0",
             "-lfrida-gum-1.0",
+            "-lcapstone",
             "-lgee-0.8",
             "-lgio-2.0",
             "-lgthread-2.0",
