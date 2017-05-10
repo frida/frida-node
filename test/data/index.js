@@ -3,7 +3,7 @@ function targetProgram() {
   if (platform === 'win32')
     return 'C:\\Windows\\notepad.exe';
   else if (platform === 'darwin')
-    return __dirname + '/unixvictim-mac';
+    return __dirname + '/unixvictim-macos';
   else
     return '/bin/cat';
 }

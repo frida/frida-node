@@ -5,10 +5,10 @@
         "frida_host": "windows",
       }],
       ["OS=='mac' and target_arch=='ia32'", {
-        "frida_host": "mac-i386",
+        "frida_host": "macos-i386",
       }],
       ["OS=='mac' and target_arch=='x64'", {
-        "frida_host": "mac-x86_64",
+        "frida_host": "macos-x86_64",
       }],
       ["OS=='linux' and target_arch=='ia32'", {
         "frida_host": "linux-i386",
