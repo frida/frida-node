@@ -16,6 +16,9 @@
       ["OS=='linux' and target_arch=='x64'", {
         "frida_host": "linux-x86_64",
       }],
+      ["OS=='linux' and target_arch=='arm'", {
+        "frida_host": "linux-armhf",
+      }],
     ],
     "frida_host_msvs": "unix",
   },
