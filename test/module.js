@@ -20,7 +20,12 @@ describe('Module', function () {
       return session.enumerateModules();
     })
     .then(function (modules) {
-      module = modules[1];
+      module = modules
+        .slice(1)
+        .filter(function (module) {
+          return module.name.indexOf('frida') === -1;
+        })
+        [0];
     });
   });
 
@@ -43,7 +48,7 @@ describe('Module', function () {
     });
   });
 
-  it('should enumerate ranges', function () {
+  it('should enumerate its ranges', function () {
     module.should.have.property('enumerateRanges');
     return module.enumerateRanges('r--').then(function (ranges) {
       ranges.length.should.be.above(0);
