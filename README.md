@@ -56,9 +56,3 @@ npm run prebuild
 [npm-link]: https://www.npmjs.com/package/frida
 [npm-v-image]: https://img.shields.io/npm/v/frida.svg
 [npm-dm-image]: https://img.shields.io/npm/dm/frida.svg
-[travis-image]: https://img.shields.io/travis/SuperPaintman/frida-node/master.svg?label=linux
-[travis-url]: https://travis-ci.org/SuperPaintman/frida-node
-[appveyor-image]: https://img.shields.io/appveyor/ci/SuperPaintman/frida-node/master.svg?label=windows
-[appveyor-url]: https://ci.appveyor.com/project/SuperPaintman/frida-node
-[coveralls-image]: https://img.shields.io/coveralls/SuperPaintman/frida-node/master.svg
-[coveralls-url]: https://coveralls.io/r/SuperPaintman/frida-node?branch=master
