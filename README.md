@@ -1,10 +1,7 @@
 # frida-node
 
-[![Linux Build][travis-image]][travis-url]
-[![Windows Build][appveyor-image]][appveyor-url]
 [![NPM version][npm-v-image]][npm-link]
 [![NPM Downloads][npm-dm-image]][npm-link]
-[![Test Coverage][coveralls-image]][coveralls-url]
 
 
 Node.js bindings for [Frida](http://www.frida.re).
