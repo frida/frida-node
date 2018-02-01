@@ -142,6 +142,7 @@
           ],
           "ldflags": [
             "-Wl,--gc-sections",
+            "-Wl,-z,noexecstack",
             "-Wl,--version-script",
             "-Wl,../binding.version",
           ],
