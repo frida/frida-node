@@ -149,12 +149,11 @@ describe('Script', function () {
       '' +
       'console.error(new Error("test message"))');
 
-    script.setLogHandler(function(level, text) {
+    script.setLogHandler(function (level, text) {
       should(level).equal('error');
       should(text).equal('Error: test message');
     });
 
     yield script.load();
-    should('a').equal('a');
   }));
 });
