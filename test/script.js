@@ -142,4 +142,19 @@ describe('Script', function () {
     should(thrownException).not.equal(null);
     thrownException.message.should.equal('Script is destroyed');
   }));
+
+  it('should support custom log handler', co.wrap(function *() {
+    const script = yield session.createScript(
+      '"use strict";' +
+      '' +
+      'console.error(new Error("test message"))');
+
+    script.setLogHandler(function(level, text) {
+      should(level).equal('error');
+      should(text).equal('Error: test message');
+    });
+
+    yield script.load();
+    should('a').equal('a');
+  }));
 });
