@@ -1,6 +1,7 @@
 #include "device.h"
 
 #include "application.h"
+#include "child.h"
 #include "events.h"
 #include "icon.h"
 #include "operation.h"
@@ -62,6 +63,8 @@ void Device::Init(Handle<Object> exports, Runtime* runtime) {
   Nan::SetPrototypeMethod(tpl, "enableSpawnGating", EnableSpawnGating);
   Nan::SetPrototypeMethod(tpl, "disableSpawnGating", DisableSpawnGating);
   Nan::SetPrototypeMethod(tpl, "enumeratePendingSpawns", EnumeratePendingSpawns);
+  Nan::SetPrototypeMethod(tpl, "enumeratePendingChildren",
+      EnumeratePendingChildren);
   Nan::SetPrototypeMethod(tpl, "spawn", Spawn);
   Nan::SetPrototypeMethod(tpl, "input", Input);
   Nan::SetPrototypeMethod(tpl, "resume", Resume);
@@ -103,8 +106,7 @@ NAN_METHOD(Device::New) {
   auto wrapper = new Device(handle, runtime);
   auto obj = info.This();
   wrapper->Wrap(obj);
-  auto events_obj = Events::New(handle, runtime, TransformSpawnedEvent,
-      wrapper);
+  auto events_obj = Events::New(handle, runtime, TransformEvent, wrapper);
 
   Nan::Set(obj, Nan::New("events").ToLocalChecked(), events_obj);
 
@@ -143,22 +145,8 @@ NAN_PROPERTY_GETTER(Device::GetType) {
   auto handle = ObjectWrap::Unwrap<Device>(
       info.Holder())->GetHandle<FridaDevice>();
 
-  const gchar* type;
-  switch (frida_device_get_dtype(handle)) {
-    case FRIDA_DEVICE_TYPE_LOCAL:
-      type = "local";
-      break;
-    case FRIDA_DEVICE_TYPE_TETHER:
-      type = "tether";
-      break;
-    case FRIDA_DEVICE_TYPE_REMOTE:
-      type = "remote";
-      break;
-    default:
-      g_assert_not_reached();
-  }
-
-  info.GetReturnValue().Set(Nan::New(type).ToLocalChecked());
+  info.GetReturnValue().Set(Runtime::EnumToString(
+      frida_device_get_dtype(handle), FRIDA_TYPE_DEVICE_TYPE));
 }
 
 class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
@@ -363,6 +351,46 @@ NAN_METHOD(Device::EnumeratePendingSpawns) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   auto operation = new EnumeratePendingSpawnsOperation();
+  operation->Schedule(isolate, wrapper);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class EnumeratePendingChildrenOperation : public Operation<FridaDevice> {
+ public:
+  void Begin() {
+    frida_device_enumerate_pending_children(handle_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    pending_children_ = frida_device_enumerate_pending_children_finish(handle_,
+        result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    auto size = frida_child_list_size(pending_children_);
+    auto pending_children = Nan::New<v8::Array>(size);
+    for (auto i = 0; i != size; i++) {
+      auto handle = frida_child_list_get(pending_children_, i);
+      auto child = Child::New(handle, runtime_);
+      Nan::Set(pending_children, i, child);
+      g_object_unref(handle);
+    }
+
+    g_object_unref(pending_children_);
+
+    return pending_children;
+  }
+
+  FridaChildList* pending_children_;
+};
+
+NAN_METHOD(Device::EnumeratePendingChildren) {
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+
+  auto operation = new EnumeratePendingChildrenOperation();
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
@@ -746,30 +774,38 @@ NAN_METHOD(Device::InjectLibraryBlob) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
-Local<Value> Device::TransformSpawnedEvent(const gchar* name, guint index,
+Local<Value> Device::TransformEvent(const gchar* name, guint index,
     const GValue* value, gpointer user_data) {
-  if (index != 0 || strcmp(name, "spawned") != 0)
-    return Local<Value>();
   auto self = static_cast<Device*>(user_data);
-  return Spawn::New(g_value_get_object(value), self->runtime_);
+
+  if (strcmp(name, "spawned") == 0 && index == 0)
+    return Spawn::New(g_value_get_object(value), self->runtime_);
+
+  if (strcmp(name, "delivered") == 0 && index == 0)
+    return Child::New(g_value_get_object(value), self->runtime_);
+
+  return Local<Value>();
 }
 
 void Device::OnListen(const gchar* signal, gpointer user_data) {
   auto wrapper = static_cast<Device*>(user_data);
 
-  if (strcmp(signal, "spawned") == 0 || strcmp(signal, "output") == 0 ||
-      strcmp(signal, "uninjected") == 0) {
+  if (ShouldStayAliveToEmit(signal))
     wrapper->runtime_->GetUVContext()->IncreaseUsage();
-  }
 }
 
 void Device::OnUnlisten(const gchar* signal, gpointer user_data) {
   auto wrapper = static_cast<Device*>(user_data);
 
-  if (strcmp(signal, "spawned") == 0 || strcmp(signal, "output") == 0 ||
-      strcmp(signal, "uninjected") == 0) {
+  if (ShouldStayAliveToEmit(signal))
     wrapper->runtime_->GetUVContext()->DecreaseUsage();
-  }
+}
+
+bool Device::ShouldStayAliveToEmit(const gchar* signal) {
+  return strcmp(signal, "spawned") == 0 ||
+      strcmp(signal, "delivered") == 0 ||
+      strcmp(signal, "output") == 0 ||
+      strcmp(signal, "uninjected") == 0;
 }
 
 }

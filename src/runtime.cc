@@ -72,4 +72,12 @@ Local<Value> Runtime::ValueFromJson(Handle<String> json) {
   return parse->Call(module, 1, argv);
 }
 
+Local<String> Runtime::EnumToString(gint value, GType type) {
+  auto enum_class = static_cast<GEnumClass*>(g_type_class_ref(type));
+  auto result = Nan::New(g_enum_get_value(enum_class, value)->value_nick)
+      .ToLocalChecked();
+  g_type_class_unref(enum_class);
+  return result;
+}
+
 }

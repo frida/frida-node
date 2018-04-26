@@ -30,6 +30,7 @@ class Device : public GLibObject {
   static NAN_METHOD(EnableSpawnGating);
   static NAN_METHOD(DisableSpawnGating);
   static NAN_METHOD(EnumeratePendingSpawns);
+  static NAN_METHOD(EnumeratePendingChildren);
   static NAN_METHOD(Spawn);
   static NAN_METHOD(Input);
   static NAN_METHOD(Resume);
@@ -38,10 +39,11 @@ class Device : public GLibObject {
   static NAN_METHOD(InjectLibraryFile);
   static NAN_METHOD(InjectLibraryBlob);
 
-  static v8::Local<v8::Value> TransformSpawnedEvent(const gchar* name,
-      guint index, const GValue* value, gpointer user_data);
+  static v8::Local<v8::Value> TransformEvent(const gchar* name, guint index,
+      const GValue* value, gpointer user_data);
   static void OnListen(const gchar* signal, gpointer user_data);
   static void OnUnlisten(const gchar* signal, gpointer user_data);
+  static bool ShouldStayAliveToEmit(const gchar* signal);
 
   v8::Persistent<v8::Object> events_;
 };

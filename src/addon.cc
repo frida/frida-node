@@ -1,4 +1,5 @@
 #include "application.h"
+#include "child.h"
 #include "device.h"
 #include "device_manager.h"
 #include "events.h"
@@ -38,6 +39,7 @@ static void InitAll(Handle<Object> exports,
   Application::Init(exports, runtime);
   Process::Init(exports, runtime);
   Spawn::Init(exports, runtime);
+  Child::Init(exports, runtime);
   Icon::Init(exports, runtime);
   Session::Init(exports, runtime);
   Script::Init(exports, runtime);

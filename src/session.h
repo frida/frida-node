@@ -22,6 +22,8 @@ class Session : public GLibObject {
   static NAN_PROPERTY_GETTER(GetPid);
 
   static NAN_METHOD(Detach);
+  static NAN_METHOD(EnableChildGating);
+  static NAN_METHOD(DisableChildGating);
   static NAN_METHOD(CreateScript);
   static NAN_METHOD(CreateScriptFromBytes);
   static NAN_METHOD(CompileScript);

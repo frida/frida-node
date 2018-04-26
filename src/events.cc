@@ -314,15 +314,8 @@ static Local<Value> events_closure_gvalue_to_jsvalue(const GValue* gvalue) {
     case G_TYPE_STRING:
       return Nan::New<v8::String>(g_value_get_string(gvalue)).ToLocalChecked();
     default: {
-      if (G_TYPE_IS_ENUM(gtype)) {
-        auto enum_class = G_ENUM_CLASS(g_type_class_ref(gtype));
-        auto enum_value = g_enum_get_value(enum_class,
-            g_value_get_enum(gvalue));
-        auto result =
-            Nan::New<v8::String>(enum_value->value_nick).ToLocalChecked();
-        g_type_class_unref(enum_class);
-        return result;
-      }
+      if (G_TYPE_IS_ENUM(gtype))
+        return Runtime::EnumToString(g_value_get_enum(gvalue), gtype);
 
       g_assert(gtype == G_TYPE_BYTES);
       auto bytes = static_cast<GBytes*>(g_value_get_boxed(gvalue));

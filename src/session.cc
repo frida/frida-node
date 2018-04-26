@@ -47,6 +47,8 @@ void Session::Init(Handle<Object> exports, Runtime* runtime) {
       data, DEFAULT, ReadOnly, signature);
 
   Nan::SetPrototypeMethod(tpl, "detach", Detach);
+  Nan::SetPrototypeMethod(tpl, "enableChildGating", EnableChildGating);
+  Nan::SetPrototypeMethod(tpl, "disableChildGating", DisableChildGating);
   Nan::SetPrototypeMethod(tpl, "createScript", CreateScript);
   Nan::SetPrototypeMethod(tpl, "createScriptFromBytes", CreateScriptFromBytes);
   Nan::SetPrototypeMethod(tpl, "compileScript", CompileScript);
@@ -157,6 +159,58 @@ class CreateScriptOperation : public Operation<FridaSession> {
   gchar* source_;
   FridaScript* script_;
 };
+
+class EnableChildGatingOperation : public Operation<FridaSession> {
+ public:
+  void Begin() {
+    frida_session_enable_child_gating(handle_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_session_enable_child_gating_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Nan::Undefined();
+  }
+};
+
+NAN_METHOD(Session::EnableChildGating) {
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Session>(obj);
+
+  auto operation = new EnableChildGatingOperation();
+  operation->Schedule(isolate, wrapper);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+class DisableChildGatingOperation : public Operation<FridaSession> {
+ public:
+  void Begin() {
+    frida_session_disable_child_gating(handle_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_session_disable_child_gating_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Nan::Undefined();
+  }
+};
+
+NAN_METHOD(Session::DisableChildGating) {
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Session>(obj);
+
+  auto operation = new DisableChildGatingOperation();
+  operation->Schedule(isolate, wrapper);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
 
 NAN_METHOD(Session::CreateScript) {
   auto isolate = info.GetIsolate();

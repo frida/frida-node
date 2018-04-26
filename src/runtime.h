@@ -22,6 +22,8 @@ class Runtime {
   v8::Local<v8::String> ValueToJson(v8::Handle<v8::Value> value);
   v8::Local<v8::Value> ValueFromJson(v8::Handle<v8::String> json);
 
+  static v8::Local<v8::String> EnumToString(gint value, GType type);
+
  private:
   UVContext* uv_context_;
   GLibContext* glib_context_;
