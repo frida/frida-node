@@ -37,14 +37,14 @@ void Icon::Init(Handle<Object> exports, Runtime* runtime) {
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  Nan::SetAccessor(instance_tpl, Nan::New("width").ToLocalChecked(),
-      GetWidth, 0, data, DEFAULT, ReadOnly, signature);
-  Nan::SetAccessor(instance_tpl, Nan::New("height").ToLocalChecked(),
-      GetHeight, 0, data, DEFAULT, ReadOnly, signature);
-  Nan::SetAccessor(instance_tpl, Nan::New("rowstride").ToLocalChecked(),
-      GetRowstride, 0, data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("pixels").ToLocalChecked(),
       GetPixels, 0, data, DEFAULT, ReadOnly, signature);
+  Nan::SetAccessor(instance_tpl, Nan::New("rowstride").ToLocalChecked(),
+      GetRowstride, 0, data, DEFAULT, ReadOnly, signature);
+  Nan::SetAccessor(instance_tpl, Nan::New("height").ToLocalChecked(),
+      GetHeight, 0, data, DEFAULT, ReadOnly, signature);
+  Nan::SetAccessor(instance_tpl, Nan::New("width").ToLocalChecked(),
+      GetWidth, 0, data, DEFAULT, ReadOnly, signature);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);

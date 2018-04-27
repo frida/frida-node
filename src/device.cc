@@ -47,13 +47,13 @@ void Device::Init(Handle<Object> exports, Runtime* runtime) {
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  Nan::SetAccessor(instance_tpl, Nan::New("id").ToLocalChecked(), GetId, 0,
-      data, DEFAULT, ReadOnly, signature);
-  Nan::SetAccessor(instance_tpl, Nan::New("name").ToLocalChecked(), GetName, 0,
+  Nan::SetAccessor(instance_tpl, Nan::New("type").ToLocalChecked(), GetType, 0,
       data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("icon").ToLocalChecked(), GetIcon, 0,
       data, DEFAULT, ReadOnly, signature);
-  Nan::SetAccessor(instance_tpl, Nan::New("type").ToLocalChecked(), GetType, 0,
+  Nan::SetAccessor(instance_tpl, Nan::New("name").ToLocalChecked(), GetName, 0,
+      data, DEFAULT, ReadOnly, signature);
+  Nan::SetAccessor(instance_tpl, Nan::New("id").ToLocalChecked(), GetId, 0,
       data, DEFAULT, ReadOnly, signature);
 
   Nan::SetPrototypeMethod(tpl, "getFrontmostApplication",

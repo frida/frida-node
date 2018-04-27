@@ -37,10 +37,10 @@ void Spawn::Init(Handle<Object> exports, Runtime* runtime) {
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  Nan::SetAccessor(instance_tpl, Nan::New("pid").ToLocalChecked(),
-      GetPid, 0, data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("identifier").ToLocalChecked(),
       GetIdentifier, 0, data, DEFAULT, ReadOnly, signature);
+  Nan::SetAccessor(instance_tpl, Nan::New("pid").ToLocalChecked(),
+      GetPid, 0, data, DEFAULT, ReadOnly, signature);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);

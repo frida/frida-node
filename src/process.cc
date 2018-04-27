@@ -37,14 +37,14 @@ void Process::Init(Handle<Object> exports, Runtime* runtime) {
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  Nan::SetAccessor(instance_tpl, Nan::New("pid").ToLocalChecked(),
-      GetPid, 0, data, DEFAULT, ReadOnly, signature);
-  Nan::SetAccessor(instance_tpl, Nan::New("name").ToLocalChecked(),
-      GetName, 0, data, DEFAULT, ReadOnly, signature);
-  Nan::SetAccessor(instance_tpl, Nan::New("smallIcon").ToLocalChecked(),
-      GetSmallIcon, 0, data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("largeIcon").ToLocalChecked(),
       GetLargeIcon, 0, data, DEFAULT, ReadOnly, signature);
+  Nan::SetAccessor(instance_tpl, Nan::New("smallIcon").ToLocalChecked(),
+      GetSmallIcon, 0, data, DEFAULT, ReadOnly, signature);
+  Nan::SetAccessor(instance_tpl, Nan::New("name").ToLocalChecked(),
+      GetName, 0, data, DEFAULT, ReadOnly, signature);
+  Nan::SetAccessor(instance_tpl, Nan::New("pid").ToLocalChecked(),
+      GetPid, 0, data, DEFAULT, ReadOnly, signature);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
