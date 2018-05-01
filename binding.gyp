@@ -21,6 +21,7 @@
       }],
     ],
     "frida_host_msvs": "unix",
+    "build_v8_with_gn": 0,
   },
   "targets": [
     {
