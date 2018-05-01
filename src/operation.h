@@ -14,7 +14,9 @@ class Operation {
   void Schedule(v8::Isolate* isolate, GLibObject* parent) {
     parent_.Reset(isolate, parent->handle(isolate));
     handle_ = parent->GetHandle<T>();
-    resolver_.Reset(isolate, v8::Promise::Resolver::New(isolate));
+    resolver_.Reset(isolate,
+        v8::Promise::Resolver::New(isolate->GetCurrentContext())
+            .ToLocalChecked());
     runtime_ = parent->GetRuntime();
 
     runtime_->GetUVContext()->IncreaseUsage();
@@ -58,11 +60,12 @@ class Operation {
 
   void Deliver() {
     auto isolate = v8::Isolate::GetCurrent();
+    auto context = isolate->GetCurrentContext();
     auto resolver = v8::Local<v8::Promise::Resolver>::New(isolate, resolver_);
     if (error_ == NULL) {
-      resolver->Resolve(Result(isolate));
+      resolver->Resolve(context, Result(isolate)).ToChecked();
     } else {
-      resolver->Reject(Nan::Error(error_->message));
+      resolver->Reject(context, Nan::Error(error_->message)).ToChecked();
     }
     runtime_->GetUVContext()->DecreaseUsage();
     delete this;

@@ -2,8 +2,7 @@
 #define FRIDANODE_UV_CONTEXT_H
 
 #include <glib.h>
-#include <uv.h>
-#include <v8.h>
+#include <nan.h>
 
 #include <functional>
 
@@ -28,6 +27,7 @@ private:
 
   int usage_count_;
   uv_async_t* async_;
+  Nan::AsyncResource async_resource_;
   GMutex mutex_;
   GCond cond_;
   GSList* pending_;

@@ -1,9 +1,5 @@
 #include "uv_context.h"
 
-#include <nan.h>
-#include <node.h>
-#include <v8.h>
-
 #define UV_CONTEXT_LOCK()   g_mutex_lock(&mutex_)
 #define UV_CONTEXT_UNLOCK() g_mutex_unlock(&mutex_)
 #define UV_CONTEXT_WAIT()   g_cond_wait(&cond_, &mutex_)
@@ -21,7 +17,8 @@ using Nan::HandleScope;
 namespace frida {
 
 UVContext::UVContext(uv_loop_t* loop)
-    : usage_count_(0), async_(new uv_async_t), pending_(NULL) {
+    : usage_count_(0), async_(new uv_async_t), async_resource_("frida"),
+      pending_(NULL) {
   async_->data = this;
   uv_async_init(loop, async_, ProcessPendingWrapper);
   uv_unref(reinterpret_cast<uv_handle_t*>(async_));
@@ -110,12 +107,10 @@ void UVContext::ProcessPendingWrapper(const v8::FunctionCallbackInfo<Value>& inf
 void UVContext::ProcessPendingWrapper(uv_async_t* handle) {
   HandleScope scope;
 
-  auto isolate = Isolate::GetCurrent();
-
   auto self = static_cast<UVContext*>(handle->data);
   auto module = Nan::New<v8::Object>(self->module_);
   auto process_pending = Nan::New<v8::Function>(self->process_pending_);
-  node::MakeCallback(isolate, module, process_pending, 0, NULL);
+  self->async_resource_.runInAsyncScope(module, process_pending, 0, NULL);
 }
 
 }

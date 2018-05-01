@@ -442,7 +442,7 @@ NAN_METHOD(Device::Spawn) {
     for (uint32_t i = 0; i != length; i++) {
       auto element_value = Nan::Get(elements, i).ToLocalChecked();
       if (element_value->IsString()) {
-        String::Utf8Value element(Local<String>::Cast(element_value));
+        Nan::Utf8String element(Local<String>::Cast(element_value));
         argv[i] = g_strdup(*element);
       } else {
         g_strfreev(argv);
@@ -697,9 +697,9 @@ NAN_METHOD(Device::InjectLibraryFile) {
     Nan::ThrowTypeError("Bad argument, expected pid");
     return;
   }
-  String::Utf8Value path(Local<String>::Cast(info[1]));
-  String::Utf8Value entrypoint(Local<String>::Cast(info[2]));
-  String::Utf8Value data(Local<String>::Cast(info[3]));
+  Nan::Utf8String path(Local<String>::Cast(info[1]));
+  Nan::Utf8String entrypoint(Local<String>::Cast(info[2]));
+  Nan::Utf8String data(Local<String>::Cast(info[3]));
 
   auto operation = new InjectLibraryFileOperation(static_cast<guint>(pid),
       g_strdup(*path), g_strdup(*entrypoint), g_strdup(*data));
@@ -764,8 +764,8 @@ NAN_METHOD(Device::InjectLibraryBlob) {
   auto buffer = info[1];
   auto blob = g_bytes_new(node::Buffer::Data(buffer),
       node::Buffer::Length(buffer));
-  String::Utf8Value entrypoint(Local<String>::Cast(info[2]));
-  String::Utf8Value data(Local<String>::Cast(info[3]));
+  Nan::Utf8String entrypoint(Local<String>::Cast(info[2]));
+  Nan::Utf8String data(Local<String>::Cast(info[3]));
 
   auto operation = new InjectLibraryBlobOperation(static_cast<guint>(pid),
       blob, g_strdup(*entrypoint), g_strdup(*data));

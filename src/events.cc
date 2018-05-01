@@ -202,7 +202,7 @@ bool Events::GetSignalArguments(const Nan::FunctionCallbackInfo<Value>& info,
     Nan::ThrowTypeError("Bad arguments, expected string and function");
     return false;
   }
-  String::Utf8Value signal_name(Local<String>::Cast(info[0]));
+  Nan::Utf8String signal_name(Local<String>::Cast(info[0]));
   signal_id = g_signal_lookup(*signal_name, G_OBJECT_TYPE(handle_));
   if (signal_id == 0) {
     Nan::ThrowTypeError("Bad event name");

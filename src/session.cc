@@ -225,10 +225,10 @@ NAN_METHOD(Session::CreateScript) {
   }
   gchar* name = NULL;
   if (info[0]->IsString()) {
-    String::Utf8Value val(Local<String>::Cast(info[0]));
+    Nan::Utf8String val(Local<String>::Cast(info[0]));
     name = g_strdup(*val);
   }
-  String::Utf8Value source(Local<String>::Cast(info[1]));
+  Nan::Utf8String source(Local<String>::Cast(info[1]));
 
   auto operation = new CreateScriptOperation(name, g_strdup(*source));
   operation->Schedule(isolate, wrapper);
@@ -333,10 +333,10 @@ NAN_METHOD(Session::CompileScript) {
   }
   gchar* name = NULL;
   if (info[0]->IsString()) {
-    String::Utf8Value val(Local<String>::Cast(info[0]));
+    Nan::Utf8String val(Local<String>::Cast(info[0]));
     name = g_strdup(*val);
   }
-  String::Utf8Value source(Local<String>::Cast(info[1]));
+  Nan::Utf8String source(Local<String>::Cast(info[1]));
 
   auto operation = new CompileScriptOperation(name, g_strdup(*source));
   operation->Schedule(isolate, wrapper);

@@ -190,7 +190,7 @@ NAN_METHOD(DeviceManager::AddRemoteDevice) {
     return;
   }
 
-  String::Utf8Value host(Local<String>::Cast(info[0]));
+  Nan::Utf8String host(Local<String>::Cast(info[0]));
 
   auto operation = new AddRemoteDeviceOperation(g_strdup(*host));
   operation->Schedule(isolate, wrapper);
@@ -232,7 +232,7 @@ NAN_METHOD(DeviceManager::RemoveRemoteDevice) {
     return;
   }
 
-  String::Utf8Value host(Local<String>::Cast(info[0]));
+  Nan::Utf8String host(Local<String>::Cast(info[0]));
 
   auto operation = new RemoveRemoteDeviceOperation(g_strdup(*host));
   operation->Schedule(isolate, wrapper);

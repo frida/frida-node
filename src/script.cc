@@ -173,8 +173,7 @@ NAN_METHOD(Script::Post) {
     return;
   }
 
-  String::Utf8Value message(
-      wrapper->runtime_->ValueToJson(info[0]));
+  Nan::Utf8String message(wrapper->runtime_->ValueToJson(info[0]));
 
   GBytes* data = NULL;
   auto buffer = info[1];
