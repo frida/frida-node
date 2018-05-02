@@ -62,7 +62,7 @@ void Device::Init(Handle<Object> exports, Runtime* runtime) {
   Nan::SetPrototypeMethod(tpl, "enumerateProcesses", EnumerateProcesses);
   Nan::SetPrototypeMethod(tpl, "enableSpawnGating", EnableSpawnGating);
   Nan::SetPrototypeMethod(tpl, "disableSpawnGating", DisableSpawnGating);
-  Nan::SetPrototypeMethod(tpl, "enumeratePendingSpawns", EnumeratePendingSpawns);
+  Nan::SetPrototypeMethod(tpl, "enumeratePendingSpawn", EnumeratePendingSpawn);
   Nan::SetPrototypeMethod(tpl, "enumeratePendingChildren",
       EnumeratePendingChildren);
   Nan::SetPrototypeMethod(tpl, "spawn", Spawn);
@@ -316,41 +316,41 @@ NAN_METHOD(Device::DisableSpawnGating) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
-class EnumeratePendingSpawnsOperation : public Operation<FridaDevice> {
+class EnumeratePendingSpawnOperation : public Operation<FridaDevice> {
  public:
   void Begin() {
-    frida_device_enumerate_pending_spawns(handle_, OnReady, this);
+    frida_device_enumerate_pending_spawn(handle_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
-    pending_spawns_ = frida_device_enumerate_pending_spawns_finish(handle_,
+    pending_spawn_ = frida_device_enumerate_pending_spawn_finish(handle_,
         result, error);
   }
 
   Local<Value> Result(Isolate* isolate) {
-    auto size = frida_spawn_list_size(pending_spawns_);
-    auto pending_spawns = Nan::New<v8::Array>(size);
+    auto size = frida_spawn_list_size(pending_spawn_);
+    auto pending_spawn = Nan::New<v8::Array>(size);
     for (auto i = 0; i != size; i++) {
-      auto handle = frida_spawn_list_get(pending_spawns_, i);
+      auto handle = frida_spawn_list_get(pending_spawn_, i);
       auto spawn = Spawn::New(handle, runtime_);
-      Nan::Set(pending_spawns, i, spawn);
+      Nan::Set(pending_spawn, i, spawn);
       g_object_unref(handle);
     }
 
-    g_object_unref(pending_spawns_);
+    g_object_unref(pending_spawn_);
 
-    return pending_spawns;
+    return pending_spawn;
   }
 
-  FridaSpawnList* pending_spawns_;
+  FridaSpawnList* pending_spawn_;
 };
 
-NAN_METHOD(Device::EnumeratePendingSpawns) {
+NAN_METHOD(Device::EnumeratePendingSpawn) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
-  auto operation = new EnumeratePendingSpawnsOperation();
+  auto operation = new EnumeratePendingSpawnOperation();
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
@@ -398,10 +398,11 @@ NAN_METHOD(Device::EnumeratePendingChildren) {
 
 class SpawnOperation : public Operation<FridaDevice> {
  public:
-  SpawnOperation(gchar* path, gchar** argv, gchar** envp)
+  SpawnOperation(gchar* path, gchar** argv, gint argv_length, gchar** envp,
+      gint envp_length)
     : path_(path),
-      argv_(argv),
-      envp_(envp) {
+      argv_(argv), argv_length_(argv_length),
+      envp_(envp), envp_length_(envp_length) {
   }
 
   ~SpawnOperation() {
@@ -411,8 +412,8 @@ class SpawnOperation : public Operation<FridaDevice> {
   }
 
   void Begin() {
-    frida_device_spawn(handle_, path_, argv_, g_strv_length(argv_),
-        envp_, g_strv_length(envp_), OnReady, this);
+    frida_device_spawn(handle_, path_, argv_, argv_length_, envp_, envp_length_,
+        OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -425,7 +426,9 @@ class SpawnOperation : public Operation<FridaDevice> {
 
   gchar* path_;
   gchar** argv_;
+  gint argv_length_;
   gchar** envp_;
+  gint envp_length_;
   guint pid_;
 };
 
@@ -434,33 +437,27 @@ NAN_METHOD(Device::Spawn) {
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
-  gchar** argv = NULL;
-  if (info.Length() >= 1 && info[0]->IsArray()) {
-    auto elements = Local<v8::Array>::Cast(info[0]);
-    uint32_t length = elements->Length();
-    argv = g_new0(gchar *, length + 1);
-    for (uint32_t i = 0; i != length; i++) {
-      auto element_value = Nan::Get(elements, i).ToLocalChecked();
-      if (element_value->IsString()) {
-        Nan::Utf8String element(Local<String>::Cast(element_value));
-        argv[i] = g_strdup(*element);
-      } else {
-        g_strfreev(argv);
-        argv = NULL;
-        break;
-      }
-    }
-  }
-  if (argv == NULL) {
-    Nan::ThrowTypeError("Bad argument, expected argv as an array of strings");
+  if (info.Length() < 2) {
+    Nan::ThrowTypeError("Bad argument, expected argv and envp");
     return;
   }
 
-  gchar** envp = g_get_environ();
+  gchar** argv;
+  gint argv_length;
+  if (!Runtime::ValueToStrV(info[0], &argv, &argv_length))
+    return;
+
+  gchar** envp;
+  gint envp_length;
+  if (!Runtime::ValueToStrVOptional(info[1], &envp, &envp_length)) {
+    g_strfreev(argv);
+    return;
+  }
 
   gchar* path = g_strdup(argv[0]);
 
-  auto operation = new SpawnOperation(path, argv, envp);
+  auto operation = new SpawnOperation(path, argv, argv_length, envp,
+      envp_length);
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
@@ -778,10 +775,12 @@ Local<Value> Device::TransformEvent(const gchar* name, guint index,
     const GValue* value, gpointer user_data) {
   auto self = static_cast<Device*>(user_data);
 
-  if (strcmp(name, "spawned") == 0 && index == 0)
+  if (index == 0 && (strcmp(name, "spawn-added") == 0 ||
+       strcmp(name, "spawn-removed") == 0))
     return Spawn::New(g_value_get_object(value), self->runtime_);
 
-  if (strcmp(name, "delivered") == 0 && index == 0)
+  if (index == 0 && (strcmp(name, "child-added") == 0 ||
+       strcmp(name, "child-removed") == 0))
     return Child::New(g_value_get_object(value), self->runtime_);
 
   return Local<Value>();
@@ -802,8 +801,10 @@ void Device::OnUnlisten(const gchar* signal, gpointer user_data) {
 }
 
 bool Device::ShouldStayAliveToEmit(const gchar* signal) {
-  return strcmp(signal, "spawned") == 0 ||
-      strcmp(signal, "delivered") == 0 ||
+  return strcmp(signal, "spawn-added") == 0 ||
+      strcmp(signal, "spawn-removed") == 0 ||
+      strcmp(signal, "child-added") == 0 ||
+      strcmp(signal, "child-removed") == 0 ||
       strcmp(signal, "output") == 0 ||
       strcmp(signal, "uninjected") == 0;
 }

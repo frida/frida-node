@@ -29,7 +29,7 @@ class Device : public GLibObject {
   static NAN_METHOD(EnumerateProcesses);
   static NAN_METHOD(EnableSpawnGating);
   static NAN_METHOD(DisableSpawnGating);
-  static NAN_METHOD(EnumeratePendingSpawns);
+  static NAN_METHOD(EnumeratePendingSpawn);
   static NAN_METHOD(EnumeratePendingChildren);
   static NAN_METHOD(Spawn);
   static NAN_METHOD(Input);

@@ -9,13 +9,14 @@ let device = null;
 
 async function main() {
   device = await frida.getLocalDevice();
-  device.events.listen('delivered', onDelivered);
+  device.events.listen('child-added', onChildAdded);
+  device.events.listen('child-removed', onChildRemoved);
   device.events.listen('output', onOutput);
 
   await showPendingChildren();
 
   console.log('[*] spawn()');
-  const pid = await device.spawn(['/bin/sh', '-c', 'ls /']);
+  const pid = await device.spawn(['/bin/sh', '-c', 'ls /'], ['FOO=bar', 'BADGER=snake']);
   console.log(`[*] attach(${pid})`);
   const session = await device.attach(pid);
   console.log('[*] enableChildGating()');
@@ -24,9 +25,9 @@ async function main() {
   await device.resume(pid);
 }
 
-async function onDelivered(child) {
+async function onChildAdded(child) {
   try {
-    console.log('[*] onDelivered:', util.inspect(child, { colors: true }));
+    console.log('[*] onChildAdded:', util.inspect(child, { colors: true }));
 
     await showPendingChildren();
 
@@ -37,6 +38,10 @@ async function onDelivered(child) {
   } catch (e) {
     console.error(e);
   }
+}
+
+function onChildRemoved(child) {
+  console.log('[*] onChildRemoved:', util.inspect(child, { colors: true }));
 }
 
 function onOutput(pid, fd, data) {
@@ -51,7 +56,8 @@ function onOutput(pid, fd, data) {
 function onChildDetached(reason) {
   console.log(`[*] onChildDetached(reason='${reason}')`);
 
-  device.events.unlisten('delivered', onDelivered);
+  device.events.unlisten('child-added', onChildAdded);
+  device.events.unlisten('child-removed', onChildRemoved);
   device.events.unlisten('output', onOutput);
 }
 
