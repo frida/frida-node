@@ -63,9 +63,9 @@ class Operation {
     auto context = isolate->GetCurrentContext();
     auto resolver = v8::Local<v8::Promise::Resolver>::New(isolate, resolver_);
     if (error_ == NULL) {
-      resolver->Resolve(context, Result(isolate)).ToChecked();
+      resolver->Resolve(context, Result(isolate)).FromJust();
     } else {
-      resolver->Reject(context, Nan::Error(error_->message)).ToChecked();
+      resolver->Reject(context, Nan::Error(error_->message)).FromJust();
     }
     runtime_->GetUVContext()->DecreaseUsage();
     delete this;
