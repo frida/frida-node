@@ -2,6 +2,7 @@
 
 #include <nan.h>
 
+using v8::Array;
 using v8::Function;
 using v8::Handle;
 using v8::Isolate;
@@ -73,24 +74,6 @@ Local<Value> Runtime::ValueFromJson(Handle<String> json) {
 }
 
 bool Runtime::ValueToStrV(Handle<Value> value, gchar*** strv, gint* length) {
-  if (!ValueToStrVOptional(value, strv, length))
-    return false;
-
-  if (*strv == NULL) {
-    Nan::ThrowTypeError("Bad argument, expected an array of strings");
-    return false;
-  }
-
-  return true;
-}
-
-bool Runtime::ValueToStrVOptional(Handle<Value> value, gchar*** strv, gint* length) {
-  if (value->IsNull()) {
-    *strv = NULL;
-    *length = -1;
-    return true;
-  }
-
   if (!value->IsArray()) {
     Nan::ThrowTypeError("Bad argument, expected an array of strings");
     return false;
@@ -118,12 +101,70 @@ bool Runtime::ValueToStrVOptional(Handle<Value> value, gchar*** strv, gint* leng
   return true;
 }
 
-Local<String> Runtime::EnumToString(gint value, GType type) {
+Local<Value> Runtime::ValueFromStrV(gchar* const* strv, gint length) {
+  if (strv == NULL)
+    return Nan::Null();
+
+  auto result = Nan::New<Array>(length);
+  for (gint i = 0; i != length; i++)
+    Nan::Set(result, i, Nan::New(strv[i]).ToLocalChecked());
+  return result;
+}
+
+bool Runtime::ValueToEnum(Handle<Value> value, GType type, gpointer result) {
+  if (!value->IsString()) {
+    Nan::ThrowTypeError("Bad argument, expected a string");
+    return false;
+  }
+  Nan::Utf8String str(Local<String>::Cast(value));
+
+  bool success = false;
+
+  auto enum_class = static_cast<GEnumClass*>(g_type_class_ref(type));
+
+  auto enum_value = g_enum_get_value_by_nick(enum_class, *str);
+  if (enum_value != NULL) {
+    *((gint*) result) = enum_value->value;
+
+    success = true;
+  } else {
+    auto message = g_string_sized_new(128);
+
+    g_string_append_printf(message,
+        "Enum type %s does not have a value named '%s', it only has: ",
+        ClassNameFromC(g_type_name(type)), *str);
+
+    for (guint i = 0; i != enum_class->n_values; i++) {
+      if (i != 0)
+        g_string_append(message, ", ");
+      g_string_append_c(message, '\'');
+      g_string_append(message, enum_class->values[i].value_nick);
+      g_string_append_c(message, '\'');
+    }
+
+    Nan::ThrowTypeError(message->str);
+
+    g_string_free(message, TRUE);
+  }
+
+  g_type_class_unref(enum_class);
+
+  return success;
+}
+
+Local<String> Runtime::ValueFromEnum(gint value, GType type) {
   auto enum_class = static_cast<GEnumClass*>(g_type_class_ref(type));
   auto result = Nan::New(g_enum_get_value(enum_class, value)->value_nick)
       .ToLocalChecked();
   g_type_class_unref(enum_class);
   return result;
+}
+
+const char* Runtime::ClassNameFromC(const char* cname) {
+  if (g_str_has_prefix(cname, "Frida"))
+    return cname + 5;
+
+  return cname;
 }
 
 }

@@ -5,7 +5,6 @@
 #define CHILD_DATA_CONSTRUCTOR "child:ctor"
 
 using v8::AccessorSignature;
-using v8::Array;
 using v8::DEFAULT;
 using v8::External;
 using v8::Function;
@@ -38,8 +37,6 @@ void Child::Init(Handle<Object> exports, Runtime* runtime) {
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Handle<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  Nan::SetAccessor(instance_tpl, Nan::New("origin").ToLocalChecked(),
-      GetOrigin, 0, data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("envp").ToLocalChecked(),
       GetEnvp, 0, data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("argv").ToLocalChecked(),
@@ -48,6 +45,8 @@ void Child::Init(Handle<Object> exports, Runtime* runtime) {
       GetPath, 0, data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("identifier").ToLocalChecked(),
       GetIdentifier, 0, data, DEFAULT, ReadOnly, signature);
+  Nan::SetAccessor(instance_tpl, Nan::New("origin").ToLocalChecked(),
+      GetOrigin, 0, data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("parentPid").ToLocalChecked(),
       GetParentPid, 0, data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("pid").ToLocalChecked(),
@@ -105,6 +104,14 @@ NAN_PROPERTY_GETTER(Child::GetParentPid) {
       Nan::New<Integer>(frida_child_get_parent_pid(handle)));
 }
 
+NAN_PROPERTY_GETTER(Child::GetOrigin) {
+  auto handle = ObjectWrap::Unwrap<Child>(
+      info.Holder())->GetHandle<FridaChild>();
+
+  info.GetReturnValue().Set(Runtime::ValueFromEnum(
+      frida_child_get_origin(handle), FRIDA_TYPE_CHILD_ORIGIN));
+}
+
 NAN_PROPERTY_GETTER(Child::GetIdentifier) {
   auto handle = ObjectWrap::Unwrap<Child>(
       info.Holder())->GetHandle<FridaChild>();
@@ -120,8 +127,11 @@ NAN_PROPERTY_GETTER(Child::GetPath) {
   auto handle = ObjectWrap::Unwrap<Child>(
       info.Holder())->GetHandle<FridaChild>();
 
-  info.GetReturnValue().Set(
-      Nan::New(frida_child_get_path(handle)).ToLocalChecked());
+  auto path = frida_child_get_path(handle);
+  if (path != NULL)
+    info.GetReturnValue().Set(Nan::New(path).ToLocalChecked());
+  else
+    info.GetReturnValue().Set(Nan::Null());
 }
 
 NAN_PROPERTY_GETTER(Child::GetArgv) {
@@ -130,7 +140,7 @@ NAN_PROPERTY_GETTER(Child::GetArgv) {
 
   gint length;
   auto argv = frida_child_get_argv(handle, &length);
-  info.GetReturnValue().Set(ParseStringVector(argv, length));
+  info.GetReturnValue().Set(Runtime::ValueFromStrV(argv, length));
 }
 
 NAN_PROPERTY_GETTER(Child::GetEnvp) {
@@ -139,22 +149,7 @@ NAN_PROPERTY_GETTER(Child::GetEnvp) {
 
   gint length;
   auto envp = frida_child_get_envp(handle, &length);
-  info.GetReturnValue().Set(ParseStringVector(envp, length));
-}
-
-NAN_PROPERTY_GETTER(Child::GetOrigin) {
-  auto handle = ObjectWrap::Unwrap<Child>(
-      info.Holder())->GetHandle<FridaChild>();
-
-  info.GetReturnValue().Set(Runtime::EnumToString(
-      frida_child_get_origin(handle), FRIDA_TYPE_CHILD_ORIGIN));
-}
-
-Local<Array> Child::ParseStringVector(gchar* const* strv, gint length) {
-  auto result = Nan::New<Array>(length);
-  for (gint i = 0; i != length; i++)
-    Nan::Set(result, i, Nan::New(strv[i]).ToLocalChecked());
-  return result;
+  info.GetReturnValue().Set(Runtime::ValueFromStrV(envp, length));
 }
 
 }

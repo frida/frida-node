@@ -16,7 +16,13 @@ async function main() {
   await showPendingChildren();
 
   console.log('[*] spawn()');
-  const pid = await device.spawn(['/bin/sh', '-c', 'ls /'], ['FOO=bar', 'BADGER=snake']);
+  const pid = await device.spawn('/bin/sh', {
+    argv: ['/bin/sh', '-c', 'ls /'],
+    envp: ['FOO=bar', 'BADGER=snake'],
+    cwd: '/usr',
+    stdio: 'pipe',
+    aslr: 'auto'
+  });
   console.log(`[*] attach(${pid})`);
   const session = await device.attach(pid);
   console.log('[*] enableChildGating()');

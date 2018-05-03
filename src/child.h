@@ -20,14 +20,11 @@ class Child : public GLibObject {
 
   static NAN_PROPERTY_GETTER(GetPid);
   static NAN_PROPERTY_GETTER(GetParentPid);
+  static NAN_PROPERTY_GETTER(GetOrigin);
   static NAN_PROPERTY_GETTER(GetIdentifier);
   static NAN_PROPERTY_GETTER(GetPath);
   static NAN_PROPERTY_GETTER(GetArgv);
   static NAN_PROPERTY_GETTER(GetEnvp);
-  static NAN_PROPERTY_GETTER(GetOrigin);
-
-  static v8::Local<v8::Array> ParseStringVector(gchar* const* strv,
-      gint length);
 };
 
 }

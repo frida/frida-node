@@ -315,7 +315,7 @@ static Local<Value> events_closure_gvalue_to_jsvalue(const GValue* gvalue) {
       return Nan::New<v8::String>(g_value_get_string(gvalue)).ToLocalChecked();
     default: {
       if (G_TYPE_IS_ENUM(gtype))
-        return Runtime::EnumToString(g_value_get_enum(gvalue), gtype);
+        return Runtime::ValueFromEnum(g_value_get_enum(gvalue), gtype);
 
       g_assert(gtype == G_TYPE_BYTES);
       auto bytes = static_cast<GBytes*>(g_value_get_boxed(gvalue));

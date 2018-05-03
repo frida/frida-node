@@ -145,7 +145,7 @@ NAN_PROPERTY_GETTER(Device::GetType) {
   auto handle = ObjectWrap::Unwrap<Device>(
       info.Holder())->GetHandle<FridaDevice>();
 
-  info.GetReturnValue().Set(Runtime::EnumToString(
+  info.GetReturnValue().Set(Runtime::ValueFromEnum(
       frida_device_get_dtype(handle), FRIDA_TYPE_DEVICE_TYPE));
 }
 
@@ -398,22 +398,18 @@ NAN_METHOD(Device::EnumeratePendingChildren) {
 
 class SpawnOperation : public Operation<FridaDevice> {
  public:
-  SpawnOperation(gchar* path, gchar** argv, gint argv_length, gchar** envp,
-      gint envp_length)
+  SpawnOperation(gchar* path, FridaSpawnOptions* options)
     : path_(path),
-      argv_(argv), argv_length_(argv_length),
-      envp_(envp), envp_length_(envp_length) {
+      options_(options) {
   }
 
   ~SpawnOperation() {
-    g_strfreev(envp_);
-    g_strfreev(argv_);
+    g_object_unref(options_);
     g_free(path_);
   }
 
   void Begin() {
-    frida_device_spawn(handle_, path_, argv_, argv_length_, envp_, envp_length_,
-        OnReady, this);
+    frida_device_spawn(handle_, path_, options_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -425,10 +421,7 @@ class SpawnOperation : public Operation<FridaDevice> {
   }
 
   gchar* path_;
-  gchar** argv_;
-  gint argv_length_;
-  gchar** envp_;
-  gint envp_length_;
+  FridaSpawnOptions* options_;
   guint pid_;
 };
 
@@ -437,27 +430,77 @@ NAN_METHOD(Device::Spawn) {
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
-  if (info.Length() < 2) {
-    Nan::ThrowTypeError("Bad argument, expected argv and envp");
+  if (info.Length() < 6) {
+    Nan::ThrowTypeError("Missing one or more arguments");
     return;
   }
 
-  gchar** argv;
-  gint argv_length;
-  if (!Runtime::ValueToStrV(info[0], &argv, &argv_length))
-    return;
+  auto path_value = info[0];
+  auto argv_value = info[1];
+  auto envp_value = info[2];
+  auto cwd_value = info[3];
+  auto stdio_value = info[4];
+  auto aslr_value = info[5];
 
-  gchar** envp;
-  gint envp_length;
-  if (!Runtime::ValueToStrVOptional(info[1], &envp, &envp_length)) {
-    g_strfreev(argv);
+  if (!path_value->IsString()) {
+    Nan::ThrowTypeError("Bad argument, 'path' must be a string");
+    return;
+  }
+  Nan::Utf8String path(Local<String>::Cast(path_value));
+
+  auto options = frida_spawn_options_new();
+  bool valid = true;
+
+  if (!argv_value->IsNull()) {
+    gchar** argv;
+    gint argv_length;
+    valid = Runtime::ValueToStrV(argv_value, &argv, &argv_length);
+    if (valid) {
+      frida_spawn_options_set_argv(options, argv, argv_length);
+      g_strfreev(argv);
+    }
+  }
+
+  if (valid && !envp_value->IsNull()) {
+    gchar** envp;
+    gint envp_length;
+    valid = Runtime::ValueToStrV(envp_value, &envp, &envp_length);
+    if (valid) {
+      frida_spawn_options_set_envp(options, envp, envp_length);
+      g_strfreev(envp);
+    }
+  }
+
+  if (valid && !cwd_value->IsNull()) {
+    if (cwd_value->IsString()) {
+      Nan::Utf8String cwd(Local<String>::Cast(cwd_value));
+      frida_spawn_options_set_cwd(options, *cwd);
+    } else {
+      Nan::ThrowTypeError("Bad argument, 'cwd' must be a string");
+      valid = false;
+    }
+  }
+
+  if (valid && !stdio_value->IsNull()) {
+    FridaStdio stdio;
+    valid = Runtime::ValueToEnum(stdio_value, FRIDA_TYPE_STDIO, &stdio);
+    if (valid)
+      frida_spawn_options_set_stdio(options, stdio);
+  }
+
+  if (valid && !aslr_value->IsNull()) {
+    FridaAslr aslr;
+    valid = Runtime::ValueToEnum(aslr_value, FRIDA_TYPE_ASLR, &aslr);
+    if (valid)
+      frida_spawn_options_set_aslr(options, aslr);
+  }
+
+  if (!valid) {
+    g_object_unref(options);
     return;
   }
 
-  gchar* path = g_strdup(argv[0]);
-
-  auto operation = new SpawnOperation(path, argv, argv_length, envp,
-      envp_length);
+  auto operation = new SpawnOperation(g_strdup(*path), options);
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
