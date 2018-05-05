@@ -18,7 +18,10 @@ async function main() {
   console.log('[*] spawn()');
   const pid = await device.spawn('/bin/sh', {
     argv: ['/bin/sh', '-c', 'ls /'],
-    envp: ['FOO=bar', 'BADGER=snake'],
+    env: {
+      'BADGER': 'badger-badger-badger',
+      'SNAKE': 'mushroom-mushroom',
+    },
     cwd: '/usr',
     stdio: 'pipe',
     aslr: 'auto'

@@ -73,7 +73,7 @@ Local<Value> Runtime::ValueFromJson(Handle<String> json) {
   return parse->Call(module, 1, argv);
 }
 
-bool Runtime::ValueToStrV(Handle<Value> value, gchar*** strv, gint* length) {
+bool Runtime::ValueToStrv(Handle<Value> value, gchar*** strv, gint* length) {
   if (!value->IsArray()) {
     Nan::ThrowTypeError("Bad argument, expected an array of strings");
     return false;
@@ -101,13 +101,59 @@ bool Runtime::ValueToStrV(Handle<Value> value, gchar*** strv, gint* length) {
   return true;
 }
 
-Local<Value> Runtime::ValueFromStrV(gchar* const* strv, gint length) {
+Local<Value> Runtime::ValueFromStrv(gchar* const* strv, gint length) {
   if (strv == NULL)
     return Nan::Null();
 
   auto result = Nan::New<Array>(length);
   for (gint i = 0; i != length; i++)
     Nan::Set(result, i, Nan::New(strv[i]).ToLocalChecked());
+  return result;
+}
+
+bool Runtime::ValueToEnvp(Handle<Value> value, gchar*** envp, gint* length) {
+  auto isolate = v8::Isolate::GetCurrent();
+  auto context = isolate->GetCurrentContext();
+
+  if (!value->IsObject()) {
+    Nan::ThrowTypeError("Bad argument, expected an object");
+    return false;
+  }
+  auto object = Local<v8::Object>::Cast(value);
+
+  Local<Array> names(object->GetOwnPropertyNames(context).ToLocalChecked());
+  uint32_t n = names->Length();
+
+  gchar** elements = g_new0(gchar*, n + 1);
+
+  for (uint32_t i = 0; i != n; i++) {
+    auto name = Nan::Get(names, i).ToLocalChecked();
+    auto value = Nan::Get(object, name).ToLocalChecked();
+
+    Nan::Utf8String name_str(name->ToString());
+    Nan::Utf8String value_str(value->ToString());
+    elements[i] = g_strconcat(*name_str, "=", *value_str, NULL);
+  }
+
+  *envp = elements;
+  *length = n;
+
+  return true;
+}
+
+Local<Value> Runtime::ValueFromEnvp(gchar* const* envp, gint length) {
+  if (envp == NULL)
+    return Nan::Null();
+
+  auto result = Nan::New<v8::Object>();
+  for (gint i = 0; i != length; i++) {
+    auto tokens = g_strsplit(envp[i], "=", 2);
+    if (g_strv_length(tokens) == 2) {
+      Nan::Set(result, Nan::New(tokens[0]).ToLocalChecked(),
+          Nan::New(tokens[1]).ToLocalChecked());
+    }
+    g_strfreev(tokens);
+  }
   return result;
 }
 

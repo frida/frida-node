@@ -15,12 +15,15 @@
 #define DEVICE_DATA_CONSTRUCTOR "device:ctor"
 
 using v8::AccessorSignature;
+using v8::Array;
+using v8::Boolean;
 using v8::DEFAULT;
 using v8::External;
 using v8::Function;
 using v8::Handle;
 using v8::Isolate;
 using v8::Local;
+using v8::Number;
 using v8::Object;
 using v8::ReadOnly;
 using v8::String;
@@ -398,18 +401,18 @@ NAN_METHOD(Device::EnumeratePendingChildren) {
 
 class SpawnOperation : public Operation<FridaDevice> {
  public:
-  SpawnOperation(gchar* path, FridaSpawnOptions* options)
-    : path_(path),
+  SpawnOperation(gchar* program, FridaSpawnOptions* options)
+    : program_(program),
       options_(options) {
   }
 
   ~SpawnOperation() {
     g_object_unref(options_);
-    g_free(path_);
+    g_free(program_);
   }
 
   void Begin() {
-    frida_device_spawn(handle_, path_, options_, OnReady, this);
+    frida_device_spawn(handle_, program_, options_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -420,33 +423,35 @@ class SpawnOperation : public Operation<FridaDevice> {
     return Nan::New<v8::Uint32>(pid_);
   }
 
-  gchar* path_;
+  gchar* program_;
   FridaSpawnOptions* options_;
   guint pid_;
 };
 
 NAN_METHOD(Device::Spawn) {
   auto isolate = info.GetIsolate();
+  auto context = isolate->GetCurrentContext();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
-  if (info.Length() < 6) {
+  if (info.Length() < 7) {
     Nan::ThrowTypeError("Missing one or more arguments");
     return;
   }
 
-  auto path_value = info[0];
+  auto program_value = info[0];
   auto argv_value = info[1];
   auto envp_value = info[2];
-  auto cwd_value = info[3];
-  auto stdio_value = info[4];
-  auto aslr_value = info[5];
+  auto env_value = info[3];
+  auto cwd_value = info[4];
+  auto stdio_value = info[5];
+  auto aux_value = info[6];
 
-  if (!path_value->IsString()) {
-    Nan::ThrowTypeError("Bad argument, 'path' must be a string");
+  if (!program_value->IsString()) {
+    Nan::ThrowTypeError("Bad argument, 'program' must be a string");
     return;
   }
-  Nan::Utf8String path(Local<String>::Cast(path_value));
+  Nan::Utf8String program(Local<String>::Cast(program_value));
 
   auto options = frida_spawn_options_new();
   bool valid = true;
@@ -454,7 +459,7 @@ NAN_METHOD(Device::Spawn) {
   if (!argv_value->IsNull()) {
     gchar** argv;
     gint argv_length;
-    valid = Runtime::ValueToStrV(argv_value, &argv, &argv_length);
+    valid = Runtime::ValueToStrv(argv_value, &argv, &argv_length);
     if (valid) {
       frida_spawn_options_set_argv(options, argv, argv_length);
       g_strfreev(argv);
@@ -464,10 +469,20 @@ NAN_METHOD(Device::Spawn) {
   if (valid && !envp_value->IsNull()) {
     gchar** envp;
     gint envp_length;
-    valid = Runtime::ValueToStrV(envp_value, &envp, &envp_length);
+    valid = Runtime::ValueToEnvp(envp_value, &envp, &envp_length);
     if (valid) {
       frida_spawn_options_set_envp(options, envp, envp_length);
       g_strfreev(envp);
+    }
+  }
+
+  if (valid && !env_value->IsNull()) {
+    gchar** env;
+    gint env_length;
+    valid = Runtime::ValueToEnvp(env_value, &env, &env_length);
+    if (valid) {
+      frida_spawn_options_set_env(options, env, env_length);
+      g_strfreev(env);
     }
   }
 
@@ -488,11 +503,40 @@ NAN_METHOD(Device::Spawn) {
       frida_spawn_options_set_stdio(options, stdio);
   }
 
-  if (valid && !aslr_value->IsNull()) {
-    FridaAslr aslr;
-    valid = Runtime::ValueToEnum(aslr_value, FRIDA_TYPE_ASLR, &aslr);
-    if (valid)
-      frida_spawn_options_set_aslr(options, aslr);
+  if (valid) {
+    if (aux_value->IsObject()) {
+      auto object = Local<v8::Object>::Cast(aux_value);
+
+      Local<Array> keys(object->GetOwnPropertyNames(context).ToLocalChecked());
+      uint32_t n = keys->Length();
+
+      GVariantDict* aux = frida_spawn_options_get_aux(options);
+
+      for (uint32_t i = 0; i != n; i++) {
+        auto key = Nan::Get(keys, i).ToLocalChecked();
+        auto value = Nan::Get(object, key).ToLocalChecked();
+
+        Nan::Utf8String key_str(key->ToString());
+
+        GVariant* raw_value;
+        if (value->IsBoolean()) {
+          Nan::Utf8String value_str(Local<String>::Cast(value));
+          raw_value = g_variant_new_boolean(
+              Local<Boolean>::Cast(value)->Value());
+        } else if (value->IsNumber()) {
+          raw_value = g_variant_new_int64(
+              static_cast<gint64>(Local<Number>::Cast(value)->Value()));
+        } else {
+          Nan::Utf8String value_str(value->ToString());
+          raw_value = g_variant_new_string(*value_str);
+        }
+
+        g_variant_dict_insert_value(aux, *key_str, raw_value);
+      }
+    } else {
+      Nan::ThrowTypeError("Bad argument, 'aux' must be an object");
+      valid = false;
+    }
   }
 
   if (!valid) {
@@ -500,7 +544,7 @@ NAN_METHOD(Device::Spawn) {
     return;
   }
 
-  auto operation = new SpawnOperation(g_strdup(*path), options);
+  auto operation = new SpawnOperation(g_strdup(*program), options);
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));

@@ -140,7 +140,7 @@ NAN_PROPERTY_GETTER(Child::GetArgv) {
 
   gint length;
   auto argv = frida_child_get_argv(handle, &length);
-  info.GetReturnValue().Set(Runtime::ValueFromStrV(argv, length));
+  info.GetReturnValue().Set(Runtime::ValueFromStrv(argv, length));
 }
 
 NAN_PROPERTY_GETTER(Child::GetEnvp) {
@@ -149,7 +149,7 @@ NAN_PROPERTY_GETTER(Child::GetEnvp) {
 
   gint length;
   auto envp = frida_child_get_envp(handle, &length);
-  info.GetReturnValue().Set(Runtime::ValueFromStrV(envp, length));
+  info.GetReturnValue().Set(Runtime::ValueFromEnvp(envp, length));
 }
 
 }

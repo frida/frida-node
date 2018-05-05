@@ -22,9 +22,13 @@ class Runtime {
   v8::Local<v8::String> ValueToJson(v8::Handle<v8::Value> value);
   v8::Local<v8::Value> ValueFromJson(v8::Handle<v8::String> json);
 
-  static bool ValueToStrV(v8::Handle<v8::Value> value, gchar*** strv,
+  static bool ValueToStrv(v8::Handle<v8::Value> value, gchar*** strv,
       gint* length);
-  static v8::Local<v8::Value> ValueFromStrV(gchar* const* strv, gint length);
+  static v8::Local<v8::Value> ValueFromStrv(gchar* const* strv, gint length);
+
+  static bool ValueToEnvp(v8::Handle<v8::Value> value, gchar*** envp,
+      gint* length);
+  static v8::Local<v8::Value> ValueFromEnvp(gchar* const* envp, gint length);
 
   static bool ValueToEnum(v8::Handle<v8::Value> value, GType type,
       gpointer result);
