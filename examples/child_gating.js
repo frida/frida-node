@@ -20,7 +20,8 @@ async function main() {
     argv: ['/bin/sh', '-c', 'ls /'],
     env: {
       'BADGER': 'badger-badger-badger',
-      'SNAKE': 'mushroom-mushroom',
+      'SNAKE': true,
+      'AGE': 42,
     },
     cwd: '/usr',
     stdio: 'pipe',
