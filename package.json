@@ -19,26 +19,29 @@
     "ipad",
     "android"
   ],
-  "homepage": "http://www.frida.re",
+  "homepage": "https://www.frida.re",
   "engines": {
-    "node": ">=0.12.0"
+    "node": ">=8.0.0"
   },
-  "main": "./lib/frida",
+  "main": "./dist/lib/frida",
   "dependencies": {
-    "big-integer": "^1.6.16",
     "bindings": "^1.2.1",
     "minimatch": "^3.0.3",
     "nan": "^2.4.0",
-    "prebuild-install": "^2.1.0"
+    "prebuild-install": "^4.0.0"
   },
   "devDependencies": {
-    "co": "^4.6.0",
+    "@types/node": "^10.3.6",
     "jshint": "^2.9.4",
-    "mocha": "^3.1.2",
-    "prebuild": "^6.2.0",
-    "should": "^11.1.1"
+    "mocha": "^5.2.0",
+    "prebuild": "^7.6.0",
+    "should": "^13.2.1",
+    "typescript": "^2.9.2"
   },
   "scripts": {
+    "prepublish": "npm run build",
+    "build": "tsc",
+    "watch": "tsc -w",
     "install": "prebuild-install || node-gyp rebuild",
     "pretest": "jshint lib test/*.js",
     "prebuild": "prebuild --verbose --strip",
