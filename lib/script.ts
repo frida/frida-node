@@ -3,20 +3,29 @@ import { Events, EventHandler, EventAdapter } from "./events";
 export class Script {
     private impl: any;
 
-    private pending: { [id: string]:  };
-    private nextRequestId: number = 1;
+    private exportsProxy: any;
 
     private logHandlerImpl: LogHandler = log;
 
-    events: ScriptEvents;
+    events: Events;
 
     constructor(impl: any) {
         this.impl = impl;
 
-        this.events = new ScriptEvents(this, impl.events);
+        const services = new ScriptServices(this, impl.events);
+        const events: Events = services;
+        const rpcController: RpcController = services;
+
+        this.exportsProxy = new ScriptExportsProxy(rpcController);
+
+        this.events = events;
     }
 
-    get logHandler() {
+    get exports(): ScriptExports {
+        return this.exportsProxy;
+    }
+
+    get logHandler(): LogHandler {
         return this.logHandlerImpl;
     }
 
@@ -35,72 +44,18 @@ export class Script {
     post(message: any, data: Buffer | null = null): Promise<void> {
         return this.impl.post(message, data);
     }
+}
 
-    async getExports(): Promise<ScriptExports> {
-        const methodNames: string[] = await this.rpcRequest("list");
-        const proxy = methodNames.reduce((proxy, methodName) => {
-            proxy[methodName] = this.makeRpcMethod(methodName);
-            return proxy;
-        }, {});
-        return Object.freeze(proxy);
-    }
+export interface ScriptExports {
+    [name: string]: (...args: any[]) => Promise<any>;
+}
 
-    private makeRpcMethod(name: string) {
-        return (...args: any[]) => {
-            return this.rpcRequest("call", name, ...args);
-        };
-    }
+export type LogHandler = (level: LogLevel, text: string) => void;
 
-    private rpcRequest(operation: string, ...params: any[]): Promise<any> {
-        return new Promise((resolve, reject) => {
-            const id = this.nextRequestId++;
-
-            const complete = (error: Error | null, result?: any) => {
-                this.events.unlisten("destroyed", onScriptDestroyed);
-
-                delete this.pending[id];
-
-                if (error === null) {
-                    resolve(result);
-                } else {
-                    reject(error);
-                }
-            };
-
-            function onScriptDestroyed() {
-                complete(new Error("Script is destroyed"));
-            }
-
-            this.pending[id] = complete;
-
-            this.post(["frida:rpc", id, operation].concat(params)).catch(complete);
-            this.events.listen("destroyed", onScriptDestroyed);
-        });
-    }
-
-    onRpcMessage(id: number, operation: RpcOperation, params: any[], data: Buffer | null) {
-        if (operation === RpcOperation.Ok || operation === RpcOperation.Error) {
-            var callback = this[pending][id];
-
-            var value = null;
-            var error = null;
-            if (operation === "ok") {
-                value = (data !== null) ? data : params[0];
-            } else {
-                error = new Error(params[0]);
-
-                var name = params[1];
-                if (name)
-                    error.name = name;
-
-                var stack = params[2];
-                if (stack)
-                    error.stack = stack;
-            }
-
-            callback(error, value);
-        }
-    }
+export enum LogLevel {
+    Info = "info",
+    Warning = "warning",
+    Error = "error"
 }
 
 export interface ScriptMessage {
@@ -115,8 +70,11 @@ export enum ScriptMessageType {
     Log = "log"
 }
 
-class ScriptEvents extends EventAdapter {
+class ScriptServices extends EventAdapter implements RpcController {
     private script: Script;
+
+    private pending: { [id: string]: (error: Error | null, result?: any) => void };
+    private nextRequestId: number = 1;
 
     constructor(script: Script, events: Events) {
         super(events);
@@ -147,27 +105,96 @@ class ScriptEvents extends EventAdapter {
     private onMessage = (message: ScriptMessage, data: Buffer | null) => {
         if (isRpcMessage(message)) {
             const [ , id, operation, ...params ] = message.payload;
-            this.script.onRpcMessage(id, operation, params, data);
+            this.onRpcMessage(id, operation, params, data);
         } else if (isLogMessage(message)) {
             this.script.logHandler(message.level, message.text);
         }
     }
+
+    request(operation: string, ...params: any[]): Promise<any> {
+        return new Promise((resolve, reject) => {
+            const id = this.nextRequestId++;
+
+            const complete = (error: Error | null, result?: any) => {
+                this.events.unlisten("destroyed", onScriptDestroyed);
+
+                delete this.pending[id];
+
+                if (error === null) {
+                    resolve(result);
+                } else {
+                    reject(error);
+                }
+            };
+
+            function onScriptDestroyed() {
+                complete(new Error("Script is destroyed"));
+            }
+
+            this.pending[id] = complete;
+
+            this.script.post(["frida:rpc", id, operation].concat(params)).catch(complete);
+            this.events.listen("destroyed", onScriptDestroyed);
+        });
+    }
+
+    onRpcMessage(id: number, operation: RpcOperation, params: any[], data: Buffer | null) {
+        if (operation === RpcOperation.Ok || operation === RpcOperation.Error) {
+            const callback = this.pending[id];
+
+            let value = null;
+            let error = null;
+            if (operation === RpcOperation.Ok) {
+                value = (data !== null) ? data : params[0];
+            } else {
+                const [message, name, stack] = params;
+                error = new Error(message);
+                error.name = name;
+                error.stack = stack;
+            }
+
+            callback(error, value);
+        }
+    }
 }
 
-interface ScriptExports {
-    [name: string]: (...args: any[]) => Promise<any>;
+function ScriptExportsProxy(rpcController: RpcController): void {
+    return new Proxy(this, {
+        has(target, property) {
+            return true;
+        },
+        get(target, property, receiver) {
+            if (property in target) {
+                return target[property];
+            }
+
+            return (...args: any[]): Promise<any> => {
+                return rpcController.request("call", property, ...args);
+            };
+        },
+        set(target, property, value, receiver) {
+            target[property] = value;
+            return true;
+        },
+        ownKeys(target) {
+            return Object.getOwnPropertyNames(target);
+        },
+        getOwnPropertyDescriptor(target, property) {
+            return {
+                writable: true,
+                configurable: true,
+                enumerable: true
+            };
+        },
+    });
+}
+
+interface RpcController {
+    request(operation: string, ...params: any[]): Promise<any>;
 }
 
 enum RpcOperation {
     Ok = "ok",
-    Error = "error"
-}
-
-type LogHandler = (level: LogLevel, text: string) => void;
-
-enum LogLevel {
-    Info = "info",
-    Warning = "warning",
     Error = "error"
 }
 
