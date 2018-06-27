@@ -1,4 +1,4 @@
-import * as frida from "..";
+import * as frida from "../lib";
 
 import { expect } from "chai";
 import "mocha";

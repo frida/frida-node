@@ -10,10 +10,6 @@ export const Device = deviceModule.Device;
 export const Session = sessionModule.Session;
 export const Script = scriptModule.Script;
 
-export function foo() {
-
-}
-
 const binding = bindings({
     bindings: "frida_binding",
     try: [

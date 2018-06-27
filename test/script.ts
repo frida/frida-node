@@ -1,4 +1,4 @@
-import * as frida from "..";
+import * as frida from "../lib";
 import { targetProgram } from "./data";
 
 import { expect } from "chai";
