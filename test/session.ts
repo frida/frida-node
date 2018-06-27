@@ -26,7 +26,6 @@ describe("Session", function () {
     afterEach(gc);
 
     it("should have some metadata", function () {
-        expect(session).to.have.property("pid");
         expect(session.pid).to.equal(target.pid);
     });
 });
