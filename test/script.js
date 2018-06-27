@@ -24,6 +24,7 @@ describe('Script', function () {
 
   afterEach(function () {
     target.kill('SIGKILL');
+    target.unref();
     gc();
   });
 

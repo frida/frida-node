@@ -81,8 +81,8 @@ class ScriptServices extends EventAdapter implements RpcController {
 
         this.script = script;
 
-        events.listen("destroyed", this.onDestroyed);
-        events.listen("message", this.onMessage);
+        this.events.listen("destroyed", this.onDestroyed);
+        this.events.listen("message", this.onMessage);
     }
 
     protected getProxy(signal: string, userHandler: EventHandler): EventHandler | null {

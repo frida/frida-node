@@ -23,6 +23,7 @@ describe('Session', function () {
 
   after(function () {
     target.kill('SIGKILL');
+    target.unref();
   });
 
   afterEach(gc);
