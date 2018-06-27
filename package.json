@@ -23,7 +23,7 @@
   "engines": {
     "node": ">=8.0.0"
   },
-  "main": "./dist/frida",
+  "main": "./dist/lib/frida",
   "dependencies": {
     "bindings": "^1.2.1",
     "minimatch": "^3.0.3",
@@ -31,11 +31,12 @@
     "prebuild-install": "^4.0.0"
   },
   "devDependencies": {
+    "@types/chai": "^4.1.4",
+    "@types/mocha": "^5.2.3",
     "@types/node": "^10.3.6",
-    "jshint": "^2.9.4",
+    "chai": "^4.1.2",
     "mocha": "^5.2.0",
     "prebuild": "^7.6.0",
-    "should": "^13.2.1",
     "typescript": "^2.9.2"
   },
   "scripts": {

@@ -12,8 +12,8 @@
             "node"
         ]
     },
-    "exclude": [
-        "node_modules",
-        "dist"
+    "include": [
+        "lib/**/*",
+        "test/**/*"
     ]
 }
