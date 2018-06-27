@@ -9,7 +9,7 @@ declare function gc(): void;
 
 describe("Session", function () {
     let target: ChildProcess;
-    let session: any;
+    let session: frida.Session;
 
     before(async () => {
         target = spawn(targetProgram(), [], {

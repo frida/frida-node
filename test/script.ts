@@ -3,25 +3,22 @@ import { targetProgram } from "./data";
 
 import { expect } from "chai";
 import "mocha";
-import { spawn } from "child_process";
+import { spawn, ChildProcess } from "child_process";
 
 declare function gc(): void;
 
 describe("Script", function () {
-    var target;
-    var session;
+    let target: ChildProcess;
+    let session: frida.Session;
 
-    beforeEach(function () {
+    beforeEach(async () => {
         target = spawn(targetProgram(), [], {
             stdio: ["pipe", process.stdout, process.stderr]
         });
-        return frida.attach(target.pid)
-            .then(function (s) {
-                session = s;
-            });
+        session = await frida.attach(target.pid);
     });
 
-    afterEach(function () {
+    afterEach(() => {
         target.kill("SIGKILL");
         target.unref();
         gc();
@@ -50,8 +47,8 @@ describe("Script", function () {
 
         const agent = script.exports;
 
-        (await agent.add(2, 3)).should.equal(5);
-        (await agent.sub(5, 3)).should.equal(2);
+        expect(await agent.add(2, 3)).to.equal(5);
+        expect(await agent.sub(5, 3)).to.equal(2);
 
         let thrownException: Error | null = null;
         try {

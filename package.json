@@ -23,7 +23,7 @@
   "engines": {
     "node": ">=8.0.0"
   },
-  "main": "./dist/lib",
+  "main": "./dist",
   "dependencies": {
     "bindings": "^1.2.1",
     "minimatch": "^3.0.3",
@@ -37,6 +37,7 @@
     "chai": "^4.1.2",
     "mocha": "^5.2.0",
     "prebuild": "^7.6.0",
+    "ts-node": "^7.0.0",
     "typescript": "^2.9.2"
   },
   "scripts": {
@@ -44,9 +45,8 @@
     "build": "tsc",
     "watch": "tsc -w",
     "install": "prebuild-install || node-gyp rebuild",
-    "pretest": "jshint lib test/*.js",
     "prebuild": "prebuild --verbose --strip",
-    "test": "npm run prebuild && node --expose-gc node_modules/mocha/bin/_mocha"
+    "test": "npm run prebuild && node --expose-gc node_modules/mocha/bin/_mocha -r ts-node/register test/*.ts"
   },
   "binary": {
     "host": "https://github.com",

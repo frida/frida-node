@@ -5,10 +5,10 @@ import * as sessionModule from "./session";
 
 import * as bindings from "bindings";
 
-export const DeviceManager = deviceManagerModule.DeviceManager;
-export const Device = deviceModule.Device;
-export const Session = sessionModule.Session;
-export const Script = scriptModule.Script;
+export type DeviceManager = deviceManagerModule.DeviceManager;
+export type Device = deviceModule.Device;
+export type Session = sessionModule.Session;
+export type Script = scriptModule.Script;
 
 const binding = bindings({
     bindings: "frida_binding",
@@ -66,7 +66,7 @@ export async function enumerateDevices(): Promise<deviceModule.Device[]> {
 
 export function getDeviceManager(): deviceManagerModule.DeviceManager {
     if (deviceManager === null) {
-        deviceManager = new DeviceManager(new binding.DeviceManager());
+        deviceManager = new deviceManagerModule.DeviceManager(new binding.DeviceManager());
     }
     return deviceManager;
 }
