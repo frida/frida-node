@@ -48,10 +48,7 @@ describe('Script', function () {
       '};');
     yield script.load();
 
-    const agent = yield script.getExports();
-
-    agent.should.have.property('add');
-    agent.should.have.property('sub');
+    const agent = script.exports;
 
     (yield agent.add(2, 3)).should.equal(5);
     (yield agent.sub(5, 3)).should.equal(2);
@@ -79,13 +76,11 @@ describe('Script', function () {
       '};');
     yield script.load();
 
-    const agent = yield script.getExports();
-
     yield session.detach();
 
     let thrownException = null;
     try {
-      yield agent.init();
+      yield script.exports.init();
     } catch (e) {
       thrownException = e;
     }
@@ -104,13 +99,11 @@ describe('Script', function () {
       '};');
     yield script.load();
 
-    const agent = yield script.getExports();
-
     setTimeout(() => script.unload(), 100);
 
     let thrownException = null;
     try {
-      yield agent.waitForever();
+      yield script.exports.waitForever();
     } catch (e) {
       thrownException = e;
     }
@@ -129,13 +122,11 @@ describe('Script', function () {
       '};');
     yield script.load();
 
-    const agent = yield script.getExports();
-
     setTimeout(() => target.kill('SIGKILL'), 100);
 
     let thrownException = null;
     try {
-      yield agent.waitForever();
+      yield script.exports.waitForever();
     } catch (e) {
       thrownException = e;
     }
@@ -149,10 +140,10 @@ describe('Script', function () {
       '' +
       'console.error(new Error("test message"))');
 
-    script.setLogHandler(function (level, text) {
+    script.logHandler = function (level, text) {
       should(level).equal('error');
       should(text).equal('Error: test message');
-    });
+    };
 
     yield script.load();
   }));

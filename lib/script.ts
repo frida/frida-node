@@ -30,7 +30,7 @@ export class Script {
     }
 
     set logHandler(handler: LogHandler | null) {
-        this.logHandler = (handler !== null) ? handler : log;
+        this.logHandlerImpl = (handler !== null) ? handler : log;
     }
 
     load(): Promise<void> {
@@ -73,7 +73,7 @@ export enum ScriptMessageType {
 class ScriptServices extends EventAdapter implements RpcController {
     private script: Script;
 
-    private pending: { [id: string]: (error: Error | null, result?: any) => void };
+    private pendingRequests: { [id: string]: (error: Error | null, result?: any) => void } = {};
     private nextRequestId: number = 1;
 
     constructor(script: Script, events: Events) {
@@ -107,7 +107,7 @@ class ScriptServices extends EventAdapter implements RpcController {
             const [ , id, operation, ...params ] = message.payload;
             this.onRpcMessage(id, operation, params, data);
         } else if (isLogMessage(message)) {
-            this.script.logHandler(message.level, message.text);
+            this.script.logHandler(message.level, message.payload);
         }
     }
 
@@ -118,7 +118,7 @@ class ScriptServices extends EventAdapter implements RpcController {
             const complete = (error: Error | null, result?: any) => {
                 this.events.unlisten("destroyed", onScriptDestroyed);
 
-                delete this.pending[id];
+                delete this.pendingRequests[id];
 
                 if (error === null) {
                     resolve(result);
@@ -131,7 +131,7 @@ class ScriptServices extends EventAdapter implements RpcController {
                 complete(new Error("Script is destroyed"));
             }
 
-            this.pending[id] = complete;
+            this.pendingRequests[id] = complete;
 
             this.script.post(["frida:rpc", id, operation].concat(params)).catch(complete);
             this.events.listen("destroyed", onScriptDestroyed);
@@ -140,7 +140,7 @@ class ScriptServices extends EventAdapter implements RpcController {
 
     onRpcMessage(id: number, operation: RpcOperation, params: any[], data: Buffer | null) {
         if (operation === RpcOperation.Ok || operation === RpcOperation.Error) {
-            const callback = this.pending[id];
+            const callback = this.pendingRequests[id];
 
             let value = null;
             let error = null;
@@ -169,7 +169,7 @@ function ScriptExportsProxy(rpcController: RpcController): void {
             }
 
             return (...args: any[]): Promise<any> => {
-                return rpcController.request("call", property, ...args);
+                return rpcController.request("call", property, args);
             };
         },
         set(target, property, value, receiver) {

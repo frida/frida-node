@@ -23,7 +23,7 @@
   "engines": {
     "node": ">=8.0.0"
   },
-  "main": "./dist/lib/frida",
+  "main": "./dist/frida",
   "dependencies": {
     "bindings": "^1.2.1",
     "minimatch": "^3.0.3",

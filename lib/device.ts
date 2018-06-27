@@ -28,7 +28,7 @@ export class Device {
     }
 
     get type(): DeviceType {
-        return this.impl.icon;
+        return this.impl.type;
     }
 
     get events(): Events {
@@ -118,7 +118,7 @@ export class Device {
     }
 
     async attach(target: number | string): Promise<Session> {
-        return new Session(this.impl.attach(await this.getPid(target)));
+        return new Session(await this.impl.attach(await this.getPid(target)));
     }
 
     async injectLibraryFile(target: number | string, path: string, entrypoint: string, data: string): Promise<number> {

@@ -4,6 +4,24 @@ import { Session } from "./session";
 
 import * as bindings from "bindings";
 
+const binding = bindings({
+    bindings: "frida_binding",
+    try: [
+        ["module_root", "build", "bindings"],
+        ["module_root", "build", "Debug", "bindings"],
+        ["module_root", "build", "Release", "bindings"],
+        ["module_root", "out", "Debug", "bindings"],
+        ["module_root", "Debug", "bindings"],
+        ["module_root", "out", "Release", "bindings"],
+        ["module_root", "Release", "bindings"],
+        ["module_root", "build", "default", "bindings"],
+        ["module_root", "compiled", "version", "platform", "arch", "bindings"],
+        [process.cwd(), "bindings"],
+    ]
+});
+
+let deviceManager: DeviceManager = null;
+
 export async function spawn(program: string | string[], options: SpawnOptions = {}): Promise<number> {
     const device = await getLocalDevice();
     return await device.spawn(program, options);
@@ -40,24 +58,7 @@ export async function enumerateDevices(): Promise<Device[]> {
     return await deviceManager.enumerateDevices();
 };
 
-const binding = bindings({
-    bindings: "frida_binding",
-    try: [
-        ["module_root", "build", "bindings"],
-        ["module_root", "build", "Debug", "bindings"],
-        ["module_root", "build", "Release", "bindings"],
-        ["module_root", "out", "Debug", "bindings"],
-        ["module_root", "Debug", "bindings"],
-        ["module_root", "out", "Release", "bindings"],
-        ["module_root", "Release", "bindings"],
-        ["module_root", "build", "default", "bindings"],
-        ["module_root", "compiled", "version", "platform", "arch", "bindings"],
-        [process.cwd(), "bindings"],
-    ]
-});
-let deviceManager = null;
-
-export function getDeviceManager() {
+export function getDeviceManager(): DeviceManager {
     if (deviceManager === null) {
         deviceManager = new DeviceManager(new binding.DeviceManager());
     }
@@ -93,7 +94,7 @@ async function getMatchingDevice(predicate: DevicePredicate, timeout: number | n
     const getDeviceEventually = new Promise((resolve: (device: Device) => void, reject: (error: Error) => void) => {
         const deviceManager = getDeviceManager();
 
-        deviceManager.added.connect(onDeviceAdded);
+        deviceManager.added.listen(onDeviceAdded);
         const timer = (typeof timeout === "number") ? setTimeout(onTimeout, timeout) : null;
 
         findDevice(predicate).then(onSuccess, onError);
@@ -123,7 +124,7 @@ async function getMatchingDevice(predicate: DevicePredicate, timeout: number | n
                 clearTimeout(timer);
             }
 
-            deviceManager.added.disconnect(onDeviceAdded);
+            deviceManager.added.unlisten(onDeviceAdded);
         }
     });
 

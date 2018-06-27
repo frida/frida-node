@@ -28,14 +28,14 @@ export class Session {
         return this.impl.disableChildGating();
     }
 
-    createScript(source: string, options: CreateScriptOptions = {}): Promise<Script> {
+    async createScript(source: string, options: CreateScriptOptions = {}): Promise<Script> {
         const { name = null } = options;
 
-        return this.impl.createScript(name, source);
+        return new Script(await this.impl.createScript(name, source));
     }
 
-    createScriptFromBytes(bytes: Buffer): Promise<Script> {
-        return this.impl.createScriptFromBytes(bytes);
+    async createScriptFromBytes(bytes: Buffer): Promise<Script> {
+        return new Script(await this.impl.createScriptFromBytes(bytes));
     }
 
     compileScript(source: string, options: CreateScriptOptions = {}): Promise<Buffer> {
