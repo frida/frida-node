@@ -1,18 +1,21 @@
 import { Device } from "./device";
-import { Events, EventHandler } from "./events";
+import { Events, Event, EventHandler, EventAdapter } from "./events";
 
 export class DeviceManager {
     private impl: any;
 
-    added: DeviceAddedEvent;
-    events: Events;
+    added: Event<AddedHandler>;
+    removed: Event<RemovedHandler>;
+    changed: Event<ChangedHandler>;
 
     constructor(impl: any) {
         this.impl = impl;
 
-        this.events = new DeviceManagerEvents(impl.events);
+        const events = new DeviceManagerEvents(impl.events);
 
-        this.added = new DeviceAddedEvent(this.events);
+        this.added = new Event<AddedHandler>(events, "added");
+        this.removed = new Event<RemovedHandler>(events, "removed");
+        this.changed = new Event<ChangedHandler>(events, "changed");
     }
 
     async enumerateDevices(): Promise<Device[]> {
@@ -29,49 +32,20 @@ export class DeviceManager {
     }
 }
 
-class DeviceManagerEvents implements Events {
-    private impl: Events;
-    private proxyHandlers: Map<EventHandler, EventHandler> = new Map();
-
-    constructor(impl: any) {
-        this.impl = impl;
-    }
-
-    listen(event: string, handler: EventHandler): void {
-        let proxyHandler: EventHandler | null = null;
-
-        if (event === "added" || event === "removed") {
-            proxyHandler = rawDevice => handler(new Device(rawDevice));
-        }
-
-        if (proxyHandler !== null) {
-            this.proxyHandlers.set(handler, proxyHandler);
-            this.impl.listen(event, proxyHandler);
-        } else {
-            this.impl.listen(event, handler);
-        }
-    }
-
-    unlisten(event: string, handler: EventHandler): void {
-        const proxyHandler = this.proxyHandlers.get(handler);
-        this.impl.unlisten(event, (proxyHandler !== undefined) ? proxyHandler : handler);
-    }
-}
-
-class DeviceAddedEvent {
-    private events: Events;
-
+class DeviceManagerEvents extends EventAdapter {
     constructor(events: Events) {
-        this.events = events;
+        super(events);
     }
 
-    listen(handler: DeviceAddedHandler): void {
-        this.events.listen("added", handler);
-    }
+    protected getProxy(signal: string, userHandler: EventHandler): EventHandler | null {
+        if (signal === "added" || signal === "removed") {
+            return impl => userHandler(new Device(impl));
+        }
 
-    unlisten(handler: DeviceAddedHandler): void {
-        this.events.unlisten("added", handler);
+        return null;
     }
 }
 
-type DeviceAddedHandler = (device: Device) => void;
+type AddedHandler = (device: Device) => void;
+type RemovedHandler = (device: Device) => void;
+type ChangedHandler = () => void;

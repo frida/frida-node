@@ -100,7 +100,7 @@ async function getMatchingDevice(predicate: DevicePredicate, timeout: number | n
     const getDeviceEventually = new Promise((resolve: (device: deviceModule.Device) => void, reject: (error: Error) => void) => {
         const deviceManager = getDeviceManager();
 
-        deviceManager.added.listen(onDeviceAdded);
+        deviceManager.added.connect(onDeviceAdded);
         const timer = (typeof timeout === "number") ? setTimeout(onTimeout, timeout) : null;
 
         findDevice(predicate).then(onSuccess, onError);
@@ -130,7 +130,7 @@ async function getMatchingDevice(predicate: DevicePredicate, timeout: number | n
                 clearTimeout(timer);
             }
 
-            deviceManager.added.unlisten(onDeviceAdded);
+            deviceManager.added.disconnect(onDeviceAdded);
         }
     });
 

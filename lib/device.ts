@@ -136,8 +136,7 @@ export class Device {
 
         const process = await this.getProcess(target);
         return process.pid;
-    };
-
+    }
 }
 
 export enum DeviceType {

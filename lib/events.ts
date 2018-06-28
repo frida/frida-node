@@ -3,6 +3,24 @@ export interface Events {
     unlisten(event: string, handler: EventHandler);
 }
 
+export class Event<T extends EventHandler> {
+    private events: Events;
+    private name: string;
+
+    constructor(events: Events, name: string) {
+        this.events = events;
+        this.name = name;
+    }
+
+    connect(handler: T): void {
+        this.events.listen(this.name, handler);
+    }
+
+    disconnect(handler: T): void {
+        this.events.unlisten(this.name, handler);
+    }
+}
+
 export type EventHandler = (...args: any[]) => void;
 
 export class EventAdapter implements Events {
