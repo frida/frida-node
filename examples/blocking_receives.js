@@ -23,7 +23,7 @@ async function main() {
 
   const script = await session.createScript(source.replace('@ADDRESS@', processAddress));
   script.message.connect(message => {
-    console.log(`[*] onMessage(message=${inspect(message, { color: true })}`);
+    console.log(`[*] onMessage(message=${inspect(message, { colors: true })})`);
     const val = parseInt(message.payload);
     script.post({
       type: 'input',

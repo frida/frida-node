@@ -20,15 +20,16 @@ async function main() {
 
   const script = await session.createScript(source.replace('@ADDRESS@', processAddress));
   await script.load();
-  console.log('script loaded');
+  console.log('[*] Script loaded');
 
   const api = script.exports;
   await api.callFunction(1);
   await api.callFunction(2);
   await api.callFunction(3);
+  console.log('[*] Function called three times');
 
   await script.unload();
-  console.log('script unloaded');
+  console.log('[*] Script unloaded');
 }
 
 main()

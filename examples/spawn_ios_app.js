@@ -11,7 +11,7 @@ const current = {
 async function main() {
   const device = await frida.getUsbDevice();
   current.device = device;
-  device.events.listen('output', onOutput);
+  device.output.connect(onOutput);
 
   console.log('[*] spawn()');
   const pid = await device.spawn('com.atebits.Tweetie2', {
@@ -26,7 +26,7 @@ async function main() {
 
   console.log(`[*] attach(${pid})`);
   const session = await device.attach(pid);
-  session.events.listen('detached', onDetached);
+  session.detached.connect(onDetached);
 
   console.log(`[*] createScript()`);
   const script = await session.createScript(`'use strict';
@@ -38,7 +38,7 @@ Interceptor.attach(Module.findExportByName('UIKit', 'UIApplicationMain'), functi
   });
 });
 `);
-  script.events.listen('message', onMessage);
+  script.message.connect(onMessage);
   await script.load();
 
   console.log(`[*] resume(${pid})`);
@@ -59,7 +59,7 @@ function onOutput(pid, fd, data) {
 
 function onDetached(reason) {
   console.log(`[*] onDetached(reason='${reason}')`);
-  current.device.events.unlisten('output', onOutput);
+  current.device.output.disconnect(onOutput);
 }
 
 function onMessage(message, data) {
@@ -75,6 +75,6 @@ function inspect(value, indent) {
 }
 
 main()
-  .catch(err => {
-    console.error(err);
+  .catch(e => {
+    console.error(e);
   });

@@ -6,24 +6,31 @@
  * $ node inject_file.js Twitter ~/.Trash/example.dylib
  */
 
-const co = require('co');
 const frida = require('../..');
 
-[target, libraryPath] = process.argv.slice(2);
+const [ target, libraryPath ] = process.argv.slice(2);
 
-co(function *() {
-  const device = yield frida.getLocalDevice();
-  device.events.listen('uninjected', onUninjected);
+let device = null;
 
-  const id = yield device.injectLibraryFile(target, libraryPath, 'example_main', 'w00t');
-  console.log('*** Injected, id=' + id);
-})
-.catch(onError);
+async function main() {
+  device = await frida.getLocalDevice();
+  device.uninjected.connect(onUninjected);
 
-function onError(error) {
-  console.error(error);
+  try {
+    const id = await device.injectLibraryFile(target, libraryPath, 'example_main', 'w00t');
+    console.log('[*] Injected id:', id);
+  } catch (e) {
+    device.uninjected.disconnect(onUninjected);
+    throw e;
+  }
 }
 
 function onUninjected(id) {
-  console.log('on_uninjected id=' + id);
+  console.log('[*] onUninjected() id:', id);
+  device.uninjected.disconnect(onUninjected);
 }
+
+main()
+  .catch(e => {
+    console.error(e);
+  });

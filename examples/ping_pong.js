@@ -1,28 +1,32 @@
 'use strict';
 
-const co = require('co');
 const frida = require('..');
+const { inspect } = require('util');
 
 const processName = process.argv[2];
 
-const source =
-`recv('poke', function onMessage(pokeMessage) {
+const source = `'use strict';
+
+recv('poke', function onMessage(pokeMessage) {
   send('pokeBack');
-});`;
-
-co(function *() {
-  const session = yield frida.attach(processName);
-  const script = yield session.createScript(source);
-
-  script.events.listen('message', message => {
-    console.log(message);
-  });
-
-  yield script.load();
-  console.log("script loaded");
-
-  script.post({ type: "poke" });
-})
-.catch(err => {
-  console.error(err);
 });
+`;
+
+async function main() {
+  const session = await frida.attach(processName);
+
+  const script = await session.createScript(source);
+  script.message.connect(message => {
+    console.log(`[*] onMessage(message=${inspect(message, { colors: true })})`);
+    script.unload();
+  });
+  await script.load();
+  console.log('[*] Script loaded');
+
+  script.post({ type: 'poke' });
+}
+
+main()
+  .catch(e => {
+    console.error(e);
+  });

@@ -1,6 +1,5 @@
 'use strict';
 
-const co = require('co');
 const frida = require('..');
 
 const processName = process.argv[2];
@@ -16,16 +15,23 @@ rpc.exports = {
   }
 };`;
 
-co(function *() {
-  const session = yield frida.attach(processName);
-  const script = yield session.createScript(source);
-  yield script.load();
+async function main() {
+  const session = await frida.attach(processName);
 
-  const api = yield script.getExports();
-  console.log('api.load() =>', yield api.hello());
+  const script = await session.createScript(source);
+  await script.load();
 
-  yield api.failPlease();
-})
-.catch(err => {
-  console.error(err);
-});
+  try {
+    const api = script.exports;
+    console.log('[*] api.hello() =>', await api.hello());
+
+    await api.failPlease();
+  } finally {
+    await script.unload();
+  }
+}
+
+main()
+  .catch(e => {
+    console.error(e);
+  });
