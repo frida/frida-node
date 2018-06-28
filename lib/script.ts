@@ -53,26 +53,41 @@ export class Script {
 }
 
 export type ScriptDestroyedHandler = () => void;
-export type ScriptMessageHandler = (message: ScriptMessage, data: Buffer | null) => void;
-export type ScriptLogHandler = (level: ScriptLogLevel, text: string) => void;
+export type ScriptMessageHandler = (message: Message, data: Buffer | null) => void;
+export type ScriptLogHandler = (level: LogLevel, text: string) => void;
 
-export interface ScriptMessage {
-    type: ScriptMessageType;
+export type Message = SendMessage | ErrorMessage;
 
-    [key: string]: any;
+export enum MessageType {
+    Send = "send",
+    Error = "error"
 }
 
-export enum ScriptMessageType {
-    Send = "send",
-    Error = "error",
-    Log = "log"
+export interface SendMessage {
+    type: MessageType.Send;
+    payload: any;
+}
+
+export interface ErrorMessage {
+    type: MessageType.Error;
+    description: string;
+    stack?: string;
+    fileName?: string;
+    lineNumber?: number;
+    columnNumber?: number;
+}
+
+interface LogMessage {
+    type: "log";
+    level: LogLevel;
+    payload: string;
 }
 
 export interface ScriptExports {
     [name: string]: (...args: any[]) => Promise<any>;
 }
 
-export enum ScriptLogLevel {
+export enum LogLevel {
     Info = "info",
     Warning = "warning",
     Error = "error"
@@ -110,12 +125,14 @@ class ScriptServices extends SignalAdapter implements RpcController {
         this.signals.disconnect("message", this.onMessage);
     }
 
-    private onMessage = (message: ScriptMessage, data: Buffer | null) => {
-        if (isRpcMessage(message)) {
+    private onMessage = (message: Message, data: Buffer | null) => {
+        if (message.type === MessageType.Send && isRpcSendMessage(message)) {
             const [ , id, operation, ...params ] = message.payload;
             this.onRpcMessage(id, operation, params, data);
         } else if (isLogMessage(message)) {
-            this.script.logHandler(message.level, message.payload);
+            const opaqueMessage: any = message;
+            const logMessage: LogMessage = opaqueMessage;
+            this.script.logHandler(logMessage.level, logMessage.payload);
         }
     }
 
@@ -214,15 +231,15 @@ enum RpcOperation {
     Error = "error"
 }
 
-function isInternalMessage(message: ScriptMessage): boolean {
+function isInternalMessage(message: Message): boolean {
     return isRpcMessage(message) || isLogMessage(message);
 }
 
-function isRpcMessage(message: ScriptMessage): boolean {
-    if (message.type !== ScriptMessageType.Send) {
-        return false;
-    }
+function isRpcMessage(message: Message): boolean {
+    return message.type === MessageType.Send && isRpcSendMessage(message);
+}
 
+function isRpcSendMessage(message: SendMessage): boolean {
     const payload = message.payload;
     if (!(payload instanceof Array)) {
         return false;
@@ -231,19 +248,19 @@ function isRpcMessage(message: ScriptMessage): boolean {
     return payload[0] === "frida:rpc";
 }
 
-function isLogMessage(message: ScriptMessage): boolean {
-    return message.type === ScriptMessageType.Log;
+function isLogMessage(message: Message): boolean {
+    return message.type as string === "log";
 }
 
-function log(level: ScriptLogLevel, text: string): void {
+function log(level: LogLevel, text: string): void {
     switch (level) {
-        case ScriptLogLevel.Info:
+        case LogLevel.Info:
             console.log(text);
             break;
-        case ScriptLogLevel.Warning:
+        case LogLevel.Warning:
             console.warn(text);
             break;
-        case ScriptLogLevel.Error:
+        case LogLevel.Error:
             console.error(text);
             break;
     }
