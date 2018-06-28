@@ -25,7 +25,7 @@ export class DeviceManager {
     }
 
     async addRemoteDevice(host: string): Promise<Device> {
-        return new Device(await this.impl.addRemoteDevice());
+        return new Device(await this.impl.addRemoteDevice(host));
     }
 
     removeRemoteDevice(host: string): Promise<void> {

@@ -13,12 +13,12 @@ deviceManager.changed.connect(() => {
   console.log('changed!');
 });
 
-async function run() {
+async function main() {
   const devices = await deviceManager.enumerateDevices();
   console.log('enumerateDevices() =>', devices);
 };
 
-run()
+main()
   .catch(e => {
     console.error(e);
   });

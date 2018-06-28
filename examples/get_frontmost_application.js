@@ -1,13 +1,14 @@
 'use strict';
 
-const co = require('co');
 const frida = require('..');
 
-co(function *() {
-  const device = yield frida.getUsbDevice();
-  const application = yield device.getFrontmostApplication();
+async function main() {
+  const device = await frida.getUsbDevice();
+  const application = await device.getFrontmostApplication();
   console.log('Application:', application);
-})
-.catch(error => {
-  console.error(error);
-});
+}
+
+main()
+  .catch(e => {
+    console.error(e);
+  });

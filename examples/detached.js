@@ -1,21 +1,25 @@
 'use strict';
 
-const co = require('co');
 const frida = require('..');
 
-co(function *() {
-  const session = yield frida.attach('Twitter');
-  session.events.listen('detached', onDetached);
+async function main() {
+  const session = await frida.attach('hello');
+  session.detached.connect(onDetached);
 
-  console.log('Attached. Press any key to exit');
+  console.log('[*] Attached. Press any key to exit.');
   process.stdin.setRawMode(true);
   process.stdin.resume();
-  process.stdin.on('data', process.exit.bind(process, 0));
-})
-.catch(err => {
-  console.error(err);
-});
+  process.stdin.on('data', () => {
+    session.detach();
+  });
+}
 
 function onDetached(reason) {
-  console.log('onDetached reason:', reason);
+  console.log(`[*] onDetached(reason=${reason})`);
+  process.stdin.pause();
 }
+
+main()
+  .catch(e => {
+    console.error(e);
+  });

@@ -13,7 +13,7 @@ Interceptor.attach(ptr('@ADDRESS@'), {
 });
 `;
 
-async function run() {
+async function main() {
   const session = await frida.attach(processName);
 
   const script = await session.createScript(source.replace('@ADDRESS@', processAddress));
@@ -21,10 +21,10 @@ async function run() {
     console.log(message);
   });
   await script.load();
-  console.log("script loaded");
+  console.log('[*] Script loaded');
 }
 
-run()
+main()
   .catch(e => {
     console.error(e);
   });

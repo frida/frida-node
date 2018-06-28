@@ -1,26 +1,25 @@
 'use strict';
 
-const co = require('co');
 const frida = require('..');
 
-co(function *() {
-  const mgr = frida.getDeviceManager();
+async function main() {
+  const deviceManager = frida.getDeviceManager();
 
-  const device = yield mgr.addRemoteDevice('192.168.1.3:1337');
+  const device = await deviceManager.addRemoteDevice('192.168.1.15:1337');
   console.log('added', device);
 
-  let processes = yield device.enumerateProcesses();
+  let processes = await device.enumerateProcesses();
   console.log('processes', processes);
 
-  yield mgr.removeRemoteDevice('192.168.1.3:1337');
+  await deviceManager.removeRemoteDevice('192.168.1.15:1337');
 
   /*
-  processes = yield device.enumerateProcesses();
+  processes = await device.enumerateProcesses();
   console.log('should not get here', processes);
   */
-})
-.catch(onError);
-
-function onError(error) {
-  console.error(error);
 }
+
+main()
+  .catch(e => {
+    console.error(e);
+  });

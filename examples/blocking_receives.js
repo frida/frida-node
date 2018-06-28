@@ -1,38 +1,40 @@
 'use strict';
 
-const co = require('co');
 const frida = require('..');
+const { inspect } = require('util');
 
-const processName    = process.argv[2];
-const processAddress = process.argv[3];
+const [ , , processName, processAddress ] = process.argv;
 
-const source =
-`Interceptor.attach(ptr('%addr%'), {
-  onEnter(args) {
-    send(args[0].toString());
+const source = `'use strict';
+
+Interceptor.attach(ptr('@ADDRESS@'), {
+  onEnter: function (args) {
+    send(args[0].toInt32());
     const op = recv('input', function (value) {
       args[0] = ptr(value.payload);
     });
     op.wait();
   }
-});`;
+});
+`;
 
-co(function *() {
-  const session = yield frida.attach(processName);
-  const script = yield session.createScript(source.replace("%addr%", processAddress));
+async function main() {
+  const session = await frida.attach(processName);
 
-  script.events.listen('message', message => {
-    console.log(message);
+  const script = await session.createScript(source.replace('@ADDRESS@', processAddress));
+  script.message.connect(message => {
+    console.log(`[*] onMessage(message=${inspect(message, { color: true })}`);
     const val = parseInt(message.payload);
     script.post({
-      type:    'input',
+      type: 'input',
       payload: `${(val * 2)}`
     });
   });
+  await script.load();
+  console.log('[*] Script loaded');
+}
 
-  yield script.load();
-  console.log("script loaded");
-})
-.catch(err => {
-  console.error(err);
-});
+main()
+  .catch(e => {
+    console.error(e);
+  });
