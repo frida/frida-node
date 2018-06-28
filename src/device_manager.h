@@ -23,12 +23,12 @@ class DeviceManager : public GLibObject {
   static NAN_METHOD(AddRemoteDevice);
   static NAN_METHOD(RemoveRemoteDevice);
 
-  static v8::Local<v8::Value> TransformDeviceEvents(const gchar* name,
+  static v8::Local<v8::Value> TransformDeviceSignals(const gchar* name,
       guint index, const GValue* value, gpointer user_data);
-  static void OnListen(const gchar* signal, gpointer user_data);
-  static void OnUnlisten(const gchar* signal, gpointer user_data);
+  static void OnConnect(const gchar* signal, gpointer user_data);
+  static void OnDisconnect(const gchar* signal, gpointer user_data);
 
-  v8::Persistent<v8::Object> events_;
+  v8::Persistent<v8::Object> signals_;
 };
 
 }

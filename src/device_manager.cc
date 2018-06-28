@@ -1,8 +1,8 @@
 #include "device_manager.h"
 
 #include "device.h"
-#include "events.h"
 #include "operation.h"
+#include "signals.h"
 
 #include <cstring>
 #include <nan.h>
@@ -33,7 +33,7 @@ DeviceManager::~DeviceManager() {
       static_cast<GSList*>(
       runtime_->GetDataPointer(DEVICE_MANAGER_DATA_WRAPPERS)), this));
 
-  events_.Reset();
+  signals_.Reset();
   frida_unref(handle_);
 }
 
@@ -73,15 +73,15 @@ NAN_METHOD(DeviceManager::New) {
   auto wrapper = new DeviceManager(handle, runtime);
   auto obj = info.This();
   wrapper->Wrap(obj);
-  auto events_obj = Events::New(handle, runtime, TransformDeviceEvents,
+  auto signals_obj = Signals::New(handle, runtime, TransformDeviceSignals,
       runtime);
 
-  Nan::Set(obj, Nan::New("events").ToLocalChecked(), events_obj);
+  Nan::Set(obj, Nan::New("signals").ToLocalChecked(), signals_obj);
   g_object_unref(handle);
 
-  auto events_wrapper = ObjectWrap::Unwrap<Events>(events_obj);
-  events_wrapper->SetListenCallback(OnListen, wrapper);
-  events_wrapper->SetUnlistenCallback(OnUnlisten, wrapper);
+  auto signals_wrapper = ObjectWrap::Unwrap<Signals>(signals_obj);
+  signals_wrapper->SetConnectCallback(OnConnect, wrapper);
+  signals_wrapper->SetDisconnectCallback(OnDisconnect, wrapper);
 
   info.GetReturnValue().Set(obj);
 }
@@ -240,7 +240,7 @@ NAN_METHOD(DeviceManager::RemoveRemoteDevice) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
-Local<Value> DeviceManager::TransformDeviceEvents(const gchar* name,
+Local<Value> DeviceManager::TransformDeviceSignals(const gchar* name,
     guint index, const GValue* value, gpointer user_data) {
   if (index == 0 && (strcmp(name, "added") == 0 ||
       strcmp(name, "removed") == 0)) {
@@ -250,24 +250,24 @@ Local<Value> DeviceManager::TransformDeviceEvents(const gchar* name,
   return Local<Value>();
 }
 
-static bool IsDeviceChangeSignal(const gchar* signal) {
-  return strcmp(signal, "added") == 0 ||
-      strcmp(signal, "removed") == 0 ||
-      strcmp(signal, "changed") == 0;
+static bool IsDeviceChangeSignal(const gchar* name) {
+  return strcmp(name, "added") == 0 ||
+      strcmp(name, "removed") == 0 ||
+      strcmp(name, "changed") == 0;
 }
 
-void DeviceManager::OnListen(const gchar* signal, gpointer user_data) {
+void DeviceManager::OnConnect(const gchar* name, gpointer user_data) {
   auto wrapper = static_cast<DeviceManager*>(user_data);
 
-  if (IsDeviceChangeSignal(signal)) {
+  if (IsDeviceChangeSignal(name)) {
     wrapper->runtime_->GetUVContext()->IncreaseUsage();
   }
 }
 
-void DeviceManager::OnUnlisten(const gchar* signal, gpointer user_data) {
+void DeviceManager::OnDisconnect(const gchar* name, gpointer user_data) {
   auto wrapper = static_cast<DeviceManager*>(user_data);
 
-  if (IsDeviceChangeSignal(signal)) {
+  if (IsDeviceChangeSignal(name)) {
     wrapper->runtime_->GetUVContext()->DecreaseUsage();
   }
 }

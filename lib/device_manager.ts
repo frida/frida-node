@@ -1,21 +1,20 @@
 import { Device } from "./device";
-import { Events, Event, EventHandler, EventAdapter } from "./events";
+import { Signals, Signal, SignalHandler, SignalAdapter } from "./signals";
 
 export class DeviceManager {
     private impl: any;
 
-    added: Event<AddedHandler>;
-    removed: Event<RemovedHandler>;
-    changed: Event<ChangedHandler>;
+    added: Signal<AddedHandler>;
+    removed: Signal<RemovedHandler>;
+    changed: Signal<ChangedHandler>;
 
     constructor(impl: any) {
         this.impl = impl;
 
-        const events = new DeviceManagerEvents(impl.events);
-
-        this.added = new Event<AddedHandler>(events, "added");
-        this.removed = new Event<RemovedHandler>(events, "removed");
-        this.changed = new Event<ChangedHandler>(events, "changed");
+        const signals = new DeviceManagerSignals(impl.signals);
+        this.added = new Signal<AddedHandler>(signals, "added");
+        this.removed = new Signal<RemovedHandler>(signals, "removed");
+        this.changed = new Signal<ChangedHandler>(signals, "changed");
     }
 
     async enumerateDevices(): Promise<Device[]> {
@@ -32,20 +31,20 @@ export class DeviceManager {
     }
 }
 
-class DeviceManagerEvents extends EventAdapter {
-    constructor(events: Events) {
-        super(events);
+export type AddedHandler = (device: Device) => void;
+export type RemovedHandler = (device: Device) => void;
+export type ChangedHandler = () => void;
+
+class DeviceManagerSignals extends SignalAdapter {
+    constructor(signals: Signals) {
+        super(signals);
     }
 
-    protected getProxy(signal: string, userHandler: EventHandler): EventHandler | null {
-        if (signal === "added" || signal === "removed") {
+    protected getProxy(name: string, userHandler: SignalHandler): SignalHandler | null {
+        if (name === "added" || name === "removed") {
             return impl => userHandler(new Device(impl));
         }
 
         return null;
     }
 }
-
-type AddedHandler = (device: Device) => void;
-type RemovedHandler = (device: Device) => void;
-type ChangedHandler = () => void;

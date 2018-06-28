@@ -1,24 +1,24 @@
-import { Events, EventHandler, EventAdapter } from "./events";
+import { Signals, Signal, SignalHandler, SignalAdapter } from "./signals";
 
 export class Script {
+    destroyed: Signal<DestroyedHandler>;
+    message: Signal<MessageHandler>;
+
     private impl: any;
-
     private exportsProxy: any;
-
     private logHandlerImpl: LogHandler = log;
-
-    events: Events;
 
     constructor(impl: any) {
         this.impl = impl;
 
-        const services = new ScriptServices(this, impl.events);
-        const events: Events = services;
-        const rpcController: RpcController = services;
+        const services = new ScriptServices(this, impl.scripts);
 
+        const rpcController: RpcController = services;
         this.exportsProxy = new ScriptExportsProxy(rpcController);
 
-        this.events = events;
+        const signals: Signals = services;
+        this.destroyed = new Signal<DestroyedHandler>(signals, "destroyed");
+        this.message = new Signal<MessageHandler>(signals, "message");
     }
 
     get exports(): ScriptExports {
@@ -46,17 +46,8 @@ export class Script {
     }
 }
 
-export interface ScriptExports {
-    [name: string]: (...args: any[]) => Promise<any>;
-}
-
-export type LogHandler = (level: LogLevel, text: string) => void;
-
-export enum LogLevel {
-    Info = "info",
-    Warning = "warning",
-    Error = "error"
-}
+export type DestroyedHandler = () => void;
+export type MessageHandler = (message: ScriptMessage, data: Buffer | null) => void;
 
 export interface ScriptMessage {
     type: ScriptMessageType;
@@ -70,23 +61,35 @@ export enum ScriptMessageType {
     Log = "log"
 }
 
-class ScriptServices extends EventAdapter implements RpcController {
+export interface ScriptExports {
+    [name: string]: (...args: any[]) => Promise<any>;
+}
+
+export type LogHandler = (level: LogLevel, text: string) => void;
+
+export enum LogLevel {
+    Info = "info",
+    Warning = "warning",
+    Error = "error"
+}
+
+class ScriptServices extends SignalAdapter implements RpcController {
     private script: Script;
 
     private pendingRequests: { [id: string]: (error: Error | null, result?: any) => void } = {};
     private nextRequestId: number = 1;
 
-    constructor(script: Script, events: Events) {
-        super(events);
+    constructor(script: Script, signals: Signals) {
+        super(signals);
 
         this.script = script;
 
-        this.events.listen("destroyed", this.onDestroyed);
-        this.events.listen("message", this.onMessage);
+        this.signals.connect("destroyed", this.onDestroyed);
+        this.signals.connect("message", this.onMessage);
     }
 
-    protected getProxy(signal: string, userHandler: EventHandler): EventHandler | null {
-        if (signal === "message") {
+    protected getProxy(name: string, userHandler: SignalHandler): SignalHandler | null {
+        if (name === "message") {
             return (message, data) => {
                 if (!isInternalMessage(message)) {
                     userHandler(message, data);
@@ -98,8 +101,8 @@ class ScriptServices extends EventAdapter implements RpcController {
     }
 
     private onDestroyed = () => {
-        this.events.unlisten("destroyed", this.onDestroyed);
-        this.events.unlisten("message", this.onMessage);
+        this.signals.disconnect("destroyed", this.onDestroyed);
+        this.signals.disconnect("message", this.onMessage);
     }
 
     private onMessage = (message: ScriptMessage, data: Buffer | null) => {
@@ -116,7 +119,7 @@ class ScriptServices extends EventAdapter implements RpcController {
             const id = this.nextRequestId++;
 
             const complete = (error: Error | null, result?: any) => {
-                this.events.unlisten("destroyed", onScriptDestroyed);
+                this.signals.disconnect("destroyed", onScriptDestroyed);
 
                 delete this.pendingRequests[id];
 
@@ -134,7 +137,7 @@ class ScriptServices extends EventAdapter implements RpcController {
             this.pendingRequests[id] = complete;
 
             this.script.post(["frida:rpc", id, operation].concat(params)).catch(complete);
-            this.events.listen("destroyed", onScriptDestroyed);
+            this.signals.connect("destroyed", onScriptDestroyed);
         });
     }
 

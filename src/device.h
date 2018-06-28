@@ -39,13 +39,13 @@ class Device : public GLibObject {
   static NAN_METHOD(InjectLibraryFile);
   static NAN_METHOD(InjectLibraryBlob);
 
-  static v8::Local<v8::Value> TransformEvent(const gchar* name, guint index,
+  static v8::Local<v8::Value> TransformSignal(const gchar* name, guint index,
       const GValue* value, gpointer user_data);
-  static void OnListen(const gchar* signal, gpointer user_data);
-  static void OnUnlisten(const gchar* signal, gpointer user_data);
+  static void OnConnect(const gchar* signal, gpointer user_data);
+  static void OnDisconnect(const gchar* signal, gpointer user_data);
   static bool ShouldStayAliveToEmit(const gchar* signal);
 
-  v8::Persistent<v8::Object> events_;
+  v8::Persistent<v8::Object> signals_;
 };
 
 }

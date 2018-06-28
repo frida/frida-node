@@ -1,18 +1,35 @@
 import { Application } from "./application";
 import { Child } from "./child";
-import { Events } from "./events";
 import { Icon } from "./icon";
 import { Process } from "./process";
 import { Session } from "./session";
+import { Signal } from "./signals";
 import { Spawn } from "./spawn";
 
 import { Minimatch } from "minimatch";
 
 export class Device {
+    spawnAdded: Signal<SpawnAddedHandler>;
+    spawnRemoved: Signal<SpawnRemovedHandler>;
+    childAdded: Signal<ChildAddedHandler>;
+    childRemoved: Signal<ChildRemovedHandler>;
+    output: Signal<OutputHandler>;
+    uninjected: Signal<UninjectedHandler>;
+    lost: Signal<LostHandler>;
+
     private impl: any;
 
     constructor(impl: any) {
         this.impl = impl;
+
+        const { signals } = impl;
+        this.spawnAdded = new Signal<SpawnAddedHandler>(signals, "spawn-added");
+        this.spawnRemoved = new Signal<SpawnRemovedHandler>(signals, "spawn-removed");
+        this.childAdded = new Signal<ChildAddedHandler>(signals, "child-added");
+        this.childRemoved = new Signal<ChildRemovedHandler>(signals, "child-removed");
+        this.output = new Signal<OutputHandler>(signals, "output");
+        this.uninjected = new Signal<UninjectedHandler>(signals, "uninjected");
+        this.lost = new Signal<LostHandler>(signals, "lost");
     }
 
     get id(): string {
@@ -29,10 +46,6 @@ export class Device {
 
     get type(): DeviceType {
         return this.impl.type;
-    }
-
-    get events(): Events {
-        return this.impl.events;
     }
 
     getFrontmostApplication(): Promise<Application> {
@@ -138,6 +151,14 @@ export class Device {
         return process.pid;
     }
 }
+
+export type SpawnAddedHandler = (spawn: Spawn) => void;
+export type SpawnRemovedHandler = (spawn: Spawn) => void;
+export type ChildAddedHandler = (child: Child) => void;
+export type ChildRemovedHandler = (child: Child) => void;
+export type OutputHandler = (pid: number, fd: number, data: Buffer) => void;
+export type UninjectedHandler = (id: number) => void;
+export type LostHandler = () => void;
 
 export enum DeviceType {
     Local = "local",

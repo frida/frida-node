@@ -1,19 +1,20 @@
-import { Events } from "./events";
 import { Script } from "./script";
+import { Signal } from "./signals";
 
 export class Session {
     private impl: any;
 
+    detached: Signal<DetachedHandler>;
+
     constructor(impl: any) {
         this.impl = impl;
+
+        const { signals } = impl;
+        this.detached = new Signal<DetachedHandler>(signals, "detached");
     }
 
     get pid(): number {
         return this.impl.pid;
-    }
-
-    get events(): Events {
-        return this.impl.events;
     }
 
     detach(): Promise<void> {
@@ -59,10 +60,20 @@ export class Session {
     }
 }
 
-interface CreateScriptOptions {
+export type DetachedHandler = (reason: SessionDetachReason) => void;
+
+export enum SessionDetachReason {
+    ApplicationRequested = "application-requested",
+    ProcessReplaced = "process-replaced",
+    ProcessTerminated = "process-terminated",
+    ServerTerminated = "server-terminated",
+    DeviceLost = "device-lost"
+}
+
+export interface CreateScriptOptions {
     name?: string;
 }
 
-interface EnableDebuggerOptions {
+export interface EnableDebuggerOptions {
     port?: number;
 }

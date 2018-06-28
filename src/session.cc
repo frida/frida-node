@@ -1,8 +1,8 @@
 #include "session.h"
 
-#include "events.h"
 #include "operation.h"
 #include "script.h"
+#include "signals.h"
 #include "usage_monitor.h"
 
 #include <nan.h>
@@ -30,7 +30,7 @@ Session::Session(FridaSession* handle, Runtime* runtime)
 }
 
 Session::~Session() {
-  events_.Reset();
+  signals_.Reset();
   frida_unref(handle_);
 }
 
@@ -89,8 +89,8 @@ NAN_METHOD(Session::New) {
   auto wrapper = new Session(handle, runtime);
   auto obj = info.This();
   wrapper->Wrap(obj);
-  Nan::Set(obj, Nan::New("events").ToLocalChecked(),
-      Events::New(handle, runtime));
+  Nan::Set(obj, Nan::New("signals").ToLocalChecked(),
+      Signals::New(handle, runtime));
 
   info.GetReturnValue().Set(obj);
 }
