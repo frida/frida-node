@@ -28,8 +28,8 @@ export class SignalAdapter implements Signals {
 
     private proxyHandlers: Map<SignalHandler, SignalHandler> = new Map();
 
-    constructor(events: Signals) {
-        this.signals = events;
+    constructor(signals: Signals) {
+        this.signals = signals;
     }
 
     connect(name: string, handler: SignalHandler): void {
