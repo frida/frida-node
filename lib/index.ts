@@ -123,12 +123,12 @@ export function getLocalDevice(): Promise<Device> {
     return getMatchingDevice(device => device.type === DeviceType.Local);
 }
 
-export function getUsbDevice(options?: GetDeviceOptions): Promise<Device> {
-    return getMatchingDevice(device => device.type === DeviceType.Tether, options);
-}
-
 export function getRemoteDevice(): Promise<Device> {
     return getMatchingDevice(device => device.type === DeviceType.Remote);
+}
+
+export function getUsbDevice(options?: GetDeviceOptions): Promise<Device> {
+    return getMatchingDevice(device => device.type === DeviceType.Usb, options);
 }
 
 export function getDevice(id: string, options?: GetDeviceOptions): Promise<Device> {

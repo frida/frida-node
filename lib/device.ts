@@ -172,8 +172,8 @@ export type DeviceLostHandler = () => void;
 
 export enum DeviceType {
     Local = "local",
-    Tether = "tether",
-    Remote = "remote"
+    Remote = "remote",
+    Usb = "usb"
 }
 
 export interface SpawnOptions {
