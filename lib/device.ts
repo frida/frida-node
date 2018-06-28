@@ -49,7 +49,7 @@ export class Device {
         return this.impl.type;
     }
 
-    getFrontmostApplication(): Promise<Application> {
+    getFrontmostApplication(): Promise<Application | null> {
         return this.impl.getFrontmostApplication();
     }
 
