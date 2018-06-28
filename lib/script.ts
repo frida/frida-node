@@ -11,7 +11,7 @@ export class Script {
     constructor(impl: any) {
         this.impl = impl;
 
-        const services = new ScriptServices(this, impl.scripts);
+        const services = new ScriptServices(this, impl.signals);
 
         const rpcController: RpcController = services;
         this.exportsProxy = new ScriptExportsProxy(rpcController);
@@ -205,13 +205,10 @@ function isInternalMessage(message: ScriptMessage): boolean {
     return isRpcMessage(message) || isLogMessage(message);
 }
 
-function isLogMessage(message: ScriptMessage): boolean {
-    return message.type === ScriptMessageType.Log;
-}
-
 function isRpcMessage(message: ScriptMessage): boolean {
-    if (message.type !== ScriptMessageType.Send)
+    if (message.type !== ScriptMessageType.Send) {
         return false;
+    }
 
     const payload = message.payload;
     if (!(payload instanceof Array)) {
@@ -219,6 +216,10 @@ function isRpcMessage(message: ScriptMessage): boolean {
     }
 
     return payload[0] === "frida:rpc";
+}
+
+function isLogMessage(message: ScriptMessage): boolean {
+    return message.type === ScriptMessageType.Log;
 }
 
 function log(level: LogLevel, text: string): void {
