@@ -54,7 +54,7 @@ async function attachExample() {
 }
 
 async function usbExample() {
-  const device = await frida.getUsbDevice(10000);
+  const device = await frida.getUsbDevice({ timeout: null });
   console.log('[*] USB device:', device);
 
   // Now call spawn(), attach(), etc. on `device` just like the above calls on `frida`

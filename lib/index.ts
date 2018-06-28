@@ -120,27 +120,32 @@ export function getDeviceManager(): DeviceManager {
 }
 
 export function getLocalDevice(): Promise<Device> {
-    return getMatchingDevice(device => device.type === DeviceType.Local, 0);
+    return getMatchingDevice(device => device.type === DeviceType.Local);
 }
 
-export function getUsbDevice(timeout: number | null = 0): Promise<Device> {
-    return getMatchingDevice(device => device.type === DeviceType.Tether, timeout || 0);
+export function getUsbDevice(options?: GetDeviceOptions): Promise<Device> {
+    return getMatchingDevice(device => device.type === DeviceType.Tether, options);
 }
 
 export function getRemoteDevice(): Promise<Device> {
-    return getMatchingDevice(device => device.type === DeviceType.Remote, 0);
+    return getMatchingDevice(device => device.type === DeviceType.Remote);
 }
 
-export function getDevice(id: string, timeout: number | null = 0): Promise<Device> {
-    return getMatchingDevice(device => device.id === id, timeout || 0);
+export function getDevice(id: string, options?: GetDeviceOptions): Promise<Device> {
+    return getMatchingDevice(device => device.id === id, options);
 }
 
-async function getMatchingDevice(predicate: DevicePredicate, timeout: number | null = null): Promise<Device> {
-    const device = await findDevice(predicate);
+export interface GetDeviceOptions {
+    timeout?: number | null;
+}
+
+async function getMatchingDevice(predicate: DevicePredicate, options: GetDeviceOptions = {}): Promise<Device> {
+    const device = await findMatchingDevice(predicate);
     if (device !== null) {
         return device;
     }
 
+    const { timeout = 0 } = options;
     if (timeout === 0) {
         throw new Error("Device not found");
     }
@@ -149,9 +154,15 @@ async function getMatchingDevice(predicate: DevicePredicate, timeout: number | n
         const deviceManager = getDeviceManager();
 
         deviceManager.added.connect(onDeviceAdded);
-        const timer = (typeof timeout === "number") ? setTimeout(onTimeout, timeout) : null;
+        const timer = (timeout !== null) ? setTimeout(onTimeout, timeout) : null;
 
-        findDevice(predicate).then(onSuccess, onError);
+        findMatchingDevice(predicate)
+            .then(device => {
+                if (device !== null) {
+                    onSuccess(device);
+                }
+            })
+            .catch(onError);
 
         function onDeviceAdded(device: Device) {
             if (predicate(device)) {
@@ -185,7 +196,7 @@ async function getMatchingDevice(predicate: DevicePredicate, timeout: number | n
     return await getDeviceEventually;
 }
 
-async function findDevice(predicate: DevicePredicate): Promise<Device | null> {
+async function findMatchingDevice(predicate: DevicePredicate): Promise<Device | null> {
     const deviceManager = getDeviceManager();
 
     const devices = await deviceManager.enumerateDevices();
