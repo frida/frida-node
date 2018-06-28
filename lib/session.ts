@@ -62,7 +62,9 @@ export class Session {
     }
 
     [inspect.custom](depth, options) {
-        return "Session {}";
+        return "Session " + inspect({
+            pid: this.pid
+        }, options);
     }
 }
 

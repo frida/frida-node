@@ -1,6 +1,8 @@
 import { Device } from "./device";
 import { Signals, Signal, SignalHandler, SignalAdapter } from "./signals";
 
+import { inspect } from "util";
+
 export class DeviceManager {
     private impl: any;
 
@@ -28,6 +30,10 @@ export class DeviceManager {
 
     removeRemoteDevice(host: string): Promise<void> {
         return this.impl.removeRemoteDevice(host);
+    }
+
+    [inspect.custom]() {
+        return "DeviceManager {}";
     }
 }
 

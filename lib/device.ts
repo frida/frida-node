@@ -7,6 +7,7 @@ import { Signal } from "./signals";
 import { Spawn } from "./spawn";
 
 import { Minimatch } from "minimatch";
+import { inspect } from "util";
 
 export class Device {
     spawnAdded: Signal<SpawnAddedHandler>;
@@ -149,6 +150,15 @@ export class Device {
 
         const process = await this.getProcess(target);
         return process.pid;
+    }
+
+    [inspect.custom](depth, options) {
+        return "Device " + inspect({
+            id: this.id,
+            name: this.name,
+            icon: this.icon,
+            type: this.type
+        }, options);
     }
 }
 
