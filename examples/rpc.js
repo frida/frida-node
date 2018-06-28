@@ -23,6 +23,7 @@ async function main() {
 
   try {
     const api = script.exports;
+
     console.log('[*] api.hello() =>', await api.hello());
 
     await api.failPlease();

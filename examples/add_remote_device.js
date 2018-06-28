@@ -6,17 +6,12 @@ async function main() {
   const deviceManager = frida.getDeviceManager();
 
   const device = await deviceManager.addRemoteDevice('192.168.1.15:1337');
-  console.log('added', device);
+  console.log('[*] Added:', device);
 
   let processes = await device.enumerateProcesses();
-  console.log('processes', processes);
+  console.log('[*] Processes:', processes);
 
   await deviceManager.removeRemoteDevice('192.168.1.15:1337');
-
-  /*
-  processes = await device.enumerateProcesses();
-  console.log('should not get here', processes);
-  */
 }
 
 main()

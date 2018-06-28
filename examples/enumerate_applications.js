@@ -5,7 +5,7 @@ const frida = require('..');
 async function main() {
   const device = await frida.getUsbDevice();
   const applications = await device.enumerateApplications();
-  console.log('Applications:', applications);
+  console.log('[*] Applications:', applications);
 }
 
 main()

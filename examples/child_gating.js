@@ -1,7 +1,6 @@
 'use strict';
 
 const frida = require('..');
-const util = require('util');
 
 let device = null;
 
@@ -35,7 +34,7 @@ async function main() {
 
 async function onChildAdded(child) {
   try {
-    console.log('[*] onChildAdded:', util.inspect(child, { colors: true }));
+    console.log('[*] onChildAdded:', child);
 
     await showPendingChildren();
 
@@ -49,7 +48,7 @@ async function onChildAdded(child) {
 }
 
 function onChildRemoved(child) {
-  console.log('[*] onChildRemoved:', util.inspect(child, { colors: true }));
+  console.log('[*] onChildRemoved:', child);
 }
 
 function onOutput(pid, fd, data) {
@@ -71,8 +70,7 @@ function onChildDetached(reason) {
 
 async function showPendingChildren() {
   const pending = await device.enumeratePendingChildren();
-  console.log('[*] enumeratePendingChildren():',
-      util.inspect(pending, { colors: true }));
+  console.log('[*] enumeratePendingChildren():', pending);
 }
 
 main()

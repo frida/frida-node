@@ -5,7 +5,7 @@ const frida = require('..');
 async function main() {
   const device = await frida.getUsbDevice();
   const application = await device.getFrontmostApplication();
-  console.log('Application:', application);
+  console.log('[*] Frontmost application:', application);
 }
 
 main()

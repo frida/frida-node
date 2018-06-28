@@ -2,20 +2,38 @@
 
 const frida = require('..');
 
-const deviceManager = frida.getDeviceManager();
-deviceManager.added.connect(device => {
-  console.log('[*] added:', device);
-});
-deviceManager.removed.connect(device => {
-  console.log('[*] removed:', device);
-});
-deviceManager.changed.connect(() => {
-  console.log('[*] changed');
-});
+let deviceManager = null;
 
 async function main() {
+  deviceManager = frida.getDeviceManager();
+
+  deviceManager.added.connect(onAdded);
+  deviceManager.removed.connect(onRemoved);
+  deviceManager.changed.connect(onChanged);
+
+  process.on('SIGTERM', stop);
+  process.on('SIGINT', stop);
+
   const devices = await deviceManager.enumerateDevices();
-  console.log('[*] enumerateDevices() =>', devices);
+  console.log('[*] Called enumerateDevices() =>', devices);
+}
+
+function stop() {
+  deviceManager.added.disconnect(onAdded);
+  deviceManager.removed.disconnect(onRemoved);
+  deviceManager.changed.disconnect(onChanged);
+}
+
+function onAdded(device) {
+  console.log('[*] Added:', device);
+}
+
+function onRemoved(device) {
+  console.log('[*] Removed:', device);
+}
+
+function onChanged() {
+  console.log('[*] Changed');
 }
 
 main()

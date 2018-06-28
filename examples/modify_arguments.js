@@ -1,7 +1,6 @@
 'use strict';
 
 const frida = require('..');
-const { inspect } = require('util');
 
 const [ , , processName, processAddress ] = process.argv;
 
@@ -14,16 +13,32 @@ Interceptor.attach(ptr('@ADDRESS@'), {
 });
 `;
 
+let script = null;
+
 async function main() {
+  process.on('SIGTERM', stop);
+  process.on('SIGINT', stop);
+
   const session = await frida.attach(processName);
+  session.detached.connect(onDetached);
 
-  const script = await session.createScript(source.replace('@ADDRESS@', processAddress));
+  script = await session.createScript(source.replace('@ADDRESS@', processAddress));
   script.message.connect(message => {
-    console.log(`[*] onMessage(message=${inspect(message, { colors: true })})`);
+    console.log('[*] Message:', message);
   });
-
   await script.load();
   console.log('[*] Script loaded');
+}
+
+function stop() {
+  if (script !== null) {
+    script.unload();
+    script = null;
+  }
+}
+
+function onDetached(reason) {
+  console.log(`[*] onDetached(reason=${reason})`);
 }
 
 main()

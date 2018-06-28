@@ -19,6 +19,9 @@ async function main() {
   const session = await frida.attach(processName);
 
   const script = await session.createScript(source.replace('@ADDRESS@', processAddress));
+  script.message.connect(message => {
+    console.log('[*] Message:', message);
+  });
   await script.load();
   console.log('[*] Script loaded');
 

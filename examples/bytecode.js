@@ -21,9 +21,12 @@ async function main() {
 
   const session = await frida.attach(processName);
   const script = await session.createScriptFromBytes(bytecode);
+  script.message.connect(message => {
+    console.log('[*] Message:', message);
+  });
   await script.load();
 
-  console.log('[*] listThreads() =>', await script.exports.listThreads());
+  console.log('[*] Called listThreads() =>', await script.exports.listThreads());
 
   await script.unload();
 }

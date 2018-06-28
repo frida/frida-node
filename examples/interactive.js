@@ -1,7 +1,6 @@
 'use strict';
 
 const frida = require('..');
-const { inspect } = require('util');
 
 const source = `'use strict';
 
@@ -25,21 +24,33 @@ async function spawnExample() {
 
 async function attachExample() {
   const session = await frida.attach('cat');
-  console.log(`[*] Attached session=${inspect(session, { colors: true })}`);
+  console.log('[*] Attached:', session);
+  session.detached.connect(onDetached);
 
   const script = await session.createScript(source);
   console.log('[*] Script created');
-
   script.message.connect(message => {
-    console.log(`[*] onMessage(message=${inspect(message, { colors: true })})`);
+    console.log('[*] Message:', message);
   });
-
   await script.load();
-
   console.log('[*] Script loaded');
-  setInterval(() => {
+
+  process.on('SIGTERM', stop);
+  process.on('SIGINT', stop);
+
+  const timer = setInterval(() => {
     script.post({ name: 'ping' });
   }, 1000);
+
+  function stop() {
+    clearInterval(timer);
+    script.unload();
+  }
+
+  function onDetached(reason) {
+    console.log(`[*] onDetached(reason=${reason})`);
+    clearInterval(timer);
+  }
 }
 
 async function usbExample() {
