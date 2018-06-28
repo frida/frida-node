@@ -19,6 +19,6 @@ async function run() {
 };
 
 run()
-  .catch(error => {
-    console.error(error);
+  .catch(e => {
+    console.error(e);
   });
