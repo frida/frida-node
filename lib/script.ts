@@ -1,5 +1,7 @@
 import { Signals, Signal, SignalHandler, SignalAdapter } from "./signals";
 
+import { inspect } from "util";
+
 export class Script {
     destroyed: Signal<DestroyedHandler>;
     message: Signal<MessageHandler>;
@@ -43,6 +45,10 @@ export class Script {
 
     post(message: any, data: Buffer | null = null): Promise<void> {
         return this.impl.post(message, data);
+    }
+
+    [inspect.custom](depth, options) {
+        return "Script {}";
     }
 }
 
@@ -171,6 +177,10 @@ function ScriptExportsProxy(rpcController: RpcController): void {
                 return target[property];
             }
 
+            if (property === inspect.custom) {
+                return inspectProxy;
+            }
+
             return (...args: any[]): Promise<any> => {
                 return rpcController.request("call", property, args);
             };
@@ -190,6 +200,10 @@ function ScriptExportsProxy(rpcController: RpcController): void {
             };
         },
     });
+}
+
+function inspectProxy() {
+    return "ScriptExportsProxy {}";
 }
 
 interface RpcController {

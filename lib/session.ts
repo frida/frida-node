@@ -1,6 +1,8 @@
 import { Script } from "./script";
 import { Signal } from "./signals";
 
+import { inspect } from "util";
+
 export class Session {
     private impl: any;
 
@@ -57,6 +59,10 @@ export class Session {
 
     enableJit(): Promise<void> {
         return this.impl.enableJit();
+    }
+
+    [inspect.custom](depth, options) {
+        return "Session {}";
     }
 }
 
