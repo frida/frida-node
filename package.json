@@ -24,6 +24,9 @@
     "node": ">=8.0.0"
   },
   "main": "./dist",
+  "files": [
+    "dist/"
+  ],
   "dependencies": {
     "bindings": "^1.2.1",
     "minimatch": "^3.0.3",
