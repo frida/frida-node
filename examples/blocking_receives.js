@@ -1,38 +1,51 @@
 'use strict';
 
-const co = require('co');
 const frida = require('..');
 
-const processName    = process.argv[2];
-const processAddress = process.argv[3];
+const [ , , processName, processAddress ] = process.argv;
 
-const source =
-`Interceptor.attach(ptr('%addr%'), {
-  onEnter(args) {
-    send(args[0].toString());
+const source = `'use strict';
+
+Interceptor.attach(ptr('@ADDRESS@'), {
+  onEnter: function (args) {
+    send(args[0].toInt32());
     const op = recv('input', function (value) {
       args[0] = ptr(value.payload);
     });
     op.wait();
   }
-});`;
+});
+`;
 
-co(function *() {
-  const session = yield frida.attach(processName);
-  const script = yield session.createScript(source.replace("%addr%", processAddress));
+let script = null;
 
-  script.events.listen('message', message => {
-    console.log(message);
-    const val = parseInt(message.payload);
+async function main() {
+  process.on('SIGTERM', stop);
+  process.on('SIGINT', stop);
+
+  const session = await frida.attach(processName);
+
+  script = await session.createScript(source.replace('@ADDRESS@', processAddress));
+  script.message.connect(message => {
+    console.log('[*] Message:', message);
+    const val = message.payload;
     script.post({
-      type:    'input',
+      type: 'input',
       payload: `${(val * 2)}`
     });
   });
+  await script.load();
+  console.log('[*] Script loaded');
+}
 
-  yield script.load();
-  console.log("script loaded");
-})
-.catch(err => {
-  console.error(err);
-});
+function stop() {
+  if (script !== null) {
+    script.unload();
+    script = null;
+  }
+}
+
+main()
+  .catch(e => {
+    console.error(e);
+  });

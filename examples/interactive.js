@@ -1,51 +1,66 @@
 'use strict';
 
-const co = require('co');
 const frida = require('..');
 
-const source = 
-`recv(function onMessage(message) {
-  send({ name: "pong", payload: message });
+const source = `'use strict';
+
+recv(onMessage);
+
+function onMessage(message) {
+  send({ name: 'pong', payload: message });
+
   recv(onMessage);
-});`;
+}`;
 
-const spawnExample = co.wrap(function *() {
-  const pid = yield frida.spawn(['/bin/cat', '/etc/resolv.conf']);
+async function spawnExample() {
+  const pid = await frida.spawn(['/bin/cat', '/etc/resolv.conf']);
 
-  console.log('spawned:', pid);
+  console.log(`[*] Spawned pid=${pid}`);
 
   // This is where you could attach (see below) and instrument APIs before you call resume()
-  yield frida.resume(pid);
-  console.log('resumed');
-});
+  await frida.resume(pid);
+  console.log('[*] Resumed');
+}
 
-const attachExample = co.wrap(function *() {
-  const session = yield frida.attach('cat');
-  console.log('attached:', session);
+async function attachExample() {
+  const session = await frida.attach('cat');
+  console.log('[*] Attached:', session);
+  session.detached.connect(onDetached);
 
-  const script = yield session.createScript(source);
-  console.log('script created:', script);
-
-  script.events.listen('message', (message, data) => {
-    console.log('message from script:', message, data);
+  const script = await session.createScript(source);
+  console.log('[*] Script created');
+  script.message.connect(message => {
+    console.log('[*] Message:', message);
   });
+  await script.load();
+  console.log('[*] Script loaded');
 
-  yield script.load();
+  process.on('SIGTERM', stop);
+  process.on('SIGINT', stop);
 
-  console.log('script loaded');
-  setInterval(() => {
+  const timer = setInterval(() => {
     script.post({ name: 'ping' });
   }, 1000);
-});
 
-const usbExample = co.wrap(function *() {
-  const device = yield frida.getUsbDevice(10000);
+  function stop() {
+    clearInterval(timer);
+    script.unload();
+  }
 
-  console.log('usb device:', device);
+  function onDetached(reason) {
+    console.log(`[*] onDetached(reason=${reason})`);
+    clearInterval(timer);
+  }
+}
+
+async function usbExample() {
+  const device = await frida.getUsbDevice({ timeout: null });
+  console.log('[*] USB device:', device);
+
   // Now call spawn(), attach(), etc. on `device` just like the above calls on `frida`
-});
+}
 
 attachExample()
-.catch(error => {
-  console.log('error:', error.message);
-});
+  .catch(e => {
+    console.error(e);
+  });

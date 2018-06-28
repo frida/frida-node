@@ -2,11 +2,11 @@
 
 #include "application.h"
 #include "child.h"
-#include "events.h"
 #include "icon.h"
 #include "operation.h"
 #include "process.h"
 #include "session.h"
+#include "signals.h"
 #include "spawn.h"
 
 #include <nan.h>
@@ -37,7 +37,7 @@ Device::Device(FridaDevice* handle, Runtime* runtime)
 }
 
 Device::~Device() {
-  events_.Reset();
+  signals_.Reset();
   frida_unref(handle_);
 }
 
@@ -109,13 +109,13 @@ NAN_METHOD(Device::New) {
   auto wrapper = new Device(handle, runtime);
   auto obj = info.This();
   wrapper->Wrap(obj);
-  auto events_obj = Events::New(handle, runtime, TransformEvent, wrapper);
+  auto signals_obj = Signals::New(handle, runtime, TransformSignal, wrapper);
 
-  Nan::Set(obj, Nan::New("events").ToLocalChecked(), events_obj);
+  Nan::Set(obj, Nan::New("signals").ToLocalChecked(), signals_obj);
 
-  auto events_wrapper = ObjectWrap::Unwrap<Events>(events_obj);
-  events_wrapper->SetListenCallback(OnListen, wrapper);
-  events_wrapper->SetUnlistenCallback(OnUnlisten, wrapper);
+  auto signals_wrapper = ObjectWrap::Unwrap<Signals>(signals_obj);
+  signals_wrapper->SetConnectCallback(OnConnect, wrapper);
+  signals_wrapper->SetDisconnectCallback(OnDisconnect, wrapper);
 
   info.GetReturnValue().Set(obj);
 }
@@ -858,7 +858,7 @@ NAN_METHOD(Device::InjectLibraryBlob) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
-Local<Value> Device::TransformEvent(const gchar* name, guint index,
+Local<Value> Device::TransformSignal(const gchar* name, guint index,
     const GValue* value, gpointer user_data) {
   auto self = static_cast<Device*>(user_data);
 
@@ -873,27 +873,27 @@ Local<Value> Device::TransformEvent(const gchar* name, guint index,
   return Local<Value>();
 }
 
-void Device::OnListen(const gchar* signal, gpointer user_data) {
+void Device::OnConnect(const gchar* name, gpointer user_data) {
   auto wrapper = static_cast<Device*>(user_data);
 
-  if (ShouldStayAliveToEmit(signal))
+  if (ShouldStayAliveToEmit(name))
     wrapper->runtime_->GetUVContext()->IncreaseUsage();
 }
 
-void Device::OnUnlisten(const gchar* signal, gpointer user_data) {
+void Device::OnDisconnect(const gchar* name, gpointer user_data) {
   auto wrapper = static_cast<Device*>(user_data);
 
-  if (ShouldStayAliveToEmit(signal))
+  if (ShouldStayAliveToEmit(name))
     wrapper->runtime_->GetUVContext()->DecreaseUsage();
 }
 
-bool Device::ShouldStayAliveToEmit(const gchar* signal) {
-  return strcmp(signal, "spawn-added") == 0 ||
-      strcmp(signal, "spawn-removed") == 0 ||
-      strcmp(signal, "child-added") == 0 ||
-      strcmp(signal, "child-removed") == 0 ||
-      strcmp(signal, "output") == 0 ||
-      strcmp(signal, "uninjected") == 0;
+bool Device::ShouldStayAliveToEmit(const gchar* name) {
+  return strcmp(name, "spawn-added") == 0 ||
+      strcmp(name, "spawn-removed") == 0 ||
+      strcmp(name, "child-added") == 0 ||
+      strcmp(name, "child-removed") == 0 ||
+      strcmp(name, "output") == 0 ||
+      strcmp(name, "uninjected") == 0;
 }
 
 }

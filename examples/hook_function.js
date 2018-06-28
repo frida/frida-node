@@ -1,29 +1,47 @@
 'use strict';
 
-const co = require('co');
 const frida = require('..');
 
-const processName    = process.argv[2];
-const processAddress = process.argv[3];
+const [ , , processName, processAddress ] = process.argv;
 
-const source = 
-`Interceptor.attach(ptr('%addr%'), {
-  onEnter(args) {
+const source = `'use strict';
+
+Interceptor.attach(ptr('@ADDRESS@'), {
+  onEnter: function (args) {
     send(args[0].toInt32());
   }
-});`;
-
-co(function *() {
-  const session = yield frida.attach(processName);
-  const script = yield session.createScript(source.replace("%addr%", processAddress));
-
-  script.events.listen('message', message => {
-    console.log(message);
-  });
-
-  yield script.load();
-  console.log("script loaded");
-})
-.catch(err => {
-  console.error(err);
 });
+`;
+
+let script = null;
+
+async function main() {
+  process.on('SIGTERM', stop);
+  process.on('SIGINT', stop);
+
+  const session = await frida.attach(processName);
+  session.detached.connect(onDetached);
+
+  script = await session.createScript(source.replace('@ADDRESS@', processAddress));
+  script.message.connect(message => {
+    console.log('[*] Message:', message);
+  });
+  await script.load();
+  console.log('[*] Script loaded');
+}
+
+function stop() {
+  if (script !== null) {
+    script.unload();
+    script = null;
+  }
+}
+
+function onDetached(reason) {
+  console.log(`[*] onDetached(reason=${reason})`);
+}
+
+main()
+  .catch(e => {
+    console.error(e);
+  });

@@ -2,13 +2,13 @@
 #include "child.h"
 #include "device.h"
 #include "device_manager.h"
-#include "events.h"
 #include "glib_context.h"
 #include "icon.h"
 #include "process.h"
 #include "runtime.h"
 #include "script.h"
 #include "session.h"
+#include "signals.h"
 #include "spawn.h"
 #include "uv_context.h"
 
@@ -32,7 +32,7 @@ static void InitAll(Handle<Object> exports,
   auto glib_context = new GLibContext(frida_get_main_context());
   auto runtime = new Runtime(uv_context, glib_context);
 
-  Events::Init(exports, runtime);
+  Signals::Init(exports, runtime);
 
   DeviceManager::Init(exports, runtime);
   Device::Init(exports, runtime);

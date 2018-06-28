@@ -1,17 +1,14 @@
 'use strict';
 
 const frida = require('..');
-const util = require('util');
-
-const processName = process.argv[2];
 
 let device = null;
 
 async function main() {
   device = await frida.getLocalDevice();
-  device.events.listen('child-added', onChildAdded);
-  device.events.listen('child-removed', onChildRemoved);
-  device.events.listen('output', onOutput);
+  device.childAdded.connect(onChildAdded);
+  device.childRemoved.connect(onChildRemoved);
+  device.output.connect(onOutput);
 
   await showPendingChildren();
 
@@ -37,13 +34,13 @@ async function main() {
 
 async function onChildAdded(child) {
   try {
-    console.log('[*] onChildAdded:', util.inspect(child, { colors: true }));
+    console.log('[*] onChildAdded:', child);
 
     await showPendingChildren();
 
     console.log(`[*] resume(${child.pid})`);
     const session = await device.attach(child.pid);
-    session.events.listen('detached', onChildDetached);
+    session.detached.connect(onChildDetached);
     await device.resume(child.pid);
   } catch (e) {
     console.error(e);
@@ -51,7 +48,7 @@ async function onChildAdded(child) {
 }
 
 function onChildRemoved(child) {
-  console.log('[*] onChildRemoved:', util.inspect(child, { colors: true }));
+  console.log('[*] onChildRemoved:', child);
 }
 
 function onOutput(pid, fd, data) {
@@ -66,18 +63,17 @@ function onOutput(pid, fd, data) {
 function onChildDetached(reason) {
   console.log(`[*] onChildDetached(reason='${reason}')`);
 
-  device.events.unlisten('child-added', onChildAdded);
-  device.events.unlisten('child-removed', onChildRemoved);
-  device.events.unlisten('output', onOutput);
+  device.childAdded.disconnect(onChildAdded);
+  device.childRemoved.disconnect(onChildRemoved);
+  device.output.disconnect(onOutput);
 }
 
 async function showPendingChildren() {
   const pending = await device.enumeratePendingChildren();
-  console.log('[*] enumeratePendingChildren():',
-      util.inspect(pending, { colors: true }));
+  console.log('[*] enumeratePendingChildren():', pending);
 }
 
 main()
-  .catch(err => {
-    console.error(err);
+  .catch(e => {
+    console.error(e);
   });

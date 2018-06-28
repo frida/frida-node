@@ -1,6 +1,5 @@
 'use strict';
 
-const co = require('co');
 const frida = require('..');
 
 const processName = process.argv[2];
@@ -14,21 +13,25 @@ rpc.exports = {
 };
 `;
 
-co(function *() {
-  const systemSession = yield frida.attach(0);
-  const bytecode = yield systemSession.compileScript(source, {
+async function main() {
+  const systemSession = await frida.attach(0);
+  const bytecode = await systemSession.compileScript(source, {
     name: 'bytecode-example'
   });
 
-  const session = yield frida.attach(processName);
-  const script = yield session.createScriptFromBytes(bytecode);
-  yield script.load();
+  const session = await frida.attach(processName);
+  const script = await session.createScriptFromBytes(bytecode);
+  script.message.connect(message => {
+    console.log('[*] Message:', message);
+  });
+  await script.load();
 
-  const api = yield script.getExports();
-  console.log('api.listThreads() =>', yield api.listThreads());
+  console.log('[*] Called listThreads() =>', await script.exports.listThreads());
 
-  yield script.unload();
-})
-.catch(err => {
-  console.error(err);
-});
+  await script.unload();
+}
+
+main()
+  .catch(e => {
+    console.error(e);
+  });

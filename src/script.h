@@ -23,10 +23,10 @@ class Script : public GLibObject {
   static NAN_METHOD(Unload);
   static NAN_METHOD(Post);
 
-  static v8::Local<v8::Value> TransformMessageEvent(const gchar* name,
+  static v8::Local<v8::Value> TransformMessageSignal(const gchar* name,
       guint index, const GValue* value, gpointer user_data);
 
-  v8::Persistent<v8::Object> events_;
+  v8::Persistent<v8::Object> signals_;
 };
 
 }

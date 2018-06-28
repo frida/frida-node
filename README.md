@@ -8,7 +8,7 @@ Node.js bindings for [Frida](http://www.frida.re).
 
 ## Depends
 
-- Node.js 0.12.x
+- Node.js 8.x or newer
 
 ## Install
 

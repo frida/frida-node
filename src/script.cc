@@ -1,7 +1,7 @@
 #include "script.h"
 
-#include "events.h"
 #include "operation.h"
+#include "signals.h"
 #include "usage_monitor.h"
 
 #include <cstring>
@@ -27,7 +27,7 @@ Script::Script(FridaScript* handle, Runtime* runtime)
 }
 
 Script::~Script() {
-  events_.Reset();
+  signals_.Reset();
   frida_unref(handle_);
 }
 
@@ -74,8 +74,8 @@ NAN_METHOD(Script::New) {
   auto wrapper = new Script(handle, runtime);
   auto obj = info.This();
   wrapper->Wrap(obj);
-  Nan::Set(obj, Nan::New("events").ToLocalChecked(),
-      Events::New(handle, runtime, TransformMessageEvent, wrapper));
+  Nan::Set(obj, Nan::New("signals").ToLocalChecked(),
+      Signals::New(handle, runtime, TransformMessageSignal, wrapper));
 
   auto monitor =
       new UsageMonitor<FridaScript>(frida_script_is_destroyed, "destroyed");
@@ -192,7 +192,7 @@ NAN_METHOD(Script::Post) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
-Local<Value> Script::TransformMessageEvent(const gchar* name, guint index,
+Local<Value> Script::TransformMessageSignal(const gchar* name, guint index,
     const GValue* value, gpointer user_data) {
   if (index != 0 || strcmp(name, "message") != 0)
     return Local<Value>();

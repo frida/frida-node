@@ -47,7 +47,7 @@
         "src/icon.cc",
         "src/session.cc",
         "src/script.cc",
-        "src/events.cc",
+        "src/signals.cc",
         "src/glib_object.cc",
         "src/runtime.cc",
         "src/uv_context.cc",

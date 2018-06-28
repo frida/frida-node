@@ -1,17 +1,20 @@
 'use strict';
 
 const frida = require('..');
-const util = require('util');
 
 const current = {
   device: null,
-  pid: null
+  pid: null,
+  script: null
 };
 
 async function main() {
+  process.on('SIGTERM', stop);
+  process.on('SIGINT', stop);
+
   const device = await frida.getUsbDevice();
   current.device = device;
-  device.events.listen('output', onOutput);
+  device.output.connect(onOutput);
 
   console.log('[*] spawn()');
   const pid = await device.spawn('com.atebits.Tweetie2', {
@@ -26,7 +29,7 @@ async function main() {
 
   console.log(`[*] attach(${pid})`);
   const session = await device.attach(pid);
-  session.events.listen('detached', onDetached);
+  session.detached.connect(onDetached);
 
   console.log(`[*] createScript()`);
   const script = await session.createScript(`'use strict';
@@ -38,11 +41,26 @@ Interceptor.attach(Module.findExportByName('UIKit', 'UIApplicationMain'), functi
   });
 });
 `);
-  script.events.listen('message', onMessage);
+  current.script = script;
+  script.message.connect(onMessage);
   await script.load();
 
   console.log(`[*] resume(${pid})`);
   await device.resume(pid);
+}
+
+function stop() {
+  const { device, script } = current;
+
+  if (script !== null) {
+    script.unload();
+    current.script = null;
+  }
+
+  if (device !== null) {
+    device.output.disconnect(onOutput);
+    current.device = null;
+  }
 }
 
 function onOutput(pid, fd, data) {
@@ -59,22 +77,14 @@ function onOutput(pid, fd, data) {
 
 function onDetached(reason) {
   console.log(`[*] onDetached(reason='${reason}')`);
-  current.device.events.unlisten('output', onOutput);
+  current.device.output.disconnect(onOutput);
 }
 
 function onMessage(message, data) {
-  const indent = '  ';
-  console.log(`[*] onMessage(
-  message=${inspect(message, indent)},
-  data=${inspect(data, indent)}
-)`);
-}
-
-function inspect(value, indent) {
-  return util.inspect(value, { colors: true }).replace(/\n/g, '\n' + indent);
+  console.log('[*] onMessage() message:', message, 'data:', data);
 }
 
 main()
-  .catch(err => {
-    console.error(err);
+  .catch(e => {
+    console.error(e);
   });
