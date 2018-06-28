@@ -1,14 +1,60 @@
+import * as applicationModule from "./application";
+import * as childModule from "./child";
 import * as deviceManagerModule from "./device_manager";
 import * as deviceModule from "./device";
+import * as iconModule from "./icon";
+import * as processModule from "./process";
 import * as scriptModule from "./script";
 import * as sessionModule from "./session";
+import * as spawnModule from "./spawn";
 
 import * as bindings from "bindings";
 
 export type DeviceManager = deviceManagerModule.DeviceManager;
+export const DeviceManager = deviceManagerModule.DeviceManager;
+export type DeviceAddedHandler = deviceManagerModule.DeviceAddedHandler;
+export type DeviceRemovedHandler = deviceManagerModule.DeviceRemovedHandler;
+export type DevicesChangedHandler = deviceManagerModule.DevicesChangedHandler;
+
 export type Device = deviceModule.Device;
+export const Device = deviceModule.Device;
+export type SpawnAddedHandler = deviceModule.SpawnAddedHandler;
+export type SpawnRemovedHandler = deviceModule.SpawnRemovedHandler;
+export type ChildAddedHandler = deviceModule.ChildAddedHandler;
+export type ChildRemovedHandler = deviceModule.ChildRemovedHandler;
+export type OutputHandler = deviceModule.OutputHandler;
+export type UninjectedHandler = deviceModule.UninjectedHandler;
+export type DeviceLostHandler = deviceModule.DeviceLostHandler;
+export type DeviceType = deviceModule.DeviceType;
+export const DeviceType = deviceModule.DeviceType;
+export type SpawnOptions = deviceModule.SpawnOptions;
+export type Stdio = deviceModule.Stdio;
+
 export type Session = sessionModule.Session;
+export const Session = sessionModule.Session;
+export type SessionDetachedHandler = sessionModule.SessionDetachedHandler;
+export type SessionDetachReason = sessionModule.SessionDetachReason;
+export const SessionDetachReason = sessionModule.SessionDetachReason;
+export type CreateScriptOptions = sessionModule.CreateScriptOptions;
+export type EnableDebuggerOptions = sessionModule.EnableDebuggerOptions;
+
 export type Script = scriptModule.Script;
+export const Script = scriptModule.Script;
+export type ScriptDestroyedHandler = scriptModule.ScriptDestroyedHandler;
+export type ScriptMessageHandler = scriptModule.ScriptMessageHandler;
+export type ScriptLogHandler = scriptModule.ScriptLogHandler;
+export type ScriptMessage = scriptModule.ScriptMessage;
+export type ScriptMessageType = scriptModule.ScriptMessageType;
+export const ScriptMessageType = scriptModule.ScriptMessageType;
+export type ScriptExports = scriptModule.ScriptExports;
+export type ScriptLogLevel = scriptModule.ScriptLogLevel;
+export const ScriptLogLevel = scriptModule.ScriptLogLevel;
+
+export type Application = applicationModule.Application;
+export type Process = processModule.Process;
+export type Spawn = spawnModule.Spawn;
+export type Child = childModule.Child;
+export type Icon = iconModule.Icon;
 
 const binding = bindings({
     bindings: "frida_binding",
@@ -26,9 +72,9 @@ const binding = bindings({
     ]
 });
 
-let deviceManager: deviceManagerModule.DeviceManager = null;
+let sharedDeviceManager: DeviceManager = null;
 
-export async function spawn(program: string | string[], options: deviceModule.SpawnOptions = {}): Promise<number> {
+export async function spawn(program: string | string[], options: SpawnOptions = {}): Promise<number> {
     const device = await getLocalDevice();
     return await device.spawn(program, options);
 }
@@ -43,7 +89,7 @@ export async function kill(target: number | string): Promise<void> {
     await device.kill(target);
 }
 
-export async function attach(target: number | string): Promise<sessionModule.Session> {
+export async function attach(target: number | string): Promise<Session> {
     const device = await getLocalDevice();
     return await device.attach(target);
 }
@@ -58,36 +104,36 @@ export async function injectLibraryBlob(target: number | string, blob: Buffer, e
     return await device.injectLibraryBlob(target, blob, entrypoint, data);
 }
 
-export async function enumerateDevices(): Promise<deviceModule.Device[]> {
+export async function enumerateDevices(): Promise<Device[]> {
     const deviceManager = getDeviceManager();
 
     return await deviceManager.enumerateDevices();
 };
 
-export function getDeviceManager(): deviceManagerModule.DeviceManager {
-    if (deviceManager === null) {
-        deviceManager = new deviceManagerModule.DeviceManager(new binding.DeviceManager());
+export function getDeviceManager(): DeviceManager {
+    if (sharedDeviceManager === null) {
+        sharedDeviceManager = new deviceManagerModule.DeviceManager(new binding.DeviceManager());
     }
-    return deviceManager;
+    return sharedDeviceManager;
 }
 
-export function getLocalDevice(): Promise<deviceModule.Device> {
-    return getMatchingDevice(device => device.type === deviceModule.DeviceType.Local, 0);
+export function getLocalDevice(): Promise<Device> {
+    return getMatchingDevice(device => device.type === DeviceType.Local, 0);
 }
 
-export function getUsbDevice(timeout: number | null = 0): Promise<deviceModule.Device> {
-    return getMatchingDevice(device => device.type === deviceModule.DeviceType.Tether, timeout || 0);
+export function getUsbDevice(timeout: number | null = 0): Promise<Device> {
+    return getMatchingDevice(device => device.type === DeviceType.Tether, timeout || 0);
 }
 
-export function getRemoteDevice(): Promise<deviceModule.Device> {
-    return getMatchingDevice(device => device.type === deviceModule.DeviceType.Remote, 0);
+export function getRemoteDevice(): Promise<Device> {
+    return getMatchingDevice(device => device.type === DeviceType.Remote, 0);
 }
 
-export function getDevice(id: string, timeout: number | null = 0): Promise<deviceModule.Device> {
+export function getDevice(id: string, timeout: number | null = 0): Promise<Device> {
     return getMatchingDevice(device => device.id === id, timeout || 0);
 }
 
-async function getMatchingDevice(predicate: DevicePredicate, timeout: number | null = null): Promise<deviceModule.Device> {
+async function getMatchingDevice(predicate: DevicePredicate, timeout: number | null = null): Promise<Device> {
     const device = await findDevice(predicate);
     if (device !== null) {
         return device;
@@ -97,7 +143,7 @@ async function getMatchingDevice(predicate: DevicePredicate, timeout: number | n
         throw new Error("Device not found");
     }
 
-    const getDeviceEventually = new Promise((resolve: (device: deviceModule.Device) => void, reject: (error: Error) => void) => {
+    const getDeviceEventually = new Promise((resolve: (device: Device) => void, reject: (error: Error) => void) => {
         const deviceManager = getDeviceManager();
 
         deviceManager.added.connect(onDeviceAdded);
@@ -105,13 +151,13 @@ async function getMatchingDevice(predicate: DevicePredicate, timeout: number | n
 
         findDevice(predicate).then(onSuccess, onError);
 
-        function onDeviceAdded(device: deviceModule.Device) {
+        function onDeviceAdded(device: Device) {
             if (predicate(device)) {
                 onSuccess(device);
             }
         }
 
-        function onSuccess(device: deviceModule.Device) {
+        function onSuccess(device: Device) {
             stopMonitoring();
             resolve(device);
         }
@@ -137,7 +183,7 @@ async function getMatchingDevice(predicate: DevicePredicate, timeout: number | n
     return await getDeviceEventually;
 }
 
-async function findDevice(predicate: DevicePredicate): Promise<deviceModule.Device | null> {
+async function findDevice(predicate: DevicePredicate): Promise<Device | null> {
     const deviceManager = getDeviceManager();
 
     const devices = await deviceManager.enumerateDevices();
@@ -150,4 +196,4 @@ async function findDevice(predicate: DevicePredicate): Promise<deviceModule.Devi
     return matching[0];
 }
 
-type DevicePredicate = (device: deviceModule.Device) => boolean;
+type DevicePredicate = (device: Device) => boolean;

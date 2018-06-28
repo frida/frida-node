@@ -6,17 +6,17 @@ import { inspect } from "util";
 export class DeviceManager {
     private impl: any;
 
-    added: Signal<AddedHandler>;
-    removed: Signal<RemovedHandler>;
-    changed: Signal<ChangedHandler>;
+    added: Signal<DeviceAddedHandler>;
+    removed: Signal<DeviceRemovedHandler>;
+    changed: Signal<DevicesChangedHandler>;
 
     constructor(impl: any) {
         this.impl = impl;
 
         const signals = new DeviceManagerSignals(impl.signals);
-        this.added = new Signal<AddedHandler>(signals, "added");
-        this.removed = new Signal<RemovedHandler>(signals, "removed");
-        this.changed = new Signal<ChangedHandler>(signals, "changed");
+        this.added = new Signal<DeviceAddedHandler>(signals, "added");
+        this.removed = new Signal<DeviceRemovedHandler>(signals, "removed");
+        this.changed = new Signal<DevicesChangedHandler>(signals, "changed");
     }
 
     async enumerateDevices(): Promise<Device[]> {
@@ -37,9 +37,9 @@ export class DeviceManager {
     }
 }
 
-export type AddedHandler = (device: Device) => void;
-export type RemovedHandler = (device: Device) => void;
-export type ChangedHandler = () => void;
+export type DeviceAddedHandler = (device: Device) => void;
+export type DeviceRemovedHandler = (device: Device) => void;
+export type DevicesChangedHandler = () => void;
 
 class DeviceManagerSignals extends SignalAdapter {
     constructor(signals: Signals) {

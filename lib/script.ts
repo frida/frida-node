@@ -3,12 +3,12 @@ import { Signals, Signal, SignalHandler, SignalAdapter } from "./signals";
 import { inspect } from "util";
 
 export class Script {
-    destroyed: Signal<DestroyedHandler>;
-    message: Signal<MessageHandler>;
+    destroyed: Signal<ScriptDestroyedHandler>;
+    message: Signal<ScriptMessageHandler>;
 
     private impl: any;
     private exportsProxy: any;
-    private logHandlerImpl: LogHandler = log;
+    private logHandlerImpl: ScriptLogHandler = log;
 
     constructor(impl: any) {
         this.impl = impl;
@@ -19,19 +19,19 @@ export class Script {
         this.exportsProxy = new ScriptExportsProxy(rpcController);
 
         const signals: Signals = services;
-        this.destroyed = new Signal<DestroyedHandler>(signals, "destroyed");
-        this.message = new Signal<MessageHandler>(signals, "message");
+        this.destroyed = new Signal<ScriptDestroyedHandler>(signals, "destroyed");
+        this.message = new Signal<ScriptMessageHandler>(signals, "message");
     }
 
     get exports(): ScriptExports {
         return this.exportsProxy;
     }
 
-    get logHandler(): LogHandler {
+    get logHandler(): ScriptLogHandler {
         return this.logHandlerImpl;
     }
 
-    set logHandler(handler: LogHandler | null) {
+    set logHandler(handler: ScriptLogHandler | null) {
         this.logHandlerImpl = (handler !== null) ? handler : log;
     }
 
@@ -52,8 +52,9 @@ export class Script {
     }
 }
 
-export type DestroyedHandler = () => void;
-export type MessageHandler = (message: ScriptMessage, data: Buffer | null) => void;
+export type ScriptDestroyedHandler = () => void;
+export type ScriptMessageHandler = (message: ScriptMessage, data: Buffer | null) => void;
+export type ScriptLogHandler = (level: ScriptLogLevel, text: string) => void;
 
 export interface ScriptMessage {
     type: ScriptMessageType;
@@ -71,9 +72,7 @@ export interface ScriptExports {
     [name: string]: (...args: any[]) => Promise<any>;
 }
 
-export type LogHandler = (level: LogLevel, text: string) => void;
-
-export enum LogLevel {
+export enum ScriptLogLevel {
     Info = "info",
     Warning = "warning",
     Error = "error"
@@ -236,15 +235,15 @@ function isLogMessage(message: ScriptMessage): boolean {
     return message.type === ScriptMessageType.Log;
 }
 
-function log(level: LogLevel, text: string): void {
+function log(level: ScriptLogLevel, text: string): void {
     switch (level) {
-        case LogLevel.Info:
+        case ScriptLogLevel.Info:
             console.log(text);
             break;
-        case LogLevel.Warning:
+        case ScriptLogLevel.Warning:
             console.warn(text);
             break;
-        case LogLevel.Error:
+        case ScriptLogLevel.Error:
             console.error(text);
             break;
     }

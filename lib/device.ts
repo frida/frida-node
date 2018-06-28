@@ -16,7 +16,7 @@ export class Device {
     childRemoved: Signal<ChildRemovedHandler>;
     output: Signal<OutputHandler>;
     uninjected: Signal<UninjectedHandler>;
-    lost: Signal<LostHandler>;
+    lost: Signal<DeviceLostHandler>;
 
     private impl: any;
 
@@ -30,7 +30,7 @@ export class Device {
         this.childRemoved = new Signal<ChildRemovedHandler>(signals, "child-removed");
         this.output = new Signal<OutputHandler>(signals, "output");
         this.uninjected = new Signal<UninjectedHandler>(signals, "uninjected");
-        this.lost = new Signal<LostHandler>(signals, "lost");
+        this.lost = new Signal<DeviceLostHandler>(signals, "lost");
     }
 
     get id(): string {
@@ -168,7 +168,7 @@ export type ChildAddedHandler = (child: Child) => void;
 export type ChildRemovedHandler = (child: Child) => void;
 export type OutputHandler = (pid: number, fd: number, data: Buffer) => void;
 export type UninjectedHandler = (id: number) => void;
-export type LostHandler = () => void;
+export type DeviceLostHandler = () => void;
 
 export enum DeviceType {
     Local = "local",

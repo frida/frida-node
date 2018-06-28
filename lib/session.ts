@@ -6,13 +6,13 @@ import { inspect } from "util";
 export class Session {
     private impl: any;
 
-    detached: Signal<DetachedHandler>;
+    detached: Signal<SessionDetachedHandler>;
 
     constructor(impl: any) {
         this.impl = impl;
 
         const { signals } = impl;
-        this.detached = new Signal<DetachedHandler>(signals, "detached");
+        this.detached = new Signal<SessionDetachedHandler>(signals, "detached");
     }
 
     get pid(): number {
@@ -68,7 +68,7 @@ export class Session {
     }
 }
 
-export type DetachedHandler = (reason: SessionDetachReason) => void;
+export type SessionDetachedHandler = (reason: SessionDetachReason) => void;
 
 export enum SessionDetachReason {
     ApplicationRequested = "application-requested",
