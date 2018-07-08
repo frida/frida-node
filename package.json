@@ -44,7 +44,7 @@
     "typescript": "^2.9.2"
   },
   "scripts": {
-    "prepublish": "npm run build",
+    "prepare": "npm run build",
     "build": "tsc",
     "watch": "tsc -w",
     "install": "prebuild-install || node-gyp rebuild",
