@@ -131,6 +131,27 @@ describe("Script", function () {
         expect(thrownException.message).to.equal("Script is destroyed");
     });
 
+    it("should support returning rpc exports object from async method", async () => {
+        const api = await load();
+        expect(await api.hello()).to.equal("Is it me you're looking for?");
+
+        async function load(): Promise<frida.ScriptExports> {
+            const script = await session.createScript(`'use strict';
+            rpc.exports.hello = function () {
+                return "Is it me you're looking for?";
+            };`);
+            await script.load();
+
+            const api = script.exports;
+
+            expect(api.then).to.be.undefined;
+            expect(api.catch).to.be.undefined;
+            expect(api.finally).to.be.undefined;
+
+            return api;
+        }
+    });
+
     it("should support custom log handler", async () => {
         const script = await session.createScript(
             "'use strict';" +

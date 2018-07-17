@@ -186,7 +186,7 @@ class ScriptServices extends SignalAdapter implements RpcController {
 function ScriptExportsProxy(rpcController: RpcController): void {
     return new Proxy(this, {
         has(target, property) {
-            return true;
+            return !isReservedMethodName(property);;
         },
         get(target, property, receiver) {
             if (property in target) {
@@ -195,6 +195,10 @@ function ScriptExportsProxy(rpcController: RpcController): void {
 
             if (property === inspect.custom) {
                 return inspectProxy;
+            }
+
+            if (isReservedMethodName(property)) {
+                return undefined;
             }
 
             return (...args: any[]): Promise<any> => {
@@ -209,6 +213,14 @@ function ScriptExportsProxy(rpcController: RpcController): void {
             return Object.getOwnPropertyNames(target);
         },
         getOwnPropertyDescriptor(target, property) {
+            if (property in target) {
+                return Object.getOwnPropertyDescriptor(target, property);
+            }
+
+            if (isReservedMethodName(property)) {
+                return undefined;
+            }
+
             return {
                 writable: true,
                 configurable: true,
@@ -264,4 +276,14 @@ function log(level: LogLevel, text: string): void {
             console.error(text);
             break;
     }
+}
+
+const reservedMethodNames = new Set<string>([
+    "then",
+    "catch",
+    "finally",
+]);
+
+function isReservedMethodName(name: string | number | symbol): boolean {
+    return reservedMethodNames.has(name.toString());
 }
