@@ -125,7 +125,6 @@
               "-stdlib=libc++",
               "-Wl,-macosx_version_min,10.9",
               "-Wl,-dead_strip",
-              "-Wl,-no_compact_unwind",
               "-Wl,-exported_symbols_list,binding.symbols",
             ],
           },
