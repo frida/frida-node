@@ -113,7 +113,7 @@
             "-lfrida-gum-1.0",
             "-lcapstone",
             "-lgee-0.8",
-            "-llibgioopenssl-static.a",
+            "-lgioopenssl-static.a",
             "-lgio-2.0",
             "-lgthread-2.0",
             "-lgobject-2.0",
