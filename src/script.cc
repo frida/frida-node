@@ -136,6 +136,32 @@ NAN_METHOD(Script::Unload) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
+class EternalizeOperation : public Operation<FridaScript> {
+ public:
+  void Begin() {
+    frida_script_eternalize(handle_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_script_eternalize_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Nan::Undefined();
+  }
+};
+
+NAN_METHOD(Script::Eternalize) {
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Script>(obj);
+
+  auto operation = new EternalizeOperation();
+  operation->Schedule(isolate, wrapper);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
 class PostOperation : public Operation<FridaScript> {
  public:
   PostOperation(gchar* message, GBytes* data) : message_(message), data_(data) {

@@ -21,6 +21,7 @@ class Script : public GLibObject {
 
   static NAN_METHOD(Load);
   static NAN_METHOD(Unload);
+  static NAN_METHOD(Eternalize);
   static NAN_METHOD(Post);
 
   static v8::Local<v8::Value> TransformMessageSignal(const gchar* name,

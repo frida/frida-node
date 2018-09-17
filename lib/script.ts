@@ -43,6 +43,10 @@ export class Script {
         return this.impl.unload();
     }
 
+    eternalize(): Promise<void> {
+        return this.impl.eternalize();
+    }
+
     post(message: any, data: Buffer | null = null): Promise<void> {
         return this.impl.post(message, data);
     }
