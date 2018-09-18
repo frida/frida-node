@@ -39,6 +39,7 @@ void Script::Init(Handle<Object> exports, Runtime* runtime) {
 
   Nan::SetPrototypeMethod(tpl, "load", Load);
   Nan::SetPrototypeMethod(tpl, "unload", Unload);
+  Nan::SetPrototypeMethod(tpl, "eternalize", Eternalize);
   Nan::SetPrototypeMethod(tpl, "post", Post);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
