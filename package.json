@@ -31,7 +31,7 @@
     "bindings": "^1.2.1",
     "minimatch": "^3.0.3",
     "nan": "^2.4.0",
-    "prebuild-install": "^4.0.0"
+    "prebuild-install": "^5.2.0"
   },
   "devDependencies": {
     "@types/chai": "^4.1.4",
@@ -39,9 +39,9 @@
     "@types/node": "^10.3.6",
     "chai": "^4.1.2",
     "mocha": "^5.2.0",
-    "prebuild": "^7.6.0",
+    "prebuild": "^8.1.0",
     "ts-node": "^7.0.0",
-    "typescript": "^2.9.2"
+    "typescript": "^3.1.1"
   },
   "scripts": {
     "prepare": "npm run build",
