@@ -106,6 +106,7 @@
           ],
           "libraries": [
             "-lfrida-core-1.0",
+            "-lfrida-gumjs-1.0",
             "-lsoup-2.4",
             "-lpsl",
             "-lxml2",
