@@ -154,6 +154,8 @@
             "-fdata-sections",
           ],
           "ldflags": [
+            "-static-libgcc",
+            "-static-libstdc++",
             "-Wl,--gc-sections",
             "-Wl,-z,noexecstack",
             "-Wl,--version-script",
