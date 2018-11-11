@@ -176,10 +176,11 @@ class ScriptServices extends SignalAdapter implements RpcController {
             if (operation === RpcOperation.Ok) {
                 value = (data !== null) ? data : params[0];
             } else {
-                const [message, name, stack] = params;
+                const [message, name, stack, rawErr] = params;
                 error = new Error(message);
                 error.name = name;
                 error.stack = stack;
+                Object.assign(error, rawErr);
             }
 
             callback(error, value);
