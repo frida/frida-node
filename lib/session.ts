@@ -1,3 +1,4 @@
+import { Crash } from "./crash";
 import { Script } from "./script";
 import { Signal } from "./signals";
 
@@ -68,7 +69,7 @@ export class Session {
     }
 }
 
-export type SessionDetachedHandler = (reason: SessionDetachReason) => void;
+export type SessionDetachedHandler = (reason: SessionDetachReason, crash: Crash | null) => void;
 
 export enum SessionDetachReason {
     ApplicationRequested = "application-requested",

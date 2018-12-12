@@ -34,6 +34,8 @@ class Runtime {
       gpointer result);
   static v8::Local<v8::String> ValueFromEnum(gint value, GType type);
 
+  static v8::Local<v8::Value> ValueFromVariantDict(GVariant* dict);
+
   static const char* ClassNameFromC(const char* cname);
 
  private:

@@ -3,10 +3,12 @@
 #include <nan.h>
 
 using v8::Array;
+using v8::Boolean;
 using v8::Function;
 using v8::Handle;
 using v8::Isolate;
 using v8::Local;
+using v8::Number;
 using v8::Object;
 using v8::String;
 using v8::Value;
@@ -203,6 +205,38 @@ Local<String> Runtime::ValueFromEnum(gint value, GType type) {
   auto result = Nan::New(g_enum_get_value(enum_class, value)->value_nick)
       .ToLocalChecked();
   g_type_class_unref(enum_class);
+  return result;
+}
+
+Local<Value> Runtime::ValueFromVariantDict(GVariant* dict) {
+  auto result = Nan::New<v8::Object>();
+
+  GVariantIter iter;
+  gchar* key;
+  GVariant* raw_value;
+  g_variant_iter_init(&iter, dict);
+  while (g_variant_iter_next(&iter, "{sv}", &key, &raw_value)) {
+    Local<Value> value;
+
+    if (g_variant_is_of_type (raw_value, G_VARIANT_TYPE_STRING)) {
+      value = Nan::New<String>(
+          g_variant_get_string(raw_value, NULL)).ToLocalChecked();
+    } else if (g_variant_is_of_type (raw_value, G_VARIANT_TYPE_INT64)) {
+      value = Nan::New<Number>(
+          static_cast<double>(g_variant_get_int64(raw_value)));
+    } else if (g_variant_is_of_type (raw_value, G_VARIANT_TYPE_BOOLEAN)) {
+      value = Nan::New<Boolean>(
+          static_cast<bool>(g_variant_get_boolean(raw_value)));
+    } else {
+      g_assert_not_reached ();
+    }
+
+    Nan::Set(result, Nan::New(key).ToLocalChecked(), value);
+
+    g_variant_unref(raw_value);
+    g_free(key);
+  }
+
   return result;
 }
 

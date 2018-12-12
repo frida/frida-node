@@ -1,5 +1,6 @@
 import { Application } from "./application";
 import { Child } from "./child";
+import { Crash } from "./crash";
 import { Icon } from "./icon";
 import { Process } from "./process";
 import { Session } from "./session";
@@ -14,6 +15,7 @@ export class Device {
     spawnRemoved: Signal<SpawnRemovedHandler>;
     childAdded: Signal<ChildAddedHandler>;
     childRemoved: Signal<ChildRemovedHandler>;
+    processCrashed: Signal<ProcessCrashedHandler>;
     output: Signal<OutputHandler>;
     uninjected: Signal<UninjectedHandler>;
     lost: Signal<DeviceLostHandler>;
@@ -28,6 +30,7 @@ export class Device {
         this.spawnRemoved = new Signal<SpawnRemovedHandler>(signals, "spawn-removed");
         this.childAdded = new Signal<ChildAddedHandler>(signals, "child-added");
         this.childRemoved = new Signal<ChildRemovedHandler>(signals, "child-removed");
+        this.processCrashed = new Signal<ProcessCrashedHandler>(signals, "process-crashed");
         this.output = new Signal<OutputHandler>(signals, "output");
         this.uninjected = new Signal<UninjectedHandler>(signals, "uninjected");
         this.lost = new Signal<DeviceLostHandler>(signals, "lost");
@@ -166,6 +169,7 @@ export type SpawnAddedHandler = (spawn: Spawn) => void;
 export type SpawnRemovedHandler = (spawn: Spawn) => void;
 export type ChildAddedHandler = (child: Child) => void;
 export type ChildRemovedHandler = (child: Child) => void;
+export type ProcessCrashedHandler = (crash: Crash) => void;
 export type OutputHandler = (pid: number, fd: number, data: Buffer) => void;
 export type UninjectedHandler = (id: number) => void;
 export type DeviceLostHandler = () => void;
