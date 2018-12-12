@@ -31,6 +31,9 @@ class Session : public GLibObject {
   static NAN_METHOD(DisableDebugger);
   static NAN_METHOD(EnableJit);
 
+  static v8::Local<v8::Value> TransformSignal(const gchar* name, guint index,
+      const GValue* value, gpointer user_data);
+
   v8::Persistent<v8::Object> signals_;
 };
 

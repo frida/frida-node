@@ -1,5 +1,6 @@
 #include "session.h"
 
+#include "crash.h"
 #include "operation.h"
 #include "script.h"
 #include "signals.h"
@@ -90,7 +91,7 @@ NAN_METHOD(Session::New) {
   auto obj = info.This();
   wrapper->Wrap(obj);
   Nan::Set(obj, Nan::New("signals").ToLocalChecked(),
-      Signals::New(handle, runtime));
+      Signals::New(handle, runtime, TransformSignal, wrapper));
 
   info.GetReturnValue().Set(obj);
 }
@@ -431,6 +432,20 @@ NAN_METHOD(Session::EnableJit) {
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+Local<Value> Session::TransformSignal(const gchar* name, guint index,
+    const GValue* value, gpointer user_data) {
+  auto self = static_cast<Session*>(user_data);
+
+  if (index == 1 && strcmp(name, "detached") == 0) {
+    auto crash = g_value_get_object(value);
+    if (crash == NULL)
+      return Nan::Null();
+    return Crash::New(crash, self->runtime_);
+  }
+
+  return Local<Value>();
 }
 
 }

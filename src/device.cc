@@ -2,6 +2,7 @@
 
 #include "application.h"
 #include "child.h"
+#include "crash.h"
 #include "icon.h"
 #include "operation.h"
 #include "process.h"
@@ -870,6 +871,9 @@ Local<Value> Device::TransformSignal(const gchar* name, guint index,
        strcmp(name, "child-removed") == 0))
     return Child::New(g_value_get_object(value), self->runtime_);
 
+  if (index == 0 && strcmp(name, "process-crashed") == 0)
+    return Crash::New(g_value_get_object(value), self->runtime_);
+
   return Local<Value>();
 }
 
@@ -892,6 +896,7 @@ bool Device::ShouldStayAliveToEmit(const gchar* name) {
       strcmp(name, "spawn-removed") == 0 ||
       strcmp(name, "child-added") == 0 ||
       strcmp(name, "child-removed") == 0 ||
+      strcmp(name, "process-crashed") == 0 ||
       strcmp(name, "output") == 0 ||
       strcmp(name, "uninjected") == 0;
 }

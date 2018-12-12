@@ -44,6 +44,7 @@
         "src/process.cc",
         "src/spawn.cc",
         "src/child.cc",
+        "src/crash.cc",
         "src/icon.cc",
         "src/session.cc",
         "src/script.cc",

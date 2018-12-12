@@ -1,5 +1,6 @@
 #include "application.h"
 #include "child.h"
+#include "crash.h"
 #include "device.h"
 #include "device_manager.h"
 #include "glib_context.h"
@@ -40,6 +41,7 @@ static void InitAll(Handle<Object> exports,
   Process::Init(exports, runtime);
   Spawn::Init(exports, runtime);
   Child::Init(exports, runtime);
+  Crash::Init(exports, runtime);
   Icon::Init(exports, runtime);
   Session::Init(exports, runtime);
   Script::Init(exports, runtime);
