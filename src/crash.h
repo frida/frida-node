@@ -20,6 +20,7 @@ class Crash : public GLibObject {
 
   static NAN_PROPERTY_GETTER(GetPid);
   static NAN_PROPERTY_GETTER(GetProcessName);
+  static NAN_PROPERTY_GETTER(GetSummary);
   static NAN_PROPERTY_GETTER(GetReport);
   static NAN_PROPERTY_GETTER(GetParameters);
 };
