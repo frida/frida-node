@@ -41,6 +41,8 @@ void Crash::Init(Handle<Object> exports, Runtime* runtime) {
       GetParameters, 0, data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("report").ToLocalChecked(),
       GetReport, 0, data, DEFAULT, ReadOnly, signature);
+  Nan::SetAccessor(instance_tpl, Nan::New("summary").ToLocalChecked(),
+      GetSummary, 0, data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("processName").ToLocalChecked(),
       GetProcessName, 0, data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("pid").ToLocalChecked(),
@@ -96,6 +98,14 @@ NAN_PROPERTY_GETTER(Crash::GetProcessName) {
 
   info.GetReturnValue().Set(
       Nan::New(frida_crash_get_process_name(handle)).ToLocalChecked());
+}
+
+NAN_PROPERTY_GETTER(Crash::GetSummary) {
+  auto handle = ObjectWrap::Unwrap<Crash>(
+      info.Holder())->GetHandle<FridaCrash>();
+
+  info.GetReturnValue().Set(
+      Nan::New(frida_crash_get_summary(handle)).ToLocalChecked());
 }
 
 NAN_PROPERTY_GETTER(Crash::GetReport) {
