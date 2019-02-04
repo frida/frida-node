@@ -1,5 +1,3 @@
-'use strict';
-
 const frida = require('..');
 
 const source = `'use strict';

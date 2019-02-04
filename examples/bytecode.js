@@ -1,5 +1,3 @@
-'use strict';
-
 const frida = require('..');
 
 const processName = process.argv[2];

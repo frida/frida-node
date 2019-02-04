@@ -1,5 +1,3 @@
-'use strict';
-
 const frida = require('..');
 
 let deviceManager = null;
