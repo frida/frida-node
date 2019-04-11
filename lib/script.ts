@@ -170,6 +170,9 @@ class ScriptServices extends SignalAdapter implements RpcController {
     onRpcMessage(id: number, operation: RpcOperation, params: any[], data: Buffer | null) {
         if (operation === RpcOperation.Ok || operation === RpcOperation.Error) {
             const callback = this.pendingRequests[id];
+            if (callback === undefined) {
+                return;
+            }
 
             let value = null;
             let error = null;
