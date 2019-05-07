@@ -226,10 +226,10 @@ NAN_METHOD(Session::CreateScript) {
   }
   gchar* name = NULL;
   if (info[0]->IsString()) {
-    Nan::Utf8String val(Local<String>::Cast(info[0]));
+    Nan::Utf8String val(info[0]);
     name = g_strdup(*val);
   }
-  Nan::Utf8String source(Local<String>::Cast(info[1]));
+  Nan::Utf8String source(info[1]);
 
   auto operation = new CreateScriptOperation(name, g_strdup(*source));
   operation->Schedule(isolate, wrapper);
@@ -334,10 +334,10 @@ NAN_METHOD(Session::CompileScript) {
   }
   gchar* name = NULL;
   if (info[0]->IsString()) {
-    Nan::Utf8String val(Local<String>::Cast(info[0]));
+    Nan::Utf8String val(info[0]);
     name = g_strdup(*val);
   }
-  Nan::Utf8String source(Local<String>::Cast(info[1]));
+  Nan::Utf8String source(info[1]);
 
   auto operation = new CompileScriptOperation(name, g_strdup(*source));
   operation->Schedule(isolate, wrapper);
@@ -374,9 +374,13 @@ NAN_METHOD(Session::EnableDebugger) {
     Nan::ThrowTypeError("Bad argument, expected port number");
     return;
   }
-  guint16 port = static_cast<guint16>(info[0]->ToInteger()->Value());
+  auto port = Nan::To<int32_t>(info[0]).FromMaybe(-1);
+  if (port <= 0 || port >= 65536) {
+    Nan::ThrowTypeError("Bad argument, expected port number");
+    return;
+  }
 
-  auto operation = new EnableDebuggerOperation(port);
+  auto operation = new EnableDebuggerOperation(static_cast<guint16>(port));
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));

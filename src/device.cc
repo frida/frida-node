@@ -452,7 +452,7 @@ NAN_METHOD(Device::Spawn) {
     Nan::ThrowTypeError("Bad argument, 'program' must be a string");
     return;
   }
-  Nan::Utf8String program(Local<String>::Cast(program_value));
+  Nan::Utf8String program(program_value);
 
   auto options = frida_spawn_options_new();
   bool valid = true;
@@ -489,7 +489,7 @@ NAN_METHOD(Device::Spawn) {
 
   if (valid && !cwd_value->IsNull()) {
     if (cwd_value->IsString()) {
-      Nan::Utf8String cwd(Local<String>::Cast(cwd_value));
+      Nan::Utf8String cwd(cwd_value);
       frida_spawn_options_set_cwd(options, *cwd);
     } else {
       Nan::ThrowTypeError("Bad argument, 'cwd' must be a string");
@@ -517,18 +517,17 @@ NAN_METHOD(Device::Spawn) {
         auto key = Nan::Get(keys, i).ToLocalChecked();
         auto value = Nan::Get(object, key).ToLocalChecked();
 
-        Nan::Utf8String key_str(key->ToString());
+        Nan::Utf8String key_str(key);
 
         GVariant* raw_value;
         if (value->IsBoolean()) {
-          Nan::Utf8String value_str(Local<String>::Cast(value));
           raw_value = g_variant_new_boolean(
               Local<Boolean>::Cast(value)->Value());
         } else if (value->IsNumber()) {
           raw_value = g_variant_new_int64(
               static_cast<gint64>(Local<Number>::Cast(value)->Value()));
         } else {
-          Nan::Utf8String value_str(value->ToString());
+          Nan::Utf8String value_str(value);
           raw_value = g_variant_new_string(*value_str);
         }
 
@@ -588,7 +587,7 @@ NAN_METHOD(Device::Input) {
     return;
   }
 
-  auto pid = info[0]->ToInteger()->Value();
+  auto pid = Nan::To<int64_t>(info[0]).FromMaybe(0);
   if (pid <= 0) {
     Nan::ThrowTypeError("Bad pid");
     return;
@@ -633,7 +632,7 @@ NAN_METHOD(Device::Resume) {
     Nan::ThrowTypeError("Bad argument, expected pid");
     return;
   }
-  auto pid = info[0]->ToInteger()->Value();
+  auto pid = Nan::To<int64_t>(info[0]).FromMaybe(0);
   if (pid <= 0) {
     Nan::ThrowTypeError("Bad argument, expected pid");
     return;
@@ -674,7 +673,7 @@ NAN_METHOD(Device::Kill) {
     Nan::ThrowTypeError("Bad argument, expected pid");
     return;
   }
-  auto pid = info[0]->ToInteger()->Value();
+  auto pid = Nan::To<int64_t>(info[0]).FromMaybe(0);
   if (pid <= 0) {
     Nan::ThrowTypeError("Bad argument, expected pid");
     return;
@@ -718,7 +717,7 @@ NAN_METHOD(Device::Attach) {
     Nan::ThrowTypeError("Bad argument, expected pid");
     return;
   }
-  auto pid = info[0]->ToInteger()->Value();
+  auto pid = Nan::To<int64_t>(info[0]).FromMaybe(-1);
   if (pid < 0) {
     Nan::ThrowTypeError("Bad argument, expected pid");
     return;
@@ -777,14 +776,14 @@ NAN_METHOD(Device::InjectLibraryFile) {
     return;
   }
 
-  auto pid = info[0]->ToInteger()->Value();
+  auto pid = Nan::To<int64_t>(info[0]).FromMaybe(-1);
   if (pid < 0) {
     Nan::ThrowTypeError("Bad argument, expected pid");
     return;
   }
-  Nan::Utf8String path(Local<String>::Cast(info[1]));
-  Nan::Utf8String entrypoint(Local<String>::Cast(info[2]));
-  Nan::Utf8String data(Local<String>::Cast(info[3]));
+  Nan::Utf8String path(info[1]);
+  Nan::Utf8String entrypoint(info[2]);
+  Nan::Utf8String data(info[3]);
 
   auto operation = new InjectLibraryFileOperation(static_cast<guint>(pid),
       g_strdup(*path), g_strdup(*entrypoint), g_strdup(*data));
@@ -841,7 +840,7 @@ NAN_METHOD(Device::InjectLibraryBlob) {
     return;
   }
 
-  auto pid = info[0]->ToInteger()->Value();
+  auto pid = Nan::To<int64_t>(info[0]).FromMaybe(-1);
   if (pid < 0) {
     Nan::ThrowTypeError("Bad argument, expected pid");
     return;
@@ -849,8 +848,8 @@ NAN_METHOD(Device::InjectLibraryBlob) {
   auto buffer = info[1];
   auto blob = g_bytes_new(node::Buffer::Data(buffer),
       node::Buffer::Length(buffer));
-  Nan::Utf8String entrypoint(Local<String>::Cast(info[2]));
-  Nan::Utf8String data(Local<String>::Cast(info[3]));
+  Nan::Utf8String entrypoint(info[2]);
+  Nan::Utf8String data(info[3]);
 
   auto operation = new InjectLibraryBlobOperation(static_cast<guint>(pid),
       blob, g_strdup(*entrypoint), g_strdup(*data));

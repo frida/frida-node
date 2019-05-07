@@ -93,7 +93,7 @@ bool Runtime::ValueToStrv(Handle<Value> value, gchar*** strv, gint* length) {
       return false;
     }
 
-    Nan::Utf8String element(Local<String>::Cast(element_value));
+    Nan::Utf8String element(element_value);
     elements[i] = g_strdup(*element);
   }
 
@@ -132,8 +132,8 @@ bool Runtime::ValueToEnvp(Handle<Value> value, gchar*** envp, gint* length) {
     auto name = Nan::Get(names, i).ToLocalChecked();
     auto value = Nan::Get(object, name).ToLocalChecked();
 
-    Nan::Utf8String name_str(name->ToString());
-    Nan::Utf8String value_str(value->ToString());
+    Nan::Utf8String name_str(name);
+    Nan::Utf8String value_str(value);
     elements[i] = g_strconcat(*name_str, "=", *value_str, NULL);
   }
 
@@ -164,7 +164,7 @@ bool Runtime::ValueToEnum(Handle<Value> value, GType type, gpointer result) {
     Nan::ThrowTypeError("Bad argument, expected a string");
     return false;
   }
-  Nan::Utf8String str(Local<String>::Cast(value));
+  Nan::Utf8String str(value);
 
   bool success = false;
 
