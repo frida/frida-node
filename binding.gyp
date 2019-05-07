@@ -60,7 +60,7 @@
       "target_conditions": [
         ["OS=='win'", {
           "include_dirs": [
-            "$(FRIDA)/build/tmp-windows/<(frida_host_msvs)/frida-core",
+            "$(FRIDA)/build/tmp-windows/<(frida_host_msvs)/frida-core/api",
             "$(FRIDA)/build/sdk-windows/<(frida_host_msvs)/include/json-glib-1.0",
             "$(FRIDA)/build/sdk-windows/<(frida_host_msvs)/include/gee-0.8",
             "$(FRIDA)/build/sdk-windows/<(frida_host_msvs)/include/glib-2.0",
