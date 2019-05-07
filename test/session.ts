@@ -1,26 +1,22 @@
 import * as frida from "../lib";
-import { targetProgram } from "./data";
+import { LabRat } from "./labrat";
 
 import { expect } from "chai";
 import "mocha";
-import { spawn, ChildProcess } from "child_process";
 
 declare function gc(): void;
 
 describe("Session", function () {
-    let target: ChildProcess;
+    let target: LabRat;
     let session: frida.Session;
 
     before(async () => {
-        target = spawn(targetProgram(), [], {
-            stdio: ["pipe", process.stdout, process.stderr]
-        });
+        target = await LabRat.start();
         session = await frida.attach(target.pid);
     });
 
     after(() => {
-        target.kill("SIGKILL");
-        target.unref();
+        target.stop();
     });
 
     afterEach(gc);
