@@ -28,20 +28,20 @@
     "dist/"
   ],
   "dependencies": {
-    "bindings": "^1.2.1",
+    "bindings": "^1.5.0",
     "minimatch": "^3.0.3",
-    "nan": "^2.4.0",
-    "prebuild-install": "^5.2.0"
+    "nan": "^2.13.2",
+    "prebuild-install": "^5.3.0"
   },
   "devDependencies": {
     "@types/chai": "^4.1.4",
-    "@types/mocha": "^5.2.3",
-    "@types/node": "^10.3.6",
+    "@types/mocha": "^5.2.6",
+    "@types/node": "^10.14.6",
     "chai": "^4.1.2",
-    "mocha": "^5.2.0",
-    "prebuild": "^8.1.0",
-    "ts-node": "^7.0.0",
-    "typescript": "^3.1.1"
+    "mocha": "^6.1.4",
+    "prebuild": "^8.2.1",
+    "ts-node": "^8.1.0",
+    "typescript": "^3.4.5"
   },
   "scripts": {
     "prepare": "npm run build",
