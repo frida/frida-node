@@ -2,8 +2,7 @@ const frida = require('..');
 
 const [ , , processName, processAddress ] = process.argv;
 
-const source = `'use strict';
-
+const source = `
 var fn = new NativeFunction(ptr('@ADDRESS@'), 'void', ['int']);
 
 rpc.exports = {

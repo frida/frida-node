@@ -2,8 +2,7 @@ const frida = require('..');
 
 const [ , , processName, processAddress ] = process.argv;
 
-const source = `'use strict';
-
+const source = `
 Interceptor.attach(ptr('@ADDRESS@'), {
   onEnter: function (args) {
     args[0] = ptr('1337');

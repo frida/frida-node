@@ -22,8 +22,6 @@ describe("Script", function () {
 
     it("should support rpc", async () => {
         const script = await session.createScript(
-            "'use strict';" +
-            "" +
             "rpc.exports = {" +
             "add: function (a, b) {" +
             "var result = a + b;" +
@@ -61,8 +59,6 @@ describe("Script", function () {
 
     it("should fail rpc request if post() fails", async () => {
         const script = await session.createScript(
-            "'use strict';" +
-            "" +
             "rpc.exports = {" +
             "init: function () {" +
             "}" +
@@ -83,8 +79,6 @@ describe("Script", function () {
 
     it("should fail rpc request if script is unloaded mid-request", async () => {
         const script = await session.createScript(
-            "'use strict';" +
-            "" +
             "rpc.exports = {" +
             "waitForever: function () {" +
             "return new Promise(function () {});" +
@@ -106,8 +100,6 @@ describe("Script", function () {
 
     it("should fail rpc request if session gets detached mid-request", async () => {
         const script = await session.createScript(
-            "'use strict';" +
-            "" +
             "rpc.exports = {" +
             "waitForever: function () {" +
             "return new Promise(function () {});" +
@@ -132,7 +124,7 @@ describe("Script", function () {
         expect(await api.hello()).to.equal("Is it me you're looking for?");
 
         async function load(): Promise<frida.ScriptExports> {
-            const script = await session.createScript(`'use strict';
+            const script = await session.createScript(`
             rpc.exports.hello = function () {
                 return "Is it me you're looking for?";
             };`);
@@ -149,10 +141,7 @@ describe("Script", function () {
     });
 
     it("should support custom log handler", async () => {
-        const script = await session.createScript(
-            "'use strict';" +
-            "" +
-            "console.error(new Error('test message'))");
+        const script = await session.createScript("console.error(new Error('test message'))");
 
         script.logHandler = function (level, text) {
             expect(level).to.equal("error");

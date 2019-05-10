@@ -1,14 +1,14 @@
 const frida = require('..');
 
-const source = `'use strict';
-
+const source = `
 recv(onMessage);
 
 function onMessage(message) {
   send({ name: 'pong', payload: message });
 
   recv(onMessage);
-}`;
+}
+`;
 
 async function spawnExample() {
   const pid = await frida.spawn(['/bin/cat', '/etc/resolv.conf']);

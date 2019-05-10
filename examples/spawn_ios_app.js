@@ -30,8 +30,7 @@ async function main() {
   session.detached.connect(onDetached);
 
   console.log(`[*] createScript()`);
-  const script = await session.createScript(`'use strict';
-
+  const script = await session.createScript(`
 Interceptor.attach(Module.findExportByName('UIKit', 'UIApplicationMain'), function () {
   send({
     timestamp: Date.now(),

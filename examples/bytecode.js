@@ -2,8 +2,7 @@ const frida = require('..');
 
 const processName = process.argv[2];
 
-const source = `'use strict';
-
+const source = `
 rpc.exports = {
   listThreads: function () {
     return Process.enumerateThreadsSync();

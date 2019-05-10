@@ -2,8 +2,7 @@ const frida = require('..');
 
 const processName = process.argv[2];
 
-const source = `'use strict';
-
+const source = `
 rpc.exports = {
   hello: function () {
     return 'Hello';
@@ -11,7 +10,8 @@ rpc.exports = {
   failPlease: function () {
     oops;
   }
-};`;
+};
+`;
 
 async function main() {
   const session = await frida.attach(processName);
