@@ -35,11 +35,13 @@ export const Session = sessionModule.Session;
 export type SessionDetachedHandler = sessionModule.SessionDetachedHandler;
 export type SessionDetachReason = sessionModule.SessionDetachReason;
 export const SessionDetachReason = sessionModule.SessionDetachReason;
-export type CreateScriptOptions = sessionModule.CreateScriptOptions;
 export type EnableDebuggerOptions = sessionModule.EnableDebuggerOptions;
 
 export type Script = scriptModule.Script;
 export const Script = scriptModule.Script;
+export type ScriptOptions = scriptModule.ScriptOptions;
+export type ScriptRuntime = scriptModule.ScriptRuntime;
+export const ScriptRuntime = scriptModule.ScriptRuntime;
 export type ScriptDestroyedHandler = scriptModule.ScriptDestroyedHandler;
 export type ScriptMessageHandler = scriptModule.ScriptMessageHandler;
 export type ScriptLogHandler = scriptModule.ScriptLogHandler;
