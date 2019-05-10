@@ -25,6 +25,10 @@ using v8::Value;
 
 namespace frida {
 
+static FridaScriptOptions* ParseScriptOptions(Handle<Value> name_value,
+    Handle<Value> runtime_value);
+static void UnrefGBytes(char* data, void* hint);
+
 Session::Session(FridaSession* handle, Runtime* runtime)
     : GLibObject(handle, runtime) {
   g_object_ref(handle_);
@@ -130,37 +134,6 @@ NAN_METHOD(Session::Detach) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
-class CreateScriptOperation : public Operation<FridaSession> {
- public:
-  CreateScriptOperation(gchar* name, gchar* source)
-    : name_(name),
-      source_(source) {
-  }
-
-  ~CreateScriptOperation() {
-    g_free(source_);
-    g_free(name_);
-  }
-
-  void Begin() {
-    frida_session_create_script(handle_, name_, source_, OnReady, this);
-  }
-
-  void End(GAsyncResult* result, GError** error) {
-    script_ = frida_session_create_script_finish(handle_, result, error);
-  }
-
-  Local<Value> Result(Isolate* isolate) {
-    auto wrapper = Script::New(script_, runtime_);
-    g_object_unref(script_);
-    return wrapper;
-  }
-
-  gchar* name_;
-  gchar* source_;
-  FridaScript* script_;
-};
-
 class EnableChildGatingOperation : public Operation<FridaSession> {
  public:
   void Begin() {
@@ -213,25 +186,75 @@ NAN_METHOD(Session::DisableChildGating) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
+class CreateScriptOperation : public Operation<FridaSession> {
+ public:
+  CreateScriptOperation(gchar* source, FridaScriptOptions* options)
+    : source_(source),
+      options_(options) {
+  }
+
+  ~CreateScriptOperation() {
+    g_object_unref(options_);
+    g_free(source_);
+  }
+
+  void Begin() {
+    frida_session_create_script(handle_, source_, options_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    script_ = frida_session_create_script_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    auto wrapper = Script::New(script_, runtime_);
+    g_object_unref(script_);
+    return wrapper;
+  }
+
+  gchar* source_;
+  FridaScriptOptions* options_;
+  FridaScript* script_;
+};
+
+
 NAN_METHOD(Session::CreateScript) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
-  if (info.Length() < 2 ||
-      !(info[0]->IsString() || info[0]->IsNull()) ||
-      !info[1]->IsString()) {
-    Nan::ThrowTypeError("Bad argument, expected string|null and string");
+  if (info.Length() < 3) {
+    Nan::ThrowTypeError("Missing one or more arguments");
     return;
   }
-  gchar* name = NULL;
-  if (info[0]->IsString()) {
-    Nan::Utf8String val(info[0]);
-    name = g_strdup(*val);
-  }
-  Nan::Utf8String source(info[1]);
 
-  auto operation = new CreateScriptOperation(name, g_strdup(*source));
+  auto source_value = info[0];
+  auto name_value = info[1];
+  auto runtime_value = info[2];
+
+  bool valid = true;
+
+  gchar* source;
+  Nan::Utf8String val(source_value);
+  source = g_strdup(*val);
+  if (source == NULL) {
+    Nan::ThrowTypeError("Bad argument, 'source' must be a string");
+    valid = false;
+  }
+
+  FridaScriptOptions* options = NULL;
+  if (valid) {
+    options = ParseScriptOptions(name_value, runtime_value);
+    valid = options != NULL;
+  }
+
+  if (!valid) {
+    g_free(source);
+    g_clear_object(&options);
+    return;
+  }
+
+  auto operation = new CreateScriptOperation(source, options);
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
@@ -239,16 +262,19 @@ NAN_METHOD(Session::CreateScript) {
 
 class CreateScriptFromBytesOperation : public Operation<FridaSession> {
  public:
-  CreateScriptFromBytesOperation(GBytes* bytes)
-    : bytes_(bytes) {
+  CreateScriptFromBytesOperation(GBytes* bytes, FridaScriptOptions* options)
+    : bytes_(bytes),
+      options_(options) {
   }
 
   ~CreateScriptFromBytesOperation() {
+    g_object_unref(options_);
     g_bytes_unref(bytes_);
   }
 
   void Begin() {
-    frida_session_create_script_from_bytes(handle_, bytes_, OnReady, this);
+    frida_session_create_script_from_bytes(handle_, bytes_, options_, OnReady,
+        this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -263,6 +289,7 @@ class CreateScriptFromBytesOperation : public Operation<FridaSession> {
   }
 
   GBytes* bytes_;
+  FridaScriptOptions* options_;
   FridaScript* script_;
 };
 
@@ -271,38 +298,58 @@ NAN_METHOD(Session::CreateScriptFromBytes) {
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
-  if (info.Length() == 0 || !node::Buffer::HasInstance(info[0])) {
-    Nan::ThrowTypeError("Bad argument, expected Buffer");
+  if (info.Length() < 3) {
+    Nan::ThrowTypeError("Missing one or more arguments");
     return;
   }
-  auto buffer = info[0];
-  auto bytes = g_bytes_new(node::Buffer::Data(buffer),
-      node::Buffer::Length(buffer));
 
-  auto operation = new CreateScriptFromBytesOperation(bytes);
+  auto bytes_value = info[0];
+  auto name_value = info[1];
+  auto runtime_value = info[2];
+
+  bool valid = true;
+
+  GBytes* bytes = NULL;
+  if (node::Buffer::HasInstance(bytes_value)) {
+    bytes = g_bytes_new(node::Buffer::Data(bytes_value),
+        node::Buffer::Length(bytes_value));
+  } else {
+    Nan::ThrowTypeError("Bad argument, 'bytes' must be a Buffer");
+    valid = false;
+  }
+
+  FridaScriptOptions* options = NULL;
+  if (valid) {
+    options = ParseScriptOptions(name_value, runtime_value);
+    valid = options != NULL;
+  }
+
+  if (!valid) {
+    g_bytes_unref(bytes);
+    g_clear_object(&options);
+    return;
+  }
+
+  auto operation = new CreateScriptFromBytesOperation(bytes, options);
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
-static void bytes_buffer_free(char* data, void* hint) {
-  g_bytes_unref(static_cast<GBytes*>(hint));
-}
-
 class CompileScriptOperation : public Operation<FridaSession> {
  public:
-  CompileScriptOperation(gchar* name, gchar* source)
-    : name_(name),
-      source_(source) {
+  CompileScriptOperation(gchar* source, FridaScriptOptions* options)
+    : source_(source),
+      options_(options) {
   }
 
   ~CompileScriptOperation() {
+    g_object_unref(options_);
     g_free(source_);
-    g_free(name_);
   }
 
   void Begin() {
-    frida_session_compile_script(handle_, name_, source_, OnReady, this);
+    frida_session_compile_script(handle_, source_, options_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -313,11 +360,11 @@ class CompileScriptOperation : public Operation<FridaSession> {
     gsize size;
     auto data = g_bytes_get_data(bytes_, &size);
     return Nan::NewBuffer(static_cast<char*>(const_cast<void*>(data)), size,
-        bytes_buffer_free, bytes_).ToLocalChecked();
+        UnrefGBytes, bytes_).ToLocalChecked();
   }
 
-  gchar* name_;
   gchar* source_;
+  FridaScriptOptions* options_;
   GBytes* bytes_;
 };
 
@@ -326,23 +373,74 @@ NAN_METHOD(Session::CompileScript) {
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
-  if (info.Length() < 2 ||
-      !(info[0]->IsString() || info[0]->IsNull()) ||
-      !info[1]->IsString()) {
-    Nan::ThrowTypeError("Bad argument, expected string|null and string");
+  if (info.Length() < 3) {
+    Nan::ThrowTypeError("Missing one or more arguments");
     return;
   }
-  gchar* name = NULL;
-  if (info[0]->IsString()) {
-    Nan::Utf8String val(info[0]);
-    name = g_strdup(*val);
-  }
-  Nan::Utf8String source(info[1]);
 
-  auto operation = new CompileScriptOperation(name, g_strdup(*source));
+  auto source_value = info[0];
+  auto name_value = info[1];
+  auto runtime_value = info[2];
+
+  bool valid = true;
+
+  gchar* source;
+  Nan::Utf8String val(source_value);
+  source = g_strdup(*val);
+  if (source == NULL) {
+    Nan::ThrowTypeError("Bad argument, 'source' must be a string");
+    valid = false;
+  }
+
+  FridaScriptOptions* options = NULL;
+  if (valid) {
+    options = ParseScriptOptions(name_value, runtime_value);
+    valid = options != NULL;
+  }
+
+  if (!valid) {
+    g_free(source);
+    g_clear_object(&options);
+    return;
+  }
+
+  auto operation = new CompileScriptOperation(source, options);
   operation->Schedule(isolate, wrapper);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+static FridaScriptOptions* ParseScriptOptions(Handle<Value> name_value,
+    Handle<Value> runtime_value) {
+  auto options = frida_script_options_new();
+  bool valid = true;
+
+  if (!name_value->IsNull()) {
+    Nan::Utf8String val(name_value);
+    const gchar* name = *val;
+    if (name != NULL) {
+      frida_script_options_set_name(options, name);
+    } else {
+      Nan::ThrowTypeError("Bad argument, 'name' must be a string");
+      valid = false;
+    }
+  }
+
+  if (valid && !runtime_value->IsNull()) {
+    FridaScriptRuntime runtime;
+    valid = Runtime::ValueToEnum(runtime_value, FRIDA_TYPE_SCRIPT_RUNTIME,
+        &runtime);
+    if (valid) {
+      frida_script_options_set_runtime(options, runtime);
+    }
+  }
+
+  if (!valid) {
+    g_object_unref(options);
+    return NULL;
+  }
+
+  return options;
 }
 
 class EnableDebuggerOperation : public Operation<FridaSession> {
@@ -450,6 +548,10 @@ Local<Value> Session::TransformSignal(const gchar* name, guint index,
   }
 
   return Local<Value>();
+}
+
+static void UnrefGBytes(char* data, void* hint) {
+  g_bytes_unref(static_cast<GBytes*>(hint));
 }
 
 }

@@ -56,6 +56,17 @@ export class Script {
     }
 }
 
+export interface ScriptOptions {
+    name?: string;
+    runtime?: ScriptRuntime;
+}
+
+export enum ScriptRuntime {
+    Default = "default",
+    Duk = "duk",
+    V8 = "v8"
+}
+
 export type ScriptDestroyedHandler = () => void;
 export type ScriptMessageHandler = (message: Message, data: Buffer | null) => void;
 export type ScriptLogHandler = (level: LogLevel, text: string) => void;

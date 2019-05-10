@@ -1,5 +1,5 @@
 import { Crash } from "./crash";
-import { Script } from "./script";
+import { Script, ScriptOptions } from "./script";
 import { Signal } from "./signals";
 
 import { inspect } from "util";
@@ -32,20 +32,22 @@ export class Session {
         return this.impl.disableChildGating();
     }
 
-    async createScript(source: string, options: CreateScriptOptions = {}): Promise<Script> {
-        const { name = null } = options;
+    async createScript(source: string, options: ScriptOptions = {}): Promise<Script> {
+        const { name = null, runtime = null } = options;
 
-        return new Script(await this.impl.createScript(name, source));
+        return new Script(await this.impl.createScript(source, name, runtime));
     }
 
-    async createScriptFromBytes(bytes: Buffer): Promise<Script> {
-        return new Script(await this.impl.createScriptFromBytes(bytes));
+    async createScriptFromBytes(bytes: Buffer, options: ScriptOptions = {}): Promise<Script> {
+        const { name = null, runtime = null } = options;
+
+        return new Script(await this.impl.createScriptFromBytes(bytes, name, runtime));
     }
 
-    compileScript(source: string, options: CreateScriptOptions = {}): Promise<Buffer> {
-        const { name = null } = options;
+    compileScript(source: string, options: ScriptOptions = {}): Promise<Buffer> {
+        const { name = null, runtime = null } = options;
 
-        return this.impl.compileScript(name, source);
+        return this.impl.compileScript(source, name, runtime);
     }
 
     enableDebugger(options: EnableDebuggerOptions = {}): Promise<void> {
@@ -77,10 +79,6 @@ export enum SessionDetachReason {
     ProcessTerminated = "process-terminated",
     ServerTerminated = "server-terminated",
     DeviceLost = "device-lost"
-}
-
-export interface CreateScriptOptions {
-    name?: string;
 }
 
 export interface EnableDebuggerOptions {
