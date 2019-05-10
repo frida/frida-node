@@ -31,7 +31,7 @@ async function main() {
 
   console.log(`[*] createScript()`);
   const script = await session.createScript(`
-Interceptor.attach(Module.findExportByName('UIKit', 'UIApplicationMain'), function () {
+Interceptor.attach(Module.getExportByName('UIKit', 'UIApplicationMain'), function () {
   send({
     timestamp: Date.now(),
     name: 'UIApplicationMain'
