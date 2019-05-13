@@ -11,7 +11,7 @@ setInterval(() => {
 async function main() {
   const session = await frida.attach(processName);
   await session.enableJit();
-  await session.enableDebugger();
+  await session.enableDebugger({ port: 9938 });
 
   const script = await session.createScript(source);
   script.message.connect(message => {
