@@ -65,14 +65,22 @@ Local<String> Runtime::ValueToJson(Handle<Value> value) {
   auto module = Nan::New<v8::Object>(json_module_);
   auto stringify = Nan::New<v8::Function>(json_stringify_);
   Local<Value> argv[] = { value };
+  #if NODE_MAJOR_VERSION >= 12
+  return Local<String>::Cast(stringify->Call(v8::Isolate::GetCurrent()->GetCurrentContext(), module, 1, argv).ToLocalChecked());
+  #else
   return Local<String>::Cast(stringify->Call(module, 1, argv));
+  #endif
 }
 
 Local<Value> Runtime::ValueFromJson(Handle<String> json) {
   auto module = Nan::New<v8::Object>(json_module_);
   auto parse = Nan::New<v8::Function>(json_parse_);
   Local<Value> argv[] = { json };
+  #if NODE_MAJOR_VERSION >= 12
+  return parse->Call(v8::Isolate::GetCurrent()->GetCurrentContext(), module, 1, argv).ToLocalChecked();
+  #else
   return parse->Call(module, 1, argv);
+  #endif
 }
 
 bool Runtime::ValueToStrv(Handle<Value> value, gchar*** strv, gint* length) {

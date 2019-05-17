@@ -282,7 +282,11 @@ static void signals_closure_marshal(GClosure* closure, GValue* return_gvalue,
 
       auto recv = Nan::New<v8::Object>(*self->parent);
       auto callback = Nan::New<v8::Function>(*self->callback);
+      #if NODE_MAJOR_VERSION >= 12
+      callback->Call(v8::Isolate::GetCurrent()->GetCurrentContext(), recv, argc, argv);
+      #else
       callback->Call(recv, argc, argv);
+      #endif
 
       delete[] argv;
     }

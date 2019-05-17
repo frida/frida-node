@@ -28,8 +28,14 @@ UVContext::UVContext(uv_loop_t* loop)
 
   auto isolate = Isolate::GetCurrent();
   auto module = Nan::New<v8::Object>();
+
+  #if NODE_MAJOR_VERSION >= 12
+  auto process_pending = Function::New(isolate->GetCurrentContext(), ProcessPendingWrapper,
+      External::New(isolate, this)).ToLocalChecked();
+  #else
   auto process_pending = Function::New(isolate, ProcessPendingWrapper,
       External::New(isolate, this));
+  #endif
   auto process_pending_name = Nan::New("processPending").ToLocalChecked();
   process_pending->SetName(process_pending_name);
   Nan::Set(module, process_pending_name, process_pending);

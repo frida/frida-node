@@ -6,6 +6,13 @@
 
 #include <v8.h>
 
+#if NODE_MAJOR_VERSION >= 12
+namespace v8 {
+    template <class T>
+    using Handle = Local<T>;
+}
+#endif
+
 namespace frida {
 
 class Runtime {
