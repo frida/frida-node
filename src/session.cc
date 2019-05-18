@@ -473,7 +473,7 @@ NAN_METHOD(Session::EnableDebugger) {
     return;
   }
   auto port = Nan::To<int32_t>(info[0]).FromMaybe(-1);
-  if (port <= 0 || port >= 65536) {
+  if (port < 0 || port >= 65536) {
     Nan::ThrowTypeError("Bad argument, expected port number");
     return;
   }
