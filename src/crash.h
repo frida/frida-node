@@ -9,7 +9,7 @@ namespace frida {
 
 class Crash : public GLibObject {
  public:
-  static void Init(v8::Handle<v8::Object> exports, Runtime* runtime);
+  static void Init(v8::Local<v8::Object> exports, Runtime* runtime);
   static v8::Local<v8::Object> New(gpointer handle, Runtime* runtime);
 
  private:

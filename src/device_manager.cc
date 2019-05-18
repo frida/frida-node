@@ -10,7 +10,6 @@
 
 #define DEVICE_MANAGER_DATA_WRAPPERS "device_manager:wrappers"
 
-using v8::Handle;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
@@ -37,7 +36,7 @@ DeviceManager::~DeviceManager() {
   frida_unref(handle_);
 }
 
-void DeviceManager::Init(Handle<Object> exports, Runtime* runtime) {
+void DeviceManager::Init(Local<Object> exports, Runtime* runtime) {
   Local<v8::String> name = Nan::New("DeviceManager").ToLocalChecked();
 
   auto tpl = CreateTemplate(name, DeviceManager::New, runtime);

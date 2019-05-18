@@ -19,18 +19,18 @@ class Runtime {
   void* GetDataPointer(const char* id);
   void SetDataPointer(const char* id, void* value);
 
-  v8::Local<v8::String> ValueToJson(v8::Handle<v8::Value> value);
-  v8::Local<v8::Value> ValueFromJson(v8::Handle<v8::String> json);
+  v8::Local<v8::String> ValueToJson(v8::Local<v8::Value> value);
+  v8::Local<v8::Value> ValueFromJson(v8::Local<v8::String> json);
 
-  static bool ValueToStrv(v8::Handle<v8::Value> value, gchar*** strv,
+  static bool ValueToStrv(v8::Local<v8::Value> value, gchar*** strv,
       gint* length);
   static v8::Local<v8::Value> ValueFromStrv(gchar* const* strv, gint length);
 
-  static bool ValueToEnvp(v8::Handle<v8::Value> value, gchar*** envp,
+  static bool ValueToEnvp(v8::Local<v8::Value> value, gchar*** envp,
       gint* length);
   static v8::Local<v8::Value> ValueFromEnvp(gchar* const* envp, gint length);
 
-  static bool ValueToEnum(v8::Handle<v8::Value> value, GType type,
+  static bool ValueToEnum(v8::Local<v8::Value> value, GType type,
       gpointer result);
   static v8::Local<v8::String> ValueFromEnum(gint value, GType type);
 

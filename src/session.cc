@@ -15,7 +15,6 @@ using v8::AccessorSignature;
 using v8::DEFAULT;
 using v8::External;
 using v8::Function;
-using v8::Handle;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
@@ -25,8 +24,8 @@ using v8::Value;
 
 namespace frida {
 
-static FridaScriptOptions* ParseScriptOptions(Handle<Value> name_value,
-    Handle<Value> runtime_value);
+static FridaScriptOptions* ParseScriptOptions(Local<Value> name_value,
+    Local<Value> runtime_value);
 static void UnrefGBytes(char* data, void* hint);
 
 Session::Session(FridaSession* handle, Runtime* runtime)
@@ -39,14 +38,14 @@ Session::~Session() {
   frida_unref(handle_);
 }
 
-void Session::Init(Handle<Object> exports, Runtime* runtime) {
+void Session::Init(Local<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
   auto name = Nan::New("Session").ToLocalChecked();
   auto tpl = CreateTemplate(name, Session::New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
-  auto data = Handle<Value>();
+  auto data = Local<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
   Nan::SetAccessor(instance_tpl, Nan::New("pid").ToLocalChecked(), GetPid, 0,
       data, DEFAULT, ReadOnly, signature);
@@ -410,8 +409,8 @@ NAN_METHOD(Session::CompileScript) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
-static FridaScriptOptions* ParseScriptOptions(Handle<Value> name_value,
-    Handle<Value> runtime_value) {
+static FridaScriptOptions* ParseScriptOptions(Local<Value> name_value,
+    Local<Value> runtime_value) {
   auto options = frida_script_options_new();
   bool valid = true;
 

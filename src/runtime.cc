@@ -5,7 +5,6 @@
 using v8::Array;
 using v8::Boolean;
 using v8::Function;
-using v8::Handle;
 using v8::Isolate;
 using v8::Local;
 using v8::Number;
@@ -61,21 +60,24 @@ void Runtime::SetDataPointer(const char* id, void* value) {
   g_hash_table_insert(data_, const_cast<char*>(id), value);
 }
 
-Local<String> Runtime::ValueToJson(Handle<Value> value) {
+Local<String> Runtime::ValueToJson(Local<Value> value) {
+  auto context = Isolate::GetCurrent()->GetCurrentContext();
   auto module = Nan::New<v8::Object>(json_module_);
   auto stringify = Nan::New<v8::Function>(json_stringify_);
   Local<Value> argv[] = { value };
-  return Local<String>::Cast(stringify->Call(module, 1, argv));
+  return Local<String>::Cast(
+      stringify->Call(context, module, 1, argv).ToLocalChecked());
 }
 
-Local<Value> Runtime::ValueFromJson(Handle<String> json) {
+Local<Value> Runtime::ValueFromJson(Local<String> json) {
+  auto context = Isolate::GetCurrent()->GetCurrentContext();
   auto module = Nan::New<v8::Object>(json_module_);
   auto parse = Nan::New<v8::Function>(json_parse_);
   Local<Value> argv[] = { json };
-  return parse->Call(module, 1, argv);
+  return parse->Call(context, module, 1, argv).ToLocalChecked();
 }
 
-bool Runtime::ValueToStrv(Handle<Value> value, gchar*** strv, gint* length) {
+bool Runtime::ValueToStrv(Local<Value> value, gchar*** strv, gint* length) {
   if (!value->IsArray()) {
     Nan::ThrowTypeError("Bad argument, expected an array of strings");
     return false;
@@ -113,7 +115,7 @@ Local<Value> Runtime::ValueFromStrv(gchar* const* strv, gint length) {
   return result;
 }
 
-bool Runtime::ValueToEnvp(Handle<Value> value, gchar*** envp, gint* length) {
+bool Runtime::ValueToEnvp(Local<Value> value, gchar*** envp, gint* length) {
   auto isolate = v8::Isolate::GetCurrent();
   auto context = isolate->GetCurrentContext();
 
@@ -159,7 +161,7 @@ Local<Value> Runtime::ValueFromEnvp(gchar* const* envp, gint length) {
   return result;
 }
 
-bool Runtime::ValueToEnum(Handle<Value> value, GType type, gpointer result) {
+bool Runtime::ValueToEnum(Local<Value> value, GType type, gpointer result) {
   if (!value->IsString()) {
     Nan::ThrowTypeError("Bad argument, expected a string");
     return false;

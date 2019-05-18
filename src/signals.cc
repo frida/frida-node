@@ -10,7 +10,6 @@ using v8::Boolean;
 using v8::Exception;
 using v8::External;
 using v8::Function;
-using v8::Handle;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
@@ -37,7 +36,7 @@ struct _SignalsClosure {
 };
 
 static SignalsClosure* signals_closure_new(guint signal_id,
-    Handle<Function> callback, Handle<Object> parent,
+    Local<Function> callback, Local<Object> parent,
     Signals::TransformCallback transform, gpointer transform_data,
     Runtime* runtime);
 static void signals_closure_finalize(gpointer data, GClosure* closure);
@@ -64,7 +63,7 @@ Signals::~Signals() {
   frida_unref(handle_);
 }
 
-void Signals::Init(Handle<Object> exports, Runtime* runtime) {
+void Signals::Init(Local<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
   auto name = Nan::New("Signals").ToLocalChecked();
@@ -214,7 +213,7 @@ bool Signals::GetSignalArguments(const Nan::FunctionCallbackInfo<Value>& info,
 }
 
 static SignalsClosure* signals_closure_new(guint signal_id,
-    Handle<Function> callback, Handle<Object> parent,
+    Local<Function> callback, Local<Object> parent,
     Signals::TransformCallback transform, gpointer transform_data,
     Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
@@ -280,9 +279,11 @@ static void signals_closure_marshal(GClosure* closure, GValue* return_gvalue,
           argv[i] = signals_closure_gvalue_to_jsvalue(value);
       }
 
+      auto context = Isolate::GetCurrent()->GetCurrentContext();
       auto recv = Nan::New<v8::Object>(*self->parent);
       auto callback = Nan::New<v8::Function>(*self->callback);
-      callback->Call(recv, argc, argv);
+      Local<Value> no_result;
+      callback->Call(context, recv, argc, argv).FromMaybe(no_result);
 
       delete[] argv;
     }

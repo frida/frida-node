@@ -27,9 +27,10 @@ UVContext::UVContext(uv_loop_t* loop)
   g_cond_init(&cond_);
 
   auto isolate = Isolate::GetCurrent();
+  auto context = isolate->GetCurrentContext();
   auto module = Nan::New<v8::Object>();
-  auto process_pending = Function::New(isolate, ProcessPendingWrapper,
-      External::New(isolate, this));
+  auto process_pending = Function::New(context, ProcessPendingWrapper,
+      External::New(isolate, this)).ToLocalChecked();
   auto process_pending_name = Nan::New("processPending").ToLocalChecked();
   process_pending->SetName(process_pending_name);
   Nan::Set(module, process_pending_name, process_pending);

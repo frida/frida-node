@@ -12,7 +12,6 @@
 
 using v8::External;
 using v8::Function;
-using v8::Handle;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
@@ -31,7 +30,7 @@ Script::~Script() {
   frida_unref(handle_);
 }
 
-void Script::Init(Handle<Object> exports, Runtime* runtime) {
+void Script::Init(Local<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
   auto name = Nan::New("Script").ToLocalChecked();

@@ -12,7 +12,7 @@ class Signals : public GLibObject {
   typedef void (*ConnectCallback)(const gchar* name, gpointer user_data);
   typedef void (*DisconnectCallback)(const gchar* name, gpointer user_data);
 
-  static void Init(v8::Handle<v8::Object> exports, Runtime* runtime);
+  static void Init(v8::Local<v8::Object> exports, Runtime* runtime);
   static v8::Local<v8::Object> New(gpointer handle, Runtime* runtime,
       TransformCallback transform = NULL, gpointer transform_data = NULL);
 

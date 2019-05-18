@@ -49,7 +49,9 @@ class UsageMonitor {
     auto isolate = v8::Isolate::GetCurrent();
     object_.Reset(wrapper->handle(isolate));
     object_.SetWeak(this, OnWeakNotifyWrapper, Nan::WeakCallbackType::kParameter);
+#if NODE_MAJOR_VERSION < 12
     object_.MarkIndependent();
+#endif
     instance_ = wrapper->GetHandle<T>();
     g_object_ref(instance_);
     runtime_ = wrapper->GetRuntime();

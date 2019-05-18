@@ -10,7 +10,6 @@ using v8::AccessorSignature;
 using v8::DEFAULT;
 using v8::External;
 using v8::Function;
-using v8::Handle;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
@@ -28,14 +27,14 @@ Process::~Process() {
   g_object_unref(handle_);
 }
 
-void Process::Init(Handle<Object> exports, Runtime* runtime) {
+void Process::Init(Local<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
   auto name = Nan::New("Process").ToLocalChecked();
   auto tpl = CreateTemplate(name, Process::New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
-  auto data = Handle<Value>();
+  auto data = Local<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
   Nan::SetAccessor(instance_tpl, Nan::New("largeIcon").ToLocalChecked(),
       GetLargeIcon, 0, data, DEFAULT, ReadOnly, signature);

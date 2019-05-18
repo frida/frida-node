@@ -21,7 +21,6 @@ using v8::Boolean;
 using v8::DEFAULT;
 using v8::External;
 using v8::Function;
-using v8::Handle;
 using v8::Isolate;
 using v8::Local;
 using v8::Number;
@@ -42,14 +41,14 @@ Device::~Device() {
   frida_unref(handle_);
 }
 
-void Device::Init(Handle<Object> exports, Runtime* runtime) {
+void Device::Init(Local<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
   auto name = Nan::New("Device").ToLocalChecked();
   auto tpl = CreateTemplate(name, New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
-  auto data = Handle<Value>();
+  auto data = Local<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
   Nan::SetAccessor(instance_tpl, Nan::New("type").ToLocalChecked(), GetType, 0,
       data, DEFAULT, ReadOnly, signature);

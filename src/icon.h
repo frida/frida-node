@@ -10,7 +10,7 @@ namespace frida {
 
 class Icon : public GLibObject {
  public:
-  static void Init(v8::Handle<v8::Object> exports, Runtime* runtime);
+  static void Init(v8::Local<v8::Object> exports, Runtime* runtime);
   static v8::Local<v8::Value> New(gpointer handle, Runtime* runtime);
 
  private:

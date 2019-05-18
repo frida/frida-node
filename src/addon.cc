@@ -16,7 +16,7 @@
 #include <node.h>
 
 using v8::Context;
-using v8::Handle;
+using v8::Local;
 using v8::Object;
 using v8::Value;
 
@@ -24,9 +24,9 @@ namespace frida {
 
 static void DisposeAll(void* data);
 
-static void InitAll(Handle<Object> exports,
-    Handle<Value> module,
-    Handle<Context> context) {
+static void InitAll(Local<Object> exports,
+    Local<Value> module,
+    Local<Context> context) {
   frida_init();
 
   auto uv_context = new UVContext(uv_default_loop());

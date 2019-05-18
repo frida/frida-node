@@ -8,7 +8,6 @@ using v8::AccessorSignature;
 using v8::DEFAULT;
 using v8::External;
 using v8::Function;
-using v8::Handle;
 using v8::Integer;
 using v8::Isolate;
 using v8::Local;
@@ -28,14 +27,14 @@ Child::~Child() {
   g_object_unref(handle_);
 }
 
-void Child::Init(Handle<Object> exports, Runtime* runtime) {
+void Child::Init(Local<Object> exports, Runtime* runtime) {
   auto isolate = Isolate::GetCurrent();
 
   auto name = Nan::New("Child").ToLocalChecked();
   auto tpl = CreateTemplate(name, Child::New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
-  auto data = Handle<Value>();
+  auto data = Local<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
   Nan::SetAccessor(instance_tpl, Nan::New("envp").ToLocalChecked(),
       GetEnvp, 0, data, DEFAULT, ReadOnly, signature);
