@@ -39,7 +39,7 @@
     "@types/node": "^12.0.4",
     "chai": "^4.1.2",
     "mocha": "^6.1.4",
-    "prebuild": "^8.2.1",
+    "prebuild": "^9.0.0",
     "ts-node": "^8.1.0",
     "typescript": "^3.5.1"
   },
