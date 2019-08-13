@@ -58,9 +58,9 @@
   "license": "LGPL-2.0 WITH WxWindows-exception-3.1",
   "repository": {
     "type": "git",
-    "url": "http://github.com/frida/frida-node.git"
+    "url": "https://github.com/frida/frida-node.git"
   },
   "bugs": {
-    "url": "http://github.com/frida/frida-node/issues"
+    "url": "https://github.com/frida/frida-node/issues"
   }
 }
