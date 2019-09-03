@@ -1,4 +1,5 @@
 #include "application.h"
+#include "cancellable.h"
 #include "child.h"
 #include "crash.h"
 #include "device.h"
@@ -45,6 +46,7 @@ static void InitAll(Local<Object> exports,
   Icon::Init(exports, runtime);
   Session::Init(exports, runtime);
   Script::Init(exports, runtime);
+  Cancellable::Init(exports, runtime);
 
   node::AtExit(DisposeAll, runtime);
 }

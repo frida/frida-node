@@ -1,3 +1,4 @@
+import { Cancellable } from "./cancellable";
 import { Signals, Signal, SignalHandler, SignalAdapter } from "./signals";
 
 import { inspect } from "util";
@@ -35,20 +36,20 @@ export class Script {
         this.logHandlerImpl = (handler !== null) ? handler : log;
     }
 
-    load(): Promise<void> {
-        return this.impl.load();
+    load(cancellable?: Cancellable): Promise<void> {
+        return this.impl.load(cancellable);
     }
 
-    unload(): Promise<void> {
-        return this.impl.unload();
+    unload(cancellable?: Cancellable): Promise<void> {
+        return this.impl.unload(cancellable);
     }
 
-    eternalize(): Promise<void> {
-        return this.impl.eternalize();
+    eternalize(cancellable?: Cancellable): Promise<void> {
+        return this.impl.eternalize(cancellable);
     }
 
-    post(message: any, data: Buffer | null = null): Promise<void> {
-        return this.impl.post(message, data);
+    post(message: any, data: Buffer | null = null, cancellable?: Cancellable): Promise<void> {
+        return this.impl.post(message, data, cancellable);
     }
 
     [inspect.custom](depth, options) {
@@ -151,11 +152,14 @@ class ScriptServices extends SignalAdapter implements RpcController {
         }
     }
 
-    request(operation: string, ...params: any[]): Promise<any> {
+    request(operation: string, params: any[], cancellable?: Cancellable): Promise<any> {
         return new Promise((resolve, reject) => {
             const id = this.nextRequestId++;
 
-            const complete = (error: Error | null, result?: any) => {
+            const complete = (error: Error | null, result?: any): void => {
+                if (cancellable !== undefined) {
+                    cancellable.cancelled.disconnect(onOperationCancelled);
+                }
                 this.signals.disconnect("destroyed", onScriptDestroyed);
 
                 delete this.pendingRequests[id];
@@ -167,14 +171,24 @@ class ScriptServices extends SignalAdapter implements RpcController {
                 }
             };
 
-            function onScriptDestroyed() {
+            function onScriptDestroyed(): void {
                 complete(new Error("Script is destroyed"));
+            }
+
+            function onOperationCancelled(): void {
+                complete(new Error("Operation was cancelled"));
             }
 
             this.pendingRequests[id] = complete;
 
-            this.script.post(["frida:rpc", id, operation].concat(params)).catch(complete);
+            this.script.post(["frida:rpc", id, operation].concat(params), undefined, cancellable).catch(complete);
             this.signals.connect("destroyed", onScriptDestroyed);
+            if (cancellable !== undefined) {
+                cancellable.cancelled.connect(onOperationCancelled);
+                if (cancellable.isCancelled) {
+                    onOperationCancelled();
+                }
+            }
         });
     }
 
@@ -221,7 +235,12 @@ function ScriptExportsProxy(rpcController: RpcController): void {
             }
 
             return (...args: any[]): Promise<any> => {
-                return rpcController.request("call", property, args);
+                let cancellable: Cancellable | undefined;
+                if (args[args.length - 1] instanceof Cancellable) {
+                    cancellable = args.pop();
+                }
+
+                return rpcController.request("call", [property, args], cancellable);
             };
         },
         set(target, property, value, receiver) {
@@ -254,7 +273,7 @@ function inspectProxy() {
 }
 
 interface RpcController {
-    request(operation: string, ...params: any[]): Promise<any>;
+    request(operation: string, params: any[], cancellable?: Cancellable): Promise<any>;
 }
 
 enum RpcOperation {

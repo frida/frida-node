@@ -54,7 +54,8 @@ void DeviceManager::Dispose(Runtime* runtime) {
       runtime->GetDataPointer(DEVICE_MANAGER_DATA_WRAPPERS));
   while (wrappers != NULL) {
     auto wrapper = static_cast<DeviceManager*>(wrappers->data);
-    frida_device_manager_close_sync(wrapper->GetHandle<FridaDeviceManager>());
+    frida_device_manager_close_sync(wrapper->GetHandle<FridaDeviceManager>(),
+        NULL, NULL);
     wrappers = g_slist_delete_link(wrappers, wrappers);
   }
   runtime->SetDataPointer(DEVICE_MANAGER_DATA_WRAPPERS, NULL);
@@ -69,13 +70,15 @@ NAN_METHOD(DeviceManager::New) {
   auto runtime = GetRuntimeFromConstructorArgs(info);
 
   auto handle = frida_device_manager_new();
+
   auto wrapper = new DeviceManager(handle, runtime);
   auto obj = info.This();
   wrapper->Wrap(obj);
+
   auto signals_obj = Signals::New(handle, runtime, TransformDeviceSignals,
       runtime);
-
   Nan::Set(obj, Nan::New("signals").ToLocalChecked(), signals_obj);
+
   g_object_unref(handle);
 
   auto signals_wrapper = ObjectWrap::Unwrap<Signals>(signals_obj);
@@ -88,11 +91,11 @@ NAN_METHOD(DeviceManager::New) {
 class CloseOperation : public Operation<FridaDeviceManager> {
  public:
   void Begin() {
-    frida_device_manager_close(handle_, OnReady, this);
+    frida_device_manager_close(handle_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
-    frida_device_manager_close_finish(handle_, result);
+    frida_device_manager_close_finish(handle_, result, error);
   }
 
   Local<Value> Result(Isolate* isolate) {
@@ -106,7 +109,7 @@ NAN_METHOD(DeviceManager::Close) {
   auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
 
   auto operation = new CloseOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -114,7 +117,8 @@ NAN_METHOD(DeviceManager::Close) {
 class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
  public:
   void Begin() {
-    frida_device_manager_enumerate_devices(handle_, OnReady, this);
+    frida_device_manager_enumerate_devices(handle_, cancellable_, OnReady,
+        this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -146,7 +150,7 @@ NAN_METHOD(DeviceManager::EnumerateDevices) {
   auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
 
   auto operation = new EnumerateDevicesOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -161,7 +165,8 @@ class AddRemoteDeviceOperation : public Operation<FridaDeviceManager> {
   }
 
   void Begin() {
-    frida_device_manager_add_remote_device(handle_, host_, OnReady, this);
+    frida_device_manager_add_remote_device(handle_, host_, cancellable_,
+        OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -192,7 +197,7 @@ NAN_METHOD(DeviceManager::AddRemoteDevice) {
   Nan::Utf8String host(info[0]);
 
   auto operation = new AddRemoteDeviceOperation(g_strdup(*host));
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -207,7 +212,8 @@ class RemoveRemoteDeviceOperation : public Operation<FridaDeviceManager> {
   }
 
   void Begin() {
-    frida_device_manager_remove_remote_device(handle_, host_, OnReady, this);
+    frida_device_manager_remove_remote_device(handle_, host_, cancellable_,
+        OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -234,7 +240,7 @@ NAN_METHOD(DeviceManager::RemoveRemoteDevice) {
   Nan::Utf8String host(info[0]);
 
   auto operation = new RemoveRemoteDeviceOperation(g_strdup(*host));
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }

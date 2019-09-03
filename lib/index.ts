@@ -1,4 +1,5 @@
 import * as applicationModule from "./application";
+import * as cancellableModule from "./cancellable";
 import * as childModule from "./child";
 import * as deviceManagerModule from "./device_manager";
 import * as deviceModule from "./device";
@@ -7,8 +8,6 @@ import * as processModule from "./process";
 import * as scriptModule from "./script";
 import * as sessionModule from "./session";
 import * as spawnModule from "./spawn";
-
-import * as bindings from "bindings";
 
 export type DeviceManager = deviceManagerModule.DeviceManager;
 export const DeviceManager = deviceManagerModule.DeviceManager;
@@ -54,95 +53,83 @@ export type ScriptExports = scriptModule.ScriptExports;
 export type LogLevel = scriptModule.LogLevel;
 export const LogLevel = scriptModule.LogLevel;
 
+export type Cancellable = cancellableModule.Cancellable;
+export const Cancellable = cancellableModule.Cancellable;
+
 export type Application = applicationModule.Application;
 export type Process = processModule.Process;
 export type Spawn = spawnModule.Spawn;
 export type Child = childModule.Child;
 export type Icon = iconModule.Icon;
 
-const binding = bindings({
-    bindings: "frida_binding",
-    try: [
-        ["module_root", "build", "bindings"],
-        ["module_root", "build", "Debug", "bindings"],
-        ["module_root", "build", "Release", "bindings"],
-        ["module_root", "out", "Debug", "bindings"],
-        ["module_root", "Debug", "bindings"],
-        ["module_root", "out", "Release", "bindings"],
-        ["module_root", "Release", "bindings"],
-        ["module_root", "build", "default", "bindings"],
-        ["module_root", "compiled", "version", "platform", "arch", "bindings"],
-        [process.cwd(), "bindings"],
-    ]
-});
-
 let sharedDeviceManager: DeviceManager = null;
 
-export async function spawn(program: string | string[], options: SpawnOptions = {}): Promise<number> {
-    const device = await getLocalDevice();
-    return await device.spawn(program, options);
+export async function spawn(program: string | string[], options: SpawnOptions = {}, cancellable?: Cancellable): Promise<number> {
+    const device = await getLocalDevice(cancellable);
+    return await device.spawn(program, options, cancellable);
 }
 
-export async function resume(target: number | string): Promise<void> {
-    const device = await getLocalDevice();
-    await device.resume(target);
+export async function resume(target: number | string, cancellable?: Cancellable): Promise<void> {
+    const device = await getLocalDevice(cancellable);
+    await device.resume(target, cancellable);
 }
 
-export async function kill(target: number | string): Promise<void> {
-    const device = await getLocalDevice();
-    await device.kill(target);
+export async function kill(target: number | string, cancellable?: Cancellable): Promise<void> {
+    const device = await getLocalDevice(cancellable);
+    await device.kill(target, cancellable);
 }
 
-export async function attach(target: number | string): Promise<Session> {
-    const device = await getLocalDevice();
-    return await device.attach(target);
+export async function attach(target: number | string, cancellable?: Cancellable): Promise<Session> {
+    const device = await getLocalDevice(cancellable);
+    return await device.attach(target, cancellable);
 }
 
-export async function injectLibraryFile(target: number | string, path: string, entrypoint: string, data: string): Promise<number> {
-    const device = await getLocalDevice();
-    return await device.injectLibraryFile(target, path, entrypoint, data);
+export async function injectLibraryFile(target: number | string, path: string, entrypoint: string, data: string,
+        cancellable?: Cancellable): Promise<number> {
+    const device = await getLocalDevice(cancellable);
+    return await device.injectLibraryFile(target, path, entrypoint, data, cancellable);
 }
 
-export async function injectLibraryBlob(target: number | string, blob: Buffer, entrypoint: string, data: string): Promise<number> {
-    const device = await getLocalDevice();
-    return await device.injectLibraryBlob(target, blob, entrypoint, data);
+export async function injectLibraryBlob(target: number | string, blob: Buffer, entrypoint: string, data: string,
+        cancellable?: Cancellable): Promise<number> {
+    const device = await getLocalDevice(cancellable);
+    return await device.injectLibraryBlob(target, blob, entrypoint, data, cancellable);
 }
 
-export async function enumerateDevices(): Promise<Device[]> {
+export async function enumerateDevices(cancellable?: Cancellable): Promise<Device[]> {
     const deviceManager = getDeviceManager();
-
-    return await deviceManager.enumerateDevices();
+    return await deviceManager.enumerateDevices(cancellable);
 };
 
 export function getDeviceManager(): DeviceManager {
     if (sharedDeviceManager === null) {
-        sharedDeviceManager = new deviceManagerModule.DeviceManager(new binding.DeviceManager());
+        sharedDeviceManager = new deviceManagerModule.DeviceManager();
     }
     return sharedDeviceManager;
 }
 
-export function getLocalDevice(): Promise<Device> {
-    return getMatchingDevice(device => device.type === DeviceType.Local);
+export function getLocalDevice(cancellable?: Cancellable): Promise<Device> {
+    return getMatchingDevice(device => device.type === DeviceType.Local, {}, cancellable);
 }
 
-export function getRemoteDevice(): Promise<Device> {
-    return getMatchingDevice(device => device.type === DeviceType.Remote);
+export function getRemoteDevice(cancellable?: Cancellable): Promise<Device> {
+    return getMatchingDevice(device => device.type === DeviceType.Remote, {}, cancellable);
 }
 
-export function getUsbDevice(options?: GetDeviceOptions): Promise<Device> {
-    return getMatchingDevice(device => device.type === DeviceType.Usb, options);
+export function getUsbDevice(options?: GetDeviceOptions, cancellable?: Cancellable): Promise<Device> {
+    return getMatchingDevice(device => device.type === DeviceType.Usb, options, cancellable);
 }
 
-export function getDevice(id: string, options?: GetDeviceOptions): Promise<Device> {
-    return getMatchingDevice(device => device.id === id, options);
+export function getDevice(id: string, options?: GetDeviceOptions, cancellable?: Cancellable): Promise<Device> {
+    return getMatchingDevice(device => device.id === id, options, cancellable);
 }
 
 export interface GetDeviceOptions {
     timeout?: number | null;
 }
 
-async function getMatchingDevice(predicate: DevicePredicate, options: GetDeviceOptions = {}): Promise<Device> {
-    const device = await findMatchingDevice(predicate);
+async function getMatchingDevice(predicate: DevicePredicate, options: GetDeviceOptions = {}, cancellable?: Cancellable): Promise<Device> {
+    const device = await findMatchingDevice(predicate, cancellable);
     if (device !== null) {
         return device;
     }
@@ -156,9 +143,18 @@ async function getMatchingDevice(predicate: DevicePredicate, options: GetDeviceO
         const deviceManager = getDeviceManager();
 
         deviceManager.added.connect(onDeviceAdded);
+
         const timer = (timeout !== null) ? setTimeout(onTimeout, timeout) : null;
 
-        findMatchingDevice(predicate)
+        if (cancellable !== undefined) {
+            cancellable.cancelled.connect(onCancel);
+            if (cancellable.isCancelled) {
+                onCancel();
+                return;
+            }
+        }
+
+        findMatchingDevice(predicate, cancellable)
             .then(device => {
                 if (device !== null) {
                     onSuccess(device);
@@ -166,27 +162,35 @@ async function getMatchingDevice(predicate: DevicePredicate, options: GetDeviceO
             })
             .catch(onError);
 
-        function onDeviceAdded(device: Device) {
+        function onDeviceAdded(device: Device): void {
             if (predicate(device)) {
                 onSuccess(device);
             }
         }
 
-        function onSuccess(device: Device) {
+        function onSuccess(device: Device): void {
             stopMonitoring();
             resolve(device);
         }
 
-        function onError(error: Error) {
+        function onError(error: Error): void {
             stopMonitoring();
             reject(error);
         }
 
-        function onTimeout() {
+        function onTimeout(): void {
             onError(new Error("Timed out while waiting for device to appear"));
         }
 
-        function stopMonitoring() {
+        function onCancel(): void {
+            onError(new Error("Operation was cancelled"));
+        }
+
+        function stopMonitoring(): void {
+            if (cancellable !== undefined) {
+                cancellable.cancelled.disconnect(onCancel);
+            }
+
             if (timer !== null) {
                 clearTimeout(timer);
             }
@@ -198,10 +202,10 @@ async function getMatchingDevice(predicate: DevicePredicate, options: GetDeviceO
     return await getDeviceEventually;
 }
 
-async function findMatchingDevice(predicate: DevicePredicate): Promise<Device | null> {
+async function findMatchingDevice(predicate: DevicePredicate, cancellable?: Cancellable): Promise<Device | null> {
     const deviceManager = getDeviceManager();
 
-    const devices = await deviceManager.enumerateDevices();
+    const devices = await deviceManager.enumerateDevices(cancellable);
 
     const matching = devices.filter(predicate);
     if (matching.length === 0) {

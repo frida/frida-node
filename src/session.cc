@@ -110,11 +110,11 @@ NAN_PROPERTY_GETTER(Session::GetPid) {
 class DetachOperation : public Operation<FridaSession> {
  public:
   void Begin() {
-    frida_session_detach(handle_, OnReady, this);
+    frida_session_detach(handle_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
-    frida_session_detach_finish(handle_, result);
+    frida_session_detach_finish(handle_, result, error);
   }
 
   Local<Value> Result(Isolate* isolate) {
@@ -128,7 +128,7 @@ NAN_METHOD(Session::Detach) {
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
   auto operation = new DetachOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -136,7 +136,7 @@ NAN_METHOD(Session::Detach) {
 class EnableChildGatingOperation : public Operation<FridaSession> {
  public:
   void Begin() {
-    frida_session_enable_child_gating(handle_, OnReady, this);
+    frida_session_enable_child_gating(handle_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -154,7 +154,7 @@ NAN_METHOD(Session::EnableChildGating) {
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
   auto operation = new EnableChildGatingOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -162,7 +162,7 @@ NAN_METHOD(Session::EnableChildGating) {
 class DisableChildGatingOperation : public Operation<FridaSession> {
  public:
   void Begin() {
-    frida_session_disable_child_gating(handle_, OnReady, this);
+    frida_session_disable_child_gating(handle_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -180,7 +180,7 @@ NAN_METHOD(Session::DisableChildGating) {
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
   auto operation = new DisableChildGatingOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -198,7 +198,8 @@ class CreateScriptOperation : public Operation<FridaSession> {
   }
 
   void Begin() {
-    frida_session_create_script(handle_, source_, options_, OnReady, this);
+    frida_session_create_script(handle_, source_, options_, cancellable_,
+        OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -254,7 +255,7 @@ NAN_METHOD(Session::CreateScript) {
   }
 
   auto operation = new CreateScriptOperation(source, options);
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -272,8 +273,8 @@ class CreateScriptFromBytesOperation : public Operation<FridaSession> {
   }
 
   void Begin() {
-    frida_session_create_script_from_bytes(handle_, bytes_, options_, OnReady,
-        this);
+    frida_session_create_script_from_bytes(handle_, bytes_, options_,
+        cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -330,7 +331,7 @@ NAN_METHOD(Session::CreateScriptFromBytes) {
   }
 
   auto operation = new CreateScriptFromBytesOperation(bytes, options);
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -348,7 +349,8 @@ class CompileScriptOperation : public Operation<FridaSession> {
   }
 
   void Begin() {
-    frida_session_compile_script(handle_, source_, options_, OnReady, this);
+    frida_session_compile_script(handle_, source_, options_, cancellable_,
+        OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -404,7 +406,7 @@ NAN_METHOD(Session::CompileScript) {
   }
 
   auto operation = new CompileScriptOperation(source, options);
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -448,7 +450,7 @@ class EnableDebuggerOperation : public Operation<FridaSession> {
   }
 
   void Begin() {
-    frida_session_enable_debugger(handle_, port_, OnReady, this);
+    frida_session_enable_debugger(handle_, port_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -478,7 +480,7 @@ NAN_METHOD(Session::EnableDebugger) {
   }
 
   auto operation = new EnableDebuggerOperation(static_cast<guint16>(port));
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -486,7 +488,7 @@ NAN_METHOD(Session::EnableDebugger) {
 class DisableDebuggerOperation : public Operation<FridaSession> {
  public:
   void Begin() {
-    frida_session_disable_debugger(handle_, OnReady, this);
+    frida_session_disable_debugger(handle_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -504,7 +506,7 @@ NAN_METHOD(Session::DisableDebugger) {
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
   auto operation = new DisableDebuggerOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -512,7 +514,7 @@ NAN_METHOD(Session::DisableDebugger) {
 class EnableJitOperation : public Operation<FridaSession> {
  public:
   void Begin() {
-    frida_session_enable_jit(handle_, OnReady, this);
+    frida_session_enable_jit(handle_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -530,7 +532,7 @@ NAN_METHOD(Session::EnableJit) {
   auto wrapper = ObjectWrap::Unwrap<Session>(obj);
 
   auto operation = new EnableJitOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }

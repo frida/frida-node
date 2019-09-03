@@ -1,3 +1,4 @@
+import { Cancellable } from "./cancellable";
 import { Crash } from "./crash";
 import { Script, ScriptOptions } from "./script";
 import { Signal } from "./signals";
@@ -20,48 +21,48 @@ export class Session {
         return this.impl.pid;
     }
 
-    detach(): Promise<void> {
-        return this.impl.detach();
+    detach(cancellable?: Cancellable): Promise<void> {
+        return this.impl.detach(cancellable);
     }
 
-    enableChildGating(): Promise<void> {
-        return this.impl.enableChildGating();
+    enableChildGating(cancellable?: Cancellable): Promise<void> {
+        return this.impl.enableChildGating(cancellable);
     }
 
-    disableChildGating(): Promise<void> {
-        return this.impl.disableChildGating();
+    disableChildGating(cancellable?: Cancellable): Promise<void> {
+        return this.impl.disableChildGating(cancellable);
     }
 
-    async createScript(source: string, options: ScriptOptions = {}): Promise<Script> {
+    async createScript(source: string, options: ScriptOptions = {}, cancellable?: Cancellable): Promise<Script> {
         const { name = null, runtime = null } = options;
 
-        return new Script(await this.impl.createScript(source, name, runtime));
+        return new Script(await this.impl.createScript(source, name, runtime, cancellable));
     }
 
-    async createScriptFromBytes(bytes: Buffer, options: ScriptOptions = {}): Promise<Script> {
+    async createScriptFromBytes(bytes: Buffer, options: ScriptOptions = {}, cancellable?: Cancellable): Promise<Script> {
         const { name = null, runtime = null } = options;
 
-        return new Script(await this.impl.createScriptFromBytes(bytes, name, runtime));
+        return new Script(await this.impl.createScriptFromBytes(bytes, name, runtime, cancellable));
     }
 
-    compileScript(source: string, options: ScriptOptions = {}): Promise<Buffer> {
+    compileScript(source: string, options: ScriptOptions = {}, cancellable?: Cancellable): Promise<Buffer> {
         const { name = null, runtime = null } = options;
 
-        return this.impl.compileScript(source, name, runtime);
+        return this.impl.compileScript(source, name, runtime, cancellable);
     }
 
-    enableDebugger(options: EnableDebuggerOptions = {}): Promise<void> {
+    enableDebugger(options: EnableDebuggerOptions = {}, cancellable?: Cancellable): Promise<void> {
         const { port = 0 } = options;
 
-        return this.impl.enableDebugger(port);
+        return this.impl.enableDebugger(port, cancellable);
     }
 
-    disableDebugger(): Promise<void> {
-        return this.impl.disableDebugger();
+    disableDebugger(cancellable?: Cancellable): Promise<void> {
+        return this.impl.disableDebugger(cancellable);
     }
 
-    enableJit(): Promise<void> {
-        return this.impl.enableJit();
+    enableJit(cancellable?: Cancellable): Promise<void> {
+        return this.impl.enableJit(cancellable);
     }
 
     [inspect.custom](depth, options) {

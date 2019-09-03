@@ -1,4 +1,6 @@
+import { Cancellable } from "./cancellable";
 import { Device } from "./device";
+import { binding } from "./native";
 import { Signals, Signal, SignalHandler, SignalAdapter } from "./signals";
 
 import { inspect } from "util";
@@ -10,26 +12,26 @@ export class DeviceManager {
     removed: Signal<DeviceRemovedHandler>;
     changed: Signal<DevicesChangedHandler>;
 
-    constructor(impl: any) {
-        this.impl = impl;
+    constructor() {
+        this.impl = new binding.DeviceManager();
 
-        const signals = new DeviceManagerSignals(impl.signals);
+        const signals = new DeviceManagerSignals(this.impl.signals);
         this.added = new Signal<DeviceAddedHandler>(signals, "added");
         this.removed = new Signal<DeviceRemovedHandler>(signals, "removed");
         this.changed = new Signal<DevicesChangedHandler>(signals, "changed");
     }
 
-    async enumerateDevices(): Promise<Device[]> {
-        const devices: any[] = await this.impl.enumerateDevices();
+    async enumerateDevices(cancellable?: Cancellable): Promise<Device[]> {
+        const devices: any[] = await this.impl.enumerateDevices(cancellable);
         return devices.map(impl => new Device(impl));
     }
 
-    async addRemoteDevice(host: string): Promise<Device> {
-        return new Device(await this.impl.addRemoteDevice(host));
+    async addRemoteDevice(host: string, cancellable?: Cancellable): Promise<Device> {
+        return new Device(await this.impl.addRemoteDevice(host, cancellable));
     }
 
-    removeRemoteDevice(host: string): Promise<void> {
-        return this.impl.removeRemoteDevice(host);
+    removeRemoteDevice(host: string, cancellable?: Cancellable): Promise<void> {
+        return this.impl.removeRemoteDevice(host, cancellable);
     }
 
     [inspect.custom]() {

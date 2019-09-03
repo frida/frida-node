@@ -155,7 +155,8 @@ NAN_PROPERTY_GETTER(Device::GetType) {
 class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
  public:
   void Begin() {
-    frida_device_get_frontmost_application(handle_, OnReady, this);
+    frida_device_get_frontmost_application(handle_, cancellable_, OnReady,
+        this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -182,7 +183,7 @@ NAN_METHOD(Device::GetFrontmostApplication) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   auto operation = new GetFrontmostApplicationOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -190,7 +191,7 @@ NAN_METHOD(Device::GetFrontmostApplication) {
 class EnumerateApplicationsOperation : public Operation<FridaDevice> {
  public:
   void Begin() {
-    frida_device_enumerate_applications(handle_, OnReady, this);
+    frida_device_enumerate_applications(handle_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -222,7 +223,7 @@ NAN_METHOD(Device::EnumerateApplications) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   auto operation = new EnumerateApplicationsOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -230,7 +231,7 @@ NAN_METHOD(Device::EnumerateApplications) {
 class EnumerateProcessesOperation : public Operation<FridaDevice> {
  public:
   void Begin() {
-    frida_device_enumerate_processes(handle_, OnReady, this);
+    frida_device_enumerate_processes(handle_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -262,7 +263,7 @@ NAN_METHOD(Device::EnumerateProcesses) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   auto operation = new EnumerateProcessesOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -270,7 +271,7 @@ NAN_METHOD(Device::EnumerateProcesses) {
 class EnableSpawnGatingOperation : public Operation<FridaDevice> {
  public:
   void Begin() {
-    frida_device_enable_spawn_gating(handle_, OnReady, this);
+    frida_device_enable_spawn_gating(handle_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -288,7 +289,7 @@ NAN_METHOD(Device::EnableSpawnGating) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   auto operation = new EnableSpawnGatingOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -296,7 +297,7 @@ NAN_METHOD(Device::EnableSpawnGating) {
 class DisableSpawnGatingOperation : public Operation<FridaDevice> {
  public:
   void Begin() {
-    frida_device_disable_spawn_gating(handle_, OnReady, this);
+    frida_device_disable_spawn_gating(handle_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -314,7 +315,7 @@ NAN_METHOD(Device::DisableSpawnGating) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   auto operation = new DisableSpawnGatingOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -322,7 +323,7 @@ NAN_METHOD(Device::DisableSpawnGating) {
 class EnumeratePendingSpawnOperation : public Operation<FridaDevice> {
  public:
   void Begin() {
-    frida_device_enumerate_pending_spawn(handle_, OnReady, this);
+    frida_device_enumerate_pending_spawn(handle_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -354,7 +355,7 @@ NAN_METHOD(Device::EnumeratePendingSpawn) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   auto operation = new EnumeratePendingSpawnOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -362,7 +363,8 @@ NAN_METHOD(Device::EnumeratePendingSpawn) {
 class EnumeratePendingChildrenOperation : public Operation<FridaDevice> {
  public:
   void Begin() {
-    frida_device_enumerate_pending_children(handle_, OnReady, this);
+    frida_device_enumerate_pending_children(handle_, cancellable_, OnReady,
+        this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -394,7 +396,7 @@ NAN_METHOD(Device::EnumeratePendingChildren) {
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
   auto operation = new EnumeratePendingChildrenOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -412,7 +414,8 @@ class SpawnOperation : public Operation<FridaDevice> {
   }
 
   void Begin() {
-    frida_device_spawn(handle_, program_, options_, OnReady, this);
+    frida_device_spawn(handle_, program_, options_, cancellable_, OnReady,
+        this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -544,7 +547,7 @@ NAN_METHOD(Device::Spawn) {
   }
 
   auto operation = new SpawnOperation(g_strdup(*program), options);
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -560,7 +563,7 @@ class InputOperation : public Operation<FridaDevice> {
   }
 
   void Begin() {
-    frida_device_input(handle_, pid_, data_, OnReady, this);
+    frida_device_input(handle_, pid_, data_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -597,7 +600,7 @@ NAN_METHOD(Device::Input) {
       node::Buffer::Length(buffer));
 
   auto operation = new InputOperation(static_cast<guint>(pid), data);
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -608,7 +611,7 @@ class ResumeOperation : public Operation<FridaDevice> {
   }
 
   void Begin() {
-    frida_device_resume(handle_, pid_, OnReady, this);
+    frida_device_resume(handle_, pid_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -638,7 +641,7 @@ NAN_METHOD(Device::Resume) {
   }
 
   auto operation = new ResumeOperation(static_cast<guint>(pid));
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -649,7 +652,7 @@ class KillOperation : public Operation<FridaDevice> {
   }
 
   void Begin() {
-    frida_device_kill(handle_, pid_, OnReady, this);
+    frida_device_kill(handle_, pid_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -679,7 +682,7 @@ NAN_METHOD(Device::Kill) {
   }
 
   auto operation = new KillOperation(static_cast<guint>(pid));
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -690,7 +693,7 @@ class AttachOperation : public Operation<FridaDevice> {
   }
 
   void Begin() {
-    frida_device_attach(handle_, pid_, OnReady, this);
+    frida_device_attach(handle_, pid_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -723,7 +726,7 @@ NAN_METHOD(Device::Attach) {
   }
 
   auto operation = new AttachOperation(static_cast<guint>(pid));
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -746,7 +749,7 @@ class InjectLibraryFileOperation : public Operation<FridaDevice> {
 
   void Begin() {
     frida_device_inject_library_file(handle_, pid_, path_, entrypoint_, data_,
-        OnReady, this);
+        cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -786,7 +789,7 @@ NAN_METHOD(Device::InjectLibraryFile) {
 
   auto operation = new InjectLibraryFileOperation(static_cast<guint>(pid),
       g_strdup(*path), g_strdup(*entrypoint), g_strdup(*data));
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -809,7 +812,7 @@ class InjectLibraryBlobOperation : public Operation<FridaDevice> {
 
   void Begin() {
     frida_device_inject_library_blob(handle_, pid_, blob_, entrypoint_, data_,
-        OnReady, this);
+        cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -852,7 +855,7 @@ NAN_METHOD(Device::InjectLibraryBlob) {
 
   auto operation = new InjectLibraryBlobOperation(static_cast<guint>(pid),
       blob, g_strdup(*entrypoint), g_strdup(*data));
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }

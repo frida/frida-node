@@ -1,4 +1,5 @@
 import { Application } from "./application";
+import { Cancellable } from "./cancellable";
 import { Child } from "./child";
 import { Crash } from "./crash";
 import { Icon } from "./icon";
@@ -52,20 +53,20 @@ export class Device {
         return this.impl.type;
     }
 
-    getFrontmostApplication(): Promise<Application | null> {
-        return this.impl.getFrontmostApplication();
+    getFrontmostApplication(cancellable?: Cancellable): Promise<Application | null> {
+        return this.impl.getFrontmostApplication(cancellable);
     }
 
-    enumerateApplications(): Promise<Application[]> {
-        return this.impl.enumerateApplications();
+    enumerateApplications(cancellable?: Cancellable): Promise<Application[]> {
+        return this.impl.enumerateApplications(cancellable);
     }
 
-    enumerateProcesses(): Promise<Process[]> {
-        return this.impl.enumerateProcesses();
+    enumerateProcesses(cancellable?: Cancellable): Promise<Process[]> {
+        return this.impl.enumerateProcesses(cancellable);
     }
 
-    async getProcess(name: string): Promise<Process> {
-        const processes = await this.enumerateProcesses();
+    async getProcess(name: string, cancellable?: Cancellable): Promise<Process> {
+        const processes = await this.enumerateProcesses(cancellable);
         const mm = new Minimatch(name.toLowerCase());
         const matching = processes.filter(process => mm.match(process.name.toLowerCase()));
         if (matching.length === 1) {
@@ -77,23 +78,23 @@ export class Device {
         }
     }
 
-    enableSpawnGating(): Promise<void> {
-        return this.impl.enableSpawnGating();
+    enableSpawnGating(cancellable?: Cancellable): Promise<void> {
+        return this.impl.enableSpawnGating(cancellable);
     }
 
-    disableSpawnGating(): Promise<void> {
-        return this.impl.disableSpawnGating();
+    disableSpawnGating(cancellable?: Cancellable): Promise<void> {
+        return this.impl.disableSpawnGating(cancellable);
     }
 
-    enumeratePendingSpawn(): Promise<Spawn[]> {
-        return this.impl.enumeratePendingSpawn();
+    enumeratePendingSpawn(cancellable?: Cancellable): Promise<Spawn[]> {
+        return this.impl.enumeratePendingSpawn(cancellable);
     }
 
-    enumeratePendingChildren(): Promise<Child[]> {
-        return this.impl.enumeratePendingChildren();
+    enumeratePendingChildren(cancellable?: Cancellable): Promise<Child[]> {
+        return this.impl.enumeratePendingChildren(cancellable);
     }
 
-    spawn(program: string | string[], options: SpawnOptions = {}): Promise<number> {
+    spawn(program: string | string[], options: SpawnOptions = {}, cancellable?: Cancellable): Promise<number> {
         const pendingOptions = Object.assign({}, options);
 
         let argv = consumeOption("argv");
@@ -110,7 +111,7 @@ export class Device {
         const stdio = consumeOption("stdio");
         const aux = pendingOptions;
 
-        return this.impl.spawn(program, argv, envp, env, cwd, stdio, aux);
+        return this.impl.spawn(program, argv, envp, env, cwd, stdio, aux, cancellable);
 
         function consumeOption(name) {
             const value = pendingOptions[name];
@@ -122,36 +123,44 @@ export class Device {
         }
     }
 
-    async input(target: number | string, data: Buffer): Promise<void> {
-        return this.impl.input(await this.getPid(target), data);
+    async input(target: number | string, data: Buffer, cancellable?: Cancellable): Promise<void> {
+        const pid = await this.getPid(target, cancellable);
+        return this.impl.input(pid, data, cancellable);
     }
 
-    async resume(target: number | string): Promise<void> {
-        return this.impl.resume(await this.getPid(target));
+    async resume(target: number | string, cancellable?: Cancellable): Promise<void> {
+        const pid = await this.getPid(target, cancellable);
+        return this.impl.resume(pid, cancellable);
     }
 
-    async kill(target: number | string): Promise<void> {
-        return this.impl.kill(await this.getPid(target));
+    async kill(target: number | string, cancellable?: Cancellable): Promise<void> {
+        const pid = await this.getPid(target, cancellable);
+        return this.impl.kill(pid, cancellable);
     }
 
-    async attach(target: number | string): Promise<Session> {
-        return new Session(await this.impl.attach(await this.getPid(target)));
+    async attach(target: number | string, cancellable?: Cancellable): Promise<Session> {
+        const pid = await this.getPid(target, cancellable);
+        return new Session(await this.impl.attach(pid, cancellable));
     }
 
-    async injectLibraryFile(target: number | string, path: string, entrypoint: string, data: string): Promise<number> {
-        return this.impl.injectLibraryFile(await this.getPid(target), path, entrypoint, data);
+    async injectLibraryFile(target: number | string, path: string, entrypoint: string, data: string,
+            cancellable?: Cancellable): Promise<number> {
+        const pid = await this.getPid(target, cancellable);
+        return this.impl.injectLibraryFile(pid, path, entrypoint, data, cancellable);
     }
 
-    async injectLibraryBlob(target: number | string, blob: Buffer, entrypoint: string, data: string): Promise<number> {
-        return this.impl.injectLibraryBlob(await this.getPid(target), blob, entrypoint, data);
+    async injectLibraryBlob(target: number | string, blob: Buffer, entrypoint: string, data: string,
+            cancellable?: Cancellable): Promise<number> {
+        const pid = await this.getPid(target, cancellable);
+        return this.impl.injectLibraryBlob(pid, blob, entrypoint, data, cancellable);
     }
 
-    private async getPid(target: number | string): Promise<number> {
+    private async getPid(target: number | string, cancellable?: Cancellable): Promise<number> {
         if (typeof target === "number") {
             return target;
         }
 
-        const process = await this.getProcess(target);
+        const process = await this.getProcess(target, cancellable);
         return process.pid;
     }
 

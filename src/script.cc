@@ -87,7 +87,7 @@ NAN_METHOD(Script::New) {
 class LoadOperation : public Operation<FridaScript> {
  public:
   void Begin() {
-    frida_script_load(handle_, OnReady, this);
+    frida_script_load(handle_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -105,7 +105,7 @@ NAN_METHOD(Script::Load) {
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
   auto operation = new LoadOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -113,7 +113,7 @@ NAN_METHOD(Script::Load) {
 class UnloadOperation : public Operation<FridaScript> {
  public:
   void Begin() {
-    frida_script_unload(handle_, OnReady, this);
+    frida_script_unload(handle_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -131,7 +131,7 @@ NAN_METHOD(Script::Unload) {
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
   auto operation = new UnloadOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -139,7 +139,7 @@ NAN_METHOD(Script::Unload) {
 class EternalizeOperation : public Operation<FridaScript> {
  public:
   void Begin() {
-    frida_script_eternalize(handle_, OnReady, this);
+    frida_script_eternalize(handle_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -157,7 +157,7 @@ NAN_METHOD(Script::Eternalize) {
   auto wrapper = ObjectWrap::Unwrap<Script>(obj);
 
   auto operation = new EternalizeOperation();
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
@@ -173,7 +173,7 @@ class PostOperation : public Operation<FridaScript> {
   }
 
   void Begin() {
-    frida_script_post(handle_, message_, data_, OnReady, this);
+    frida_script_post(handle_, message_, data_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -213,7 +213,7 @@ NAN_METHOD(Script::Post) {
   }
 
   auto operation = new PostOperation(g_strdup(*message), data);
-  operation->Schedule(isolate, wrapper);
+  operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }

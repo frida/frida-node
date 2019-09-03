@@ -119,6 +119,29 @@ describe("Script", function () {
         expect(thrownException.message).to.equal("Script is destroyed");
     });
 
+    it("should fail rpc request if cancelled mid-request", async () => {
+        const cancellable = new frida.Cancellable();
+
+        const script = await session.createScript(
+            "rpc.exports = {" +
+            "waitForever: function () {" +
+            "return new Promise(function () {});" +
+            "}" +
+            "};", {}, cancellable);
+        await script.load(cancellable);
+
+        setTimeout(() => cancellable.cancel(), 100);
+
+        let thrownException: Error | null = null;
+        try {
+            await script.exports.waitForever(cancellable);
+        } catch (e) {
+            thrownException = e;
+        }
+        expect(thrownException).to.not.equal(null);
+        expect(thrownException.message).to.equal("Operation was cancelled");
+    });
+
     it("should support returning rpc exports object from async method", async () => {
         const api = await load();
         expect(await api.hello()).to.equal("Is it me you're looking for?");
