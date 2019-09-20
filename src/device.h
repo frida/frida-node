@@ -38,6 +38,7 @@ class Device : public GLibObject {
   static NAN_METHOD(Attach);
   static NAN_METHOD(InjectLibraryFile);
   static NAN_METHOD(InjectLibraryBlob);
+  static NAN_METHOD(OpenChannel);
 
   static v8::Local<v8::Value> TransformSignal(const gchar* name, guint index,
       const GValue* value, gpointer user_data);

@@ -51,6 +51,7 @@
         "src/icon.cc",
         "src/session.cc",
         "src/script.cc",
+        "src/iostream.cc",
         "src/cancellable.cc",
         "src/signals.cc",
         "src/glib_object.cc",

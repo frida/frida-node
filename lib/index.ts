@@ -4,6 +4,7 @@ import * as childModule from "./child";
 import * as deviceManagerModule from "./device_manager";
 import * as deviceModule from "./device";
 import * as iconModule from "./icon";
+import * as iostreamModule from "./iostream";
 import * as processModule from "./process";
 import * as scriptModule from "./script";
 import * as sessionModule from "./session";
@@ -53,6 +54,8 @@ export type ScriptExports = scriptModule.ScriptExports;
 export type LogLevel = scriptModule.LogLevel;
 export const LogLevel = scriptModule.LogLevel;
 
+export type IOStream = iostreamModule.IOStream;
+export const IOStream = iostreamModule.IOStream;
 export type Cancellable = cancellableModule.Cancellable;
 export const Cancellable = cancellableModule.Cancellable;
 

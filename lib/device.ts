@@ -3,6 +3,7 @@ import { Cancellable } from "./cancellable";
 import { Child } from "./child";
 import { Crash } from "./crash";
 import { Icon } from "./icon";
+import { IOStream } from "./iostream";
 import { Process } from "./process";
 import { Session } from "./session";
 import { Signal } from "./signals";
@@ -149,6 +150,10 @@ export class Device {
             cancellable?: Cancellable): Promise<number> {
         const pid = await this.getPid(target, cancellable);
         return this.impl.injectLibraryBlob(pid, blob, entrypoint, data, cancellable);
+    }
+
+    async openChannel(address: string, cancellable?: Cancellable): Promise<IOStream> {
+        return new IOStream(await this.impl.openChannel(address, cancellable));
     }
 
     private async getPid(target: number | string, cancellable?: Cancellable): Promise<number> {

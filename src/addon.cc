@@ -6,6 +6,7 @@
 #include "device_manager.h"
 #include "glib_context.h"
 #include "icon.h"
+#include "iostream.h"
 #include "process.h"
 #include "runtime.h"
 #include "script.h"
@@ -46,6 +47,7 @@ static void InitAll(Local<Object> exports,
   Icon::Init(exports, runtime);
   Session::Init(exports, runtime);
   Script::Init(exports, runtime);
+  IOStream::Init(exports, runtime);
   Cancellable::Init(exports, runtime);
 
   node::AtExit(DisposeAll, runtime);

@@ -4,6 +4,7 @@
 #include "child.h"
 #include "crash.h"
 #include "icon.h"
+#include "iostream.h"
 #include "operation.h"
 #include "process.h"
 #include "session.h"
@@ -75,6 +76,7 @@ void Device::Init(Local<Object> exports, Runtime* runtime) {
   Nan::SetPrototypeMethod(tpl, "attach", Attach);
   Nan::SetPrototypeMethod(tpl, "injectLibraryFile", InjectLibraryFile);
   Nan::SetPrototypeMethod(tpl, "injectLibraryBlob", InjectLibraryBlob);
+  Nan::SetPrototypeMethod(tpl, "openChannel", OpenChannel);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
@@ -911,6 +913,56 @@ NAN_METHOD(Device::InjectLibraryBlob) {
 
   auto operation = new InjectLibraryBlobOperation(static_cast<guint>(pid),
       blob, g_strdup(*entrypoint), g_strdup(*data));
+  operation->Schedule(isolate, wrapper, info);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+namespace {
+
+class OpenChannelOperation : public Operation<FridaDevice> {
+ public:
+  OpenChannelOperation(gchar* address)
+    : address_(address),
+      stream_(NULL) {
+  }
+
+  ~OpenChannelOperation() {
+    g_free(address_);
+  }
+
+  void Begin() {
+    frida_device_open_channel(handle_, address_, cancellable_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    stream_ = frida_device_open_channel_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    auto wrapper = IOStream::New(stream_, runtime_);
+    g_object_unref(stream_);
+    return wrapper;
+  }
+
+  gchar* address_;
+  GIOStream* stream_;
+};
+
+}
+
+NAN_METHOD(Device::OpenChannel) {
+  auto isolate = info.GetIsolate();
+  auto obj = info.Holder();
+  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+
+  if (info.Length() < 1 || !info[0]->IsString()) {
+    Nan::ThrowTypeError("Bad argument");
+    return;
+  }
+  Nan::Utf8String address(info[0]);
+
+  auto operation = new OpenChannelOperation(g_strdup(*address));
   operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
