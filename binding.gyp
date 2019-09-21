@@ -140,7 +140,6 @@
             ],
             "OTHER_LDFLAGS": [
               "-stdlib=libc++",
-              "-Wl,-macosx_version_min,10.9",
               "-Wl,-dead_strip",
               "-Wl,-exported_symbols_list,binding.symbols",
             ],
