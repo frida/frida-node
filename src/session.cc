@@ -107,6 +107,8 @@ NAN_PROPERTY_GETTER(Session::GetPid) {
       frida_session_get_pid(handle)));
 }
 
+namespace {
+
 class DetachOperation : public Operation<FridaSession> {
  public:
   void Begin() {
@@ -122,6 +124,8 @@ class DetachOperation : public Operation<FridaSession> {
   }
 };
 
+}
+
 NAN_METHOD(Session::Detach) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -132,6 +136,8 @@ NAN_METHOD(Session::Detach) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class EnableChildGatingOperation : public Operation<FridaSession> {
  public:
@@ -148,6 +154,8 @@ class EnableChildGatingOperation : public Operation<FridaSession> {
   }
 };
 
+}
+
 NAN_METHOD(Session::EnableChildGating) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -158,6 +166,8 @@ NAN_METHOD(Session::EnableChildGating) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class DisableChildGatingOperation : public Operation<FridaSession> {
  public:
@@ -174,6 +184,8 @@ class DisableChildGatingOperation : public Operation<FridaSession> {
   }
 };
 
+}
+
 NAN_METHOD(Session::DisableChildGating) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -184,6 +196,8 @@ NAN_METHOD(Session::DisableChildGating) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class CreateScriptOperation : public Operation<FridaSession> {
  public:
@@ -216,6 +230,8 @@ class CreateScriptOperation : public Operation<FridaSession> {
   FridaScriptOptions* options_;
   FridaScript* script_;
 };
+
+}
 
 
 NAN_METHOD(Session::CreateScript) {
@@ -260,6 +276,8 @@ NAN_METHOD(Session::CreateScript) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
+namespace {
+
 class CreateScriptFromBytesOperation : public Operation<FridaSession> {
  public:
   CreateScriptFromBytesOperation(GBytes* bytes, FridaScriptOptions* options)
@@ -292,6 +310,8 @@ class CreateScriptFromBytesOperation : public Operation<FridaSession> {
   FridaScriptOptions* options_;
   FridaScript* script_;
 };
+
+}
 
 NAN_METHOD(Session::CreateScriptFromBytes) {
   auto isolate = info.GetIsolate();
@@ -336,6 +356,8 @@ NAN_METHOD(Session::CreateScriptFromBytes) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
+namespace {
+
 class CompileScriptOperation : public Operation<FridaSession> {
  public:
   CompileScriptOperation(gchar* source, FridaScriptOptions* options)
@@ -368,6 +390,8 @@ class CompileScriptOperation : public Operation<FridaSession> {
   FridaScriptOptions* options_;
   GBytes* bytes_;
 };
+
+}
 
 NAN_METHOD(Session::CompileScript) {
   auto isolate = info.GetIsolate();
@@ -444,6 +468,8 @@ static FridaScriptOptions* ParseScriptOptions(Local<Value> name_value,
   return options;
 }
 
+namespace {
+
 class EnableDebuggerOperation : public Operation<FridaSession> {
  public:
   EnableDebuggerOperation(guint16 port) : port_(port) {
@@ -463,6 +489,8 @@ class EnableDebuggerOperation : public Operation<FridaSession> {
 
   guint16 port_;
 };
+
+}
 
 NAN_METHOD(Session::EnableDebugger) {
   auto isolate = info.GetIsolate();
@@ -485,6 +513,8 @@ NAN_METHOD(Session::EnableDebugger) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
+namespace {
+
 class DisableDebuggerOperation : public Operation<FridaSession> {
  public:
   void Begin() {
@@ -500,6 +530,8 @@ class DisableDebuggerOperation : public Operation<FridaSession> {
   }
 };
 
+}
+
 NAN_METHOD(Session::DisableDebugger) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -510,6 +542,8 @@ NAN_METHOD(Session::DisableDebugger) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class EnableJitOperation : public Operation<FridaSession> {
  public:
@@ -525,6 +559,8 @@ class EnableJitOperation : public Operation<FridaSession> {
     return Nan::Undefined();
   }
 };
+
+}
 
 NAN_METHOD(Session::EnableJit) {
   auto isolate = info.GetIsolate();

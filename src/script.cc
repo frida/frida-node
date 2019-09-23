@@ -84,6 +84,8 @@ NAN_METHOD(Script::New) {
   info.GetReturnValue().Set(obj);
 }
 
+namespace {
+
 class LoadOperation : public Operation<FridaScript> {
  public:
   void Begin() {
@@ -99,6 +101,8 @@ class LoadOperation : public Operation<FridaScript> {
   }
 };
 
+}
+
 NAN_METHOD(Script::Load) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -109,6 +113,8 @@ NAN_METHOD(Script::Load) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class UnloadOperation : public Operation<FridaScript> {
  public:
@@ -125,6 +131,8 @@ class UnloadOperation : public Operation<FridaScript> {
   }
 };
 
+}
+
 NAN_METHOD(Script::Unload) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -135,6 +143,8 @@ NAN_METHOD(Script::Unload) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class EternalizeOperation : public Operation<FridaScript> {
  public:
@@ -151,6 +161,8 @@ class EternalizeOperation : public Operation<FridaScript> {
   }
 };
 
+}
+
 NAN_METHOD(Script::Eternalize) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -161,6 +173,8 @@ NAN_METHOD(Script::Eternalize) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class PostOperation : public Operation<FridaScript> {
  public:
@@ -187,6 +201,8 @@ class PostOperation : public Operation<FridaScript> {
   gchar* message_;
   GBytes* data_;
 };
+
+}
 
 NAN_METHOD(Script::Post) {
   auto isolate = info.GetIsolate();

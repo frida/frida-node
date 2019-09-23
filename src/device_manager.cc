@@ -88,6 +88,8 @@ NAN_METHOD(DeviceManager::New) {
   info.GetReturnValue().Set(obj);
 }
 
+namespace {
+
 class CloseOperation : public Operation<FridaDeviceManager> {
  public:
   void Begin() {
@@ -103,6 +105,8 @@ class CloseOperation : public Operation<FridaDeviceManager> {
   }
 };
 
+}
+
 NAN_METHOD(DeviceManager::Close) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -113,6 +117,8 @@ NAN_METHOD(DeviceManager::Close) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
  public:
@@ -144,6 +150,8 @@ class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
   FridaDeviceList* devices_;
 };
 
+}
+
 NAN_METHOD(DeviceManager::EnumerateDevices) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -154,6 +162,8 @@ NAN_METHOD(DeviceManager::EnumerateDevices) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class AddRemoteDeviceOperation : public Operation<FridaDeviceManager> {
  public:
@@ -184,6 +194,8 @@ class AddRemoteDeviceOperation : public Operation<FridaDeviceManager> {
   FridaDevice* device_;
 };
 
+}
+
 NAN_METHOD(DeviceManager::AddRemoteDevice) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -201,6 +213,8 @@ NAN_METHOD(DeviceManager::AddRemoteDevice) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class RemoveRemoteDeviceOperation : public Operation<FridaDeviceManager> {
  public:
@@ -226,6 +240,8 @@ class RemoveRemoteDeviceOperation : public Operation<FridaDeviceManager> {
 
   gchar* host_;
 };
+
+}
 
 NAN_METHOD(DeviceManager::RemoveRemoteDevice) {
   auto isolate = info.GetIsolate();

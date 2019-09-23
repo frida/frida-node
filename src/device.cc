@@ -152,6 +152,8 @@ NAN_PROPERTY_GETTER(Device::GetType) {
       frida_device_get_dtype(handle), FRIDA_TYPE_DEVICE_TYPE));
 }
 
+namespace {
+
 class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
  public:
   void Begin() {
@@ -177,6 +179,8 @@ class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
   FridaApplication* application_;
 };
 
+}
+
 NAN_METHOD(Device::GetFrontmostApplication) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -187,6 +191,8 @@ NAN_METHOD(Device::GetFrontmostApplication) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class EnumerateApplicationsOperation : public Operation<FridaDevice> {
  public:
@@ -217,6 +223,8 @@ class EnumerateApplicationsOperation : public Operation<FridaDevice> {
   FridaApplicationList* applications_;
 };
 
+}
+
 NAN_METHOD(Device::EnumerateApplications) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -227,6 +235,8 @@ NAN_METHOD(Device::EnumerateApplications) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class EnumerateProcessesOperation : public Operation<FridaDevice> {
  public:
@@ -257,6 +267,8 @@ class EnumerateProcessesOperation : public Operation<FridaDevice> {
   FridaProcessList* processes_;
 };
 
+}
+
 NAN_METHOD(Device::EnumerateProcesses) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -267,6 +279,8 @@ NAN_METHOD(Device::EnumerateProcesses) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class EnableSpawnGatingOperation : public Operation<FridaDevice> {
  public:
@@ -283,6 +297,8 @@ class EnableSpawnGatingOperation : public Operation<FridaDevice> {
   }
 };
 
+}
+
 NAN_METHOD(Device::EnableSpawnGating) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -293,6 +309,8 @@ NAN_METHOD(Device::EnableSpawnGating) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class DisableSpawnGatingOperation : public Operation<FridaDevice> {
  public:
@@ -309,6 +327,8 @@ class DisableSpawnGatingOperation : public Operation<FridaDevice> {
   }
 };
 
+}
+
 NAN_METHOD(Device::DisableSpawnGating) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -319,6 +339,8 @@ NAN_METHOD(Device::DisableSpawnGating) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class EnumeratePendingSpawnOperation : public Operation<FridaDevice> {
  public:
@@ -349,6 +371,8 @@ class EnumeratePendingSpawnOperation : public Operation<FridaDevice> {
   FridaSpawnList* pending_spawn_;
 };
 
+}
+
 NAN_METHOD(Device::EnumeratePendingSpawn) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -359,6 +383,8 @@ NAN_METHOD(Device::EnumeratePendingSpawn) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class EnumeratePendingChildrenOperation : public Operation<FridaDevice> {
  public:
@@ -390,6 +416,8 @@ class EnumeratePendingChildrenOperation : public Operation<FridaDevice> {
   FridaChildList* pending_children_;
 };
 
+}
+
 NAN_METHOD(Device::EnumeratePendingChildren) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -400,6 +428,8 @@ NAN_METHOD(Device::EnumeratePendingChildren) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class SpawnOperation : public Operation<FridaDevice> {
  public:
@@ -430,6 +460,8 @@ class SpawnOperation : public Operation<FridaDevice> {
   FridaSpawnOptions* options_;
   guint pid_;
 };
+
+}
 
 NAN_METHOD(Device::Spawn) {
   auto isolate = info.GetIsolate();
@@ -552,6 +584,8 @@ NAN_METHOD(Device::Spawn) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
+namespace {
+
 class InputOperation : public Operation<FridaDevice> {
  public:
   InputOperation(guint pid, GBytes* data)
@@ -577,6 +611,8 @@ class InputOperation : public Operation<FridaDevice> {
   const guint pid_;
   GBytes* data_;
 };
+
+}
 
 NAN_METHOD(Device::Input) {
   auto isolate = info.GetIsolate();
@@ -605,6 +641,8 @@ NAN_METHOD(Device::Input) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
+namespace {
+
 class ResumeOperation : public Operation<FridaDevice> {
  public:
   ResumeOperation(guint pid) : pid_(pid) {
@@ -624,6 +662,8 @@ class ResumeOperation : public Operation<FridaDevice> {
 
   const guint pid_;
 };
+
+}
 
 NAN_METHOD(Device::Resume) {
   auto isolate = info.GetIsolate();
@@ -646,6 +686,8 @@ NAN_METHOD(Device::Resume) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
+namespace {
+
 class KillOperation : public Operation<FridaDevice> {
  public:
   KillOperation(guint pid) : pid_(pid) {
@@ -665,6 +707,8 @@ class KillOperation : public Operation<FridaDevice> {
 
   const guint pid_;
 };
+
+}
 
 NAN_METHOD(Device::Kill) {
   auto isolate = info.GetIsolate();
@@ -686,6 +730,8 @@ NAN_METHOD(Device::Kill) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class AttachOperation : public Operation<FridaDevice> {
  public:
@@ -710,6 +756,8 @@ class AttachOperation : public Operation<FridaDevice> {
   FridaSession* session_;
 };
 
+}
+
 NAN_METHOD(Device::Attach) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -730,6 +778,8 @@ NAN_METHOD(Device::Attach) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class InjectLibraryFileOperation : public Operation<FridaDevice> {
  public:
@@ -767,6 +817,8 @@ class InjectLibraryFileOperation : public Operation<FridaDevice> {
   guint id_;
 };
 
+}
+
 NAN_METHOD(Device::InjectLibraryFile) {
   auto isolate = info.GetIsolate();
   auto obj = info.Holder();
@@ -793,6 +845,8 @@ NAN_METHOD(Device::InjectLibraryFile) {
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
+
+namespace {
 
 class InjectLibraryBlobOperation : public Operation<FridaDevice> {
  public:
@@ -829,6 +883,8 @@ class InjectLibraryBlobOperation : public Operation<FridaDevice> {
   gchar* data_;
   guint id_;
 };
+
+}
 
 NAN_METHOD(Device::InjectLibraryBlob) {
   auto isolate = info.GetIsolate();
