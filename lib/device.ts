@@ -21,11 +21,7 @@ export class Device {
     uninjected: Signal<UninjectedHandler>;
     lost: Signal<DeviceLostHandler>;
 
-    private impl: any;
-
-    constructor(impl: any) {
-        this.impl = impl;
-
+    constructor(private impl: any) {
         const { signals } = impl;
         this.spawnAdded = new Signal<SpawnAddedHandler>(signals, "spawn-added");
         this.spawnRemoved = new Signal<SpawnRemovedHandler>(signals, "spawn-removed");

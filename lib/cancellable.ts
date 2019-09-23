@@ -4,13 +4,11 @@ import { Signal } from "./signals";
 import { inspect } from "util";
 
 export class Cancellable {
-    private impl: any;
+    private impl = new binding.Cancellable();
 
     cancelled: Signal<CancelledHandler>;
 
     constructor() {
-        this.impl = new binding.Cancellable();
-
         const { signals } = this.impl;
         this.cancelled = new Signal<CancelledHandler>(signals, "cancelled");
     }

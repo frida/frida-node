@@ -6,15 +6,13 @@ import { Signals, Signal, SignalHandler, SignalAdapter } from "./signals";
 import { inspect } from "util";
 
 export class DeviceManager {
-    private impl: any;
+    private impl = new binding.DeviceManager();
 
     added: Signal<DeviceAddedHandler>;
     removed: Signal<DeviceRemovedHandler>;
     changed: Signal<DevicesChangedHandler>;
 
     constructor() {
-        this.impl = new binding.DeviceManager();
-
         const signals = new DeviceManagerSignals(this.impl.signals);
         this.added = new Signal<DeviceAddedHandler>(signals, "added");
         this.removed = new Signal<DeviceRemovedHandler>(signals, "removed");

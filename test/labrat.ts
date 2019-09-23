@@ -3,10 +3,7 @@ import { targetProgram } from "./data";
 import { spawn, ChildProcess } from "child_process";
 
 export class LabRat {
-    private childProcess: ChildProcess;
-
-    private constructor(childProcess: ChildProcess) {
-        this.childProcess = childProcess;
+    private constructor(private childProcess: ChildProcess) {
     }
 
     get pid(): number {

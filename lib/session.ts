@@ -6,13 +6,9 @@ import { Signal } from "./signals";
 import { inspect } from "util";
 
 export class Session {
-    private impl: any;
-
     detached: Signal<SessionDetachedHandler>;
 
-    constructor(impl: any) {
-        this.impl = impl;
-
+    constructor(private impl: any) {
         const { signals } = impl;
         this.detached = new Signal<SessionDetachedHandler>(signals, "detached");
     }

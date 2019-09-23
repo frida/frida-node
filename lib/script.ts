@@ -7,13 +7,10 @@ export class Script {
     destroyed: Signal<ScriptDestroyedHandler>;
     message: Signal<ScriptMessageHandler>;
 
-    private impl: any;
     private exportsProxy: any;
     private logHandlerImpl: ScriptLogHandler = log;
 
-    constructor(impl: any) {
-        this.impl = impl;
-
+    constructor(private impl: any) {
         const services = new ScriptServices(this, impl.signals);
 
         const rpcController: RpcController = services;
@@ -110,15 +107,11 @@ export enum LogLevel {
 }
 
 class ScriptServices extends SignalAdapter implements RpcController {
-    private script: Script;
-
     private pendingRequests: { [id: string]: (error: Error | null, result?: any) => void } = {};
     private nextRequestId: number = 1;
 
-    constructor(script: Script, signals: Signals) {
+    constructor(private script: Script, signals: Signals) {
         super(signals);
-
-        this.script = script;
 
         this.signals.connect("destroyed", this.onDestroyed);
         this.signals.connect("message", this.onMessage);

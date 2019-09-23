@@ -4,12 +4,7 @@ export interface Signals {
 }
 
 export class Signal<T extends SignalHandler> {
-    private signals: Signals;
-    private name: string;
-
-    constructor(signals: Signals, name: string) {
-        this.signals = signals;
-        this.name = name;
+    constructor(private signals: Signals, private name: string) {
     }
 
     connect(handler: T): void {
@@ -24,12 +19,9 @@ export class Signal<T extends SignalHandler> {
 export type SignalHandler = (...args: any[]) => void;
 
 export class SignalAdapter implements Signals {
-    protected signals: Signals;
-
     private proxyHandlers: Map<SignalHandler, SignalHandler> = new Map();
 
-    constructor(signals: Signals) {
-        this.signals = signals;
+    constructor(protected signals: Signals) {
     }
 
     connect(name: string, handler: SignalHandler): void {
