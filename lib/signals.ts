@@ -1,6 +1,6 @@
 export interface Signals {
-    connect(name: string, handler: SignalHandler);
-    disconnect(name: string, handler: SignalHandler);
+    connect(name: string, handler: SignalHandler): void;
+    disconnect(name: string, handler: SignalHandler): void;
 }
 
 export class Signal<T extends SignalHandler> {
