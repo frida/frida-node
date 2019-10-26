@@ -1,6 +1,7 @@
 import * as applicationModule from "./application";
 import * as cancellableModule from "./cancellable";
 import * as childModule from "./child";
+import * as crashModule from "./crash";
 import * as deviceManagerModule from "./device_manager";
 import * as deviceModule from "./device";
 import * as iconModule from "./icon";
@@ -63,6 +64,8 @@ export type Application = applicationModule.Application;
 export type Process = processModule.Process;
 export type Spawn = spawnModule.Spawn;
 export type Child = childModule.Child;
+export type Crash = crashModule.Crash;
+export type CrashParameters = crashModule.CrashParameters;
 export type Icon = iconModule.Icon;
 
 let sharedDeviceManager: DeviceManager = null;
