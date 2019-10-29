@@ -30,6 +30,7 @@ export type DeviceType = deviceModule.DeviceType;
 export const DeviceType = deviceModule.DeviceType;
 export type SpawnOptions = deviceModule.SpawnOptions;
 export type Stdio = deviceModule.Stdio;
+export const Stdio = deviceModule.Stdio;
 
 export type Session = sessionModule.Session;
 export const Session = sessionModule.Session;
@@ -64,6 +65,8 @@ export type Application = applicationModule.Application;
 export type Process = processModule.Process;
 export type Spawn = spawnModule.Spawn;
 export type Child = childModule.Child;
+export type ChildOrigin = childModule.ChildOrigin;
+export const ChildOrigin = childModule.ChildOrigin;
 export type Crash = crashModule.Crash;
 export type CrashParameters = crashModule.CrashParameters;
 export type Icon = iconModule.Icon;
