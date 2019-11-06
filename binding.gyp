@@ -123,6 +123,8 @@
             "-lcapstone",
             "-lgee-0.8",
             "-lgioopenssl-static",
+            "-lssl",
+            "-lcrypto",
             "-lgio-2.0",
             "-lgthread-2.0",
             "-lgobject-2.0",
