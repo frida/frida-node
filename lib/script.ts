@@ -29,8 +29,12 @@ export class Script {
         return this.logHandlerImpl;
     }
 
-    set logHandler(handler: ScriptLogHandler | null) {
-        this.logHandlerImpl = (handler !== null) ? handler : log;
+    set logHandler(handler: ScriptLogHandler) {
+        this.logHandlerImpl = handler;
+    }
+
+    get defaultLogHandler(): ScriptLogHandler {
+        return log;
     }
 
     load(cancellable?: Cancellable): Promise<void> {
