@@ -21,13 +21,13 @@ class Operation {
             .ToLocalChecked());
     runtime_ = parent->GetRuntime();
 
-    runtime_->GetUVContext()->IncreaseUsage();
-    runtime_->GetGLibContext()->Schedule([=]() { Begin(); });
-
     auto num_args = info.Length();
     if (num_args >= 1) {
       cancellable_ = Cancellable::TryParse(info[num_args - 1], runtime_);
     }
+
+    runtime_->GetUVContext()->IncreaseUsage();
+    runtime_->GetGLibContext()->Schedule([=]() { Begin(); });
   }
 
   v8::Local<v8::Promise> GetPromise(v8::Isolate* isolate) {
