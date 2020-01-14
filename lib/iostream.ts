@@ -14,9 +14,11 @@ export class IOStream extends Duplex {
     async _destroy(error: Error | null, callback: (error: Error | null) => void): Promise<void> {
         this.cancellable.cancel();
 
-        try {
-            await Promise.all(Array.from(this.pending));
-        } catch (e) {
+        for (const operation of this.pending) {
+            try {
+                await operation;
+            } catch (e) {
+            }
         }
 
         try {
