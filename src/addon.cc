@@ -50,7 +50,11 @@ static void InitAll(Local<Object> exports,
   IOStream::Init(exports, runtime);
   Cancellable::Init(exports, runtime);
 
+#if NODE_VERSION_AT_LEAST(11, 0, 0)
+  node::AddEnvironmentCleanupHook(context->GetIsolate(), DisposeAll, runtime);
+#else
   node::AtExit(DisposeAll, runtime);
+#endif
 }
 
 static void DisposeAll(void* data) {
