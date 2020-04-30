@@ -167,15 +167,15 @@ namespace {
 
 class AddRemoteDeviceOperation : public Operation<FridaDeviceManager> {
  public:
-  AddRemoteDeviceOperation(gchar* host) : host_(host) {
+  AddRemoteDeviceOperation(gchar* location) : location_(location) {
   }
 
   ~AddRemoteDeviceOperation() {
-    g_free(host_);
+    g_free(location_);
   }
 
   void Begin() {
-    frida_device_manager_add_remote_device(handle_, host_, cancellable_,
+    frida_device_manager_add_remote_device(handle_, location_, cancellable_,
         OnReady, this);
   }
 
@@ -190,7 +190,7 @@ class AddRemoteDeviceOperation : public Operation<FridaDeviceManager> {
     return wrapper;
   }
 
-  gchar* host_;
+  gchar* location_;
   FridaDevice* device_;
 };
 
@@ -202,13 +202,13 @@ NAN_METHOD(DeviceManager::AddRemoteDevice) {
   auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
 
   if (info.Length() < 1 || !info[0]->IsString()) {
-    Nan::ThrowTypeError("Expected host");
+    Nan::ThrowTypeError("Expected location");
     return;
   }
 
-  Nan::Utf8String host(info[0]);
+  Nan::Utf8String location(info[0]);
 
-  auto operation = new AddRemoteDeviceOperation(g_strdup(*host));
+  auto operation = new AddRemoteDeviceOperation(g_strdup(*location));
   operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
@@ -218,15 +218,15 @@ namespace {
 
 class RemoveRemoteDeviceOperation : public Operation<FridaDeviceManager> {
  public:
-  RemoveRemoteDeviceOperation(gchar* host) : host_(host) {
+  RemoveRemoteDeviceOperation(gchar* location) : location_(location) {
   }
 
   ~RemoveRemoteDeviceOperation() {
-    g_free(host_);
+    g_free(location_);
   }
 
   void Begin() {
-    frida_device_manager_remove_remote_device(handle_, host_, cancellable_,
+    frida_device_manager_remove_remote_device(handle_, location_, cancellable_,
         OnReady, this);
   }
 
@@ -238,7 +238,7 @@ class RemoveRemoteDeviceOperation : public Operation<FridaDeviceManager> {
     return Nan::Undefined();
   }
 
-  gchar* host_;
+  gchar* location_;
 };
 
 }
@@ -249,13 +249,13 @@ NAN_METHOD(DeviceManager::RemoveRemoteDevice) {
   auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
 
   if (info.Length() < 1 || !info[0]->IsString()) {
-    Nan::ThrowTypeError("Expected host");
+    Nan::ThrowTypeError("Expected location");
     return;
   }
 
-  Nan::Utf8String host(info[0]);
+  Nan::Utf8String location(info[0]);
 
-  auto operation = new RemoveRemoteDeviceOperation(g_strdup(*host));
+  auto operation = new RemoveRemoteDeviceOperation(g_strdup(*location));
   operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
