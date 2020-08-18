@@ -214,7 +214,7 @@ class WriteOperation : public Operation<GIOStream> {
   }
 
   GOutputStream* stream_;
-  Persistent<Value> buffer_;
+  Persistent<Value, v8::CopyablePersistentTraits<Value>> buffer_;
   const void* data_;
   gsize count_;
 };
