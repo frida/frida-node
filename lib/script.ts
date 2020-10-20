@@ -65,7 +65,7 @@ export interface ScriptOptions {
 
 export enum ScriptRuntime {
     Default = "default",
-    Duk = "duk",
+    QJS = "qjs",
     V8 = "v8"
 }
 

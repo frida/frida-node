@@ -25,16 +25,16 @@ describe("Session", () => {
     });
 
     it("should support specifying which script runtime to use", async () => {
-        expect(await evaluteScript("Script.runtime")).to.equal("DUK");
-        expect(await evaluteScript("Script.runtime", { runtime: frida.ScriptRuntime.Default })).to.equal("DUK");
-        expect(await evaluteScript("Script.runtime", { runtime: frida.ScriptRuntime.Duk })).to.equal("DUK");
+        expect(await evaluteScript("Script.runtime")).to.equal("QJS");
+        expect(await evaluteScript("Script.runtime", { runtime: frida.ScriptRuntime.Default })).to.equal("QJS");
+        expect(await evaluteScript("Script.runtime", { runtime: frida.ScriptRuntime.QJS })).to.equal("QJS");
         expect(await evaluteScript("Script.runtime", { runtime: frida.ScriptRuntime.V8 })).to.equal("V8");
 
-        expect(await evaluteScript("Script.runtime")).to.equal("DUK");
+        expect(await evaluteScript("Script.runtime")).to.equal("QJS");
         await session.enableJit();
         expect(await evaluteScript("Script.runtime")).to.equal("V8");
 
-        const bytes = await session.compileScript("console.log('Hello World!');", { runtime: frida.ScriptRuntime.Duk });
+        const bytes = await session.compileScript("console.log('Hello World!');", { runtime: frida.ScriptRuntime.QJS });
         expect(bytes).instanceOf(Buffer);
         expect(bytes.length).to.be.greaterThan(0);
     });
