@@ -28,6 +28,15 @@ describe("Session", () => {
         expect(await evaluteScript("Script.runtime")).to.equal("QJS");
         expect(await evaluteScript("Script.runtime", { runtime: frida.ScriptRuntime.Default })).to.equal("QJS");
         expect(await evaluteScript("Script.runtime", { runtime: frida.ScriptRuntime.QJS })).to.equal("QJS");
+
+        try {
+            await evaluteScript("Script.runtime", { runtime: frida.ScriptRuntime.V8 });
+        } catch (e) {
+            if (/V8 runtime not available due to build configuration/.test(e.message)) {
+                return;
+            }
+            throw e;
+        }
         expect(await evaluteScript("Script.runtime", { runtime: frida.ScriptRuntime.V8 })).to.equal("V8");
 
         expect(await evaluteScript("Script.runtime")).to.equal("QJS");
