@@ -79,6 +79,7 @@
           ],
           "libraries": [
             "-lfrida-core.lib",
+            "-llibcapstone.a",
             "-llibsoup-2.4.a",
             "-llibpsl.a",
             "-llibxml2.a",
