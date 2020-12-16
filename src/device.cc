@@ -741,7 +741,8 @@ class AttachOperation : public Operation<FridaDevice> {
   }
 
   void Begin() {
-    frida_device_attach(handle_, pid_, cancellable_, OnReady, this);
+    frida_device_attach(handle_, pid_, FRIDA_REALM_NATIVE, cancellable_,
+        OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
