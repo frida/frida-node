@@ -91,7 +91,7 @@ export class Device {
         return this.impl.enumeratePendingChildren(cancellable);
     }
 
-    spawn(program: string | string[], options: SpawnOptions = {}, cancellable?: Cancellable): Promise<number> {
+    spawn(program: string | string[], options: SpawnOptions = {}, cancellable?: Cancellable): Promise<ProcessID> {
         const pendingOptions = Object.assign({}, options);
 
         let argv = consumeOption("argv");
@@ -120,34 +120,34 @@ export class Device {
         }
     }
 
-    async input(target: number | string, data: Buffer, cancellable?: Cancellable): Promise<void> {
+    async input(target: TargetProcess, data: Buffer, cancellable?: Cancellable): Promise<void> {
         const pid = await this.getPid(target, cancellable);
         return this.impl.input(pid, data, cancellable);
     }
 
-    async resume(target: number | string, cancellable?: Cancellable): Promise<void> {
+    async resume(target: TargetProcess, cancellable?: Cancellable): Promise<void> {
         const pid = await this.getPid(target, cancellable);
         return this.impl.resume(pid, cancellable);
     }
 
-    async kill(target: number | string, cancellable?: Cancellable): Promise<void> {
+    async kill(target: TargetProcess, cancellable?: Cancellable): Promise<void> {
         const pid = await this.getPid(target, cancellable);
         return this.impl.kill(pid, cancellable);
     }
 
-    async attach(target: number | string, cancellable?: Cancellable): Promise<Session> {
+    async attach(target: TargetProcess, cancellable?: Cancellable): Promise<Session> {
         const pid = await this.getPid(target, cancellable);
         return new Session(await this.impl.attach(pid, cancellable));
     }
 
-    async injectLibraryFile(target: number | string, path: string, entrypoint: string, data: string,
-            cancellable?: Cancellable): Promise<number> {
+    async injectLibraryFile(target: TargetProcess, path: string, entrypoint: string, data: string,
+            cancellable?: Cancellable): Promise<InjecteeID> {
         const pid = await this.getPid(target, cancellable);
         return this.impl.injectLibraryFile(pid, path, entrypoint, data, cancellable);
     }
 
-    async injectLibraryBlob(target: number | string, blob: Buffer, entrypoint: string, data: string,
-            cancellable?: Cancellable): Promise<number> {
+    async injectLibraryBlob(target: TargetProcess, blob: Buffer, entrypoint: string, data: string,
+            cancellable?: Cancellable): Promise<InjecteeID> {
         const pid = await this.getPid(target, cancellable);
         return this.impl.injectLibraryBlob(pid, blob, entrypoint, data, cancellable);
     }
@@ -156,7 +156,7 @@ export class Device {
         return new IOStream(await this.impl.openChannel(address, cancellable));
     }
 
-    private async getPid(target: number | string, cancellable?: Cancellable): Promise<number> {
+    private async getPid(target: TargetProcess, cancellable?: Cancellable): Promise<ProcessID> {
         if (typeof target === "number") {
             return target;
         }
@@ -175,13 +175,18 @@ export class Device {
     }
 }
 
+export type ProcessID = number;
+export type ProcessName = string;
+export type InjecteeID = number;
+export type FileDescriptor = number;
+
 export type SpawnAddedHandler = (spawn: Spawn) => void;
 export type SpawnRemovedHandler = (spawn: Spawn) => void;
 export type ChildAddedHandler = (child: Child) => void;
 export type ChildRemovedHandler = (child: Child) => void;
 export type ProcessCrashedHandler = (crash: Crash) => void;
-export type OutputHandler = (pid: number, fd: number, data: Buffer) => void;
-export type UninjectedHandler = (id: number) => void;
+export type OutputHandler = (pid: ProcessID, fd: FileDescriptor, data: Buffer) => void;
+export type UninjectedHandler = (id: InjecteeID) => void;
 export type DeviceLostHandler = () => void;
 
 export enum DeviceType {
@@ -204,3 +209,5 @@ export enum Stdio {
     Inherit = "inherit",
     Pipe = "pipe"
 }
+
+export type TargetProcess = ProcessID | ProcessName;

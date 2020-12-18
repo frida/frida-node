@@ -19,6 +19,10 @@ export type DevicesChangedHandler = deviceManagerModule.DevicesChangedHandler;
 
 export type Device = deviceModule.Device;
 export const Device = deviceModule.Device;
+export type ProcessID = deviceModule.ProcessID;
+export type ProcessName = deviceModule.ProcessName;
+export type InjecteeID = deviceModule.InjecteeID;
+export type FileDescriptor = deviceModule.FileDescriptor;
 export type SpawnAddedHandler = deviceModule.SpawnAddedHandler;
 export type SpawnRemovedHandler = deviceModule.SpawnRemovedHandler;
 export type ChildAddedHandler = deviceModule.ChildAddedHandler;
@@ -31,6 +35,7 @@ export const DeviceType = deviceModule.DeviceType;
 export type SpawnOptions = deviceModule.SpawnOptions;
 export type Stdio = deviceModule.Stdio;
 export const Stdio = deviceModule.Stdio;
+export type TargetProcess = deviceModule.TargetProcess;
 
 export type Session = sessionModule.Session;
 export const Session = sessionModule.Session;
@@ -88,7 +93,7 @@ export async function kill(target: number | string, cancellable?: Cancellable): 
     await device.kill(target, cancellable);
 }
 
-export async function attach(target: number | string, cancellable?: Cancellable): Promise<Session> {
+export async function attach(target: TargetProcess, cancellable?: Cancellable): Promise<Session> {
     const device = await getLocalDevice(cancellable);
     return await device.attach(target, cancellable);
 }
