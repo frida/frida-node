@@ -737,12 +737,11 @@ namespace {
 
 class AttachOperation : public Operation<FridaDevice> {
  public:
-  AttachOperation(guint pid) : pid_(pid) {
+  AttachOperation(guint pid, FridaRealm realm) : pid_(pid), realm_(realm) {
   }
 
   void Begin() {
-    frida_device_attach(handle_, pid_, FRIDA_REALM_NATIVE, cancellable_,
-        OnReady, this);
+    frida_device_attach(handle_, pid_, realm_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -756,6 +755,7 @@ class AttachOperation : public Operation<FridaDevice> {
   }
 
   const guint pid_;
+  FridaRealm realm_;
   FridaSession* session_;
 };
 
@@ -766,17 +766,29 @@ NAN_METHOD(Device::Attach) {
   auto obj = info.Holder();
   auto wrapper = ObjectWrap::Unwrap<Device>(obj);
 
-  if (info.Length() < 1 || !info[0]->IsNumber()) {
-    Nan::ThrowTypeError("Bad argument, expected pid");
+  if (info.Length() < 2) {
+    Nan::ThrowTypeError("Missing one or more arguments");
     return;
   }
-  auto pid = Nan::To<int64_t>(info[0]).FromMaybe(-1);
+
+  auto pid_value = info[0];
+  auto realm_value = info[1];
+
+  int64_t pid = -1;
+  if (pid_value->IsNumber()) {
+    pid = Nan::To<int64_t>(pid_value).FromMaybe(-1);
+  }
   if (pid < 0) {
     Nan::ThrowTypeError("Bad argument, expected pid");
     return;
   }
 
-  auto operation = new AttachOperation(static_cast<guint>(pid));
+  FridaRealm realm;
+  if (!Runtime::ValueToEnum(realm_value, FRIDA_TYPE_REALM, &realm)) {
+    return;
+  }
+
+  auto operation = new AttachOperation(static_cast<guint>(pid), realm);
   operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));

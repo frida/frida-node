@@ -135,9 +135,21 @@ export class Device {
         return this.impl.kill(pid, cancellable);
     }
 
-    async attach(target: TargetProcess, cancellable?: Cancellable): Promise<Session> {
+    async attach(targetOrParameters: TargetProcess | AttachParameters, cancellable?: Cancellable): Promise<Session> {
+        let target: TargetProcess;
+        let realm: Realm;
+        if (typeof targetOrParameters === "object") {
+            const parameters = targetOrParameters;
+            target = parameters.target;
+            realm = parameters.realm ?? Realm.Native;
+        } else {
+            target = targetOrParameters;
+            realm = Realm.Native;
+        }
+
         const pid = await this.getPid(target, cancellable);
-        return new Session(await this.impl.attach(pid, cancellable));
+
+        return new Session(await this.impl.attach(pid, realm, cancellable));
     }
 
     async injectLibraryFile(target: TargetProcess, path: string, entrypoint: string, data: string,
@@ -211,3 +223,13 @@ export enum Stdio {
 }
 
 export type TargetProcess = ProcessID | ProcessName;
+
+export interface AttachParameters {
+    target: TargetProcess;
+    realm?: Realm;
+}
+
+export enum Realm {
+    Native = "native",
+    Emulated = "emulated",
+}

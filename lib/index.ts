@@ -36,6 +36,9 @@ export type SpawnOptions = deviceModule.SpawnOptions;
 export type Stdio = deviceModule.Stdio;
 export const Stdio = deviceModule.Stdio;
 export type TargetProcess = deviceModule.TargetProcess;
+export type AttachParameters = deviceModule.AttachParameters;
+export type Realm = deviceModule.Realm;
+export const Realm = deviceModule.Realm;
 
 export type Session = sessionModule.Session;
 export const Session = sessionModule.Session;
@@ -93,9 +96,9 @@ export async function kill(target: number | string, cancellable?: Cancellable): 
     await device.kill(target, cancellable);
 }
 
-export async function attach(target: TargetProcess, cancellable?: Cancellable): Promise<Session> {
+export async function attach(targetOrParameters: TargetProcess | AttachParameters, cancellable?: Cancellable): Promise<Session> {
     const device = await getLocalDevice(cancellable);
-    return await device.attach(target, cancellable);
+    return await device.attach(targetOrParameters, cancellable);
 }
 
 export async function injectLibraryFile(target: number | string, path: string, entrypoint: string, data: string,
