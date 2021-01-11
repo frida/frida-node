@@ -179,6 +179,9 @@
             "$(FRIDA)/build/sdk-<(frida_host)/lib32",
             "$(FRIDA)/build/sdk-<(frida_host)/lib64",
           ],
+          "libraries": [
+            "-lelf",
+          ],
         }],
       ],
     },
