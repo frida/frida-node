@@ -24,12 +24,12 @@ export class DeviceManager {
         return devices.map(impl => new Device(impl));
     }
 
-    async addRemoteDevice(location: string, cancellable?: Cancellable): Promise<Device> {
-        return new Device(await this.impl.addRemoteDevice(location, cancellable));
+    async addRemoteDevice(address: string, cancellable?: Cancellable): Promise<Device> {
+        return new Device(await this.impl.addRemoteDevice(address, cancellable));
     }
 
-    removeRemoteDevice(location: string, cancellable?: Cancellable): Promise<void> {
-        return this.impl.removeRemoteDevice(location, cancellable);
+    removeRemoteDevice(address: string, cancellable?: Cancellable): Promise<void> {
+        return this.impl.removeRemoteDevice(address, cancellable);
     }
 
     [inspect.custom]() {
