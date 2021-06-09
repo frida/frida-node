@@ -14,6 +14,7 @@ class Operation {
  public:
   void Schedule(v8::Isolate* isolate, GLibObject* parent,
       const Nan::FunctionCallbackInfo<v8::Value>& info) {
+    wrapper_ = parent;
     parent_.Reset(isolate, parent->handle(isolate));
     handle_ = parent->GetHandle<T>();
     resolver_.Reset(isolate,
@@ -36,7 +37,11 @@ class Operation {
 
  protected:
   Operation()
-      : handle_(NULL), cancellable_(NULL), runtime_(NULL), error_(NULL) {
+    : wrapper_(NULL),
+      handle_(NULL),
+      cancellable_(NULL),
+      runtime_(NULL),
+      error_(NULL) {
   }
 
   virtual ~Operation() {
@@ -51,10 +56,14 @@ class Operation {
   virtual void End(GAsyncResult* result, GError** error) = 0;
   virtual v8::Local<v8::Value> Result(v8::Isolate* isolate) = 0;
 
+  template<typename W>
+  W* GetWrapper() const { return static_cast<W*>(wrapper_); }
+
   static void OnReady(GObject* source_object, GAsyncResult* result, gpointer user_data) {
     static_cast<Operation<T>*>(user_data)->PerformEnd(result);
   }
 
+  void* wrapper_;
   v8::Persistent<v8::Value> parent_;
   T* handle_;
   GCancellable* cancellable_;
