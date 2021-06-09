@@ -75,7 +75,7 @@ NAN_METHOD(Script::New) {
   auto obj = info.This();
   wrapper->Wrap(obj);
   Nan::Set(obj, Nan::New("signals").ToLocalChecked(),
-      Signals::New(handle, runtime, TransformMessageSignal, wrapper));
+      Signals::New(handle, runtime, TransformMessageSignal, runtime));
 
   auto monitor =
       new UsageMonitor<FridaScript>(frida_script_is_destroyed, "destroyed");
@@ -238,9 +238,9 @@ Local<Value> Script::TransformMessageSignal(const gchar* name, guint index,
     const GValue* value, gpointer user_data) {
   if (index != 0 || strcmp(name, "message") != 0)
     return Local<Value>();
-  auto self = static_cast<Script*>(user_data);
+  auto runtime = static_cast<Runtime*>(user_data);
   auto json = Nan::New(g_value_get_string(value)).ToLocalChecked();
-  return self->runtime_->ValueFromJson(json);
+  return runtime->ValueFromJson(json);
 }
 
 }

@@ -111,7 +111,7 @@ NAN_METHOD(Device::New) {
   auto wrapper = new Device(handle, runtime);
   auto obj = info.This();
   wrapper->Wrap(obj);
-  auto signals_obj = Signals::New(handle, runtime, TransformSignal, wrapper);
+  auto signals_obj = Signals::New(handle, runtime, TransformSignal, runtime);
 
   Nan::Set(obj, Nan::New("signals").ToLocalChecked(), signals_obj);
 
@@ -983,18 +983,18 @@ NAN_METHOD(Device::OpenChannel) {
 
 Local<Value> Device::TransformSignal(const gchar* name, guint index,
     const GValue* value, gpointer user_data) {
-  auto self = static_cast<Device*>(user_data);
+  auto runtime = static_cast<Runtime*>(user_data);
 
   if (index == 0 && (strcmp(name, "spawn-added") == 0 ||
        strcmp(name, "spawn-removed") == 0))
-    return Spawn::New(g_value_get_object(value), self->runtime_);
+    return Spawn::New(g_value_get_object(value), runtime);
 
   if (index == 0 && (strcmp(name, "child-added") == 0 ||
        strcmp(name, "child-removed") == 0))
-    return Child::New(g_value_get_object(value), self->runtime_);
+    return Child::New(g_value_get_object(value), runtime);
 
   if (index == 0 && strcmp(name, "process-crashed") == 0)
-    return Crash::New(g_value_get_object(value), self->runtime_);
+    return Crash::New(g_value_get_object(value), runtime);
 
   return Local<Value>();
 }

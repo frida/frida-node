@@ -94,7 +94,7 @@ NAN_METHOD(Session::New) {
   auto obj = info.This();
   wrapper->Wrap(obj);
   Nan::Set(obj, Nan::New("signals").ToLocalChecked(),
-      Signals::New(handle, runtime, TransformSignal, wrapper));
+      Signals::New(handle, runtime, TransformSignal, runtime));
 
   info.GetReturnValue().Set(obj);
 }
@@ -575,13 +575,13 @@ NAN_METHOD(Session::EnableJit) {
 
 Local<Value> Session::TransformSignal(const gchar* name, guint index,
     const GValue* value, gpointer user_data) {
-  auto self = static_cast<Session*>(user_data);
+  auto runtime = static_cast<Runtime*>(user_data);
 
   if (index == 1 && strcmp(name, "detached") == 0) {
     auto crash = g_value_get_object(value);
     if (crash == NULL)
       return Nan::Null();
-    return Crash::New(crash, self->runtime_);
+    return Crash::New(crash, runtime);
   }
 
   return Local<Value>();
