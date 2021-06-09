@@ -22,9 +22,7 @@ using v8::Value;
 
 namespace frida {
 
-typedef struct _SignalsClosure SignalsClosure;
-
-struct _SignalsClosure {
+struct SignalsClosure {
   GClosure closure;
   gboolean alive;
   guint signal_id;
