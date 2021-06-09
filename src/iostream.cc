@@ -9,6 +9,7 @@
 #define IOSTREAM_DATA_CONSTRUCTOR "iostream:ctor"
 
 using v8::AccessorSignature;
+using v8::CopyablePersistentTraits;
 using v8::DEFAULT;
 using v8::External;
 using v8::Function;
@@ -214,7 +215,7 @@ class WriteOperation : public Operation<GIOStream> {
   }
 
   GOutputStream* stream_;
-  Persistent<Value, v8::CopyablePersistentTraits<Value>> buffer_;
+  Persistent<Value, CopyablePersistentTraits<Value>> buffer_;
   const void* data_;
   gsize count_;
 };

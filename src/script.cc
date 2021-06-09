@@ -15,6 +15,7 @@ using v8::Function;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
+using v8::Persistent;
 using v8::String;
 using v8::Value;
 
@@ -44,15 +45,15 @@ void Script::Init(Local<Object> exports, Runtime* runtime) {
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
   runtime->SetDataPointer(SCRIPT_DATA_CONSTRUCTOR,
-      new v8::Persistent<Function>(isolate, ctor));
+      new Persistent<Function>(isolate, ctor));
 }
 
 Local<Object> Script::New(gpointer handle, Runtime* runtime) {
-  auto ctor = Nan::New<v8::Function>(
-      *static_cast<v8::Persistent<Function>*>(
+  auto ctor = Nan::New<Function>(
+      *static_cast<Persistent<Function>*>(
       runtime->GetDataPointer(SCRIPT_DATA_CONSTRUCTOR)));
   const int argc = 1;
-  Local<Value> argv[argc] = { Nan::New<v8::External>(handle) };
+  Local<Value> argv[argc] = { Nan::New<External>(handle) };
   return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
 

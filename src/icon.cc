@@ -13,6 +13,7 @@ using v8::Integer;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
+using v8::Persistent;
 using v8::ReadOnly;
 using v8::Value;
 
@@ -48,7 +49,7 @@ void Icon::Init(Local<Object> exports, Runtime* runtime) {
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
   runtime->SetDataPointer(ICON_DATA_CONSTRUCTOR,
-      new v8::Persistent<Function>(isolate, ctor));
+      new Persistent<Function>(isolate, ctor));
 }
 
 Local<Value> Icon::New(gpointer handle, Runtime* runtime) {
@@ -56,10 +57,10 @@ Local<Value> Icon::New(gpointer handle, Runtime* runtime) {
     return Nan::Null();
 
   auto ctor = Nan::New<Function>(
-      *static_cast<v8::Persistent<Function>*>(
+      *static_cast<Persistent<Function>*>(
       runtime->GetDataPointer(ICON_DATA_CONSTRUCTOR)));
   const int argc = 1;
-  Local<Value> argv[argc] = { Nan::New<v8::External>(handle) };
+  Local<Value> argv[argc] = { Nan::New<External>(handle) };
   return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
 
@@ -89,7 +90,7 @@ NAN_PROPERTY_GETTER(Icon::GetWidth) {
   auto handle = ObjectWrap::Unwrap<Icon>(
       info.Holder())->GetHandle<FridaIcon>();
 
-  info.GetReturnValue().Set(Nan::New<v8::Integer>(
+  info.GetReturnValue().Set(Nan::New<Integer>(
     frida_icon_get_width(handle)));
 }
 
@@ -97,7 +98,7 @@ NAN_PROPERTY_GETTER(Icon::GetHeight) {
   auto handle = ObjectWrap::Unwrap<Icon>(
       info.Holder())->GetHandle<FridaIcon>();
 
-  info.GetReturnValue().Set(Nan::New<v8::Integer>(
+  info.GetReturnValue().Set(Nan::New<Integer>(
     frida_icon_get_height(handle)));
 }
 
@@ -105,7 +106,7 @@ NAN_PROPERTY_GETTER(Icon::GetRowstride) {
   auto handle = ObjectWrap::Unwrap<Icon>(
       info.Holder())->GetHandle<FridaIcon>();
 
-  info.GetReturnValue().Set(Nan::New<v8::Integer>(
+  info.GetReturnValue().Set(Nan::New<Integer>(
     frida_icon_get_rowstride(handle)));
 }
 

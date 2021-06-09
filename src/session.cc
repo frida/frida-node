@@ -12,14 +12,17 @@
 #define SESSION_DATA_CONSTRUCTOR "session:ctor"
 
 using v8::AccessorSignature;
+using v8::Array;
 using v8::DEFAULT;
 using v8::External;
 using v8::Function;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
+using v8::Persistent;
 using v8::ReadOnly;
 using v8::String;
+using v8::Uint32;
 using v8::Value;
 
 namespace frida {
@@ -63,15 +66,15 @@ void Session::Init(Local<Object> exports, Runtime* runtime) {
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
   runtime->SetDataPointer(SESSION_DATA_CONSTRUCTOR,
-      new v8::Persistent<Function>(isolate, ctor));
+      new Persistent<Function>(isolate, ctor));
 }
 
 Local<Object> Session::New(gpointer handle, Runtime* runtime) {
-  auto ctor = Nan::New<v8::Function>(
-    *static_cast<v8::Persistent<Function>*>(
+  auto ctor = Nan::New<Function>(
+    *static_cast<Persistent<Function>*>(
       runtime->GetDataPointer(SESSION_DATA_CONSTRUCTOR)));
   const int argc = 1;
-  Local<Value> argv[argc] = { Nan::New<v8::External>(handle) };
+  Local<Value> argv[argc] = { Nan::New<External>(handle) };
   return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
 
@@ -103,7 +106,7 @@ NAN_PROPERTY_GETTER(Session::GetPid) {
   auto handle = ObjectWrap::Unwrap<Session>(
       info.Holder())->GetHandle<FridaSession>();
 
-  info.GetReturnValue().Set(Nan::New<v8::Uint32>(
+  info.GetReturnValue().Set(Nan::New<Uint32>(
       frida_session_get_pid(handle)));
 }
 

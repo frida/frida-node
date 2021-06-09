@@ -23,7 +23,6 @@ class Icon : public GLibObject {
   static NAN_PROPERTY_GETTER(GetHeight);
   static NAN_PROPERTY_GETTER(GetRowstride);
   static NAN_PROPERTY_GETTER(GetPixels);
-
 };
 
 }

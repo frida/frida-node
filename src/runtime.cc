@@ -62,8 +62,8 @@ void Runtime::SetDataPointer(const char* id, void* value) {
 
 Local<String> Runtime::ValueToJson(Local<Value> value) {
   auto context = Isolate::GetCurrent()->GetCurrentContext();
-  auto module = Nan::New<v8::Object>(json_module_);
-  auto stringify = Nan::New<v8::Function>(json_stringify_);
+  auto module = Nan::New<Object>(json_module_);
+  auto stringify = Nan::New<Function>(json_stringify_);
   Local<Value> argv[] = { value };
   return Local<String>::Cast(
       stringify->Call(context, module, 1, argv).ToLocalChecked());
@@ -71,8 +71,8 @@ Local<String> Runtime::ValueToJson(Local<Value> value) {
 
 Local<Value> Runtime::ValueFromJson(Local<String> json) {
   auto context = Isolate::GetCurrent()->GetCurrentContext();
-  auto module = Nan::New<v8::Object>(json_module_);
-  auto parse = Nan::New<v8::Function>(json_parse_);
+  auto module = Nan::New<Object>(json_module_);
+  auto parse = Nan::New<Function>(json_parse_);
   Local<Value> argv[] = { json };
   return parse->Call(context, module, 1, argv).ToLocalChecked();
 }
@@ -82,7 +82,7 @@ bool Runtime::ValueToStrv(Local<Value> value, gchar*** strv, gint* length) {
     Nan::ThrowTypeError("Bad argument, expected an array of strings");
     return false;
   }
-  auto array = Local<v8::Array>::Cast(value);
+  auto array = Local<Array>::Cast(value);
 
   uint32_t n = array->Length();
   gchar** elements = g_new0(gchar*, n + 1);
@@ -116,14 +116,14 @@ Local<Value> Runtime::ValueFromStrv(gchar* const* strv, gint length) {
 }
 
 bool Runtime::ValueToEnvp(Local<Value> value, gchar*** envp, gint* length) {
-  auto isolate = v8::Isolate::GetCurrent();
+  auto isolate = Isolate::GetCurrent();
   auto context = isolate->GetCurrentContext();
 
   if (!value->IsObject()) {
     Nan::ThrowTypeError("Bad argument, expected an object");
     return false;
   }
-  auto object = Local<v8::Object>::Cast(value);
+  auto object = Local<Object>::Cast(value);
 
   Local<Array> names(object->GetOwnPropertyNames(context).ToLocalChecked());
   uint32_t n = names->Length();
@@ -149,7 +149,7 @@ Local<Value> Runtime::ValueFromEnvp(gchar* const* envp, gint length) {
   if (envp == NULL)
     return Nan::Null();
 
-  auto result = Nan::New<v8::Object>();
+  auto result = Nan::New<Object>();
   for (gint i = 0; i != length; i++) {
     auto tokens = g_strsplit(envp[i], "=", 2);
     if (g_strv_length(tokens) == 2) {
@@ -211,7 +211,7 @@ Local<String> Runtime::ValueFromEnum(gint value, GType type) {
 }
 
 Local<Value> Runtime::ValueFromVariantDict(GVariant* dict) {
-  auto result = Nan::New<v8::Object>();
+  auto result = Nan::New<Object>();
 
   GVariantIter iter;
   gchar* key;

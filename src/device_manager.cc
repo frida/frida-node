@@ -10,6 +10,7 @@
 
 #define DEVICE_MANAGER_DATA_WRAPPERS "device_manager:wrappers"
 
+using v8::Array;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
@@ -37,7 +38,7 @@ DeviceManager::~DeviceManager() {
 }
 
 void DeviceManager::Init(Local<Object> exports, Runtime* runtime) {
-  Local<v8::String> name = Nan::New("DeviceManager").ToLocalChecked();
+  Local<String> name = Nan::New("DeviceManager").ToLocalChecked();
 
   auto tpl = CreateTemplate(name, DeviceManager::New, runtime);
 
@@ -134,7 +135,7 @@ class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
 
   Local<Value> Result(Isolate* isolate) {
     auto size = frida_device_list_size(devices_);
-    Local<v8::Array> devices = Nan::New<v8::Array>(size);
+    Local<Array> devices = Nan::New<Array>(size);
     for (auto i = 0; i != size; i++) {
       auto handle = frida_device_list_get(devices_, i);
       auto device = Device::New(handle, runtime_);

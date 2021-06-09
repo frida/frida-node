@@ -8,6 +8,7 @@
 using v8::Context;
 using v8::External;
 using v8::Function;
+using v8::FunctionCallbackInfo;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
@@ -28,7 +29,7 @@ UVContext::UVContext(uv_loop_t* loop)
 
   auto isolate = Isolate::GetCurrent();
   auto context = isolate->GetCurrentContext();
-  auto module = Nan::New<v8::Object>();
+  auto module = Nan::New<Object>();
   auto process_pending = Function::New(context, ProcessPendingWrapper,
       External::New(isolate, this)).ToLocalChecked();
   auto process_pending_name = Nan::New("processPending").ToLocalChecked();
@@ -99,7 +100,7 @@ void UVContext::ProcessPending() {
   UV_CONTEXT_UNLOCK();
 }
 
-void UVContext::ProcessPendingWrapper(const v8::FunctionCallbackInfo<Value>& info) {
+void UVContext::ProcessPendingWrapper(const FunctionCallbackInfo<Value>& info) {
   UVContext* self = static_cast<UVContext*>(
       info.Data().As<External>()->Value ());
   self->ProcessPending();
@@ -109,8 +110,8 @@ void UVContext::ProcessPendingWrapper(uv_async_t* handle) {
   HandleScope scope;
 
   auto self = static_cast<UVContext*>(handle->data);
-  auto module = Nan::New<v8::Object>(self->module_);
-  auto process_pending = Nan::New<v8::Function>(self->process_pending_);
+  auto module = Nan::New<Object>(self->module_);
+  auto process_pending = Nan::New<Function>(self->process_pending_);
   self->async_resource_.runInAsyncScope(module, process_pending, 0, NULL);
 }
 

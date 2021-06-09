@@ -10,9 +10,11 @@ using v8::AccessorSignature;
 using v8::DEFAULT;
 using v8::External;
 using v8::Function;
+using v8::Integer;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
+using v8::Persistent;
 using v8::ReadOnly;
 using v8::Value;
 
@@ -48,15 +50,15 @@ void Process::Init(Local<Object> exports, Runtime* runtime) {
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
   runtime->SetDataPointer(PROCESS_DATA_CONSTRUCTOR,
-      new v8::Persistent<Function>(isolate, ctor));
+      new Persistent<Function>(isolate, ctor));
 }
 
 Local<Object> Process::New(gpointer handle, Runtime* runtime) {
   auto ctor = Nan::New<Function>(
-      *static_cast<v8::Persistent<Function>*>(
+      *static_cast<Persistent<Function>*>(
       runtime->GetDataPointer(PROCESS_DATA_CONSTRUCTOR)));
   const int argc = 1;
-  Local<Value> argv[argc] = { Nan::New<v8::External>(handle) };
+  Local<Value> argv[argc] = { Nan::New<External>(handle) };
   return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
 
@@ -86,8 +88,7 @@ NAN_PROPERTY_GETTER(Process::GetPid) {
   auto handle = ObjectWrap::Unwrap<Process>(
       info.Holder())->GetHandle<FridaProcess>();
 
-  info.GetReturnValue().Set(Nan::New<v8::Integer>(
-      frida_process_get_pid(handle)));
+  info.GetReturnValue().Set(Nan::New<Integer>(frida_process_get_pid(handle)));
 }
 
 NAN_PROPERTY_GETTER(Process::GetName) {

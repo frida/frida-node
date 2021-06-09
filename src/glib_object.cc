@@ -12,8 +12,8 @@ namespace frida {
 
 Local<FunctionTemplate> GLibObject::CreateTemplate(Local<String> name,
     Nan::FunctionCallback callback, Runtime* runtime) {
-  v8::Local<v8::FunctionTemplate> tpl = Nan::New<v8::FunctionTemplate>(
-    callback, Nan::New<v8::External>(runtime));
+  Local<FunctionTemplate> tpl = Nan::New<FunctionTemplate>(callback,
+      Nan::New<External>(runtime));
   tpl->SetClassName(name);
   tpl->InstanceTemplate()->SetInternalFieldCount(1);
   return tpl;

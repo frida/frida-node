@@ -17,6 +17,7 @@ using v8::Number;
 using v8::Object;
 using v8::Persistent;
 using v8::String;
+using v8::Uint32;
 using v8::Value;
 
 namespace frida {
@@ -28,8 +29,8 @@ struct _SignalsClosure {
   gboolean alive;
   guint signal_id;
   guint handler_id;
-  v8::Persistent<Function>* callback;
-  v8::Persistent<Object>* parent;
+  Persistent<Function>* callback;
+  Persistent<Object>* parent;
   Signals::TransformCallback transform;
   gpointer transform_data;
   Runtime* runtime;
@@ -75,20 +76,20 @@ void Signals::Init(Local<Object> exports, Runtime* runtime) {
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
   runtime->SetDataPointer(SIGNALS_DATA_CONSTRUCTOR,
-      new v8::Persistent<Function>(isolate, ctor));
+      new Persistent<Function>(isolate, ctor));
 }
 
 Local<Object> Signals::New(gpointer handle, Runtime* runtime,
     TransformCallback transform, gpointer transform_data) {
 
-  auto ctor = Nan::New<v8::Function>(
-      *static_cast<v8::Persistent<Function>*>(
+  auto ctor = Nan::New<Function>(
+      *static_cast<Persistent<Function>*>(
       runtime->GetDataPointer(SIGNALS_DATA_CONSTRUCTOR)));
   const int argc = 3;
   Local<Value> argv[argc] = {
-    Nan::New<v8::External>(handle),
-    Nan::New<v8::External>(reinterpret_cast<void*>(transform)),
-    Nan::New<v8::External>(transform_data)
+    Nan::New<External>(handle),
+    Nan::New<External>(reinterpret_cast<void*>(transform)),
+    Nan::New<External>(transform_data)
   };
   return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
@@ -169,7 +170,7 @@ NAN_METHOD(Signals::Disconnect) {
   for (GSList* cur = wrapper->closures_; cur != NULL; cur = cur->next) {
     auto signals_closure = static_cast<SignalsClosure*>(cur->data);
     auto closure = reinterpret_cast<GClosure*>(signals_closure);
-    auto closure_callback = Nan::New<v8::Function>(*signals_closure->callback);
+    auto closure_callback = Nan::New<Function>(*signals_closure->callback);
     if (signals_closure->signal_id == signal_id &&
         closure_callback->SameValue(callback)) {
       if (wrapper->disconnect_ != NULL) {
@@ -226,8 +227,8 @@ static SignalsClosure* signals_closure_new(guint signal_id,
   self->alive = TRUE;
   self->signal_id = signal_id;
   self->handler_id = 0;
-  self->callback = new v8::Persistent<Function>(isolate, callback);
-  self->parent = new v8::Persistent<Object>(isolate, parent);
+  self->callback = new Persistent<Function>(isolate, callback);
+  self->parent = new Persistent<Object>(isolate, parent);
   self->transform = transform;
   self->transform_data = transform_data;
   self->runtime = runtime;
@@ -280,8 +281,8 @@ static void signals_closure_marshal(GClosure* closure, GValue* return_gvalue,
       }
 
       auto context = Isolate::GetCurrent()->GetCurrentContext();
-      auto recv = Nan::New<v8::Object>(*self->parent);
-      auto callback = Nan::New<v8::Function>(*self->callback);
+      auto recv = Nan::New<Object>(*self->parent);
+      auto callback = Nan::New<Function>(*self->callback);
       Local<Value> no_result;
       callback->Call(context, recv, argc, argv).FromMaybe(no_result);
 
@@ -304,20 +305,20 @@ static Local<Value> signals_closure_gvalue_to_jsvalue(const GValue* gvalue) {
   auto gtype = G_VALUE_TYPE(gvalue);
   switch (gtype) {
     case G_TYPE_BOOLEAN:
-      return Nan::New<v8::Boolean>(g_value_get_boolean(gvalue));
+      return Nan::New<Boolean>(g_value_get_boolean(gvalue));
     case G_TYPE_INT:
-      return Nan::New<v8::Integer>(g_value_get_int(gvalue));
+      return Nan::New<Integer>(g_value_get_int(gvalue));
     case G_TYPE_UINT:
-      return Nan::New<v8::Uint32>(g_value_get_uint(gvalue));
+      return Nan::New<Uint32>(g_value_get_uint(gvalue));
     case G_TYPE_FLOAT:
-      return Nan::New<v8::Number>(g_value_get_float(gvalue));
+      return Nan::New<Number>(g_value_get_float(gvalue));
     case G_TYPE_DOUBLE:
-      return Nan::New<v8::Number>(g_value_get_double(gvalue));
+      return Nan::New<Number>(g_value_get_double(gvalue));
     case G_TYPE_STRING: {
       auto str = g_value_get_string(gvalue);
       if (str == NULL)
         return Nan::Null();
-      return Nan::New<v8::String>(str).ToLocalChecked();
+      return Nan::New<String>(str).ToLocalChecked();
     }
     default: {
       if (G_TYPE_IS_ENUM(gtype))

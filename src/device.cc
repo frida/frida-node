@@ -26,8 +26,10 @@ using v8::Isolate;
 using v8::Local;
 using v8::Number;
 using v8::Object;
+using v8::Persistent;
 using v8::ReadOnly;
 using v8::String;
+using v8::Uint32;
 using v8::Value;
 
 namespace frida {
@@ -81,15 +83,15 @@ void Device::Init(Local<Object> exports, Runtime* runtime) {
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
   runtime->SetDataPointer(DEVICE_DATA_CONSTRUCTOR,
-      new v8::Persistent<v8::Function>(isolate, ctor));
+      new Persistent<Function>(isolate, ctor));
 }
 
 Local<Object> Device::New(gpointer handle, Runtime* runtime) {
   auto ctor = Nan::New<Function>(
-      *static_cast<v8::Persistent<Function>*>(
+      *static_cast<Persistent<Function>*>(
       runtime->GetDataPointer(DEVICE_DATA_CONSTRUCTOR)));
   const int argc = 1;
-  Local<Value> argv[argc] = { Nan::New<v8::External>(handle) };
+  Local<Value> argv[argc] = { Nan::New<External>(handle) };
   return Nan::NewInstance(ctor, argc, argv).ToLocalChecked();
 }
 
@@ -209,7 +211,7 @@ class EnumerateApplicationsOperation : public Operation<FridaDevice> {
 
   Local<Value> Result(Isolate* isolate) {
     auto size = frida_application_list_size(applications_);
-    auto applications = Nan::New<v8::Array>(size);
+    auto applications = Nan::New<Array>(size);
     for (auto i = 0; i != size; i++) {
       auto handle = frida_application_list_get(applications_, i);
       auto application = Application::New(handle, runtime_);
@@ -253,7 +255,7 @@ class EnumerateProcessesOperation : public Operation<FridaDevice> {
 
   Local<Value> Result(Isolate* isolate) {
     auto size = frida_process_list_size(processes_);
-    auto processes = Nan::New<v8::Array>(size);
+    auto processes = Nan::New<Array>(size);
     for (auto i = 0; i != size; i++) {
       auto handle = frida_process_list_get(processes_, i);
       auto process = Process::New(handle, runtime_);
@@ -357,7 +359,7 @@ class EnumeratePendingSpawnOperation : public Operation<FridaDevice> {
 
   Local<Value> Result(Isolate* isolate) {
     auto size = frida_spawn_list_size(pending_spawn_);
-    auto pending_spawn = Nan::New<v8::Array>(size);
+    auto pending_spawn = Nan::New<Array>(size);
     for (auto i = 0; i != size; i++) {
       auto handle = frida_spawn_list_get(pending_spawn_, i);
       auto spawn = Spawn::New(handle, runtime_);
@@ -402,7 +404,7 @@ class EnumeratePendingChildrenOperation : public Operation<FridaDevice> {
 
   Local<Value> Result(Isolate* isolate) {
     auto size = frida_child_list_size(pending_children_);
-    auto pending_children = Nan::New<v8::Array>(size);
+    auto pending_children = Nan::New<Array>(size);
     for (auto i = 0; i != size; i++) {
       auto handle = frida_child_list_get(pending_children_, i);
       auto child = Child::New(handle, runtime_);
@@ -455,7 +457,7 @@ class SpawnOperation : public Operation<FridaDevice> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Nan::New<v8::Uint32>(pid_);
+    return Nan::New<Uint32>(pid_);
   }
 
   gchar* program_;
@@ -542,7 +544,7 @@ NAN_METHOD(Device::Spawn) {
 
   if (valid) {
     if (aux_value->IsObject()) {
-      auto object = Local<v8::Object>::Cast(aux_value);
+      auto object = Local<Object>::Cast(aux_value);
 
       Local<Array> keys(object->GetOwnPropertyNames(context).ToLocalChecked());
       uint32_t n = keys->Length();
@@ -822,7 +824,7 @@ class InjectLibraryFileOperation : public Operation<FridaDevice> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Nan::New<v8::Uint32>(id_);
+    return Nan::New<Uint32>(id_);
   }
 
   const guint pid_;
@@ -889,7 +891,7 @@ class InjectLibraryBlobOperation : public Operation<FridaDevice> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    return Nan::New<v8::Uint32>(id_);
+    return Nan::New<Uint32>(id_);
   }
 
   const guint pid_;
@@ -986,11 +988,11 @@ Local<Value> Device::TransformSignal(const gchar* name, guint index,
   auto runtime = static_cast<Runtime*>(user_data);
 
   if (index == 0 && (strcmp(name, "spawn-added") == 0 ||
-       strcmp(name, "spawn-removed") == 0))
+        strcmp(name, "spawn-removed") == 0))
     return Spawn::New(g_value_get_object(value), runtime);
 
   if (index == 0 && (strcmp(name, "child-added") == 0 ||
-       strcmp(name, "child-removed") == 0))
+        strcmp(name, "child-removed") == 0))
     return Child::New(g_value_get_object(value), runtime);
 
   if (index == 0 && strcmp(name, "process-crashed") == 0)
