@@ -40,7 +40,6 @@ Device::Device(FridaDevice* handle, Runtime* runtime)
 }
 
 Device::~Device() {
-  signals_.Reset();
   frida_unref(handle_);
 }
 

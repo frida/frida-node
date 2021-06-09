@@ -31,7 +31,6 @@ IOStream::IOStream(GIOStream* handle, Runtime* runtime)
 }
 
 IOStream::~IOStream() {
-  signals_.Reset();
   g_object_unref(handle_);
 }
 

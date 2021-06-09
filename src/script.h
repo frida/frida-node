@@ -26,8 +26,6 @@ class Script : public GLibObject {
 
   static v8::Local<v8::Value> TransformMessageSignal(const gchar* name,
       guint index, const GValue* value, gpointer user_data);
-
-  v8::Persistent<v8::Object> signals_;
 };
 
 }

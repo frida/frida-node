@@ -45,8 +45,6 @@ class Device : public GLibObject {
   static void OnConnect(const gchar* signal, gpointer user_data);
   static void OnDisconnect(const gchar* signal, gpointer user_data);
   static bool ShouldStayAliveToEmit(const gchar* signal);
-
-  v8::Persistent<v8::Object> signals_;
 };
 
 }

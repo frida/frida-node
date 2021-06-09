@@ -27,7 +27,6 @@ Script::Script(FridaScript* handle, Runtime* runtime)
 }
 
 Script::~Script() {
-  signals_.Reset();
   frida_unref(handle_);
 }
 

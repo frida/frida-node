@@ -33,7 +33,6 @@ DeviceManager::~DeviceManager() {
       static_cast<GSList*>(
       runtime_->GetDataPointer(DEVICE_MANAGER_DATA_WRAPPERS)), this));
 
-  signals_.Reset();
   frida_unref(handle_);
 }
 

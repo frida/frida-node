@@ -24,8 +24,6 @@ class IOStream : public GLibObject {
   static NAN_METHOD(Close);
   static NAN_METHOD(Read);
   static NAN_METHOD(Write);
-
-  v8::Persistent<v8::Object> signals_;
 };
 
 }

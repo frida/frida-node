@@ -5,7 +5,6 @@
 #include <nan.h>
 
 #define CANCELLABLE_DATA_TEMPLATE "cancellable:tpl"
-#define CANCELLABLE_DATA_CONSTRUCTOR "cancellable:ctor"
 
 using v8::AccessorSignature;
 using v8::DEFAULT;
@@ -49,8 +48,6 @@ void Cancellable::Init(Local<Object> exports, Runtime* runtime) {
   Nan::Set(exports, name, ctor);
   runtime->SetDataPointer(CANCELLABLE_DATA_TEMPLATE,
       new Persistent<FunctionTemplate>(isolate, tpl));
-  runtime->SetDataPointer(CANCELLABLE_DATA_CONSTRUCTOR,
-      new Persistent<Function>(isolate, ctor));
 }
 
 GCancellable* Cancellable::TryParse(Local<Value> value, Runtime* runtime) {

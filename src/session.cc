@@ -37,7 +37,6 @@ Session::Session(FridaSession* handle, Runtime* runtime)
 }
 
 Session::~Session() {
-  signals_.Reset();
   frida_unref(handle_);
 }
 
