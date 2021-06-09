@@ -279,8 +279,8 @@ static void signals_closure_marshal(GClosure* closure, GValue* return_gvalue,
       }
 
       auto context = Isolate::GetCurrent()->GetCurrentContext();
-      auto recv = Nan::New<Object>(*self->parent);
       auto callback = Nan::New<Function>(*self->callback);
+      auto recv = Nan::Undefined();
       Local<Value> no_result;
       callback->Call(context, recv, argc, argv).FromMaybe(no_result);
 
