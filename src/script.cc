@@ -9,12 +9,15 @@
 #define SCRIPT_DATA_CONSTRUCTOR "script:ctor"
 
 using std::strcmp;
+using v8::AccessorSignature;
+using v8::DEFAULT;
 using v8::External;
 using v8::Function;
 using v8::Isolate;
 using v8::Local;
 using v8::Object;
 using v8::Persistent;
+using v8::ReadOnly;
 using v8::String;
 using v8::Value;
 
@@ -34,6 +37,12 @@ void Script::Init(Local<Object> exports, Runtime* runtime) {
 
   auto name = Nan::New("Script").ToLocalChecked();
   auto tpl = CreateTemplate(name, New, runtime);
+
+  auto instance_tpl = tpl->InstanceTemplate();
+  auto data = Local<Value>();
+  auto signature = AccessorSignature::New(isolate, tpl);
+  Nan::SetAccessor(instance_tpl, Nan::New("isDestroyed").ToLocalChecked(),
+      IsDestroyed, 0, data, DEFAULT, ReadOnly, signature);
 
   Nan::SetPrototypeMethod(tpl, "load", Load);
   Nan::SetPrototypeMethod(tpl, "unload", Unload);
@@ -81,6 +90,14 @@ NAN_METHOD(Script::New) {
   monitor->Enable(wrapper);
 
   info.GetReturnValue().Set(obj);
+}
+
+NAN_PROPERTY_GETTER(Script::IsDestroyed) {
+  auto handle = ObjectWrap::Unwrap<Script>(
+      info.Holder())->GetHandle<FridaScript>();
+
+  info.GetReturnValue().Set(
+      Nan::New(static_cast<bool>(frida_script_is_destroyed(handle))));
 }
 
 namespace {

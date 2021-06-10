@@ -18,6 +18,8 @@ class Script : public GLibObject {
 
   static NAN_METHOD(New);
 
+  static NAN_PROPERTY_GETTER(IsDestroyed);
+
   static NAN_METHOD(Load);
   static NAN_METHOD(Unload);
   static NAN_METHOD(Eternalize);

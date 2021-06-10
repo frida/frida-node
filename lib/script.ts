@@ -21,6 +21,10 @@ export class Script {
         this.message = new Signal<ScriptMessageHandler>(signals, "message");
     }
 
+    get isDestroyed(): boolean {
+        return this.impl.isDestroyed;
+    }
+
     get exports(): ScriptExports {
         return this.exportsProxy;
     }
