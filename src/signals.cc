@@ -145,11 +145,9 @@ NAN_METHOD(Signals::Connect) {
   g_closure_sink(closure);
   wrapper->closures_ = g_slist_append(wrapper->closures_, signals_closure);
 
-  runtime->GetGLibContext()->Schedule([=]() {
-    signals_closure->handler_id = g_signal_connect_closure_by_id(
-        wrapper->handle_, signal_id, 0, closure, TRUE);
-    g_assert(signals_closure->handler_id != 0);
-  });
+  signals_closure->handler_id = g_signal_connect_closure_by_id(wrapper->handle_,
+      signal_id, 0, closure, TRUE);
+  g_assert(signals_closure->handler_id != 0);
 
   if (wrapper->connect_ != NULL) {
     wrapper->connect_(g_signal_name(signal_id), wrapper->connect_data_);
@@ -179,15 +177,11 @@ NAN_METHOD(Signals::Disconnect) {
 
       signals_closure->alive = FALSE;
 
-      auto runtime = wrapper->runtime_;
-      runtime->GetGLibContext()->Schedule([=]() {
-        g_assert(signals_closure->handler_id != 0);
-        g_signal_handler_disconnect(wrapper->handle_,
-            signals_closure->handler_id);
-        runtime->GetUVContext()->Schedule([=]() {
-          g_closure_unref(closure);
-        });
-      });
+      g_assert(signals_closure->handler_id != 0);
+      g_signal_handler_disconnect(wrapper->handle_,
+          signals_closure->handler_id);
+
+      g_closure_unref(closure);
 
       break;
     }
