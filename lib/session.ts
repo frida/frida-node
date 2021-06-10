@@ -101,7 +101,7 @@ export enum SessionDetachReason {
     ApplicationRequested = "application-requested",
     ProcessReplaced = "process-replaced",
     ProcessTerminated = "process-terminated",
-    ServerTerminated = "server-terminated",
+    ConnectionTerminated = "connection-terminated",
     DeviceLost = "device-lost"
 }
 
