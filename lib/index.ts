@@ -131,6 +131,11 @@ export const Bus = busModule.Bus;
 export type BusDetachedHandler = busModule.BusDetachedHandler;
 export type BusMessageHandler = busModule.BusMessageHandler;
 export type SocketAddress = socketAddressModule.SocketAddress;
+export type IPV4SocketAddress = socketAddressModule.IPV4SocketAddress;
+export type IPV6SocketAddress = socketAddressModule.IPV6SocketAddress;
+export type AnonymousUnixSocketAddress = socketAddressModule.AnonymousUnixSocketAddress;
+export type PathUnixSocketAddress = socketAddressModule.PathUnixSocketAddress;
+export type AbstractUnixSocketAddress = socketAddressModule.AbstractUnixSocketAddress;
 
 let sharedDeviceManager: DeviceManager = null;
 
