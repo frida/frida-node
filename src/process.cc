@@ -2,8 +2,6 @@
 
 #include "icon.h"
 
-#include <nan.h>
-
 #define PROCESS_DATA_CONSTRUCTOR "process:ctor"
 
 using v8::AccessorSignature;

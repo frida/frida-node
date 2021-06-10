@@ -3,9 +3,6 @@
 #include "operation.h"
 #include "signals.h"
 
-#include <nan.h>
-#include <node.h>
-
 #define IOSTREAM_DATA_CONSTRUCTOR "iostream:ctor"
 
 using v8::AccessorSignature;

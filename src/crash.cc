@@ -1,7 +1,5 @@
 #include "crash.h"
 
-#include <nan.h>
-
 #define CRASH_DATA_CONSTRUCTOR "crash:ctor"
 
 using v8::AccessorSignature;

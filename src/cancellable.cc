@@ -2,8 +2,6 @@
 
 #include "signals.h"
 
-#include <nan.h>
-
 #define CANCELLABLE_DATA_TEMPLATE "cancellable:tpl"
 
 using v8::AccessorSignature;

@@ -5,8 +5,6 @@
 #include "signals.h"
 
 #include <cstring>
-#include <nan.h>
-#include <node.h>
 
 #define DEVICE_MANAGER_DATA_WRAPPERS "device_manager:wrappers"
 

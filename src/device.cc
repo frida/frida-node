@@ -11,9 +11,6 @@
 #include "signals.h"
 #include "spawn.h"
 
-#include <nan.h>
-#include <node.h>
-
 #define DEVICE_DATA_CONSTRUCTOR "device:ctor"
 
 using v8::AccessorSignature;

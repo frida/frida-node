@@ -15,8 +15,6 @@
 #include "spawn.h"
 #include "uv_context.h"
 
-#include <node.h>
-
 using v8::Context;
 using v8::Local;
 using v8::Object;

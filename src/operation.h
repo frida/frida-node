@@ -4,9 +4,6 @@
 #include "cancellable.h"
 #include "runtime.h"
 
-#include <glib.h>
-#include <nan.h>
-
 namespace frida {
 
 template<class T>

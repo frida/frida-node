@@ -1,8 +1,5 @@
 #include "icon.h"
 
-#include <nan.h>
-#include <node.h>
-
 #define ICON_DATA_CONSTRUCTOR "icon:ctor"
 
 using v8::AccessorSignature;

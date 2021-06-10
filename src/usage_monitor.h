@@ -3,9 +3,6 @@
 
 #include "glib_object.h"
 
-#include <v8.h>
-#include <nan.h>
-
 using Nan::HandleScope;
 
 namespace frida {

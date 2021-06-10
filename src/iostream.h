@@ -4,7 +4,6 @@
 #include "glib_object.h"
 
 #include <gio/gio.h>
-#include <nan.h>
 
 namespace frida {
 

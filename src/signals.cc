@@ -1,8 +1,6 @@
 #include "signals.h"
 
 #include <cstring>
-#include <nan.h>
-#include <node.h>
 
 #define SIGNALS_DATA_CONSTRUCTOR "signals:ctor"
 

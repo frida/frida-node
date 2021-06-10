@@ -1,7 +1,5 @@
 #include "spawn.h"
 
-#include <nan.h>
-
 #define SPAWN_DATA_CONSTRUCTOR "spawn:ctor"
 
 using v8::AccessorSignature;

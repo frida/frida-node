@@ -1,7 +1,5 @@
 #include "glib_object.h"
 
-#include <nan.h>
-
 using v8::External;
 using v8::FunctionTemplate;
 using v8::Local;

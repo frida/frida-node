@@ -6,9 +6,6 @@
 #include "signals.h"
 #include "usage_monitor.h"
 
-#include <nan.h>
-#include <node.h>
-
 #define SESSION_DATA_CONSTRUCTOR "session:ctor"
 
 using v8::AccessorSignature;

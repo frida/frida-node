@@ -2,8 +2,6 @@
 
 #include "icon.h"
 
-#include <nan.h>
-
 #define APPLICATION_DATA_CONSTRUCTOR "application:ctor"
 
 using v8::AccessorSignature;

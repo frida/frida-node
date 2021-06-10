@@ -1,7 +1,5 @@
 #include "child.h"
 
-#include <nan.h>
-
 #define CHILD_DATA_CONSTRUCTOR "child:ctor"
 
 using v8::AccessorSignature;

@@ -4,7 +4,6 @@
 #include "glib_object.h"
 
 #include <frida-core.h>
-#include <nan.h>
 
 namespace frida {
 

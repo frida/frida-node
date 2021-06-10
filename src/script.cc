@@ -5,8 +5,6 @@
 #include "usage_monitor.h"
 
 #include <cstring>
-#include <nan.h>
-#include <node.h>
 
 #define SCRIPT_DATA_CONSTRUCTOR "script:ctor"
 
