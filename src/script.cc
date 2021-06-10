@@ -8,6 +8,7 @@
 
 #define SCRIPT_DATA_CONSTRUCTOR "script:ctor"
 
+using std::strcmp;
 using v8::External;
 using v8::Function;
 using v8::Isolate;

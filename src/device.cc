@@ -11,8 +11,11 @@
 #include "signals.h"
 #include "spawn.h"
 
+#include <cstring>
+
 #define DEVICE_DATA_CONSTRUCTOR "device:ctor"
 
+using std::strcmp;
 using v8::AccessorSignature;
 using v8::Array;
 using v8::Boolean;

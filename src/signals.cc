@@ -4,6 +4,7 @@
 
 #define SIGNALS_DATA_CONSTRUCTOR "signals:ctor"
 
+using std::memset;
 using v8::Boolean;
 using v8::Exception;
 using v8::External;

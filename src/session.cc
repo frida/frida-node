@@ -6,8 +6,11 @@
 #include "signals.h"
 #include "usage_monitor.h"
 
+#include <cstring>
+
 #define SESSION_DATA_CONSTRUCTOR "session:ctor"
 
+using std::strcmp;
 using v8::AccessorSignature;
 using v8::Array;
 using v8::DEFAULT;

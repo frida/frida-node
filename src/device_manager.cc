@@ -8,6 +8,7 @@
 
 #define DEVICE_MANAGER_DATA_WRAPPERS "device_manager:wrappers"
 
+using std::strcmp;
 using v8::Array;
 using v8::Isolate;
 using v8::Local;
