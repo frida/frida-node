@@ -1,6 +1,7 @@
 #include "device.h"
 
 #include "application.h"
+#include "bus.h"
 #include "child.h"
 #include "crash.h"
 #include "icon.h"
@@ -53,6 +54,8 @@ void Device::Init(Local<Object> exports, Runtime* runtime) {
   auto data = Local<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
   Nan::SetAccessor(instance_tpl, Nan::New("isLost").ToLocalChecked(), IsLost, 0,
+      data, DEFAULT, ReadOnly, signature);
+  Nan::SetAccessor(instance_tpl, Nan::New("bus").ToLocalChecked(), GetBus, 0,
       data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("type").ToLocalChecked(), GetType, 0,
       data, DEFAULT, ReadOnly, signature);
@@ -155,6 +158,14 @@ NAN_PROPERTY_GETTER(Device::GetType) {
 
   info.GetReturnValue().Set(Runtime::ValueFromEnum(
       frida_device_get_dtype(handle), FRIDA_TYPE_DEVICE_TYPE));
+}
+
+NAN_PROPERTY_GETTER(Device::GetBus) {
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
+  auto handle = wrapper->GetHandle<FridaDevice>();
+
+  info.GetReturnValue().Set(
+      Bus::New(frida_device_get_bus(handle), wrapper->runtime_));
 }
 
 NAN_PROPERTY_GETTER(Device::IsLost) {
@@ -557,7 +568,7 @@ NAN_METHOD(Device::Spawn) {
       Local<Array> keys(object->GetOwnPropertyNames(context).ToLocalChecked());
       uint32_t n = keys->Length();
 
-      GVariantDict* aux = frida_spawn_options_get_aux(options);
+      GHashTable* aux = frida_spawn_options_get_aux(options);
 
       for (uint32_t i = 0; i != n; i++) {
         auto key = Nan::Get(keys, i).ToLocalChecked();
@@ -577,7 +588,7 @@ NAN_METHOD(Device::Spawn) {
           raw_value = g_variant_new_string(*value_str);
         }
 
-        g_variant_dict_insert_value(aux, *key_str, raw_value);
+        g_hash_table_insert(aux, g_strdup(*key_str), raw_value);
       }
     } else {
       Nan::ThrowTypeError("Bad argument, 'aux' must be an object");
@@ -750,12 +761,18 @@ namespace {
 
 class AttachOperation : public Operation<FridaDevice> {
  public:
-  AttachOperation(guint pid, FridaRealm realm) : pid_(pid), realm_(realm) {
+  AttachOperation(guint pid, FridaSessionOptions* options)
+    : pid_(pid),
+      options_(options) {
+  }
+
+  ~AttachOperation() {
+    g_object_unref(options_);
   }
 
  protected:
   void Begin() {
-    frida_device_attach(handle_, pid_, realm_, cancellable_, OnReady, this);
+    frida_device_attach(handle_, pid_, options_, cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -770,7 +787,7 @@ class AttachOperation : public Operation<FridaDevice> {
 
  private:
   const guint pid_;
-  FridaRealm realm_;
+  FridaSessionOptions* options_;
   FridaSession* session_;
 };
 
@@ -780,13 +797,14 @@ NAN_METHOD(Device::Attach) {
   auto isolate = info.GetIsolate();
   auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
-  if (info.Length() < 2) {
+  if (info.Length() < 3) {
     Nan::ThrowTypeError("Missing one or more arguments");
     return;
   }
 
   auto pid_value = info[0];
   auto realm_value = info[1];
+  auto persist_timeout_value = info[2];
 
   int64_t pid = -1;
   if (pid_value->IsNumber()) {
@@ -797,12 +815,39 @@ NAN_METHOD(Device::Attach) {
     return;
   }
 
-  FridaRealm realm;
-  if (!Runtime::ValueToEnum(realm_value, FRIDA_TYPE_REALM, &realm)) {
+  auto options = frida_session_options_new();
+  bool valid = true;
+
+  if (!realm_value->IsNull()) {
+    FridaRealm realm;
+    if (Runtime::ValueToEnum(realm_value, FRIDA_TYPE_REALM, &realm))
+      frida_session_options_set_realm(options, realm);
+    else
+      valid = false;
+  }
+
+  if (valid && !persist_timeout_value->IsNull()) {
+    if (persist_timeout_value->IsNumber()) {
+      auto persist_timeout =
+          Nan::To<int32_t>(persist_timeout_value).FromMaybe(-1);
+      if (persist_timeout >= 0) {
+        frida_session_options_set_persist_timeout(options, persist_timeout);
+      } else {
+        Nan::ThrowTypeError("Bad argument, invalid 'persistTimeout'");
+        valid = false;
+      }
+    } else {
+      Nan::ThrowTypeError("Bad argument, 'persistTimeout' must be a number");
+      valid = false;
+    }
+  }
+
+  if (!valid) {
+    g_object_unref(options);
     return;
   }
 
-  auto operation = new AttachOperation(static_cast<guint>(pid), realm);
+  auto operation = new AttachOperation(static_cast<guint>(pid), options);
   operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));

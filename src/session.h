@@ -19,8 +19,10 @@ class Session : public GLibObject {
   static NAN_METHOD(New);
 
   static NAN_PROPERTY_GETTER(GetPid);
+  static NAN_PROPERTY_GETTER(IsDetached);
 
   static NAN_METHOD(Detach);
+  static NAN_METHOD(Resume);
   static NAN_METHOD(EnableChildGating);
   static NAN_METHOD(DisableChildGating);
   static NAN_METHOD(CreateScript);
@@ -28,7 +30,8 @@ class Session : public GLibObject {
   static NAN_METHOD(CompileScript);
   static NAN_METHOD(EnableDebugger);
   static NAN_METHOD(DisableDebugger);
-  static NAN_METHOD(EnableJit);
+  static NAN_METHOD(SetupPeerConnection);
+  static NAN_METHOD(JoinPortal);
 
   static v8::Local<v8::Value> TransformSignal(const gchar* name, guint index,
       const GValue* value, gpointer user_data);

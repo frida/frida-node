@@ -1,4 +1,5 @@
 import { Application } from "./application";
+import { Bus } from "./bus";
 import { Cancellable } from "./cancellable";
 import { Child } from "./child";
 import { Crash } from "./crash";
@@ -22,7 +23,11 @@ export class Device {
     uninjected: Signal<UninjectedHandler>;
     lost: Signal<DeviceLostHandler>;
 
+    bus: Bus;
+
     constructor(private impl: any) {
+        this.bus = new Bus(impl.bus);
+
         const { signals } = impl;
         this.spawnAdded = new Signal<SpawnAddedHandler>(signals, "spawn-added");
         this.spawnRemoved = new Signal<SpawnRemovedHandler>(signals, "spawn-removed");
@@ -139,21 +144,15 @@ export class Device {
         return this.impl.kill(pid, cancellable);
     }
 
-    async attach(targetOrParameters: TargetProcess | AttachParameters, cancellable?: Cancellable): Promise<Session> {
-        let target: TargetProcess;
-        let realm: Realm;
-        if (typeof targetOrParameters === "object") {
-            const parameters = targetOrParameters;
-            target = parameters.target;
-            realm = parameters.realm ?? Realm.Native;
-        } else {
-            target = targetOrParameters;
-            realm = Realm.Native;
-        }
+    async attach(target: TargetProcess, options: SessionOptions = {}, cancellable?: Cancellable): Promise<Session> {
+        const {
+            realm = null,
+            persistTimeout = null,
+        } = options;
 
         const pid = await this.getPid(target, cancellable);
 
-        return new Session(await this.impl.attach(pid, realm, cancellable));
+        return new Session(await this.impl.attach(pid, realm, persistTimeout, cancellable));
     }
 
     async injectLibraryFile(target: TargetProcess, path: string, entrypoint: string, data: string,
@@ -228,9 +227,9 @@ export enum Stdio {
 
 export type TargetProcess = ProcessID | ProcessName;
 
-export interface AttachParameters {
-    target: TargetProcess;
+export interface SessionOptions {
     realm?: Realm;
+    persistTimeout?: number;
 }
 
 export enum Realm {

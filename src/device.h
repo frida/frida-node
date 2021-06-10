@@ -22,6 +22,7 @@ class Device : public GLibObject {
   static NAN_PROPERTY_GETTER(GetName);
   static NAN_PROPERTY_GETTER(GetIcon);
   static NAN_PROPERTY_GETTER(GetType);
+  static NAN_PROPERTY_GETTER(GetBus);
   static NAN_PROPERTY_GETTER(IsLost);
 
   static NAN_METHOD(GetFrontmostApplication);

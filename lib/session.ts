@@ -1,5 +1,7 @@
 import { Cancellable } from "./cancellable";
 import { Crash } from "./crash";
+import { PortalMembership } from "./portal_membership";
+import { Relay } from "./relay";
 import { Script, ScriptOptions } from "./script";
 import { Signal } from "./signals";
 
@@ -17,8 +19,16 @@ export class Session {
         return this.impl.pid;
     }
 
+    get isDetached(): boolean {
+        return this.impl.isDetached;
+    }
+
     detach(cancellable?: Cancellable): Promise<void> {
         return this.impl.detach(cancellable);
+    }
+
+    resume(cancellable?: Cancellable): Promise<void> {
+        return this.impl.resume(cancellable);
     }
 
     enableChildGating(cancellable?: Cancellable): Promise<void> {
@@ -57,8 +67,21 @@ export class Session {
         return this.impl.disableDebugger(cancellable);
     }
 
-    enableJit(cancellable?: Cancellable): Promise<void> {
-        return this.impl.enableJit(cancellable);
+    setupPeerConnection(options: PeerOptions = {}, cancellable?: Cancellable): Promise<void> {
+        const {
+            stunServer = null,
+            relays = [],
+        } = options;
+        return this.impl.setupPeerConnection(stunServer, relays, cancellable);
+    }
+
+    async joinPortal(address: string, options: PortalOptions = {}, cancellable?: Cancellable): Promise<PortalMembership> {
+        const {
+            certificate = null,
+            token = null,
+            acl = null,
+        } = options;
+        return new PortalMembership(await this.impl.joinPortal(address, certificate, token, acl, cancellable));
     }
 
     [inspect.custom](depth, options) {
@@ -80,4 +103,15 @@ export enum SessionDetachReason {
 
 export interface EnableDebuggerOptions {
     port?: number;
+}
+
+export interface PeerOptions {
+    stunServer?: string;
+    relays?: Relay[];
+}
+
+export interface PortalOptions {
+    certificate?: string;
+    token?: string;
+    acl?: string[];
 }

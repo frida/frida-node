@@ -39,10 +39,6 @@ describe("Session", () => {
         }
         expect(await evaluteScript("Script.runtime", { runtime: frida.ScriptRuntime.V8 })).to.equal("V8");
 
-        expect(await evaluteScript("Script.runtime")).to.equal("QJS");
-        await session.enableJit();
-        expect(await evaluteScript("Script.runtime")).to.equal("V8");
-
         const bytes = await session.compileScript("console.log('Hello World!');", { runtime: frida.ScriptRuntime.QJS });
         expect(bytes).instanceOf(Buffer);
         expect(bytes.length).to.be.greaterThan(0);

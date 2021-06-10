@@ -1,7 +1,12 @@
 #include "runtime.h"
 
+#include <cstring>
 #include <nan.h>
+#ifdef G_OS_UNIX
+# include <gio/gunixsocketaddress.h>
+#endif
 
+using std::strchr;
 using v8::Array;
 using v8::Boolean;
 using v8::Function;
@@ -210,23 +215,24 @@ Local<String> Runtime::ValueFromEnum(gint value, GType type) {
   return result;
 }
 
-Local<Value> Runtime::ValueFromVariantDict(GVariant* dict) {
+Local<Value> Runtime::ValueFromOptionsDict(GHashTable* dict) {
   auto result = Nan::New<Object>();
 
-  GVariantIter iter;
+  GHashTableIter iter;
   gchar* key;
   GVariant* raw_value;
-  g_variant_iter_init(&iter, dict);
-  while (g_variant_iter_next(&iter, "{sv}", &key, &raw_value)) {
+  g_hash_table_iter_init(&iter, dict);
+  while (g_hash_table_iter_next(&iter, reinterpret_cast<gpointer*>(&key),
+        reinterpret_cast<gpointer*>(&raw_value))) {
     Local<Value> value;
 
-    if (g_variant_is_of_type (raw_value, G_VARIANT_TYPE_STRING)) {
+    if (g_variant_is_of_type(raw_value, G_VARIANT_TYPE_STRING)) {
       value = Nan::New<String>(
           g_variant_get_string(raw_value, NULL)).ToLocalChecked();
-    } else if (g_variant_is_of_type (raw_value, G_VARIANT_TYPE_INT64)) {
+    } else if (g_variant_is_of_type(raw_value, G_VARIANT_TYPE_INT64)) {
       value = Nan::New<Number>(
           static_cast<double>(g_variant_get_int64(raw_value)));
-    } else if (g_variant_is_of_type (raw_value, G_VARIANT_TYPE_BOOLEAN)) {
+    } else if (g_variant_is_of_type(raw_value, G_VARIANT_TYPE_BOOLEAN)) {
       value = Nan::New<Boolean>(
           static_cast<bool>(g_variant_get_boolean(raw_value)));
     } else {
@@ -234,12 +240,114 @@ Local<Value> Runtime::ValueFromVariantDict(GVariant* dict) {
     }
 
     Nan::Set(result, Nan::New(key).ToLocalChecked(), value);
-
-    g_variant_unref(raw_value);
-    g_free(key);
   }
 
   return result;
+}
+
+Local<Object> Runtime::ValueFromSocketAddress(GSocketAddress* address) {
+  auto result = Nan::New<Object>();
+
+  if (G_IS_INET_SOCKET_ADDRESS(address)) {
+    GSocketFamily family = g_socket_address_get_family(address);
+    GInetSocketAddress* sa = G_INET_SOCKET_ADDRESS(address);
+
+    Nan::Set(result,
+        Nan::New("family").ToLocalChecked(),
+        Nan::New((family == G_SOCKET_FAMILY_IPV6) ? "ipv6" : "ipv4")
+        .ToLocalChecked());
+
+    gchar* host = g_inet_address_to_string(
+        g_inet_socket_address_get_address(sa));
+    Nan::Set(result,
+        Nan::New("address").ToLocalChecked(),
+        Nan::New(host).ToLocalChecked());
+    g_free(host);
+
+    Nan::Set(result, Nan::New("port").ToLocalChecked(),
+        Nan::New(static_cast<uint32_t>(g_inet_socket_address_get_port(sa))));
+
+    if (family == G_SOCKET_FAMILY_IPV6) {
+      Nan::Set(result,
+          Nan::New("flowlabel").ToLocalChecked(),
+          Nan::New(g_inet_socket_address_get_flowinfo(sa)));
+      Nan::Set(result,
+          Nan::New("scopeid").ToLocalChecked(),
+          Nan::New(g_inet_socket_address_get_scope_id(sa)));
+    }
+  }
+
+#ifdef G_OS_UNIX
+  if (G_IS_UNIX_SOCKET_ADDRESS(address)) {
+    GUnixSocketAddress* sa = G_UNIX_SOCKET_ADDRESS(address);
+
+    switch (g_unix_socket_address_get_address_type(sa)) {
+      case G_UNIX_SOCKET_ADDRESS_ANONYMOUS: {
+        Nan::Set(result,
+            Nan::New("family").ToLocalChecked(),
+            Nan::New("unix:anonymous").ToLocalChecked());
+
+        break;
+      }
+      case G_UNIX_SOCKET_ADDRESS_PATH: {
+        Nan::Set(result,
+            Nan::New("family").ToLocalChecked(),
+            Nan::New("unix:path").ToLocalChecked());
+
+        gchar* path = g_filename_to_utf8(g_unix_socket_address_get_path(sa), -1,
+            NULL, NULL, NULL);
+        Nan::Set(result,
+            Nan::New("path").ToLocalChecked(),
+            Nan::New(path).ToLocalChecked());
+        g_free(path);
+
+        break;
+      }
+      case G_UNIX_SOCKET_ADDRESS_ABSTRACT:
+      case G_UNIX_SOCKET_ADDRESS_ABSTRACT_PADDED: {
+        Nan::Set(result,
+            Nan::New("family").ToLocalChecked(),
+            Nan::New("unix:abstract").ToLocalChecked());
+
+        Nan::Set(result,
+            Nan::New("path").ToLocalChecked(),
+            Nan::CopyBuffer(
+                g_unix_socket_address_get_path(sa),
+                g_unix_socket_address_get_path_len(sa)).ToLocalChecked());
+
+        break;
+      }
+      default:
+        break;
+    }
+  }
+#endif
+
+  return result;
+}
+
+bool Runtime::ValueToCertificate(Local<Value> value,
+    GTlsCertificate** certificate) {
+  if (!value->IsString()) {
+    Nan::ThrowTypeError("Bad argument, expected a string");
+    return false;
+  }
+  Nan::Utf8String str(value);
+  const char* cstr = *str;
+
+  GError* error = NULL;
+  if (strchr(cstr, '\n') != NULL)
+    *certificate = g_tls_certificate_new_from_pem(cstr, -1, &error);
+  else
+    *certificate = g_tls_certificate_new_from_file(cstr, &error);
+
+  if (error != NULL) {
+    Nan::ThrowError(Nan::Error(error->message));
+    g_error_free(error);
+    return false;
+  }
+
+  return true;
 }
 
 const char* Runtime::ClassNameFromC(const char* cname) {

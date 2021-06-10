@@ -311,6 +311,11 @@ static Local<Value> signals_closure_gvalue_to_jsvalue(const GValue* gvalue) {
       if (G_TYPE_IS_ENUM(gtype))
         return Runtime::ValueFromEnum(g_value_get_enum(gvalue), gtype);
 
+      if (g_type_is_a(gtype, G_TYPE_SOCKET_ADDRESS)) {
+        return Runtime::ValueFromSocketAddress(
+            G_SOCKET_ADDRESS(g_value_get_object(gvalue)));
+      }
+
       g_assert(gtype == G_TYPE_BYTES);
       auto bytes = static_cast<GBytes*>(g_value_get_boxed(gvalue));
       if (bytes != NULL) {

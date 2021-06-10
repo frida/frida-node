@@ -187,40 +187,7 @@ NAN_METHOD(Script::Eternalize) {
   info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
-namespace {
-
-class PostOperation : public Operation<FridaScript> {
- public:
-  PostOperation(gchar* message, GBytes* data) : message_(message), data_(data) {
-  }
-
-  ~PostOperation() {
-    g_free(message_);
-    g_bytes_unref(data_);
-  }
-
- protected:
-  void Begin() {
-    frida_script_post(handle_, message_, data_, cancellable_, OnReady, this);
-  }
-
-  void End(GAsyncResult* result, GError** error) {
-    frida_script_post_finish(handle_, result, error);
-  }
-
-  Local<Value> Result(Isolate* isolate) {
-    return Nan::Undefined();
-  }
-
- private:
-  gchar* message_;
-  GBytes* data_;
-};
-
-}
-
 NAN_METHOD(Script::Post) {
-  auto isolate = info.GetIsolate();
   auto wrapper = ObjectWrap::Unwrap<Script>(info.Holder());
 
   auto num_args = info.Length();
@@ -242,10 +209,9 @@ NAN_METHOD(Script::Post) {
         node::Buffer::Length(buffer));
   }
 
-  auto operation = new PostOperation(g_strdup(*message), data);
-  operation->Schedule(isolate, wrapper, info);
+  frida_script_post(wrapper->GetHandle<FridaScript>(), *message, data);
 
-  info.GetReturnValue().Set(operation->GetPromise(isolate));
+  g_bytes_unref(data);
 }
 
 Local<Value> Script::TransformMessageSignal(const gchar* name, guint index,

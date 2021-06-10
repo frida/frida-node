@@ -13,7 +13,7 @@ async function main() {
 }
 
 async function probeRealm(device, target, realm) {
-  const session = await device.attach({ target, realm });
+  const session = await device.attach(target, { realm });
 
   const script = await session.createScript(source);
   script.message.connect(message => {

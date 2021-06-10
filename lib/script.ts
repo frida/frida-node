@@ -53,8 +53,8 @@ export class Script {
         return this.impl.eternalize(cancellable);
     }
 
-    post(message: any, data: Buffer | null = null, cancellable?: Cancellable): Promise<void> {
-        return this.impl.post(message, data, cancellable);
+    post(message: any, data: Buffer | null = null): void {
+        this.impl.post(message, data);
     }
 
     [inspect.custom](depth, options) {
@@ -182,7 +182,7 @@ class ScriptServices extends SignalAdapter implements RpcController {
 
             this.pendingRequests[id] = complete;
 
-            this.script.post(["frida:rpc", id, operation].concat(params), undefined, cancellable).catch(complete);
+            this.script.post(["frida:rpc", id, operation].concat(params));
             this.signals.connect("destroyed", onScriptDestroyed);
             if (cancellable !== undefined) {
                 cancellable.cancelled.connect(onOperationCancelled);

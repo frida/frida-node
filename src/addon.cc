@@ -1,19 +1,25 @@
 #include "application.h"
+#include "bus.h"
 #include "cancellable.h"
 #include "child.h"
 #include "crash.h"
 #include "device.h"
 #include "device_manager.h"
+#include "endpoint_parameters.h"
 #include "glib_context.h"
 #include "icon.h"
 #include "iostream.h"
+#include "portal_membership.h"
+#include "portal_service.h"
 #include "process.h"
+#include "relay.h"
 #include "runtime.h"
 #include "script.h"
 #include "session.h"
 #include "signals.h"
 #include "spawn.h"
 #include "uv_context.h"
+#include "web_gateway_service.h"
 
 using v8::Context;
 using v8::Local;
@@ -43,8 +49,14 @@ static void InitAll(Local<Object> exports,
   Child::Init(exports, runtime);
   Crash::Init(exports, runtime);
   Icon::Init(exports, runtime);
+  Bus::Init(exports, runtime);
   Session::Init(exports, runtime);
   Script::Init(exports, runtime);
+  Relay::Init(exports, runtime);
+  PortalMembership::Init(exports, runtime);
+  PortalService::Init(exports, runtime);
+  WebGatewayService::Init(exports, runtime);
+  EndpointParameters::Init(exports, runtime);
   IOStream::Init(exports, runtime);
   Cancellable::Init(exports, runtime);
 

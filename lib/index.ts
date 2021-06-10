@@ -1,18 +1,27 @@
 import * as applicationModule from "./application";
+import * as authenticationModule from "./authentication";
+import * as busModule from "./bus";
 import * as cancellableModule from "./cancellable";
 import * as childModule from "./child";
 import * as crashModule from "./crash";
 import * as deviceManagerModule from "./device_manager";
 import * as deviceModule from "./device";
+import * as endpointParametersModule from "./endpoint_parameters";
 import * as iconModule from "./icon";
 import * as iostreamModule from "./iostream";
+import * as portalMembershipModule from "./portal_membership";
+import * as portalServiceModule from "./portal_service";
 import * as processModule from "./process";
+import * as relayModule from "./relay";
 import * as scriptModule from "./script";
 import * as sessionModule from "./session";
+import * as socketAddressModule from "./socket_address";
 import * as spawnModule from "./spawn";
+import * as webGatewayServiceModule from "./web_gateway_service";
 
 export type DeviceManager = deviceManagerModule.DeviceManager;
 export const DeviceManager = deviceManagerModule.DeviceManager;
+export type RemoteDeviceOptions = deviceManagerModule.RemoteDeviceOptions;
 export type DeviceAddedHandler = deviceManagerModule.DeviceAddedHandler;
 export type DeviceRemovedHandler = deviceManagerModule.DeviceRemovedHandler;
 export type DevicesChangedHandler = deviceManagerModule.DevicesChangedHandler;
@@ -36,7 +45,7 @@ export type SpawnOptions = deviceModule.SpawnOptions;
 export type Stdio = deviceModule.Stdio;
 export const Stdio = deviceModule.Stdio;
 export type TargetProcess = deviceModule.TargetProcess;
-export type AttachParameters = deviceModule.AttachParameters;
+export type SessionOptions = deviceModule.SessionOptions;
 export type Realm = deviceModule.Realm;
 export const Realm = deviceModule.Realm;
 
@@ -46,6 +55,8 @@ export type SessionDetachedHandler = sessionModule.SessionDetachedHandler;
 export type SessionDetachReason = sessionModule.SessionDetachReason;
 export const SessionDetachReason = sessionModule.SessionDetachReason;
 export type EnableDebuggerOptions = sessionModule.EnableDebuggerOptions;
+export type PeerOptions = sessionModule.PeerOptions;
+export type PortalOptions = sessionModule.PortalOptions;
 
 export type Script = scriptModule.Script;
 export const Script = scriptModule.Script;
@@ -64,6 +75,43 @@ export type ScriptExports = scriptModule.ScriptExports;
 export type LogLevel = scriptModule.LogLevel;
 export const LogLevel = scriptModule.LogLevel;
 
+export type Relay = relayModule.Relay;
+export const Relay = relayModule.Relay;
+export type RelayProperties = relayModule.RelayProperties;
+export type RelayKind = relayModule.RelayKind;
+
+export type PortalMembership = portalMembershipModule.PortalMembership;
+export const PortalMembership = portalMembershipModule.PortalMembership;
+
+export type PortalService = portalServiceModule.PortalService;
+export const PortalService = portalServiceModule.PortalService;
+export type PortalServiceOptions = portalServiceModule.PortalServiceOptions;
+export type PortalConnectionId = portalServiceModule.PortalConnectionId;
+export type PortalConnectionTag = portalServiceModule.PortalConnectionTag;
+export type PortalNodeConnectedHandler = portalServiceModule.PortalNodeConnectedHandler;
+export type PortalNodeJoinedHandler = portalServiceModule.PortalNodeJoinedHandler;
+export type PortalNodeLeftHandler = portalServiceModule.PortalNodeLeftHandler;
+export type PortalNodeDisconnectedHandler = portalServiceModule.PortalNodeDisconnectedHandler;
+export type PortalControllerConnectedHandler = portalServiceModule.PortalControllerConnectedHandler;
+export type PortalControllerDisconnectedHandler = portalServiceModule.PortalControllerDisconnectedHandler;
+export type PortalAuthenticatedHandler = portalServiceModule.PortalAuthenticatedHandler;
+export type PortalSubscribeHandler = portalServiceModule.PortalSubscribeHandler;
+export type PortalMessageHandler = portalServiceModule.PortalMessageHandler;
+
+export type WebGatewayService = webGatewayServiceModule.WebGatewayService;
+export const WebGatewayService = webGatewayServiceModule.WebGatewayService;
+export type WebGatewayServiceOptions = webGatewayServiceModule.WebGatewayServiceOptions;
+
+export type EndpointParameters = endpointParametersModule.EndpointParameters;
+export const EndpointParameters = endpointParametersModule.EndpointParameters;
+export type EndpointParametersSubset = endpointParametersModule.EndpointParametersSubset;
+export type AuthenticationScheme = endpointParametersModule.AuthenticationScheme;
+export type TokenAuthenticationScheme = endpointParametersModule.TokenAuthenticationScheme;
+export type CallbackAuthenticationScheme = endpointParametersModule.CallbackAuthenticationScheme;
+export type AuthenticationCallback = endpointParametersModule.AuthenticationCallback;
+
+export type AuthenticatedSessionInfo = authenticationModule.AuthenticatedSessionInfo;
+
 export type IOStream = iostreamModule.IOStream;
 export const IOStream = iostreamModule.IOStream;
 export type Cancellable = cancellableModule.Cancellable;
@@ -78,6 +126,11 @@ export const ChildOrigin = childModule.ChildOrigin;
 export type Crash = crashModule.Crash;
 export type CrashParameters = crashModule.CrashParameters;
 export type Icon = iconModule.Icon;
+export type Bus = busModule.Bus;
+export const Bus = busModule.Bus;
+export type BusDetachedHandler = busModule.BusDetachedHandler;
+export type BusMessageHandler = busModule.BusMessageHandler;
+export type SocketAddress = socketAddressModule.SocketAddress;
 
 let sharedDeviceManager: DeviceManager = null;
 
@@ -96,9 +149,9 @@ export async function kill(target: number | string, cancellable?: Cancellable): 
     await device.kill(target, cancellable);
 }
 
-export async function attach(targetOrParameters: TargetProcess | AttachParameters, cancellable?: Cancellable): Promise<Session> {
+export async function attach(target: TargetProcess, options: SessionOptions = {}, cancellable?: Cancellable): Promise<Session> {
     const device = await getLocalDevice(cancellable);
-    return await device.attach(targetOrParameters, cancellable);
+    return await device.attach(target, options, cancellable);
 }
 
 export async function injectLibraryFile(target: number | string, path: string, entrypoint: string, data: string,

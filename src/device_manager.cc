@@ -165,17 +165,20 @@ namespace {
 
 class AddRemoteDeviceOperation : public Operation<FridaDeviceManager> {
  public:
-  AddRemoteDeviceOperation(gchar* address) : address_(address) {
+  AddRemoteDeviceOperation(gchar* address, FridaRemoteDeviceOptions* options)
+    : address_(address),
+      options_(options) {
   }
 
   ~AddRemoteDeviceOperation() {
+    g_object_unref(options_);
     g_free(address_);
   }
 
  protected:
   void Begin() {
-    frida_device_manager_add_remote_device(handle_, address_, cancellable_,
-        OnReady, this);
+    frida_device_manager_add_remote_device(handle_, address_, options_,
+        cancellable_, OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -191,6 +194,7 @@ class AddRemoteDeviceOperation : public Operation<FridaDeviceManager> {
 
  private:
   gchar* address_;
+  FridaRemoteDeviceOptions* options_;
   FridaDevice* device_;
 };
 
@@ -200,14 +204,67 @@ NAN_METHOD(DeviceManager::AddRemoteDevice) {
   auto isolate = info.GetIsolate();
   auto wrapper = ObjectWrap::Unwrap<DeviceManager>(info.Holder());
 
-  if (info.Length() < 1 || !info[0]->IsString()) {
-    Nan::ThrowTypeError("Expected an address");
+  if (info.Length() < 4) {
+    Nan::ThrowTypeError("Missing one or more arguments");
     return;
   }
 
-  Nan::Utf8String address(info[0]);
+  auto address_value = info[0];
+  auto certificate_value = info[1];
+  auto token_value = info[2];
+  auto keepalive_interval_value = info[3];
 
-  auto operation = new AddRemoteDeviceOperation(g_strdup(*address));
+  if (!address_value->IsString()) {
+    Nan::ThrowTypeError("Bad argument, 'address' must be a string");
+    return;
+  }
+  Nan::Utf8String address(address_value);
+
+  auto options = frida_remote_device_options_new();
+  bool valid = true;
+
+  if (!certificate_value->IsNull()) {
+    GTlsCertificate* certificate;
+    valid = Runtime::ValueToCertificate(certificate_value, &certificate);
+    if (valid) {
+      frida_remote_device_options_set_certificate(options, certificate);
+      g_object_unref(certificate);
+    }
+  }
+
+  if (valid && !token_value->IsNull()) {
+    if (token_value->IsString()) {
+      Nan::Utf8String token(token_value);
+      frida_remote_device_options_set_token(options, *token);
+    } else {
+      Nan::ThrowTypeError("Bad argument, 'token' must be a string");
+      valid = false;
+    }
+  }
+
+  if (valid && !keepalive_interval_value->IsNull()) {
+    if (keepalive_interval_value->IsNumber()) {
+      auto keepalive_interval =
+          Nan::To<int32_t>(keepalive_interval_value).FromMaybe(-1);
+      if (keepalive_interval >= -1) {
+        frida_remote_device_options_set_keepalive_interval(options,
+            keepalive_interval);
+      } else {
+        Nan::ThrowTypeError("Bad argument, invalid 'keepaliveInterval'");
+        valid = false;
+      }
+    } else {
+      Nan::ThrowTypeError("Bad argument, 'keepaliveInterval' must be a number");
+      valid = false;
+    }
+  }
+
+  if (!valid) {
+    g_object_unref(options);
+    return;
+  }
+
+  auto operation = new AddRemoteDeviceOperation(g_strdup(*address), options);
   operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));

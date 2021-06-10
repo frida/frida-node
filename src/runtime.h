@@ -34,7 +34,12 @@ class Runtime {
       gpointer result);
   static v8::Local<v8::String> ValueFromEnum(gint value, GType type);
 
-  static v8::Local<v8::Value> ValueFromVariantDict(GVariant* dict);
+  static v8::Local<v8::Value> ValueFromOptionsDict(GHashTable* dict);
+
+  static v8::Local<v8::Object> ValueFromSocketAddress(GSocketAddress* address);
+
+  static bool ValueToCertificate(v8::Local<v8::Value> value,
+      GTlsCertificate** certificate);
 
   static const char* ClassNameFromC(const char* cname);
 

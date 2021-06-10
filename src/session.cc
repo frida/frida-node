@@ -2,6 +2,8 @@
 
 #include "crash.h"
 #include "operation.h"
+#include "portal_membership.h"
+#include "relay.h"
 #include "script.h"
 #include "signals.h"
 #include "usage_monitor.h"
@@ -49,10 +51,13 @@ void Session::Init(Local<Object> exports, Runtime* runtime) {
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Local<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
+  Nan::SetAccessor(instance_tpl, Nan::New("isDetached").ToLocalChecked(),
+      IsDetached, 0, data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("pid").ToLocalChecked(), GetPid, 0,
       data, DEFAULT, ReadOnly, signature);
 
   Nan::SetPrototypeMethod(tpl, "detach", Detach);
+  Nan::SetPrototypeMethod(tpl, "resume", Resume);
   Nan::SetPrototypeMethod(tpl, "enableChildGating", EnableChildGating);
   Nan::SetPrototypeMethod(tpl, "disableChildGating", DisableChildGating);
   Nan::SetPrototypeMethod(tpl, "createScript", CreateScript);
@@ -60,7 +65,8 @@ void Session::Init(Local<Object> exports, Runtime* runtime) {
   Nan::SetPrototypeMethod(tpl, "compileScript", CompileScript);
   Nan::SetPrototypeMethod(tpl, "enableDebugger", EnableDebugger);
   Nan::SetPrototypeMethod(tpl, "disableDebugger", DisableDebugger);
-  Nan::SetPrototypeMethod(tpl, "enableJit", EnableJit);
+  Nan::SetPrototypeMethod(tpl, "setupPeerConnection", SetupPeerConnection);
+  Nan::SetPrototypeMethod(tpl, "joinPortal", JoinPortal);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
@@ -109,6 +115,14 @@ NAN_PROPERTY_GETTER(Session::GetPid) {
       frida_session_get_pid(handle)));
 }
 
+NAN_PROPERTY_GETTER(Session::IsDetached) {
+  auto handle = ObjectWrap::Unwrap<Session>(
+      info.Holder())->GetHandle<FridaSession>();
+
+  info.GetReturnValue().Set(
+      Nan::New(static_cast<bool>(frida_session_is_detached(handle))));
+}
+
 namespace {
 
 class DetachOperation : public Operation<FridaSession> {
@@ -133,6 +147,35 @@ NAN_METHOD(Session::Detach) {
   auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
 
   auto operation = new DetachOperation();
+  operation->Schedule(isolate, wrapper, info);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+namespace {
+
+class ResumeOperation : public Operation<FridaSession> {
+ protected:
+  void Begin() {
+    frida_session_resume(handle_, cancellable_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_session_resume_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Nan::Undefined();
+  }
+};
+
+}
+
+NAN_METHOD(Session::Resume) {
+  auto isolate = info.GetIsolate();
+  auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
+
+  auto operation = new ResumeOperation();
   operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
@@ -547,28 +590,189 @@ NAN_METHOD(Session::DisableDebugger) {
 
 namespace {
 
-class EnableJitOperation : public Operation<FridaSession> {
+class SetupPeerConnectionOperation : public Operation<FridaSession> {
+ public:
+  SetupPeerConnectionOperation(FridaPeerOptions* options) : options_(options) {
+  }
+
+  ~SetupPeerConnectionOperation() {
+    g_object_unref(options_);
+  }
+
  protected:
   void Begin() {
-    frida_session_enable_jit(handle_, cancellable_, OnReady, this);
+    frida_session_setup_peer_connection(handle_, options_, cancellable_,
+        OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
-    frida_session_enable_jit_finish(handle_, result, error);
+    frida_session_setup_peer_connection_finish(handle_, result, error);
   }
 
   Local<Value> Result(Isolate* isolate) {
     return Nan::Undefined();
   }
+
+ private:
+  FridaPeerOptions* options_;
 };
 
 }
 
-NAN_METHOD(Session::EnableJit) {
+NAN_METHOD(Session::SetupPeerConnection) {
   auto isolate = info.GetIsolate();
   auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
 
-  auto operation = new EnableJitOperation();
+  if (info.Length() < 2) {
+    Nan::ThrowTypeError("Missing one or more arguments");
+    return;
+  }
+
+  auto stun_server_value = info[0];
+  auto relays_value = info[1];
+
+  auto options = frida_peer_options_new();
+  bool valid = true;
+
+  if (!stun_server_value->IsNull()) {
+    if (stun_server_value->IsString()) {
+      Nan::Utf8String stun_server(stun_server_value);
+      frida_peer_options_set_stun_server(options, *stun_server);
+    } else {
+      Nan::ThrowTypeError("Bad argument, 'stunServer' must be a string");
+      valid = false;
+    }
+  }
+
+  if (valid) {
+    if (relays_value->IsArray()) {
+      auto array = Local<Array>::Cast(relays_value);
+
+      uint32_t n = array->Length();
+
+      for (uint32_t i = 0; i != n; i++) {
+        auto element_value = Nan::Get(array, i).ToLocalChecked();
+        FridaRelay* relay = Relay::TryParse(element_value, wrapper->runtime_);
+        if (relay == NULL) {
+          Nan::ThrowTypeError("Bad argument, 'relays' element type mismatch");
+          valid = false;
+          break;
+        }
+        frida_peer_options_add_relay(options, relay);
+      }
+    } else {
+      Nan::ThrowTypeError("Bad argument, 'relays' must be an array");
+      valid = false;
+    }
+  }
+
+  if (!valid) {
+    g_object_unref(options);
+    return;
+  }
+
+  auto operation = new SetupPeerConnectionOperation(options);
+  operation->Schedule(isolate, wrapper, info);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+namespace {
+
+class JoinPortalOperation : public Operation<FridaSession> {
+ public:
+  JoinPortalOperation(gchar* address, FridaPortalOptions* options)
+    : address_(address),
+      options_(options) {
+  }
+
+  ~JoinPortalOperation() {
+    g_object_unref(options_);
+    g_free(address_);
+  }
+
+ protected:
+  void Begin() {
+    frida_session_join_portal(handle_, address_, options_, cancellable_,
+        OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    membership_ = frida_session_join_portal_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    auto wrapper = PortalMembership::New(membership_, runtime_);
+    g_object_unref(membership_);
+    return wrapper;
+  }
+
+ private:
+  gchar* address_;
+  FridaPortalOptions* options_;
+  FridaPortalMembership* membership_;
+};
+
+}
+
+NAN_METHOD(Session::JoinPortal) {
+  auto isolate = info.GetIsolate();
+  auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
+
+  if (info.Length() < 4) {
+    Nan::ThrowTypeError("Missing one or more arguments");
+    return;
+  }
+
+  auto address_value = info[0];
+  auto certificate_value = info[1];
+  auto token_value = info[2];
+  auto acl_value = info[3];
+
+  if (!address_value->IsString()) {
+    Nan::ThrowTypeError("Bad argument, 'address' must be a string");
+    return;
+  }
+  Nan::Utf8String address(address_value);
+
+  auto options = frida_portal_options_new();
+  bool valid = true;
+
+  if (!certificate_value->IsNull()) {
+    GTlsCertificate* certificate;
+    valid = Runtime::ValueToCertificate(certificate_value, &certificate);
+    if (valid) {
+      frida_portal_options_set_certificate(options, certificate);
+      g_object_unref(certificate);
+    }
+  }
+
+  if (valid && !token_value->IsNull()) {
+    if (token_value->IsString()) {
+      Nan::Utf8String token(token_value);
+      frida_portal_options_set_token(options, *token);
+    } else {
+      Nan::ThrowTypeError("Bad argument, 'token' must be a string");
+      valid = false;
+    }
+  }
+
+  if (valid && !acl_value->IsNull()) {
+    gchar** acl;
+    gint acl_length;
+    valid = Runtime::ValueToEnvp(acl_value, &acl, &acl_length);
+    if (valid) {
+      frida_portal_options_set_acl(options, acl, acl_length);
+      g_strfreev(acl);
+    }
+  }
+
+  if (!valid) {
+    g_object_unref(options);
+    return;
+  }
+
+  auto operation = new JoinPortalOperation(g_strdup(*address), options);
   operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
