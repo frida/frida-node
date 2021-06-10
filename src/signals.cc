@@ -288,10 +288,6 @@ static void signals_closure_marshal(GClosure* closure, GValue* return_gvalue,
   });
 }
 
-static void signals_buffer_free(char* data, void* hint) {
-  g_bytes_unref(static_cast<GBytes*>(hint));
-}
-
 static Local<Value> signals_closure_gvalue_to_jsvalue(const GValue* gvalue) {
   auto gtype = G_VALUE_TYPE(gvalue);
   switch (gtype) {
@@ -319,9 +315,10 @@ static Local<Value> signals_closure_gvalue_to_jsvalue(const GValue* gvalue) {
       auto bytes = static_cast<GBytes*>(g_value_get_boxed(gvalue));
       if (bytes != NULL) {
         gsize size;
-        auto data = g_bytes_get_data(bytes, &size);
-        return Nan::NewBuffer(static_cast<char*>(const_cast<void*>(data)), size,
-            signals_buffer_free, g_bytes_ref(bytes)).ToLocalChecked();
+        gconstpointer data = g_bytes_get_data(bytes, &size);
+
+        return Nan::CopyBuffer(static_cast<const char*>(data), size)
+            .ToLocalChecked();
       } else {
         return Nan::Null();
       }
