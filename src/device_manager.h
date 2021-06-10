@@ -27,6 +27,7 @@ class DeviceManager : public GLibObject {
       guint index, const GValue* value, gpointer user_data);
   static void OnConnect(const gchar* signal, gpointer user_data);
   static void OnDisconnect(const gchar* signal, gpointer user_data);
+  static bool ShouldStayAliveToEmit(const gchar* signal);
 };
 
 }

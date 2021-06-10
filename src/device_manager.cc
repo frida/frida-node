@@ -82,8 +82,8 @@ NAN_METHOD(DeviceManager::New) {
   g_object_unref(handle);
 
   auto signals_wrapper = ObjectWrap::Unwrap<Signals>(signals_obj);
-  signals_wrapper->SetConnectCallback(OnConnect, wrapper);
-  signals_wrapper->SetDisconnectCallback(OnDisconnect, wrapper);
+  signals_wrapper->SetConnectCallback(OnConnect, runtime);
+  signals_wrapper->SetDisconnectCallback(OnDisconnect, runtime);
 
   info.GetReturnValue().Set(obj);
 }
@@ -271,26 +271,24 @@ Local<Value> DeviceManager::TransformDeviceSignals(const gchar* name,
   return Local<Value>();
 }
 
-static bool IsDeviceChangeSignal(const gchar* name) {
-  return strcmp(name, "added") == 0 ||
-      strcmp(name, "removed") == 0 ||
-      strcmp(name, "changed") == 0;
-}
-
 void DeviceManager::OnConnect(const gchar* name, gpointer user_data) {
-  auto wrapper = static_cast<DeviceManager*>(user_data);
+  auto runtime = static_cast<Runtime*>(user_data);
 
-  if (IsDeviceChangeSignal(name)) {
-    wrapper->runtime_->GetUVContext()->IncreaseUsage();
-  }
+  if (ShouldStayAliveToEmit(name))
+    runtime->GetUVContext()->IncreaseUsage();
 }
 
 void DeviceManager::OnDisconnect(const gchar* name, gpointer user_data) {
-  auto wrapper = static_cast<DeviceManager*>(user_data);
+  auto runtime = static_cast<Runtime*>(user_data);
 
-  if (IsDeviceChangeSignal(name)) {
-    wrapper->runtime_->GetUVContext()->DecreaseUsage();
-  }
+  if (ShouldStayAliveToEmit(name))
+    runtime->GetUVContext()->DecreaseUsage();
+}
+
+bool DeviceManager::ShouldStayAliveToEmit(const gchar* name) {
+  return strcmp(name, "added") == 0 ||
+      strcmp(name, "removed") == 0 ||
+      strcmp(name, "changed") == 0;
 }
 
 }

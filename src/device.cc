@@ -117,8 +117,8 @@ NAN_METHOD(Device::New) {
   Nan::Set(obj, Nan::New("signals").ToLocalChecked(), signals_obj);
 
   auto signals_wrapper = ObjectWrap::Unwrap<Signals>(signals_obj);
-  signals_wrapper->SetConnectCallback(OnConnect, wrapper);
-  signals_wrapper->SetDisconnectCallback(OnDisconnect, wrapper);
+  signals_wrapper->SetConnectCallback(OnConnect, runtime);
+  signals_wrapper->SetDisconnectCallback(OnDisconnect, runtime);
 
   info.GetReturnValue().Set(obj);
 }
@@ -1001,17 +1001,17 @@ Local<Value> Device::TransformSignal(const gchar* name, guint index,
 }
 
 void Device::OnConnect(const gchar* name, gpointer user_data) {
-  auto wrapper = static_cast<Device*>(user_data);
+  auto runtime = static_cast<Runtime*>(user_data);
 
   if (ShouldStayAliveToEmit(name))
-    wrapper->runtime_->GetUVContext()->IncreaseUsage();
+    runtime->GetUVContext()->IncreaseUsage();
 }
 
 void Device::OnDisconnect(const gchar* name, gpointer user_data) {
-  auto wrapper = static_cast<Device*>(user_data);
+  auto runtime = static_cast<Runtime*>(user_data);
 
   if (ShouldStayAliveToEmit(name))
-    wrapper->runtime_->GetUVContext()->DecreaseUsage();
+    runtime->GetUVContext()->DecreaseUsage();
 }
 
 bool Device::ShouldStayAliveToEmit(const gchar* name) {
