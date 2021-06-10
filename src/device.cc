@@ -158,7 +158,7 @@ NAN_PROPERTY_GETTER(Device::GetType) {
 namespace {
 
 class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
- public:
+ protected:
   void Begin() {
     frida_device_get_frontmost_application(handle_, cancellable_, OnReady,
         this);
@@ -179,6 +179,7 @@ class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
     }
   }
 
+ private:
   FridaApplication* application_;
 };
 
@@ -186,8 +187,7 @@ class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
 
 NAN_METHOD(Device::GetFrontmostApplication) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
   auto operation = new GetFrontmostApplicationOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -198,7 +198,7 @@ NAN_METHOD(Device::GetFrontmostApplication) {
 namespace {
 
 class EnumerateApplicationsOperation : public Operation<FridaDevice> {
- public:
+ protected:
   void Begin() {
     frida_device_enumerate_applications(handle_, cancellable_, OnReady, this);
   }
@@ -223,6 +223,7 @@ class EnumerateApplicationsOperation : public Operation<FridaDevice> {
     return applications;
   }
 
+ private:
   FridaApplicationList* applications_;
 };
 
@@ -230,8 +231,7 @@ class EnumerateApplicationsOperation : public Operation<FridaDevice> {
 
 NAN_METHOD(Device::EnumerateApplications) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
   auto operation = new EnumerateApplicationsOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -242,7 +242,7 @@ NAN_METHOD(Device::EnumerateApplications) {
 namespace {
 
 class EnumerateProcessesOperation : public Operation<FridaDevice> {
- public:
+ protected:
   void Begin() {
     frida_device_enumerate_processes(handle_, cancellable_, OnReady, this);
   }
@@ -267,6 +267,7 @@ class EnumerateProcessesOperation : public Operation<FridaDevice> {
     return processes;
   }
 
+ private:
   FridaProcessList* processes_;
 };
 
@@ -274,8 +275,7 @@ class EnumerateProcessesOperation : public Operation<FridaDevice> {
 
 NAN_METHOD(Device::EnumerateProcesses) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
   auto operation = new EnumerateProcessesOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -286,7 +286,7 @@ NAN_METHOD(Device::EnumerateProcesses) {
 namespace {
 
 class EnableSpawnGatingOperation : public Operation<FridaDevice> {
- public:
+ protected:
   void Begin() {
     frida_device_enable_spawn_gating(handle_, cancellable_, OnReady, this);
   }
@@ -304,8 +304,7 @@ class EnableSpawnGatingOperation : public Operation<FridaDevice> {
 
 NAN_METHOD(Device::EnableSpawnGating) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
   auto operation = new EnableSpawnGatingOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -316,7 +315,7 @@ NAN_METHOD(Device::EnableSpawnGating) {
 namespace {
 
 class DisableSpawnGatingOperation : public Operation<FridaDevice> {
- public:
+ protected:
   void Begin() {
     frida_device_disable_spawn_gating(handle_, cancellable_, OnReady, this);
   }
@@ -334,8 +333,7 @@ class DisableSpawnGatingOperation : public Operation<FridaDevice> {
 
 NAN_METHOD(Device::DisableSpawnGating) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
   auto operation = new DisableSpawnGatingOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -346,7 +344,7 @@ NAN_METHOD(Device::DisableSpawnGating) {
 namespace {
 
 class EnumeratePendingSpawnOperation : public Operation<FridaDevice> {
- public:
+ protected:
   void Begin() {
     frida_device_enumerate_pending_spawn(handle_, cancellable_, OnReady, this);
   }
@@ -371,6 +369,7 @@ class EnumeratePendingSpawnOperation : public Operation<FridaDevice> {
     return pending_spawn;
   }
 
+ private:
   FridaSpawnList* pending_spawn_;
 };
 
@@ -378,8 +377,7 @@ class EnumeratePendingSpawnOperation : public Operation<FridaDevice> {
 
 NAN_METHOD(Device::EnumeratePendingSpawn) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
   auto operation = new EnumeratePendingSpawnOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -390,7 +388,7 @@ NAN_METHOD(Device::EnumeratePendingSpawn) {
 namespace {
 
 class EnumeratePendingChildrenOperation : public Operation<FridaDevice> {
- public:
+ protected:
   void Begin() {
     frida_device_enumerate_pending_children(handle_, cancellable_, OnReady,
         this);
@@ -416,6 +414,7 @@ class EnumeratePendingChildrenOperation : public Operation<FridaDevice> {
     return pending_children;
   }
 
+ private:
   FridaChildList* pending_children_;
 };
 
@@ -423,8 +422,7 @@ class EnumeratePendingChildrenOperation : public Operation<FridaDevice> {
 
 NAN_METHOD(Device::EnumeratePendingChildren) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
   auto operation = new EnumeratePendingChildrenOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -446,6 +444,7 @@ class SpawnOperation : public Operation<FridaDevice> {
     g_free(program_);
   }
 
+ protected:
   void Begin() {
     frida_device_spawn(handle_, program_, options_, cancellable_, OnReady,
         this);
@@ -459,6 +458,7 @@ class SpawnOperation : public Operation<FridaDevice> {
     return Nan::New<Uint32>(pid_);
   }
 
+ private:
   gchar* program_;
   FridaSpawnOptions* options_;
   guint pid_;
@@ -469,8 +469,7 @@ class SpawnOperation : public Operation<FridaDevice> {
 NAN_METHOD(Device::Spawn) {
   auto isolate = info.GetIsolate();
   auto context = isolate->GetCurrentContext();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
   if (info.Length() < 7) {
     Nan::ThrowTypeError("Missing one or more arguments");
@@ -599,6 +598,7 @@ class InputOperation : public Operation<FridaDevice> {
     g_bytes_unref(data_);
   }
 
+ protected:
   void Begin() {
     frida_device_input(handle_, pid_, data_, cancellable_, OnReady, this);
   }
@@ -611,6 +611,7 @@ class InputOperation : public Operation<FridaDevice> {
     return Nan::Undefined();
   }
 
+ private:
   const guint pid_;
   GBytes* data_;
 };
@@ -619,8 +620,7 @@ class InputOperation : public Operation<FridaDevice> {
 
 NAN_METHOD(Device::Input) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
   if (info.Length() < 2 || !info[0]->IsNumber() ||
       !node::Buffer::HasInstance(info[1])) {
@@ -651,6 +651,7 @@ class ResumeOperation : public Operation<FridaDevice> {
   ResumeOperation(guint pid) : pid_(pid) {
   }
 
+ protected:
   void Begin() {
     frida_device_resume(handle_, pid_, cancellable_, OnReady, this);
   }
@@ -663,6 +664,7 @@ class ResumeOperation : public Operation<FridaDevice> {
     return Nan::Undefined();
   }
 
+ private:
   const guint pid_;
 };
 
@@ -670,8 +672,7 @@ class ResumeOperation : public Operation<FridaDevice> {
 
 NAN_METHOD(Device::Resume) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
   if (info.Length() < 1 || !info[0]->IsNumber()) {
     Nan::ThrowTypeError("Bad argument, expected pid");
@@ -696,6 +697,7 @@ class KillOperation : public Operation<FridaDevice> {
   KillOperation(guint pid) : pid_(pid) {
   }
 
+ protected:
   void Begin() {
     frida_device_kill(handle_, pid_, cancellable_, OnReady, this);
   }
@@ -708,6 +710,7 @@ class KillOperation : public Operation<FridaDevice> {
     return Nan::Undefined();
   }
 
+ private:
   const guint pid_;
 };
 
@@ -715,8 +718,7 @@ class KillOperation : public Operation<FridaDevice> {
 
 NAN_METHOD(Device::Kill) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
   if (info.Length() < 1 || !info[0]->IsNumber()) {
     Nan::ThrowTypeError("Bad argument, expected pid");
@@ -741,6 +743,7 @@ class AttachOperation : public Operation<FridaDevice> {
   AttachOperation(guint pid, FridaRealm realm) : pid_(pid), realm_(realm) {
   }
 
+ protected:
   void Begin() {
     frida_device_attach(handle_, pid_, realm_, cancellable_, OnReady, this);
   }
@@ -755,6 +758,7 @@ class AttachOperation : public Operation<FridaDevice> {
     return wrapper;
   }
 
+ private:
   const guint pid_;
   FridaRealm realm_;
   FridaSession* session_;
@@ -764,8 +768,7 @@ class AttachOperation : public Operation<FridaDevice> {
 
 NAN_METHOD(Device::Attach) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
   if (info.Length() < 2) {
     Nan::ThrowTypeError("Missing one or more arguments");
@@ -813,6 +816,7 @@ class InjectLibraryFileOperation : public Operation<FridaDevice> {
     g_free(path_);
   }
 
+ protected:
   void Begin() {
     frida_device_inject_library_file(handle_, pid_, path_, entrypoint_, data_,
         cancellable_, OnReady, this);
@@ -826,6 +830,7 @@ class InjectLibraryFileOperation : public Operation<FridaDevice> {
     return Nan::New<Uint32>(id_);
   }
 
+ private:
   const guint pid_;
   gchar* path_;
   gchar* entrypoint_;
@@ -837,8 +842,7 @@ class InjectLibraryFileOperation : public Operation<FridaDevice> {
 
 NAN_METHOD(Device::InjectLibraryFile) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
   if (info.Length() < 4 || !info[0]->IsNumber() || !info[1]->IsString() ||
       !info[2]->IsString() || !info[3]->IsString()) {
@@ -880,6 +884,7 @@ class InjectLibraryBlobOperation : public Operation<FridaDevice> {
     g_bytes_unref(blob_);
   }
 
+ protected:
   void Begin() {
     frida_device_inject_library_blob(handle_, pid_, blob_, entrypoint_, data_,
         cancellable_, OnReady, this);
@@ -893,6 +898,7 @@ class InjectLibraryBlobOperation : public Operation<FridaDevice> {
     return Nan::New<Uint32>(id_);
   }
 
+ private:
   const guint pid_;
   GBytes* blob_;
   gchar* entrypoint_;
@@ -904,8 +910,7 @@ class InjectLibraryBlobOperation : public Operation<FridaDevice> {
 
 NAN_METHOD(Device::InjectLibraryBlob) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
   if (info.Length() < 4 || !info[0]->IsNumber() ||
       !node::Buffer::HasInstance(info[1]) || !info[2]->IsString() ||
@@ -945,6 +950,7 @@ class OpenChannelOperation : public Operation<FridaDevice> {
     g_free(address_);
   }
 
+ protected:
   void Begin() {
     frida_device_open_channel(handle_, address_, cancellable_, OnReady, this);
   }
@@ -959,6 +965,7 @@ class OpenChannelOperation : public Operation<FridaDevice> {
     return wrapper;
   }
 
+ private:
   gchar* address_;
   GIOStream* stream_;
 };
@@ -967,8 +974,7 @@ class OpenChannelOperation : public Operation<FridaDevice> {
 
 NAN_METHOD(Device::OpenChannel) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Device>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
   if (info.Length() < 1 || !info[0]->IsString()) {
     Nan::ThrowTypeError("Bad argument");

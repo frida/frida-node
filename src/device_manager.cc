@@ -91,7 +91,7 @@ NAN_METHOD(DeviceManager::New) {
 namespace {
 
 class CloseOperation : public Operation<FridaDeviceManager> {
- public:
+ protected:
   void Begin() {
     frida_device_manager_close(handle_, cancellable_, OnReady, this);
   }
@@ -109,8 +109,7 @@ class CloseOperation : public Operation<FridaDeviceManager> {
 
 NAN_METHOD(DeviceManager::Close) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
+  auto wrapper = ObjectWrap::Unwrap<DeviceManager>(info.Holder());
 
   auto operation = new CloseOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -121,7 +120,7 @@ NAN_METHOD(DeviceManager::Close) {
 namespace {
 
 class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
- public:
+ protected:
   void Begin() {
     frida_device_manager_enumerate_devices(handle_, cancellable_, OnReady,
         this);
@@ -147,6 +146,7 @@ class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
     return devices;
   }
 
+ private:
   FridaDeviceList* devices_;
 };
 
@@ -154,8 +154,7 @@ class EnumerateDevicesOperation : public Operation<FridaDeviceManager> {
 
 NAN_METHOD(DeviceManager::EnumerateDevices) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
+  auto wrapper = ObjectWrap::Unwrap<DeviceManager>(info.Holder());
 
   auto operation = new EnumerateDevicesOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -174,6 +173,7 @@ class AddRemoteDeviceOperation : public Operation<FridaDeviceManager> {
     g_free(address_);
   }
 
+ protected:
   void Begin() {
     frida_device_manager_add_remote_device(handle_, address_, cancellable_,
         OnReady, this);
@@ -190,6 +190,7 @@ class AddRemoteDeviceOperation : public Operation<FridaDeviceManager> {
     return wrapper;
   }
 
+ private:
   gchar* address_;
   FridaDevice* device_;
 };
@@ -198,8 +199,7 @@ class AddRemoteDeviceOperation : public Operation<FridaDeviceManager> {
 
 NAN_METHOD(DeviceManager::AddRemoteDevice) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
+  auto wrapper = ObjectWrap::Unwrap<DeviceManager>(info.Holder());
 
   if (info.Length() < 1 || !info[0]->IsString()) {
     Nan::ThrowTypeError("Expected an address");
@@ -225,6 +225,7 @@ class RemoveRemoteDeviceOperation : public Operation<FridaDeviceManager> {
     g_free(address_);
   }
 
+ protected:
   void Begin() {
     frida_device_manager_remove_remote_device(handle_, address_, cancellable_,
         OnReady, this);
@@ -238,6 +239,7 @@ class RemoveRemoteDeviceOperation : public Operation<FridaDeviceManager> {
     return Nan::Undefined();
   }
 
+ private:
   gchar* address_;
 };
 
@@ -245,8 +247,7 @@ class RemoveRemoteDeviceOperation : public Operation<FridaDeviceManager> {
 
 NAN_METHOD(DeviceManager::RemoveRemoteDevice) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<DeviceManager>(obj);
+  auto wrapper = ObjectWrap::Unwrap<DeviceManager>(info.Holder());
 
   if (info.Length() < 1 || !info[0]->IsString()) {
     Nan::ThrowTypeError("Expected an address");

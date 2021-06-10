@@ -100,7 +100,7 @@ NAN_PROPERTY_GETTER(IOStream::IsClosed) {
 namespace {
 
 class CloseOperation : public Operation<GIOStream> {
- public:
+ protected:
   void Begin() {
     g_io_stream_close_async(handle_, G_PRIORITY_DEFAULT, cancellable_,
         OnReady, this);
@@ -119,8 +119,7 @@ class CloseOperation : public Operation<GIOStream> {
 
 NAN_METHOD(IOStream::Close) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<IOStream>(obj);
+  auto wrapper = ObjectWrap::Unwrap<IOStream>(info.Holder());
 
   auto operation = new CloseOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -138,6 +137,7 @@ class ReadOperation : public Operation<GIOStream> {
       bytes_(NULL) {
   }
 
+ protected:
   void Begin() {
     stream_ = g_io_stream_get_input_stream(handle_);
 
@@ -156,6 +156,7 @@ class ReadOperation : public Operation<GIOStream> {
         UnrefGBytes, bytes_).ToLocalChecked();
   }
 
+ private:
   GInputStream* stream_;
   gsize count_;
   GBytes* bytes_;
@@ -165,8 +166,7 @@ class ReadOperation : public Operation<GIOStream> {
 
 NAN_METHOD(IOStream::Read) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<IOStream>(obj);
+  auto wrapper = ObjectWrap::Unwrap<IOStream>(info.Holder());
 
   if (info.Length() < 1 || !info[0]->IsNumber()) {
     Nan::ThrowTypeError("Bad argument, expected amount to read");
@@ -198,6 +198,7 @@ class WriteOperation : public Operation<GIOStream> {
   ~WriteOperation() {
   }
 
+ protected:
   void Begin() {
     stream_ = g_io_stream_get_output_stream(handle_);
 
@@ -213,6 +214,7 @@ class WriteOperation : public Operation<GIOStream> {
     return Nan::Undefined();
   }
 
+ private:
   GOutputStream* stream_;
   Persistent<Value, CopyablePersistentTraits<Value>> buffer_;
   const void* data_;
@@ -223,8 +225,7 @@ class WriteOperation : public Operation<GIOStream> {
 
 NAN_METHOD(IOStream::Write) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<IOStream>(obj);
+  auto wrapper = ObjectWrap::Unwrap<IOStream>(info.Holder());
 
   auto num_args = info.Length();
   if (num_args < 1) {

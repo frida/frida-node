@@ -112,7 +112,7 @@ NAN_PROPERTY_GETTER(Session::GetPid) {
 namespace {
 
 class DetachOperation : public Operation<FridaSession> {
- public:
+ protected:
   void Begin() {
     frida_session_detach(handle_, cancellable_, OnReady, this);
   }
@@ -130,8 +130,7 @@ class DetachOperation : public Operation<FridaSession> {
 
 NAN_METHOD(Session::Detach) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Session>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
 
   auto operation = new DetachOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -142,7 +141,7 @@ NAN_METHOD(Session::Detach) {
 namespace {
 
 class EnableChildGatingOperation : public Operation<FridaSession> {
- public:
+ protected:
   void Begin() {
     frida_session_enable_child_gating(handle_, cancellable_, OnReady, this);
   }
@@ -160,8 +159,7 @@ class EnableChildGatingOperation : public Operation<FridaSession> {
 
 NAN_METHOD(Session::EnableChildGating) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Session>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
 
   auto operation = new EnableChildGatingOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -172,7 +170,7 @@ NAN_METHOD(Session::EnableChildGating) {
 namespace {
 
 class DisableChildGatingOperation : public Operation<FridaSession> {
- public:
+ protected:
   void Begin() {
     frida_session_disable_child_gating(handle_, cancellable_, OnReady, this);
   }
@@ -190,8 +188,7 @@ class DisableChildGatingOperation : public Operation<FridaSession> {
 
 NAN_METHOD(Session::DisableChildGating) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Session>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
 
   auto operation = new DisableChildGatingOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -213,6 +210,7 @@ class CreateScriptOperation : public Operation<FridaSession> {
     g_free(source_);
   }
 
+ protected:
   void Begin() {
     frida_session_create_script(handle_, source_, options_, cancellable_,
         OnReady, this);
@@ -228,6 +226,7 @@ class CreateScriptOperation : public Operation<FridaSession> {
     return wrapper;
   }
 
+ private:
   gchar* source_;
   FridaScriptOptions* options_;
   FridaScript* script_;
@@ -238,8 +237,7 @@ class CreateScriptOperation : public Operation<FridaSession> {
 
 NAN_METHOD(Session::CreateScript) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Session>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
 
   if (info.Length() < 3) {
     Nan::ThrowTypeError("Missing one or more arguments");
@@ -292,6 +290,7 @@ class CreateScriptFromBytesOperation : public Operation<FridaSession> {
     g_bytes_unref(bytes_);
   }
 
+ protected:
   void Begin() {
     frida_session_create_script_from_bytes(handle_, bytes_, options_,
         cancellable_, OnReady, this);
@@ -308,6 +307,7 @@ class CreateScriptFromBytesOperation : public Operation<FridaSession> {
     return wrapper;
   }
 
+ private:
   GBytes* bytes_;
   FridaScriptOptions* options_;
   FridaScript* script_;
@@ -317,8 +317,7 @@ class CreateScriptFromBytesOperation : public Operation<FridaSession> {
 
 NAN_METHOD(Session::CreateScriptFromBytes) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Session>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
 
   if (info.Length() < 3) {
     Nan::ThrowTypeError("Missing one or more arguments");
@@ -372,6 +371,7 @@ class CompileScriptOperation : public Operation<FridaSession> {
     g_free(source_);
   }
 
+ protected:
   void Begin() {
     frida_session_compile_script(handle_, source_, options_, cancellable_,
         OnReady, this);
@@ -388,6 +388,7 @@ class CompileScriptOperation : public Operation<FridaSession> {
         UnrefGBytes, bytes_).ToLocalChecked();
   }
 
+ private:
   gchar* source_;
   FridaScriptOptions* options_;
   GBytes* bytes_;
@@ -397,8 +398,7 @@ class CompileScriptOperation : public Operation<FridaSession> {
 
 NAN_METHOD(Session::CompileScript) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Session>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
 
   if (info.Length() < 3) {
     Nan::ThrowTypeError("Missing one or more arguments");
@@ -477,6 +477,7 @@ class EnableDebuggerOperation : public Operation<FridaSession> {
   EnableDebuggerOperation(guint16 port) : port_(port) {
   }
 
+ protected:
   void Begin() {
     frida_session_enable_debugger(handle_, port_, cancellable_, OnReady, this);
   }
@@ -489,6 +490,7 @@ class EnableDebuggerOperation : public Operation<FridaSession> {
     return Nan::Undefined();
   }
 
+ private:
   guint16 port_;
 };
 
@@ -496,8 +498,7 @@ class EnableDebuggerOperation : public Operation<FridaSession> {
 
 NAN_METHOD(Session::EnableDebugger) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Session>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
 
   if (info.Length() < 1 || !info[0]->IsNumber()) {
     Nan::ThrowTypeError("Bad argument, expected port number");
@@ -518,7 +519,7 @@ NAN_METHOD(Session::EnableDebugger) {
 namespace {
 
 class DisableDebuggerOperation : public Operation<FridaSession> {
- public:
+ protected:
   void Begin() {
     frida_session_disable_debugger(handle_, cancellable_, OnReady, this);
   }
@@ -536,8 +537,7 @@ class DisableDebuggerOperation : public Operation<FridaSession> {
 
 NAN_METHOD(Session::DisableDebugger) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Session>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
 
   auto operation = new DisableDebuggerOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -548,7 +548,7 @@ NAN_METHOD(Session::DisableDebugger) {
 namespace {
 
 class EnableJitOperation : public Operation<FridaSession> {
- public:
+ protected:
   void Begin() {
     frida_session_enable_jit(handle_, cancellable_, OnReady, this);
   }
@@ -566,8 +566,7 @@ class EnableJitOperation : public Operation<FridaSession> {
 
 NAN_METHOD(Session::EnableJit) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Session>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
 
   auto operation = new EnableJitOperation();
   operation->Schedule(isolate, wrapper, info);

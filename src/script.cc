@@ -87,7 +87,7 @@ NAN_METHOD(Script::New) {
 namespace {
 
 class LoadOperation : public Operation<FridaScript> {
- public:
+ protected:
   void Begin() {
     frida_script_load(handle_, cancellable_, OnReady, this);
   }
@@ -105,8 +105,7 @@ class LoadOperation : public Operation<FridaScript> {
 
 NAN_METHOD(Script::Load) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Script>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Script>(info.Holder());
 
   auto operation = new LoadOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -117,7 +116,7 @@ NAN_METHOD(Script::Load) {
 namespace {
 
 class UnloadOperation : public Operation<FridaScript> {
- public:
+ protected:
   void Begin() {
     frida_script_unload(handle_, cancellable_, OnReady, this);
   }
@@ -135,8 +134,7 @@ class UnloadOperation : public Operation<FridaScript> {
 
 NAN_METHOD(Script::Unload) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Script>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Script>(info.Holder());
 
   auto operation = new UnloadOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -147,7 +145,7 @@ NAN_METHOD(Script::Unload) {
 namespace {
 
 class EternalizeOperation : public Operation<FridaScript> {
- public:
+ protected:
   void Begin() {
     frida_script_eternalize(handle_, cancellable_, OnReady, this);
   }
@@ -165,8 +163,7 @@ class EternalizeOperation : public Operation<FridaScript> {
 
 NAN_METHOD(Script::Eternalize) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Script>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Script>(info.Holder());
 
   auto operation = new EternalizeOperation();
   operation->Schedule(isolate, wrapper, info);
@@ -186,6 +183,7 @@ class PostOperation : public Operation<FridaScript> {
     g_bytes_unref(data_);
   }
 
+ protected:
   void Begin() {
     frida_script_post(handle_, message_, data_, cancellable_, OnReady, this);
   }
@@ -198,6 +196,7 @@ class PostOperation : public Operation<FridaScript> {
     return Nan::Undefined();
   }
 
+ private:
   gchar* message_;
   GBytes* data_;
 };
@@ -206,8 +205,7 @@ class PostOperation : public Operation<FridaScript> {
 
 NAN_METHOD(Script::Post) {
   auto isolate = info.GetIsolate();
-  auto obj = info.Holder();
-  auto wrapper = ObjectWrap::Unwrap<Script>(obj);
+  auto wrapper = ObjectWrap::Unwrap<Script>(info.Holder());
 
   auto num_args = info.Length();
   if (num_args < 2) {
