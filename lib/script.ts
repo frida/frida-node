@@ -188,7 +188,11 @@ class ScriptServices extends SignalAdapter implements RpcController {
                 cancellable.cancelled.connect(onOperationCancelled);
                 if (cancellable.isCancelled) {
                     onOperationCancelled();
+                    return;
                 }
+            }
+            if (this.script.isDestroyed) {
+                onScriptDestroyed();
             }
         });
     }
