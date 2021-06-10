@@ -53,6 +53,8 @@ void Session::Init(Local<Object> exports, Runtime* runtime) {
   auto signature = AccessorSignature::New(isolate, tpl);
   Nan::SetAccessor(instance_tpl, Nan::New("isDetached").ToLocalChecked(),
       IsDetached, 0, data, DEFAULT, ReadOnly, signature);
+  Nan::SetAccessor(instance_tpl, Nan::New("persistTimeout").ToLocalChecked(),
+      GetPersistTimeout, 0, data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("pid").ToLocalChecked(), GetPid, 0,
       data, DEFAULT, ReadOnly, signature);
 
@@ -113,6 +115,14 @@ NAN_PROPERTY_GETTER(Session::GetPid) {
 
   info.GetReturnValue().Set(Nan::New<Uint32>(
       frida_session_get_pid(handle)));
+}
+
+NAN_PROPERTY_GETTER(Session::GetPersistTimeout) {
+  auto handle = ObjectWrap::Unwrap<Session>(
+      info.Holder())->GetHandle<FridaSession>();
+
+  info.GetReturnValue().Set(Nan::New<Uint32>(
+      frida_session_get_persist_timeout(handle)));
 }
 
 NAN_PROPERTY_GETTER(Session::IsDetached) {

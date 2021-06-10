@@ -19,6 +19,7 @@ class Session : public GLibObject {
   static NAN_METHOD(New);
 
   static NAN_PROPERTY_GETTER(GetPid);
+  static NAN_PROPERTY_GETTER(GetPersistTimeout);
   static NAN_PROPERTY_GETTER(IsDetached);
 
   static NAN_METHOD(Detach);

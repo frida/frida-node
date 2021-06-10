@@ -19,6 +19,10 @@ export class Session {
         return this.impl.pid;
     }
 
+    get persistTimeout(): number {
+        return this.impl.persistTimeout;
+    }
+
     get isDetached(): boolean {
         return this.impl.isDetached;
     }
