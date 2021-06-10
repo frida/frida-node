@@ -50,6 +50,10 @@ export class Device {
         return this.impl.type;
     }
 
+    get isLost(): boolean {
+        return this.impl.isLost;
+    }
+
     getFrontmostApplication(cancellable?: Cancellable): Promise<Application | null> {
         return this.impl.getFrontmostApplication(cancellable);
     }

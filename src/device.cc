@@ -52,6 +52,8 @@ void Device::Init(Local<Object> exports, Runtime* runtime) {
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Local<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
+  Nan::SetAccessor(instance_tpl, Nan::New("isLost").ToLocalChecked(), IsLost, 0,
+      data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("type").ToLocalChecked(), GetType, 0,
       data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("icon").ToLocalChecked(), GetIcon, 0,
@@ -153,6 +155,14 @@ NAN_PROPERTY_GETTER(Device::GetType) {
 
   info.GetReturnValue().Set(Runtime::ValueFromEnum(
       frida_device_get_dtype(handle), FRIDA_TYPE_DEVICE_TYPE));
+}
+
+NAN_PROPERTY_GETTER(Device::IsLost) {
+  auto handle = ObjectWrap::Unwrap<Device>(
+      info.Holder())->GetHandle<FridaDevice>();
+
+  info.GetReturnValue().Set(
+      Nan::New(static_cast<bool>(frida_device_is_lost(handle))));
 }
 
 namespace {
