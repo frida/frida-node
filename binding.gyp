@@ -158,7 +158,7 @@
         ["OS=='mac'", {
           "xcode_settings": {
             "OTHER_CFLAGS": [
-              "-std=c++11",
+              "-std=c++17",
               "-stdlib=libc++",
               "-mmacosx-version-min=10.9",
             ],
@@ -177,7 +177,7 @@
         }],
         ["OS=='linux'", {
           "cflags": [
-            "-std=c++11",
+            "-std=c++17",
             "-ffunction-sections",
             "-fdata-sections",
           ],
