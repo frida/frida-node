@@ -79,6 +79,7 @@ export type Relay = relayModule.Relay;
 export const Relay = relayModule.Relay;
 export type RelayProperties = relayModule.RelayProperties;
 export type RelayKind = relayModule.RelayKind;
+export const RelayKind = relayModule.RelayKind;
 
 export type PortalMembership = portalMembershipModule.PortalMembership;
 export const PortalMembership = portalMembershipModule.PortalMembership;
