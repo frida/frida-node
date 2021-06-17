@@ -118,7 +118,7 @@ NAN_PROPERTY_GETTER(Crash::GetParameters) {
       info.Holder())->GetHandle<FridaCrash>();
 
   GHashTable* parameters = frida_crash_get_parameters(handle);
-  info.GetReturnValue().Set(Runtime::ValueFromOptionsDict(parameters));
+  info.GetReturnValue().Set(Runtime::ValueFromParametersDict(parameters));
 }
 
 }

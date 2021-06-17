@@ -215,34 +215,62 @@ Local<String> Runtime::ValueFromEnum(gint value, GType type) {
   return result;
 }
 
-Local<Value> Runtime::ValueFromOptionsDict(GHashTable* dict) {
+Local<Value> Runtime::ValueFromParametersDict(GHashTable* dict) {
   auto result = Nan::New<Object>();
 
   GHashTableIter iter;
-  gchar* key;
-  GVariant* raw_value;
+  gpointer raw_key, raw_value;
+
   g_hash_table_iter_init(&iter, dict);
-  while (g_hash_table_iter_next(&iter, reinterpret_cast<gpointer*>(&key),
-        reinterpret_cast<gpointer*>(&raw_value))) {
-    Local<Value> value;
 
-    if (g_variant_is_of_type(raw_value, G_VARIANT_TYPE_STRING)) {
-      value = Nan::New<String>(
-          g_variant_get_string(raw_value, NULL)).ToLocalChecked();
-    } else if (g_variant_is_of_type(raw_value, G_VARIANT_TYPE_INT64)) {
-      value = Nan::New<Number>(
-          static_cast<double>(g_variant_get_int64(raw_value)));
-    } else if (g_variant_is_of_type(raw_value, G_VARIANT_TYPE_BOOLEAN)) {
-      value = Nan::New<Boolean>(
-          static_cast<bool>(g_variant_get_boolean(raw_value)));
-    } else {
-      g_assert_not_reached ();
-    }
+  while (g_hash_table_iter_next(&iter, &raw_key, &raw_value)) {
+    char* canonicalized_key = ParameterNameFromC(static_cast<char*>(raw_key));
 
-    Nan::Set(result, Nan::New(key).ToLocalChecked(), value);
+    Local<String> key = Nan::New(canonicalized_key).ToLocalChecked();
+    Local<Value> value = ValueFromVariant(static_cast<GVariant*>(raw_value));
+    Nan::Set(result, key, value);
+
+    g_free(canonicalized_key);
   }
 
   return result;
+}
+
+Local<Value> Runtime::ValueFromVariant(GVariant* v) {
+  if (g_variant_is_of_type(v, G_VARIANT_TYPE_STRING))
+    return Nan::New<String>(g_variant_get_string(v, NULL)).ToLocalChecked();
+
+  if (g_variant_is_of_type(v, G_VARIANT_TYPE_INT64))
+    return Nan::New<Number>(static_cast<double>(g_variant_get_int64(v)));
+
+  if (g_variant_is_of_type(v, G_VARIANT_TYPE_BOOLEAN))
+    return Nan::New<Boolean>(static_cast<bool>(g_variant_get_boolean(v)));
+
+  if (g_variant_is_of_type(v, G_VARIANT_TYPE_VARDICT)) {
+    auto dict = Nan::New<Object>();
+
+    GVariantIter iter;
+    gchar* raw_key;
+    GVariant* raw_value;
+
+    g_variant_iter_init(&iter, v);
+
+    while (g_variant_iter_next(&iter, "{sv}", &raw_key, &raw_value)) {
+      char* canonicalized_key = ParameterNameFromC(raw_key);
+
+      Local<String> key = Nan::New(canonicalized_key).ToLocalChecked();
+      Local<Value> value = ValueFromVariant(raw_value);
+      Nan::Set(dict, key, value);
+
+      g_free(canonicalized_key);
+      g_variant_unref(raw_value);
+      g_free(raw_key);
+    }
+
+    return dict;
+  }
+
+  g_assert_not_reached ();
 }
 
 Local<Object> Runtime::ValueFromSocketAddress(GSocketAddress* address) {
@@ -355,6 +383,23 @@ const char* Runtime::ClassNameFromC(const char* cname) {
     return cname + 5;
 
   return cname;
+}
+
+char* Runtime::ParameterNameFromC(const char* cname) {
+  auto name = g_string_new("");
+
+  bool need_uppercase = false;
+  for (const char* cursor = cname; *cursor != '\0'; cursor++) {
+    char ch = *cursor;
+    if (ch == '-') {
+      need_uppercase = true;
+    } else {
+      g_string_append_c(name, need_uppercase ? g_ascii_toupper(ch) : ch);
+      need_uppercase = false;
+    }
+  }
+
+  return g_string_free(name, FALSE);
 }
 
 }
