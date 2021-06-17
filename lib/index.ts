@@ -41,6 +41,7 @@ export type UninjectedHandler = deviceModule.UninjectedHandler;
 export type DeviceLostHandler = deviceModule.DeviceLostHandler;
 export type DeviceType = deviceModule.DeviceType;
 export const DeviceType = deviceModule.DeviceType;
+export type SystemParameters = deviceModule.SystemParameters;
 export type SpawnOptions = deviceModule.SpawnOptions;
 export type Stdio = deviceModule.Stdio;
 export const Stdio = deviceModule.Stdio;
@@ -139,6 +140,11 @@ export type PathUnixSocketAddress = socketAddressModule.PathUnixSocketAddress;
 export type AbstractUnixSocketAddress = socketAddressModule.AbstractUnixSocketAddress;
 
 let sharedDeviceManager: DeviceManager = null;
+
+export async function querySystemParameters(cancellable?: Cancellable): Promise<SystemParameters> {
+    const device = await getLocalDevice(cancellable);
+    return await device.querySystemParameters(cancellable);
+}
 
 export async function spawn(program: string | string[], options: SpawnOptions = {}, cancellable?: Cancellable): Promise<number> {
     const device = await getLocalDevice(cancellable);

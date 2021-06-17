@@ -59,6 +59,10 @@ export class Device {
         return this.impl.isLost;
     }
 
+    querySystemParameters(cancellable?: Cancellable): Promise<SystemParameters> {
+        return this.impl.querySystemParameters(cancellable);
+    }
+
     getFrontmostApplication(cancellable?: Cancellable): Promise<Application | null> {
         return this.impl.getFrontmostApplication(cancellable);
     }
@@ -208,6 +212,75 @@ export enum DeviceType {
     Local = "local",
     Remote = "remote",
     Usb = "usb"
+}
+
+export interface SystemParameters {
+    /**
+     * Operating System details.
+     */
+    os: {
+        /**
+         * ID, e.g.: windows, macos, linux, ios, android, qnx, fedora, ubuntu, etc.
+         */
+        id: string;
+
+        /**
+         * Human-readable name, e.g. `"macOS"`.
+         */
+        name: string;
+
+        /**
+         * Human-readable version string, e.g. `"11.2.2"`.
+         */
+        version?: string;
+    }
+
+    /**
+     * Platform, same as `Process.platform` in GumJS.
+     */
+    platform: "windows" | "darwin" | "linux" | "qnx";
+
+    /**
+     * Architecture, same as `Process.arch` in GumJS.
+     */
+    arch: "ia32" | "x64" | "arm" | "arm64" | "mips";
+
+    /**
+     * System name, e.g. `"Ole André’s iPhone"`.
+     */
+    name?: string;
+
+    /**
+     * iOS UDID (Unique Device ID).
+     */
+    udid?: string;
+
+    /**
+     * Phone number, e.g. `"+47 123 45 678"`.
+     */
+    phoneNumber?: string;
+
+    /**
+     * MAC address of Ethernet interface, e.g.: `"aa:bb:cc:dd:ee:ff"`.
+     */
+    ethernetAddress?: string;
+
+    /**
+     * MAC address of WiFi interface, e.g.: `"aa:bb:cc:dd:ee:ff"`.
+     */
+    wifiAddress?: string;
+
+    /**
+     * MAC address of Bluetooth interface, e.g.: `"aa:bb:cc:dd:ee:ff"`.
+     */
+    bluetoothAddress?: string;
+
+    /**
+     * Android API level, e.g.: `30`.
+     */
+    apiLevel?: number;
+
+    [name: string]: any;
 }
 
 export interface SpawnOptions {

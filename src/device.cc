@@ -66,6 +66,7 @@ void Device::Init(Local<Object> exports, Runtime* runtime) {
   Nan::SetAccessor(instance_tpl, Nan::New("id").ToLocalChecked(), GetId, 0,
       data, DEFAULT, ReadOnly, signature);
 
+  Nan::SetPrototypeMethod(tpl, "querySystemParameters", QuerySystemParameters);
   Nan::SetPrototypeMethod(tpl, "getFrontmostApplication",
       GetFrontmostApplication);
   Nan::SetPrototypeMethod(tpl, "enumerateApplications", EnumerateApplications);
@@ -174,6 +175,41 @@ NAN_PROPERTY_GETTER(Device::IsLost) {
 
   info.GetReturnValue().Set(
       Nan::New(static_cast<bool>(frida_device_is_lost(handle))));
+}
+
+namespace {
+
+class QuerySystemParametersOperation : public Operation<FridaDevice> {
+ protected:
+  void Begin() {
+    frida_device_query_system_parameters(handle_, cancellable_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    parameters_ = frida_device_query_system_parameters_finish(handle_, result,
+        error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    auto value = Runtime::ValueFromParametersDict(parameters_);
+    g_hash_table_unref(parameters_);
+    return value;
+  }
+
+ private:
+  GHashTable* parameters_;
+};
+
+}
+
+NAN_METHOD(Device::QuerySystemParameters) {
+  auto isolate = info.GetIsolate();
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
+
+  auto operation = new QuerySystemParametersOperation();
+  operation->Schedule(isolate, wrapper, info);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
 namespace {
