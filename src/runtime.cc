@@ -246,6 +246,14 @@ Local<Value> Runtime::ValueFromVariant(GVariant* v) {
   if (g_variant_is_of_type(v, G_VARIANT_TYPE_BOOLEAN))
     return Nan::New<Boolean>(static_cast<bool>(g_variant_get_boolean(v)));
 
+  if (g_variant_is_of_type(v, G_VARIANT_TYPE("ay"))) {
+    gsize size;
+    gconstpointer data = g_variant_get_fixed_array(v, &size, sizeof(guint8));
+
+    return Nan::CopyBuffer(static_cast<const char*>(data), size)
+        .ToLocalChecked();
+  }
+
   if (g_variant_is_of_type(v, G_VARIANT_TYPE_VARDICT)) {
     auto dict = Nan::New<Object>();
 
