@@ -270,6 +270,21 @@ Local<Value> Runtime::ValueFromVariant(GVariant* v) {
     return dict;
   }
 
+  if (g_variant_is_of_type(v, G_VARIANT_TYPE_ARRAY)) {
+    GVariantIter iter;
+    g_variant_iter_init(&iter, v);
+
+    auto array = Nan::New<Array>(g_variant_iter_n_children(&iter));
+
+    GVariant* child;
+    for (int i = 0; (child = g_variant_iter_next_value(&iter)) != NULL; i++) {
+      Nan::Set(array, i, ValueFromVariant(child));
+      g_variant_unref(child);
+    }
+
+    return array;
+  }
+
   g_assert_not_reached ();
 }
 
