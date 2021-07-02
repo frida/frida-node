@@ -293,7 +293,7 @@ Local<Value> Runtime::ValueFromVariant(GVariant* v) {
     return array;
   }
 
-  g_assert_not_reached ();
+  return Nan::Null();
 }
 
 Local<Object> Runtime::ValueFromSocketAddress(GSocketAddress* address) {
