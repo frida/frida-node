@@ -7,7 +7,6 @@
 #include "device_manager.h"
 #include "endpoint_parameters.h"
 #include "glib_context.h"
-#include "icon.h"
 #include "iostream.h"
 #include "portal_membership.h"
 #include "portal_service.h"
@@ -48,7 +47,6 @@ static void InitAll(Local<Object> exports,
   Spawn::Init(exports, runtime);
   Child::Init(exports, runtime);
   Crash::Init(exports, runtime);
-  Icon::Init(exports, runtime);
   Bus::Init(exports, runtime);
   Session::Init(exports, runtime);
   Script::Init(exports, runtime);

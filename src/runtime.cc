@@ -9,6 +9,7 @@
 using std::strchr;
 using v8::Array;
 using v8::Boolean;
+using v8::Date;
 using v8::Function;
 using v8::Isolate;
 using v8::Local;
@@ -80,6 +81,20 @@ Local<Value> Runtime::ValueFromJson(Local<String> json) {
   auto parse = Nan::New<Function>(json_parse_);
   Local<Value> argv[] = { json };
   return parse->Call(context, module, 1, argv).ToLocalChecked();
+}
+
+Local<Value> Runtime::ValueFromDatetime(const char* iso8601_text) {
+  GDateTime* dt = g_date_time_new_from_iso8601(iso8601_text, NULL);
+  if (dt == NULL)
+    return Nan::Null();
+
+  double unix_msec = static_cast<double>(g_date_time_to_unix(dt) * 1000) +
+      (static_cast<double>(g_date_time_get_microsecond(dt)) / 1000.0);
+  Local<Date> result = Nan::New<Date>(unix_msec).ToLocalChecked();
+
+  g_date_time_unref(dt);
+
+  return result;
 }
 
 bool Runtime::ValueToStrv(Local<Value> value, gchar*** strv, gint* length) {

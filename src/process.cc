@@ -1,9 +1,10 @@
 #include "process.h"
 
-#include "icon.h"
+#include <cstring>
 
 #define PROCESS_DATA_CONSTRUCTOR "process:ctor"
 
+using std::strcmp;
 using v8::AccessorSignature;
 using v8::DEFAULT;
 using v8::External;
@@ -14,6 +15,7 @@ using v8::Local;
 using v8::Object;
 using v8::Persistent;
 using v8::ReadOnly;
+using v8::String;
 using v8::Value;
 
 namespace frida {
@@ -36,10 +38,8 @@ void Process::Init(Local<Object> exports, Runtime* runtime) {
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Local<Value>();
   auto signature = AccessorSignature::New(isolate, tpl);
-  Nan::SetAccessor(instance_tpl, Nan::New("largeIcon").ToLocalChecked(),
-      GetLargeIcon, 0, data, DEFAULT, ReadOnly, signature);
-  Nan::SetAccessor(instance_tpl, Nan::New("smallIcon").ToLocalChecked(),
-      GetSmallIcon, 0, data, DEFAULT, ReadOnly, signature);
+  Nan::SetAccessor(instance_tpl, Nan::New("parameters").ToLocalChecked(),
+      GetParameters, 0, data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("name").ToLocalChecked(),
       GetName, 0, data, DEFAULT, ReadOnly, signature);
   Nan::SetAccessor(instance_tpl, Nan::New("pid").ToLocalChecked(),
@@ -97,20 +97,41 @@ NAN_PROPERTY_GETTER(Process::GetName) {
       Nan::New(frida_process_get_name(handle)).ToLocalChecked());
 }
 
-NAN_PROPERTY_GETTER(Process::GetSmallIcon) {
+NAN_PROPERTY_GETTER(Process::GetParameters) {
   auto wrapper = ObjectWrap::Unwrap<Process>(info.Holder());
   auto handle = wrapper->GetHandle<FridaProcess>();
 
-  info.GetReturnValue().Set(
-      Icon::New(frida_process_get_small_icon(handle), wrapper->runtime_));
+  GHashTable* parameters = frida_process_get_parameters(handle);
+  info.GetReturnValue().Set(ParseParameters(parameters));
 }
 
-NAN_PROPERTY_GETTER(Process::GetLargeIcon) {
-  auto wrapper = ObjectWrap::Unwrap<Process>(info.Holder());
-  auto handle = wrapper->GetHandle<FridaProcess>();
+Local<Value> Process::ParseParameters(GHashTable* dict) {
+  auto result = Nan::New<Object>();
 
-  info.GetReturnValue().Set(
-      Icon::New(frida_process_get_large_icon(handle), wrapper->runtime_));
+  GHashTableIter iter;
+  gpointer raw_key, raw_value;
+
+  g_hash_table_iter_init(&iter, dict);
+
+  while (g_hash_table_iter_next(&iter, &raw_key, &raw_value)) {
+    char* canonicalized_key =
+        Runtime::ParameterNameFromC(static_cast<char*>(raw_key));
+    GVariant* var_value = static_cast<GVariant*>(raw_value);
+
+    Local<String> key = Nan::New(canonicalized_key).ToLocalChecked();
+    Local<Value> value;
+    if (strcmp(canonicalized_key, "started") == 0 &&
+        g_variant_is_of_type(var_value, G_VARIANT_TYPE_STRING)) {
+      value = Runtime::ValueFromDatetime(g_variant_get_string(var_value, NULL));
+    } else {
+      value = Runtime::ValueFromVariant(var_value);
+    }
+    Nan::Set(result, key, value);
+
+    g_free(canonicalized_key);
+  }
+
+  return result;
 }
 
 }

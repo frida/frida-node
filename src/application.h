@@ -21,8 +21,9 @@ class Application : public GLibObject {
   static NAN_PROPERTY_GETTER(GetIdentifier);
   static NAN_PROPERTY_GETTER(GetName);
   static NAN_PROPERTY_GETTER(GetPid);
-  static NAN_PROPERTY_GETTER(GetSmallIcon);
-  static NAN_PROPERTY_GETTER(GetLargeIcon);
+  static NAN_PROPERTY_GETTER(GetParameters);
+
+  static v8::Local<v8::Value> ParseParameters(GHashTable* dict);
 };
 
 }

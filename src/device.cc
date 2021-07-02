@@ -4,7 +4,6 @@
 #include "bus.h"
 #include "child.h"
 #include "crash.h"
-#include "icon.h"
 #include "iostream.h"
 #include "operation.h"
 #include "process.h"
@@ -149,8 +148,11 @@ NAN_PROPERTY_GETTER(Device::GetIcon) {
   auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
   auto handle = wrapper->GetHandle<FridaDevice>();
 
-  info.GetReturnValue().Set(Icon::New(frida_device_get_icon(handle),
-      wrapper->runtime_));
+  GVariant* icon = frida_device_get_icon(handle);
+  if (icon != NULL)
+    info.GetReturnValue().Set(Runtime::ValueFromVariant(icon));
+  else
+    info.GetReturnValue().SetNull();
 }
 
 NAN_PROPERTY_GETTER(Device::GetType) {
@@ -215,10 +217,21 @@ NAN_METHOD(Device::QuerySystemParameters) {
 namespace {
 
 class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
+ public:
+  GetFrontmostApplicationOperation(FridaFrontmostQueryOptions* options)
+    : application_(NULL),
+      options_(options) {
+  }
+
+  ~GetFrontmostApplicationOperation() {
+    g_object_unref(options_);
+    g_clear_object(&application_);
+  }
+
  protected:
   void Begin() {
-    frida_device_get_frontmost_application(handle_, cancellable_, OnReady,
-        this);
+    frida_device_get_frontmost_application(handle_, options_, cancellable_,
+        OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -227,17 +240,14 @@ class GetFrontmostApplicationOperation : public Operation<FridaDevice> {
   }
 
   Local<Value> Result(Isolate* isolate) {
-    if (application_ != NULL) {
-      auto application = Application::New(application_, runtime_);
-      g_object_unref(application_);
-      return application;
-    } else {
+    if (application_ == NULL)
       return Nan::Null();
-    }
+    return Application::New(application_, runtime_);
   }
 
  private:
   FridaApplication* application_;
+  FridaFrontmostQueryOptions* options_;
 };
 
 }
@@ -246,7 +256,30 @@ NAN_METHOD(Device::GetFrontmostApplication) {
   auto isolate = info.GetIsolate();
   auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
-  auto operation = new GetFrontmostApplicationOperation();
+  if (info.Length() < 1) {
+    Nan::ThrowTypeError("Missing one or more arguments");
+    return;
+  }
+
+  auto scope_value = info[0];
+
+  auto options = frida_frontmost_query_options_new();
+  bool valid = true;
+
+  if (!scope_value->IsNull()) {
+    FridaScope scope;
+    if (Runtime::ValueToEnum(scope_value, FRIDA_TYPE_SCOPE, &scope))
+      frida_frontmost_query_options_set_scope(options, scope);
+    else
+      valid = false;
+  }
+
+  if (!valid) {
+    g_object_unref(options);
+    return;
+  }
+
+  auto operation = new GetFrontmostApplicationOperation(options);
   operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
@@ -255,9 +288,21 @@ NAN_METHOD(Device::GetFrontmostApplication) {
 namespace {
 
 class EnumerateApplicationsOperation : public Operation<FridaDevice> {
+ public:
+  EnumerateApplicationsOperation(FridaApplicationQueryOptions* options)
+    : applications_(NULL),
+      options_(options) {
+  }
+
+  ~EnumerateApplicationsOperation() {
+    g_object_unref(options_);
+    g_clear_object(&applications_);
+  }
+
  protected:
   void Begin() {
-    frida_device_enumerate_applications(handle_, cancellable_, OnReady, this);
+    frida_device_enumerate_applications(handle_, options_, cancellable_,
+        OnReady, this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -274,14 +319,12 @@ class EnumerateApplicationsOperation : public Operation<FridaDevice> {
       Nan::Set(applications, i, application);
       g_object_unref(handle);
     }
-
-    g_object_unref(applications_);
-
     return applications;
   }
 
  private:
   FridaApplicationList* applications_;
+  FridaApplicationQueryOptions* options_;
 };
 
 }
@@ -290,7 +333,54 @@ NAN_METHOD(Device::EnumerateApplications) {
   auto isolate = info.GetIsolate();
   auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
-  auto operation = new EnumerateApplicationsOperation();
+  if (info.Length() < 2) {
+    Nan::ThrowTypeError("Missing one or more arguments");
+    return;
+  }
+
+  auto identifiers_value = info[0];
+  auto scope_value = info[1];
+
+  auto options = frida_application_query_options_new();
+  bool valid = true;
+
+  if (identifiers_value->IsArray()) {
+    auto array = Local<Array>::Cast(identifiers_value);
+
+    uint32_t n = array->Length();
+
+    for (uint32_t i = 0; i != n; i++) {
+      auto element_value = Nan::Get(array, i).ToLocalChecked();
+
+      if (!element_value->IsString()) {
+        Nan::ThrowTypeError("Bad argument, not a valid application ID");
+        valid = false;
+        break;
+      }
+      Nan::Utf8String identifier(element_value);
+
+      frida_application_query_options_select_identifier(options, *identifier);
+    }
+  } else {
+    Nan::ThrowTypeError("Bad argument, 'identifiers' must be an array of "
+        "application IDs");
+    valid = false;
+  }
+
+  if (valid && !scope_value->IsNull()) {
+    FridaScope scope;
+    if (Runtime::ValueToEnum(scope_value, FRIDA_TYPE_SCOPE, &scope))
+      frida_application_query_options_set_scope(options, scope);
+    else
+      valid = false;
+  }
+
+  if (!valid) {
+    g_object_unref(options);
+    return;
+  }
+
+  auto operation = new EnumerateApplicationsOperation(options);
   operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
@@ -299,9 +389,21 @@ NAN_METHOD(Device::EnumerateApplications) {
 namespace {
 
 class EnumerateProcessesOperation : public Operation<FridaDevice> {
+ public:
+  EnumerateProcessesOperation(FridaProcessQueryOptions* options)
+    : processes_(NULL),
+      options_(options) {
+  }
+
+  ~EnumerateProcessesOperation() {
+    g_object_unref(options_);
+    g_clear_object(&processes_);
+  }
+
  protected:
   void Begin() {
-    frida_device_enumerate_processes(handle_, cancellable_, OnReady, this);
+    frida_device_enumerate_processes(handle_, options_, cancellable_, OnReady,
+        this);
   }
 
   void End(GAsyncResult* result, GError** error) {
@@ -318,14 +420,12 @@ class EnumerateProcessesOperation : public Operation<FridaDevice> {
       Nan::Set(processes, i, process);
       g_object_unref(handle);
     }
-
-    g_object_unref(processes_);
-
     return processes;
   }
 
  private:
   FridaProcessList* processes_;
+  FridaProcessQueryOptions* options_;
 };
 
 }
@@ -334,7 +434,56 @@ NAN_METHOD(Device::EnumerateProcesses) {
   auto isolate = info.GetIsolate();
   auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
 
-  auto operation = new EnumerateProcessesOperation();
+  if (info.Length() < 2) {
+    Nan::ThrowTypeError("Missing one or more arguments");
+    return;
+  }
+
+  auto pids_value = info[0];
+  auto scope_value = info[1];
+
+  auto options = frida_process_query_options_new();
+  bool valid = true;
+
+  if (pids_value->IsArray()) {
+    auto array = Local<Array>::Cast(pids_value);
+
+    uint32_t n = array->Length();
+
+    for (uint32_t i = 0; i != n; i++) {
+      auto element_value = Nan::Get(array, i).ToLocalChecked();
+
+      int64_t pid = -1;
+      if (element_value->IsNumber()) {
+        pid = Nan::To<int64_t>(element_value).FromMaybe(-1);
+      }
+      if (pid < 0) {
+        Nan::ThrowTypeError("Bad argument, not a valid process ID");
+        valid = false;
+        break;
+      }
+
+      frida_process_query_options_select_pid(options, pid);
+    }
+  } else {
+    Nan::ThrowTypeError("Bad argument, 'pids' must be an array of process IDs");
+    valid = false;
+  }
+
+  if (valid && !scope_value->IsNull()) {
+    FridaScope scope;
+    if (Runtime::ValueToEnum(scope_value, FRIDA_TYPE_SCOPE, &scope))
+      frida_process_query_options_set_scope(options, scope);
+    else
+      valid = false;
+  }
+
+  if (!valid) {
+    g_object_unref(options);
+    return;
+  }
+
+  auto operation = new EnumerateProcessesOperation(options);
   operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));

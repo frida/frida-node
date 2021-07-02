@@ -47,7 +47,7 @@ export class Device {
         return this.impl.name;
     }
 
-    get icon(): Icon {
+    get icon(): Icon | null {
         return this.impl.icon;
     }
 
@@ -63,20 +63,34 @@ export class Device {
         return this.impl.querySystemParameters(cancellable);
     }
 
-    getFrontmostApplication(cancellable?: Cancellable): Promise<Application | null> {
-        return this.impl.getFrontmostApplication(cancellable);
+    getFrontmostApplication(options: FrontmostQueryOptions = {}, cancellable?: Cancellable): Promise<Application | null> {
+        const {
+            scope = null,
+        } = options;
+        return this.impl.getFrontmostApplication(scope, cancellable);
     }
 
-    enumerateApplications(cancellable?: Cancellable): Promise<Application[]> {
-        return this.impl.enumerateApplications(cancellable);
+    enumerateApplications(options: ApplicationQueryOptions = {}, cancellable?: Cancellable): Promise<Application[]> {
+        const {
+            identifiers = [],
+            scope = null,
+        } = options;
+        return this.impl.enumerateApplications(identifiers, scope, cancellable);
     }
 
-    enumerateProcesses(cancellable?: Cancellable): Promise<Process[]> {
-        return this.impl.enumerateProcesses(cancellable);
+    enumerateProcesses(options: ProcessQueryOptions = {}, cancellable?: Cancellable): Promise<Process[]> {
+        const {
+            pids = [],
+            scope = null,
+        } = options;
+        return this.impl.enumerateProcesses(pids, scope, cancellable);
     }
 
-    async getProcess(name: string, cancellable?: Cancellable): Promise<Process> {
-        const processes = await this.enumerateProcesses(cancellable);
+    async getProcess(name: string, options: ProcessMatchOptions = {}, cancellable?: Cancellable): Promise<Process> {
+        const {
+            scope = Scope.Minimal,
+        } = options;
+        const processes = await this.enumerateProcesses({ scope }, cancellable);
         const mm = new Minimatch(name.toLowerCase());
         const matching = processes.filter(process => mm.match(process.name.toLowerCase()));
         if (matching.length === 1) {
@@ -180,7 +194,7 @@ export class Device {
             return target;
         }
 
-        const process = await this.getProcess(target, cancellable);
+        const process = await this.getProcess(target, {}, cancellable);
         return process.pid;
     }
 
@@ -281,6 +295,74 @@ export interface SystemParameters {
     apiLevel?: number;
 
     [name: string]: any;
+}
+
+export interface FrontmostQueryOptions {
+    /**
+     * How much data to collect about the frontmost application. The default is `Scope.Minimal`,
+     * which means no parameters will be collected. Specify `Scope.Metadata` to collect all
+     * parameters except icons, which can be included by specifying `Scope.Full`.
+     */
+    scope?: Scope;
+}
+
+export interface ApplicationQueryOptions {
+    /**
+     * Limit enumeration to one or more application IDs only. Typically used to fetch additional
+     * details about a subset, e.g. based on user interaction.
+     */
+    identifiers?: string[];
+
+    /**
+     * How much data to collect about each application. The default is `Scope.Minimal`, which
+     * means no parameters will be collected. Specify `Scope.Metadata` to collect all parameters
+     * except icons, which can be included by specifying `Scope.Full`.
+     */
+    scope?: Scope;
+}
+
+export interface ProcessQueryOptions {
+    /**
+     * Limit enumeration to one or more process IDs only. Typically used to fetch additional
+     * details about a subset, e.g. based on user interaction.
+     */
+    pids?: number[];
+
+    /**
+     * How much data to collect about each process. The default is `Scope.Minimal`, which
+     * means no parameters will be collected. Specify `Scope.Metadata` to collect all
+     * parameters except icons, which can be included by specifying `Scope.Full`.
+     */
+    scope?: Scope;
+}
+
+export interface ProcessMatchOptions {
+    /**
+     * How much data to collect about the matching process. The default is `Scope.Minimal`,
+     * which means no parameters will be collected. Specify `Scope.Metadata` to collect all
+     * parameters except icons, which can be included by specifying `Scope.Full`.
+     */
+    scope?: Scope;
+}
+
+/**
+ * How much data to collect about a given application or process.
+ */
+export enum Scope {
+    /**
+     * Don't collect any parameters. This is the default.
+     */
+    Minimal = "minimal",
+
+    /**
+     * Collect all parameters except icons.
+     */
+    Metadata = "metadata",
+
+    /**
+     * Collect all parameters, including icons.
+     */
+    Full = "full"
 }
 
 export interface SpawnOptions {

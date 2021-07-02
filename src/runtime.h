@@ -22,6 +22,8 @@ class Runtime {
   v8::Local<v8::String> ValueToJson(v8::Local<v8::Value> value);
   v8::Local<v8::Value> ValueFromJson(v8::Local<v8::String> json);
 
+  static v8::Local<v8::Value> ValueFromDatetime(const char* iso8601_text);
+
   static bool ValueToStrv(v8::Local<v8::Value> value, gchar*** strv,
       gint* length);
   static v8::Local<v8::Value> ValueFromStrv(gchar* const* strv, gint length);
@@ -43,10 +45,10 @@ class Runtime {
   static bool ValueToCertificate(v8::Local<v8::Value> value,
       GTlsCertificate** certificate);
 
- private:
   static const char* ClassNameFromC(const char* cname);
   static char* ParameterNameFromC(const char* cname);
 
+ private:
   UVContext* uv_context_;
   GLibContext* glib_context_;
 

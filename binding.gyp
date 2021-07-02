@@ -51,7 +51,6 @@
         "src/spawn.cc",
         "src/child.cc",
         "src/crash.cc",
-        "src/icon.cc",
         "src/bus.cc",
         "src/session.cc",
         "src/script.cc",
