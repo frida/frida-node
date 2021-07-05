@@ -17,6 +17,7 @@ import * as scriptModule from "./script";
 import * as sessionModule from "./session";
 import * as socketAddressModule from "./socket_address";
 import * as spawnModule from "./spawn";
+import * as systemParametersModule from "./system_parameters";
 import * as webGatewayServiceModule from "./web_gateway_service";
 
 export type DeviceManager = deviceManagerModule.DeviceManager;
@@ -41,7 +42,6 @@ export type UninjectedHandler = deviceModule.UninjectedHandler;
 export type DeviceLostHandler = deviceModule.DeviceLostHandler;
 export type DeviceType = deviceModule.DeviceType;
 export const DeviceType = deviceModule.DeviceType;
-export type SystemParameters = deviceModule.SystemParameters;
 export type FrontmostQueryOptions = deviceModule.FrontmostQueryOptions;
 export type ApplicationQueryOptions = deviceModule.ApplicationQueryOptions;
 export type ProcessQueryOptions = deviceModule.ProcessQueryOptions;
@@ -55,6 +55,11 @@ export type TargetProcess = deviceModule.TargetProcess;
 export type SessionOptions = deviceModule.SessionOptions;
 export type Realm = deviceModule.Realm;
 export const Realm = deviceModule.Realm;
+
+export type SystemParameters = systemParametersModule.SystemParameters;
+export type SystemInterface = systemParametersModule.SystemInterface;
+export type NetworkInterface = systemParametersModule.NetworkInterface;
+export type CellularInterface = systemParametersModule.CellularInterface;
 
 export type Session = sessionModule.Session;
 export const Session = sessionModule.Session;
