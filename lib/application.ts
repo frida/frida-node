@@ -1,4 +1,5 @@
 import { Icon } from "./icon";
+import { SystemParameters } from "./system_parameters";
 
 export interface Application {
     identifier: string;
@@ -87,6 +88,11 @@ export interface ApplicationParameters {
      * One or more icons. Only included when `scope` is set to `Scope.Full`.
      */
     icons?: Icon[];
+
+    /**
+     * System parameters, available for applications accessed through a portal.
+     */
+    system?: SystemParameters;
 
     [name: string]: any;
 }
