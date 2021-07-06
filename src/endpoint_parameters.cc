@@ -63,7 +63,7 @@ NAN_METHOD(EndpointParameters::New) {
     return;
   }
 
-  if (info.Length() < 5) {
+  if (info.Length() < 7) {
     Nan::ThrowTypeError("Missing one or more arguments");
     return;
   }
@@ -73,13 +73,17 @@ NAN_METHOD(EndpointParameters::New) {
   auto address_value = info[0];
   auto port_value = info[1];
   auto certificate_value = info[2];
-  auto auth_token_value = info[3];
-  auto auth_callback_value = info[4];
+  auto origin_value = info[3];
+  auto auth_token_value = info[4];
+  auto auth_callback_value = info[5];
+  auto asset_root_value = info[6];
 
   gchar* address = NULL;
   guint16 port = 0;
   GTlsCertificate* certificate = NULL;
+  gchar* origin = NULL;
   FridaAuthenticationService* auth_service = NULL;
+  GFile* asset_root = NULL;
   bool valid = true;
 
   if (!address_value->IsNull()) {
@@ -106,6 +110,16 @@ NAN_METHOD(EndpointParameters::New) {
     valid = Runtime::ValueToCertificate(certificate_value, &certificate);
   }
 
+  if (valid && !origin_value->IsNull()) {
+    if (origin_value->IsString()) {
+      Nan::Utf8String str(origin_value);
+      origin = g_strdup(*str);
+    } else {
+      Nan::ThrowTypeError("Bad argument, 'origin' must be a string");
+      valid = false;
+    }
+  }
+
   if (valid && !auth_token_value->IsNull()) {
     if (auth_token_value->IsString()) {
       Nan::Utf8String auth_token(auth_token_value);
@@ -126,9 +140,19 @@ NAN_METHOD(EndpointParameters::New) {
     }
   }
 
+  if (valid && !asset_root_value->IsNull()) {
+    if (asset_root_value->IsString()) {
+      Nan::Utf8String str(asset_root_value);
+      asset_root = g_file_new_for_path(*str);
+    } else {
+      Nan::ThrowTypeError("Bad argument, 'assetRoot' must be a string");
+      valid = false;
+    }
+  }
+
   if (valid) {
     auto handle = frida_endpoint_parameters_new(address, port, certificate,
-        auth_service);
+        origin, auth_service, asset_root);
     auto wrapper = new EndpointParameters(handle, runtime);
     g_object_unref(handle);
     auto obj = info.This();
@@ -137,7 +161,9 @@ NAN_METHOD(EndpointParameters::New) {
     info.GetReturnValue().Set(obj);
   }
 
+  g_clear_object(&asset_root);
   g_clear_object(&auth_service);
+  g_free(origin);
   g_clear_object(&certificate);
   g_free(address);
 }

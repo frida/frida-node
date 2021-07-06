@@ -18,7 +18,6 @@
 #include "signals.h"
 #include "spawn.h"
 #include "uv_context.h"
-#include "web_gateway_service.h"
 
 using v8::Context;
 using v8::Local;
@@ -53,7 +52,6 @@ static void InitAll(Local<Object> exports,
   Relay::Init(exports, runtime);
   PortalMembership::Init(exports, runtime);
   PortalService::Init(exports, runtime);
-  WebGatewayService::Init(exports, runtime);
   EndpointParameters::Init(exports, runtime);
   IOStream::Init(exports, runtime);
   Cancellable::Init(exports, runtime);

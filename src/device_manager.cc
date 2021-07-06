@@ -204,15 +204,16 @@ NAN_METHOD(DeviceManager::AddRemoteDevice) {
   auto isolate = info.GetIsolate();
   auto wrapper = ObjectWrap::Unwrap<DeviceManager>(info.Holder());
 
-  if (info.Length() < 4) {
+  if (info.Length() < 5) {
     Nan::ThrowTypeError("Missing one or more arguments");
     return;
   }
 
   auto address_value = info[0];
   auto certificate_value = info[1];
-  auto token_value = info[2];
-  auto keepalive_interval_value = info[3];
+  auto origin_value = info[2];
+  auto token_value = info[3];
+  auto keepalive_interval_value = info[4];
 
   if (!address_value->IsString()) {
     Nan::ThrowTypeError("Bad argument, 'address' must be a string");
@@ -229,6 +230,16 @@ NAN_METHOD(DeviceManager::AddRemoteDevice) {
     if (valid) {
       frida_remote_device_options_set_certificate(options, certificate);
       g_object_unref(certificate);
+    }
+  }
+
+  if (valid && !origin_value->IsNull()) {
+    if (origin_value->IsString()) {
+      Nan::Utf8String origin(origin_value);
+      frida_remote_device_options_set_origin(options, *origin);
+    } else {
+      Nan::ThrowTypeError("Bad argument, 'origin' must be a string");
+      valid = false;
     }
   }
 

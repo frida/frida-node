@@ -57,7 +57,6 @@
         "src/relay.cc",
         "src/portal_membership.cc",
         "src/portal_service.cc",
-        "src/web_gateway_service.cc",
         "src/endpoint_parameters.cc",
         "src/authentication.cc",
         "src/iostream.cc",

@@ -18,7 +18,6 @@ import * as sessionModule from "./session";
 import * as socketAddressModule from "./socket_address";
 import * as spawnModule from "./spawn";
 import * as systemParametersModule from "./system_parameters";
-import * as webGatewayServiceModule from "./web_gateway_service";
 
 export type DeviceManager = deviceManagerModule.DeviceManager;
 export const DeviceManager = deviceManagerModule.DeviceManager;
@@ -110,10 +109,6 @@ export type PortalControllerDisconnectedHandler = portalServiceModule.PortalCont
 export type PortalAuthenticatedHandler = portalServiceModule.PortalAuthenticatedHandler;
 export type PortalSubscribeHandler = portalServiceModule.PortalSubscribeHandler;
 export type PortalMessageHandler = portalServiceModule.PortalMessageHandler;
-
-export type WebGatewayService = webGatewayServiceModule.WebGatewayService;
-export const WebGatewayService = webGatewayServiceModule.WebGatewayService;
-export type WebGatewayServiceOptions = webGatewayServiceModule.WebGatewayServiceOptions;
 
 export type EndpointParameters = endpointParametersModule.EndpointParameters;
 export const EndpointParameters = endpointParametersModule.EndpointParameters;

@@ -87,7 +87,8 @@ NAN_METHOD(PortalService::New) {
       valid = false;
     }
   } else {
-    cluster_params = frida_endpoint_parameters_new(NULL, 0, NULL, NULL);
+    cluster_params =
+        frida_endpoint_parameters_new(NULL, 0, NULL, NULL, NULL, NULL);
   }
 
   if (valid && !control_params_value->IsNull()) {

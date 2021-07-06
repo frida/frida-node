@@ -6,7 +6,14 @@ import { inspect } from "util";
 export class EndpointParameters {
     private impl: any;
 
-    constructor({ address = null, port = null, certificate = null, authentication = null }: EndpointParametersSubset = {}) {
+    constructor({
+                    address = null,
+                    port = null,
+                    certificate = null,
+                    origin = null,
+                    authentication = null,
+                    assetRoot = null,
+                }: EndpointParametersSubset = {}) {
         let authToken: string | null = null;
         let authCallback: AuthenticationCallback | null = null;
         if (authentication !== null) {
@@ -17,7 +24,7 @@ export class EndpointParameters {
             }
         }
 
-        this.impl = new binding.EndpointParameters(address, port, certificate, authToken, authCallback);
+        this.impl = new binding.EndpointParameters(address, port, certificate, origin, authToken, authCallback, assetRoot);
     }
 
     [inspect.custom]() {
@@ -29,7 +36,9 @@ export interface EndpointParametersSubset {
     address?: string;
     port?: number;
     certificate?: string;
+    origin?: string;
     authentication?: AuthenticationScheme;
+    assetRoot?: string;
 }
 
 export type AuthenticationScheme = TokenAuthenticationScheme | CallbackAuthenticationScheme;

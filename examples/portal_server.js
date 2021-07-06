@@ -20,11 +20,11 @@ class Application {
       controlParams = new frida.EndpointParameters({
         address: '::1',
         port: 27042,
-        certificate: '/Users/oleavr/src/identity.pem',
         authentication: {
           scheme: 'callback',
           callback: this._authenticate
         },
+        assetRoot: '/Users/oleavr/src/frida/frida-python/examples/web_client/dist'
       });
     }
 

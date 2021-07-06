@@ -19,7 +19,6 @@ class Application {
       secret: 'knock-knock'
     };
     this._device = await frida.getDeviceManager().addRemoteDevice('::1', {
-      certificate: '/Users/oleavr/src/cert.pem',
       token: JSON.stringify(token)
     });
 

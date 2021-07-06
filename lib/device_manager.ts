@@ -27,10 +27,11 @@ export class DeviceManager {
     async addRemoteDevice(address: string, options: RemoteDeviceOptions = {}, cancellable?: Cancellable): Promise<Device> {
         const {
             certificate = null,
+            origin = null,
             token = null,
             keepaliveInterval = null,
         } = options;
-        return new Device(await this.impl.addRemoteDevice(address, certificate, token, keepaliveInterval, cancellable));
+        return new Device(await this.impl.addRemoteDevice(address, certificate, origin, token, keepaliveInterval, cancellable));
     }
 
     removeRemoteDevice(address: string, cancellable?: Cancellable): Promise<void> {
@@ -44,6 +45,7 @@ export class DeviceManager {
 
 export interface RemoteDeviceOptions {
     certificate?: string;
+    origin?: string;
     token?: string;
     keepaliveInterval?: number;
 }
