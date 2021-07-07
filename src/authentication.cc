@@ -68,8 +68,9 @@ static void frida_node_authentication_service_init(
 static void frida_node_authentication_service_dispose(GObject* object) {
   auto self = FRIDA_NODE_AUTHENTICATION_SERVICE(object);
 
-  Persistent<Function>* callback = g_steal_pointer(&self->callback);
+  Persistent<Function>* callback = self->callback;
   if (callback != NULL) {
+    self->callback = NULL;
     self->runtime->GetUVContext()->Schedule([=]() {
       delete callback;
     });
