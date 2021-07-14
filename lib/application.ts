@@ -41,7 +41,7 @@ export interface ApplicationParameters {
         /**
          * App group container locations.
          */
-        [name: string]: string;
+        [name: string]: string | undefined;
     }
 
     /**
