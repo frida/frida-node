@@ -773,7 +773,8 @@ NAN_METHOD(Device::Spawn) {
           raw_value = g_variant_new_string(*value_str);
         }
 
-        g_hash_table_insert(aux, g_strdup(*key_str), raw_value);
+        g_hash_table_insert(aux, g_strdup(*key_str),
+            g_variant_ref_sink(raw_value));
       }
     } else {
       Nan::ThrowTypeError("Bad argument, 'aux' must be an object");
