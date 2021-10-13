@@ -19,7 +19,7 @@
     "ipad",
     "android"
   ],
-  "homepage": "https://www.frida.re",
+  "homepage": "https://frida.re",
   "engines": {
     "node": ">=8.0.0"
   },

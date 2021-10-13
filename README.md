@@ -4,7 +4,7 @@
 [![NPM Downloads][npm-dm-image]][npm-link]
 
 
-Node.js bindings for [Frida](http://www.frida.re).
+Node.js bindings for [Frida](http://frida.re).
 
 ## Depends
 
@@ -26,7 +26,7 @@ FRIDA=/absolute/path/to/fully/compiled/frida/repo npm install
 
 ## Examples
 
-* Follow [Setting up the experiment](http://www.frida.re/docs/functions/) to
+* Follow [Setting up the experiment](http://frida.re/docs/functions/) to
   produce a binary.
 * Run the binary.
 * Take note of the memory address the binary gives you when run.
