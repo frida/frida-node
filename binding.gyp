@@ -25,6 +25,9 @@
       ["OS=='linux' and target_arch=='arm64'", {
         "frida_host": "linux-arm64",
       }],
+      ["OS=='freebsd' and target_arch=='x64'", {
+        "frida_host": "freebsd-x86_64",
+      }],
     ],
     "frida_host_msvs": "unix",
     "build_v8_with_gn": 0,
@@ -193,6 +196,20 @@
           ],
           "libraries": [
             "-lelf",
+          ],
+        }],
+        ["OS=='freebsd'", {
+          "cflags": [
+            "-ffunction-sections",
+            "-fdata-sections",
+          ],
+          "ldflags": [
+            "-Wl,--gc-sections",
+            "-Wl,--version-script",
+            "-Wl,../binding.version",
+          ],
+          "libraries": [
+            "-liconv",
           ],
         }],
       ],
