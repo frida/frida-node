@@ -28,6 +28,9 @@
       ["OS=='freebsd' and target_arch=='x64'", {
         "frida_host": "freebsd-x86_64",
       }],
+      ["OS=='freebsd' and target_arch=='arm64'", {
+        "frida_host": "freebsd-arm64",
+      }],
     ],
     "frida_host_msvs": "unix",
     "build_v8_with_gn": 0,
