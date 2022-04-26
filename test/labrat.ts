@@ -1,29 +1,27 @@
+import * as frida from "../lib";
 import { targetProgram } from "./data";
 
-import { spawn, ChildProcess } from "child_process";
-
 export class LabRat {
-    private constructor(private childProcess: ChildProcess) {
+    private constructor(private _pid: number) {
     }
 
     get pid(): number {
-        return this.childProcess.pid;
+        return this._pid;
     }
 
     static async start(): Promise<LabRat> {
-        const childProcess = spawn(targetProgram(), [], {
-            stdio: ["pipe", process.stdout, process.stderr]
+        const pid = await frida.spawn(targetProgram(), {
+            stdio: frida.Stdio.Pipe
         });
-
+        await frida.resume(pid);
         // TODO: improve injectors to handle injection into a process that hasn't yet finished initializing
         await sleep(50);
 
-        return new LabRat(childProcess);
+        return new LabRat(pid);
     }
 
     stop(): void {
-        this.childProcess.kill("SIGKILL");
-        this.childProcess.unref();
+        frida.kill(this._pid);
     }
 }
 
