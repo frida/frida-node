@@ -21,7 +21,7 @@ describe("Device", function () {
         expect(processes.length).to.be.above(0);
 
         const process = processes[0];
-        expect(process.pid).to.be.greaterThan(0);
+        expect(process.pid).to.be.at.least(0);
         expect(process.name.length).to.be.greaterThan(0);
     });
 });
