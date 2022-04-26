@@ -211,9 +211,6 @@
             "-Wl,--version-script",
             "-Wl,../binding.version",
           ],
-          "libraries": [
-            "-liconv",
-          ],
         }],
       ],
     },
