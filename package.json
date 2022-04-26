@@ -29,7 +29,7 @@
   ],
   "dependencies": {
     "bindings": "^1.5.0",
-    "minimatch": "^3.0.3",
+    "minimatch": "^5.0.1",
     "nan": "^2.13.2",
     "prebuild-install": "^7.0.0"
   },
