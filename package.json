@@ -34,12 +34,12 @@
     "prebuild-install": "^7.0.0"
   },
   "devDependencies": {
+    "@frida/prebuild": "^11.0.4-frida.0",
     "@types/chai": "^4.2.18",
     "@types/mocha": "^9.0.0",
     "@types/node": "^18.0.0",
     "chai": "^4.3.4",
     "mocha": "^10.0.0",
-    "prebuild": "^11.0.1",
     "ts-node": "^10.0.0",
     "typescript": "^4.3.2"
   },
