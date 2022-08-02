@@ -48,6 +48,8 @@ void Script::Init(Local<Object> exports, Runtime* runtime) {
   Nan::SetPrototypeMethod(tpl, "unload", Unload);
   Nan::SetPrototypeMethod(tpl, "eternalize", Eternalize);
   Nan::SetPrototypeMethod(tpl, "post", Post);
+  Nan::SetPrototypeMethod(tpl, "enableDebugger", EnableDebugger);
+  Nan::SetPrototypeMethod(tpl, "disableDebugger", DisableDebugger);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
@@ -212,6 +214,81 @@ NAN_METHOD(Script::Post) {
   frida_script_post(wrapper->GetHandle<FridaScript>(), *message, data);
 
   g_bytes_unref(data);
+}
+
+namespace {
+
+class EnableDebuggerOperation : public Operation<FridaScript> {
+ public:
+  EnableDebuggerOperation(guint16 port) : port_(port) {
+  }
+
+ protected:
+  void Begin() {
+    frida_script_enable_debugger(handle_, port_, cancellable_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_script_enable_debugger_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Nan::Undefined();
+  }
+
+ private:
+  guint16 port_;
+};
+
+}
+
+NAN_METHOD(Script::EnableDebugger) {
+  auto isolate = info.GetIsolate();
+  auto wrapper = ObjectWrap::Unwrap<Script>(info.Holder());
+
+  if (info.Length() < 1 || !info[0]->IsNumber()) {
+    Nan::ThrowTypeError("Bad argument, expected port number");
+    return;
+  }
+  auto port = Nan::To<int32_t>(info[0]).FromMaybe(-1);
+  if (port < 0 || port >= 65536) {
+    Nan::ThrowTypeError("Bad argument, expected port number");
+    return;
+  }
+
+  auto operation = new EnableDebuggerOperation(static_cast<guint16>(port));
+  operation->Schedule(isolate, wrapper, info);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+namespace {
+
+class DisableDebuggerOperation : public Operation<FridaScript> {
+ protected:
+  void Begin() {
+    frida_script_disable_debugger(handle_, cancellable_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_script_disable_debugger_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Nan::Undefined();
+  }
+};
+
+}
+
+NAN_METHOD(Script::DisableDebugger) {
+  auto isolate = info.GetIsolate();
+  auto wrapper = ObjectWrap::Unwrap<Script>(info.Holder());
+
+  auto operation = new DisableDebuggerOperation();
+  operation->Schedule(isolate, wrapper, info);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
 Local<Value> Script::TransformMessageSignal(const gchar* name, guint index,

@@ -57,6 +57,16 @@ export class Script {
         this.impl.post(message, data);
     }
 
+    enableDebugger(options: EnableDebuggerOptions = {}, cancellable?: Cancellable): Promise<void> {
+        const { port = 0 } = options;
+
+        return this.impl.enableDebugger(port, cancellable);
+    }
+
+    disableDebugger(cancellable?: Cancellable): Promise<void> {
+        return this.impl.disableDebugger(cancellable);
+    }
+
     [inspect.custom](depth, options) {
         return "Script {}";
     }
@@ -112,6 +122,10 @@ export enum LogLevel {
     Info = "info",
     Warning = "warning",
     Error = "error"
+}
+
+export interface EnableDebuggerOptions {
+    port?: number;
 }
 
 class ScriptServices extends SignalAdapter implements RpcController {

@@ -61,16 +61,6 @@ export class Session {
         return this.impl.compileScript(source, name, runtime, cancellable);
     }
 
-    enableDebugger(options: EnableDebuggerOptions = {}, cancellable?: Cancellable): Promise<void> {
-        const { port = 0 } = options;
-
-        return this.impl.enableDebugger(port, cancellable);
-    }
-
-    disableDebugger(cancellable?: Cancellable): Promise<void> {
-        return this.impl.disableDebugger(cancellable);
-    }
-
     setupPeerConnection(options: PeerOptions = {}, cancellable?: Cancellable): Promise<void> {
         const {
             stunServer = null,
@@ -103,10 +93,6 @@ export enum SessionDetachReason {
     ProcessTerminated = "process-terminated",
     ConnectionTerminated = "connection-terminated",
     DeviceLost = "device-lost"
-}
-
-export interface EnableDebuggerOptions {
-    port?: number;
 }
 
 export interface PeerOptions {

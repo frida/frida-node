@@ -65,8 +65,6 @@ void Session::Init(Local<Object> exports, Runtime* runtime) {
   Nan::SetPrototypeMethod(tpl, "createScript", CreateScript);
   Nan::SetPrototypeMethod(tpl, "createScriptFromBytes", CreateScriptFromBytes);
   Nan::SetPrototypeMethod(tpl, "compileScript", CompileScript);
-  Nan::SetPrototypeMethod(tpl, "enableDebugger", EnableDebugger);
-  Nan::SetPrototypeMethod(tpl, "disableDebugger", DisableDebugger);
   Nan::SetPrototypeMethod(tpl, "setupPeerConnection", SetupPeerConnection);
   Nan::SetPrototypeMethod(tpl, "joinPortal", JoinPortal);
 
@@ -521,81 +519,6 @@ static FridaScriptOptions* ParseScriptOptions(Local<Value> name_value,
   }
 
   return options;
-}
-
-namespace {
-
-class EnableDebuggerOperation : public Operation<FridaSession> {
- public:
-  EnableDebuggerOperation(guint16 port) : port_(port) {
-  }
-
- protected:
-  void Begin() {
-    frida_session_enable_debugger(handle_, port_, cancellable_, OnReady, this);
-  }
-
-  void End(GAsyncResult* result, GError** error) {
-    frida_session_enable_debugger_finish(handle_, result, error);
-  }
-
-  Local<Value> Result(Isolate* isolate) {
-    return Nan::Undefined();
-  }
-
- private:
-  guint16 port_;
-};
-
-}
-
-NAN_METHOD(Session::EnableDebugger) {
-  auto isolate = info.GetIsolate();
-  auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
-
-  if (info.Length() < 1 || !info[0]->IsNumber()) {
-    Nan::ThrowTypeError("Bad argument, expected port number");
-    return;
-  }
-  auto port = Nan::To<int32_t>(info[0]).FromMaybe(-1);
-  if (port < 0 || port >= 65536) {
-    Nan::ThrowTypeError("Bad argument, expected port number");
-    return;
-  }
-
-  auto operation = new EnableDebuggerOperation(static_cast<guint16>(port));
-  operation->Schedule(isolate, wrapper, info);
-
-  info.GetReturnValue().Set(operation->GetPromise(isolate));
-}
-
-namespace {
-
-class DisableDebuggerOperation : public Operation<FridaSession> {
- protected:
-  void Begin() {
-    frida_session_disable_debugger(handle_, cancellable_, OnReady, this);
-  }
-
-  void End(GAsyncResult* result, GError** error) {
-    frida_session_disable_debugger_finish(handle_, result, error);
-  }
-
-  Local<Value> Result(Isolate* isolate) {
-    return Nan::Undefined();
-  }
-};
-
-}
-
-NAN_METHOD(Session::DisableDebugger) {
-  auto isolate = info.GetIsolate();
-  auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
-
-  auto operation = new DisableDebuggerOperation();
-  operation->Schedule(isolate, wrapper, info);
-
-  info.GetReturnValue().Set(operation->GetPromise(isolate));
 }
 
 namespace {

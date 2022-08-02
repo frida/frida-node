@@ -65,7 +65,6 @@ export const Session = sessionModule.Session;
 export type SessionDetachedHandler = sessionModule.SessionDetachedHandler;
 export type SessionDetachReason = sessionModule.SessionDetachReason;
 export const SessionDetachReason = sessionModule.SessionDetachReason;
-export type EnableDebuggerOptions = sessionModule.EnableDebuggerOptions;
 export type PeerOptions = sessionModule.PeerOptions;
 export type PortalOptions = sessionModule.PortalOptions;
 
@@ -85,6 +84,7 @@ export type ErrorMessage = scriptModule.ErrorMessage;
 export type ScriptExports = scriptModule.ScriptExports;
 export type LogLevel = scriptModule.LogLevel;
 export const LogLevel = scriptModule.LogLevel;
+export type EnableDebuggerOptions = scriptModule.EnableDebuggerOptions;
 
 export type Relay = relayModule.Relay;
 export const Relay = relayModule.Relay;

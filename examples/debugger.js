@@ -10,9 +10,9 @@ setInterval(() => {
 
 async function main() {
   const session = await frida.attach(processName);
-  await session.enableDebugger();
 
   const script = await session.createScript(source, { runtime: 'v8' });
+  await script.enableDebugger();
   script.message.connect(message => {
     console.log('[*] Message:', message);
   });
