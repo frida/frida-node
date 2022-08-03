@@ -2,7 +2,7 @@ import { Cancellable } from "./cancellable";
 import { Crash } from "./crash";
 import { PortalMembership } from "./portal_membership";
 import { Relay } from "./relay";
-import { Script, ScriptOptions } from "./script";
+import { Script, ScriptOptions, SnapshotOptions } from "./script";
 import { Signal } from "./signals";
 
 import { inspect } from "util";
@@ -44,21 +44,27 @@ export class Session {
     }
 
     async createScript(source: string, options: ScriptOptions = {}, cancellable?: Cancellable): Promise<Script> {
-        const { name = null, runtime = null } = options;
+        const { name = null, snapshot = null, runtime = null } = options;
 
-        return new Script(await this.impl.createScript(source, name, runtime, cancellable));
+        return new Script(await this.impl.createScript(source, name, snapshot, runtime, cancellable));
     }
 
     async createScriptFromBytes(bytes: Buffer, options: ScriptOptions = {}, cancellable?: Cancellable): Promise<Script> {
-        const { name = null, runtime = null } = options;
+        const { name = null, snapshot = null, runtime = null } = options;
 
-        return new Script(await this.impl.createScriptFromBytes(bytes, name, runtime, cancellable));
+        return new Script(await this.impl.createScriptFromBytes(bytes, name, snapshot, runtime, cancellable));
     }
 
     compileScript(source: string, options: ScriptOptions = {}, cancellable?: Cancellable): Promise<Buffer> {
         const { name = null, runtime = null } = options;
 
         return this.impl.compileScript(source, name, runtime, cancellable);
+    }
+
+    snapshotScript(embedScript: string, options: SnapshotOptions = {}, cancellable?: Cancellable): Promise<Buffer> {
+        const { warmupScript = null, runtime = null } = options;
+
+        return this.impl.snapshotScript(embedScript, warmupScript, runtime, cancellable);
     }
 
     setupPeerConnection(options: PeerOptions = {}, cancellable?: Cancellable): Promise<void> {
