@@ -71,6 +71,7 @@ export type PortalOptions = sessionModule.PortalOptions;
 export type Script = scriptModule.Script;
 export const Script = scriptModule.Script;
 export type ScriptOptions = scriptModule.ScriptOptions;
+export type SnapshotOptions = scriptModule.SnapshotOptions;
 export type ScriptRuntime = scriptModule.ScriptRuntime;
 export const ScriptRuntime = scriptModule.ScriptRuntime;
 export type ScriptDestroyedHandler = scriptModule.ScriptDestroyedHandler;

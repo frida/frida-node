@@ -74,6 +74,12 @@ export class Script {
 
 export interface ScriptOptions {
     name?: string;
+    snapshot?: Buffer;
+    runtime?: ScriptRuntime;
+}
+
+export interface SnapshotOptions {
+    warmupScript?: string;
     runtime?: ScriptRuntime;
 }
 

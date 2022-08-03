@@ -29,6 +29,7 @@ class Session : public GLibObject {
   static NAN_METHOD(CreateScript);
   static NAN_METHOD(CreateScriptFromBytes);
   static NAN_METHOD(CompileScript);
+  static NAN_METHOD(SnapshotScript);
   static NAN_METHOD(SetupPeerConnection);
   static NAN_METHOD(JoinPortal);
 

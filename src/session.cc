@@ -30,7 +30,9 @@ using v8::Value;
 namespace frida {
 
 static FridaScriptOptions* ParseScriptOptions(Local<Value> name_value,
-    Local<Value> runtime_value);
+    Local<Value> snapshot_value, Local<Value> runtime_value);
+static FridaSnapshotOptions* ParseSnapshotOptions(
+    Local<Value> warmup_script_value, Local<Value> runtime_value);
 static void UnrefGBytes(char* data, void* hint);
 
 Session::Session(FridaSession* handle, Runtime* runtime)
@@ -65,6 +67,7 @@ void Session::Init(Local<Object> exports, Runtime* runtime) {
   Nan::SetPrototypeMethod(tpl, "createScript", CreateScript);
   Nan::SetPrototypeMethod(tpl, "createScriptFromBytes", CreateScriptFromBytes);
   Nan::SetPrototypeMethod(tpl, "compileScript", CompileScript);
+  Nan::SetPrototypeMethod(tpl, "snapshotScript", SnapshotScript);
   Nan::SetPrototypeMethod(tpl, "setupPeerConnection", SetupPeerConnection);
   Nan::SetPrototypeMethod(tpl, "joinPortal", JoinPortal);
 
@@ -290,14 +293,15 @@ NAN_METHOD(Session::CreateScript) {
   auto isolate = info.GetIsolate();
   auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
 
-  if (info.Length() < 3) {
+  if (info.Length() < 4) {
     Nan::ThrowTypeError("Missing one or more arguments");
     return;
   }
 
   auto source_value = info[0];
   auto name_value = info[1];
-  auto runtime_value = info[2];
+  auto snapshot_value = info[2];
+  auto runtime_value = info[3];
 
   bool valid = true;
 
@@ -311,7 +315,7 @@ NAN_METHOD(Session::CreateScript) {
 
   FridaScriptOptions* options = NULL;
   if (valid) {
-    options = ParseScriptOptions(name_value, runtime_value);
+    options = ParseScriptOptions(name_value, snapshot_value, runtime_value);
     valid = options != NULL;
   }
 
@@ -370,14 +374,15 @@ NAN_METHOD(Session::CreateScriptFromBytes) {
   auto isolate = info.GetIsolate();
   auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
 
-  if (info.Length() < 3) {
+  if (info.Length() < 4) {
     Nan::ThrowTypeError("Missing one or more arguments");
     return;
   }
 
   auto bytes_value = info[0];
   auto name_value = info[1];
-  auto runtime_value = info[2];
+  auto snapshot_value = info[2];
+  auto runtime_value = info[3];
 
   bool valid = true;
 
@@ -392,7 +397,7 @@ NAN_METHOD(Session::CreateScriptFromBytes) {
 
   FridaScriptOptions* options = NULL;
   if (valid) {
-    options = ParseScriptOptions(name_value, runtime_value);
+    options = ParseScriptOptions(name_value, snapshot_value, runtime_value);
     valid = options != NULL;
   }
 
@@ -472,7 +477,7 @@ NAN_METHOD(Session::CompileScript) {
 
   FridaScriptOptions* options = NULL;
   if (valid) {
-    options = ParseScriptOptions(name_value, runtime_value);
+    options = ParseScriptOptions(name_value, Nan::Null(), runtime_value);
     valid = options != NULL;
   }
 
@@ -489,7 +494,7 @@ NAN_METHOD(Session::CompileScript) {
 }
 
 static FridaScriptOptions* ParseScriptOptions(Local<Value> name_value,
-    Local<Value> runtime_value) {
+    Local<Value> snapshot_value, Local<Value> runtime_value) {
   auto options = frida_script_options_new();
   bool valid = true;
 
@@ -504,12 +509,137 @@ static FridaScriptOptions* ParseScriptOptions(Local<Value> name_value,
     }
   }
 
+  if (valid && !snapshot_value->IsNull()) {
+    if (node::Buffer::HasInstance(snapshot_value)) {
+      auto snapshot = g_bytes_new(node::Buffer::Data(snapshot_value),
+          node::Buffer::Length(snapshot_value));
+      frida_script_options_set_snapshot(options, snapshot);
+      g_bytes_unref(snapshot);
+    } else {
+      Nan::ThrowTypeError("Bad argument, 'snapshot' must be a Buffer");
+      valid = false;
+    }
+  }
+
   if (valid && !runtime_value->IsNull()) {
     FridaScriptRuntime runtime;
     valid = Runtime::ValueToEnum(runtime_value, FRIDA_TYPE_SCRIPT_RUNTIME,
         &runtime);
     if (valid) {
       frida_script_options_set_runtime(options, runtime);
+    }
+  }
+
+  if (!valid) {
+    g_object_unref(options);
+    return NULL;
+  }
+
+  return options;
+}
+
+namespace {
+
+class SnapshotScriptOperation : public Operation<FridaSession> {
+ public:
+  SnapshotScriptOperation(gchar* embed_script, FridaSnapshotOptions* options)
+    : embed_script_(embed_script),
+      options_(options) {
+  }
+
+  ~SnapshotScriptOperation() {
+    g_object_unref(options_);
+    g_free(embed_script_);
+  }
+
+ protected:
+  void Begin() {
+    frida_session_snapshot_script(handle_, embed_script_, options_,
+        cancellable_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    bytes_ = frida_session_snapshot_script_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    gsize size;
+    auto data = g_bytes_get_data(bytes_, &size);
+    return Nan::NewBuffer(static_cast<char*>(const_cast<void*>(data)), size,
+        UnrefGBytes, bytes_).ToLocalChecked();
+  }
+
+ private:
+  gchar* embed_script_;
+  FridaSnapshotOptions* options_;
+  GBytes* bytes_;
+};
+
+}
+
+NAN_METHOD(Session::SnapshotScript) {
+  auto isolate = info.GetIsolate();
+  auto wrapper = ObjectWrap::Unwrap<Session>(info.Holder());
+
+  if (info.Length() < 3) {
+    Nan::ThrowTypeError("Missing one or more arguments");
+    return;
+  }
+
+  auto embed_script_value = info[0];
+  auto warmup_script_value = info[1];
+  auto runtime_value = info[2];
+
+  bool valid = true;
+
+  gchar* embed_script;
+  Nan::Utf8String val(embed_script_value);
+  embed_script = g_strdup(*val);
+  if (embed_script == NULL) {
+    Nan::ThrowTypeError("Bad argument, 'embedScript' must be a string");
+    valid = false;
+  }
+
+  FridaSnapshotOptions* options = NULL;
+  if (valid) {
+    options = ParseSnapshotOptions(warmup_script_value, runtime_value);
+    valid = options != NULL;
+  }
+
+  if (!valid) {
+    g_free(embed_script);
+    g_clear_object(&options);
+    return;
+  }
+
+  auto operation = new SnapshotScriptOperation(embed_script, options);
+  operation->Schedule(isolate, wrapper, info);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+static FridaSnapshotOptions* ParseSnapshotOptions(
+    Local<Value> warmup_script_value, Local<Value> runtime_value) {
+  auto options = frida_snapshot_options_new();
+  bool valid = true;
+
+  if (!warmup_script_value->IsNull()) {
+    Nan::Utf8String val(warmup_script_value);
+    const gchar* warmup_script = *val;
+    if (warmup_script != NULL) {
+      frida_snapshot_options_set_warmup_script(options, warmup_script);
+    } else {
+      Nan::ThrowTypeError("Bad argument, 'warmupScript' must be a string");
+      valid = false;
+    }
+  }
+
+  if (valid && !runtime_value->IsNull()) {
+    FridaScriptRuntime runtime;
+    valid = Runtime::ValueToEnum(runtime_value, FRIDA_TYPE_SCRIPT_RUNTIME,
+        &runtime);
+    if (valid) {
+      frida_snapshot_options_set_runtime(options, runtime);
     }
   }
 
