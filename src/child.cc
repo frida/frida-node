@@ -2,7 +2,6 @@
 
 #define CHILD_DATA_CONSTRUCTOR "child:ctor"
 
-using v8::AccessorSignature;
 using v8::DEFAULT;
 using v8::External;
 using v8::Function;
@@ -33,21 +32,20 @@ void Child::Init(Local<Object> exports, Runtime* runtime) {
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Local<Value>();
-  auto signature = AccessorSignature::New(isolate, tpl);
   Nan::SetAccessor(instance_tpl, Nan::New("envp").ToLocalChecked(),
-      GetEnvp, 0, data, DEFAULT, ReadOnly, signature);
+      GetEnvp, 0, data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("argv").ToLocalChecked(),
-      GetArgv, 0, data, DEFAULT, ReadOnly, signature);
+      GetArgv, 0, data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("path").ToLocalChecked(),
-      GetPath, 0, data, DEFAULT, ReadOnly, signature);
+      GetPath, 0, data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("identifier").ToLocalChecked(),
-      GetIdentifier, 0, data, DEFAULT, ReadOnly, signature);
+      GetIdentifier, 0, data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("origin").ToLocalChecked(),
-      GetOrigin, 0, data, DEFAULT, ReadOnly, signature);
+      GetOrigin, 0, data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("parentPid").ToLocalChecked(),
-      GetParentPid, 0, data, DEFAULT, ReadOnly, signature);
+      GetParentPid, 0, data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("pid").ToLocalChecked(),
-      GetPid, 0, data, DEFAULT, ReadOnly, signature);
+      GetPid, 0, data, DEFAULT, ReadOnly);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);

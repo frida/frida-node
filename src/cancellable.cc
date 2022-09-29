@@ -4,7 +4,6 @@
 
 #define CANCELLABLE_DATA_TEMPLATE "cancellable:tpl"
 
-using v8::AccessorSignature;
 using v8::DEFAULT;
 using v8::External;
 using v8::Function;
@@ -35,9 +34,8 @@ void Cancellable::Init(Local<Object> exports, Runtime* runtime) {
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Local<Value>();
-  auto signature = AccessorSignature::New(isolate, tpl);
   Nan::SetAccessor(instance_tpl, Nan::New("isCancelled").ToLocalChecked(),
-      IsCancelled, 0, data, DEFAULT, ReadOnly, signature);
+      IsCancelled, 0, data, DEFAULT, ReadOnly);
 
   Nan::SetPrototypeMethod(tpl, "throwIfCancelled", ThrowIfCancelled);
   Nan::SetPrototypeMethod(tpl, "cancel", Cancel);

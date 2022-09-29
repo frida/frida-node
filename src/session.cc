@@ -13,7 +13,6 @@
 #define SESSION_DATA_CONSTRUCTOR "session:ctor"
 
 using std::strcmp;
-using v8::AccessorSignature;
 using v8::Array;
 using v8::DEFAULT;
 using v8::External;
@@ -52,13 +51,12 @@ void Session::Init(Local<Object> exports, Runtime* runtime) {
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Local<Value>();
-  auto signature = AccessorSignature::New(isolate, tpl);
   Nan::SetAccessor(instance_tpl, Nan::New("isDetached").ToLocalChecked(),
-      IsDetached, 0, data, DEFAULT, ReadOnly, signature);
+      IsDetached, 0, data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("persistTimeout").ToLocalChecked(),
-      GetPersistTimeout, 0, data, DEFAULT, ReadOnly, signature);
+      GetPersistTimeout, 0, data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("pid").ToLocalChecked(), GetPid, 0,
-      data, DEFAULT, ReadOnly, signature);
+      data, DEFAULT, ReadOnly);
 
   Nan::SetPrototypeMethod(tpl, "detach", Detach);
   Nan::SetPrototypeMethod(tpl, "resume", Resume);

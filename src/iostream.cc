@@ -5,7 +5,6 @@
 
 #define IOSTREAM_DATA_CONSTRUCTOR "iostream:ctor"
 
-using v8::AccessorSignature;
 using v8::CopyablePersistentTraits;
 using v8::DEFAULT;
 using v8::External;
@@ -39,9 +38,8 @@ void IOStream::Init(Local<Object> exports, Runtime* runtime) {
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Local<Value>();
-  auto signature = AccessorSignature::New(isolate, tpl);
   Nan::SetAccessor(instance_tpl, Nan::New("isClosed").ToLocalChecked(),
-      IsClosed, 0, data, DEFAULT, ReadOnly, signature);
+      IsClosed, 0, data, DEFAULT, ReadOnly);
 
   Nan::SetPrototypeMethod(tpl, "close", Close);
   Nan::SetPrototypeMethod(tpl, "read", Read);

@@ -2,7 +2,6 @@
 
 #define RELAY_DATA_TEMPLATE "relay:tpl"
 
-using v8::AccessorSignature;
 using v8::DEFAULT;
 using v8::Function;
 using v8::FunctionTemplate;
@@ -32,15 +31,14 @@ void Relay::Init(Local<Object> exports, Runtime* runtime) {
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Local<Value>();
-  auto signature = AccessorSignature::New(isolate, tpl);
   Nan::SetAccessor(instance_tpl, Nan::New("kind").ToLocalChecked(),
-      GetKind, 0, data, DEFAULT, ReadOnly, signature);
+      GetKind, 0, data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("password").ToLocalChecked(),
-      GetPassword, 0, data, DEFAULT, ReadOnly, signature);
+      GetPassword, 0, data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("username").ToLocalChecked(),
-      GetUsername, 0, data, DEFAULT, ReadOnly, signature);
+      GetUsername, 0, data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("address").ToLocalChecked(),
-      GetAddress, 0, data, DEFAULT, ReadOnly, signature);
+      GetAddress, 0, data, DEFAULT, ReadOnly);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);

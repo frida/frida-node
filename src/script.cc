@@ -9,7 +9,6 @@
 #define SCRIPT_DATA_CONSTRUCTOR "script:ctor"
 
 using std::strcmp;
-using v8::AccessorSignature;
 using v8::DEFAULT;
 using v8::External;
 using v8::Function;
@@ -40,9 +39,8 @@ void Script::Init(Local<Object> exports, Runtime* runtime) {
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Local<Value>();
-  auto signature = AccessorSignature::New(isolate, tpl);
   Nan::SetAccessor(instance_tpl, Nan::New("isDestroyed").ToLocalChecked(),
-      IsDestroyed, 0, data, DEFAULT, ReadOnly, signature);
+      IsDestroyed, 0, data, DEFAULT, ReadOnly);
 
   Nan::SetPrototypeMethod(tpl, "load", Load);
   Nan::SetPrototypeMethod(tpl, "unload", Unload);

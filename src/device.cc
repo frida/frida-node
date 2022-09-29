@@ -16,7 +16,6 @@
 #define DEVICE_DATA_CONSTRUCTOR "device:ctor"
 
 using std::strcmp;
-using v8::AccessorSignature;
 using v8::Array;
 using v8::Boolean;
 using v8::DEFAULT;
@@ -51,19 +50,18 @@ void Device::Init(Local<Object> exports, Runtime* runtime) {
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Local<Value>();
-  auto signature = AccessorSignature::New(isolate, tpl);
   Nan::SetAccessor(instance_tpl, Nan::New("isLost").ToLocalChecked(), IsLost, 0,
-      data, DEFAULT, ReadOnly, signature);
+      data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("bus").ToLocalChecked(), GetBus, 0,
-      data, DEFAULT, ReadOnly, signature);
+      data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("type").ToLocalChecked(), GetType, 0,
-      data, DEFAULT, ReadOnly, signature);
+      data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("icon").ToLocalChecked(), GetIcon, 0,
-      data, DEFAULT, ReadOnly, signature);
+      data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("name").ToLocalChecked(), GetName, 0,
-      data, DEFAULT, ReadOnly, signature);
+      data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("id").ToLocalChecked(), GetId, 0,
-      data, DEFAULT, ReadOnly, signature);
+      data, DEFAULT, ReadOnly);
 
   Nan::SetPrototypeMethod(tpl, "querySystemParameters", QuerySystemParameters);
   Nan::SetPrototypeMethod(tpl, "getFrontmostApplication",

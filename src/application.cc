@@ -5,7 +5,6 @@
 #define APPLICATION_DATA_CONSTRUCTOR "application:ctor"
 
 using std::strcmp;
-using v8::AccessorSignature;
 using v8::DEFAULT;
 using v8::External;
 using v8::Function;
@@ -37,15 +36,14 @@ void Application::Init(Local<Object> exports, Runtime* runtime) {
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Local<Value>();
-  auto signature = AccessorSignature::New(isolate, tpl);
   Nan::SetAccessor(instance_tpl, Nan::New("parameters").ToLocalChecked(),
-      GetParameters, 0, data, DEFAULT, ReadOnly, signature);
+      GetParameters, 0, data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("pid").ToLocalChecked(),
-      GetPid, 0, data, DEFAULT, ReadOnly, signature);
+      GetPid, 0, data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("name").ToLocalChecked(),
-      GetName, 0, data, DEFAULT, ReadOnly, signature);
+      GetName, 0, data, DEFAULT, ReadOnly);
   Nan::SetAccessor(instance_tpl, Nan::New("identifier").ToLocalChecked(),
-      GetIdentifier, 0, data, DEFAULT, ReadOnly, signature);
+      GetIdentifier, 0, data, DEFAULT, ReadOnly);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);

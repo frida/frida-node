@@ -9,7 +9,6 @@
 #include <cstring>
 
 using std::strcmp;
-using v8::AccessorSignature;
 using v8::DEFAULT;
 using v8::Function;
 using v8::FunctionTemplate;
@@ -33,16 +32,13 @@ PortalService::~PortalService() {
 }
 
 void PortalService::Init(Local<Object> exports, Runtime* runtime) {
-  auto isolate = Isolate::GetCurrent();
-
   auto name = Nan::New("PortalService").ToLocalChecked();
   auto tpl = CreateTemplate(name, PortalService::New, runtime);
 
   auto instance_tpl = tpl->InstanceTemplate();
   auto data = Local<Value>();
-  auto signature = AccessorSignature::New(isolate, tpl);
   Nan::SetAccessor(instance_tpl, Nan::New("device").ToLocalChecked(), GetDevice,
-      0, data, DEFAULT, ReadOnly, signature);
+      0, data, DEFAULT, ReadOnly);
 
   Nan::SetPrototypeMethod(tpl, "start", Start);
   Nan::SetPrototypeMethod(tpl, "stop", Stop);
