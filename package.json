@@ -49,7 +49,7 @@
     "watch": "tsc -w",
     "install": "prebuild-install || node-gyp rebuild",
     "prebuild": "prebuild --verbose --strip",
-    "test": "npm run prebuild && node --expose-gc node_modules/mocha/bin/_mocha -r ts-node/register test/*.ts"
+    "test": "node --expose-gc node_modules/mocha/bin/_mocha -r ts-node/register test/*.ts"
   },
   "binary": {
     "host": "https://github.com",
