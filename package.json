@@ -48,7 +48,7 @@
     "build": "tsc",
     "watch": "tsc -w",
     "install": "prebuild-install || node-gyp rebuild",
-    "prebuild": "prebuild --verbose --strip",
+    "prebuild": "prebuild --strip",
     "test": "node --expose-gc node_modules/mocha/bin/_mocha -r ts-node/register test/*.ts"
   },
   "binary": {
