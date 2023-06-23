@@ -91,6 +91,7 @@
           ],
           "libraries": [
             "-lfrida-core.lib",
+            "-llibquickjs.a",
             "-llibcapstone.a",
             "-llibsoup-3.0.a",
             "-llibnghttp2.a",
