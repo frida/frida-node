@@ -316,7 +316,7 @@ function isRpcMessage(message: Message): boolean {
 
 function isRpcSendMessage(message: SendMessage): boolean {
     const payload = message.payload;
-    if (!(payload instanceof Array)) {
+    if (!Array.isArray(payload)) {
         return false;
     }
 
