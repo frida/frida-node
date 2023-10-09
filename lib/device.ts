@@ -190,6 +190,10 @@ export class Device {
         return new IOStream(await this.impl.openChannel(address, cancellable));
     }
 
+    async unpair(cancellable?: Cancellable): Promise<void> {
+        await this.impl.unpair(cancellable);
+    }
+
     private async getPid(target: TargetProcess, cancellable?: Cancellable): Promise<ProcessID> {
         if (typeof target === "number") {
             return target;

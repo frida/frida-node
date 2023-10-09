@@ -81,6 +81,7 @@ void Device::Init(Local<Object> exports, Runtime* runtime) {
   Nan::SetPrototypeMethod(tpl, "injectLibraryFile", InjectLibraryFile);
   Nan::SetPrototypeMethod(tpl, "injectLibraryBlob", InjectLibraryBlob);
   Nan::SetPrototypeMethod(tpl, "openChannel", OpenChannel);
+  Nan::SetPrototypeMethod(tpl, "unpair", Unpair);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
   Nan::Set(exports, name, ctor);
@@ -1222,6 +1223,35 @@ NAN_METHOD(Device::OpenChannel) {
   Nan::Utf8String address(info[0]);
 
   auto operation = new OpenChannelOperation(g_strdup(*address));
+  operation->Schedule(isolate, wrapper, info);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+namespace {
+
+class UnpairOperation : public Operation<FridaDevice> {
+ protected:
+  void Begin() {
+    frida_device_unpair(handle_, cancellable_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    frida_device_unpair_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    return Nan::Undefined();
+  }
+};
+
+}
+
+NAN_METHOD(Device::Unpair) {
+  auto isolate = info.GetIsolate();
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
+
+  auto operation = new UnpairOperation();
   operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
