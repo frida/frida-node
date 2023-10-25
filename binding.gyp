@@ -82,7 +82,7 @@
             "$(FRIDA)/build/sdk-windows/<(frida_host_msvs)/include/gee-0.8",
             "$(FRIDA)/build/sdk-windows/<(frida_host_msvs)/include/glib-2.0",
             "$(FRIDA)/build/sdk-windows/<(frida_host_msvs)/lib/glib-2.0/include",
-            "<!(node -e \"require(\'@frida/nan\')\")",
+            "<!(node -e \"require(\'nan\')\")",
           ],
           "library_dirs": [
             "$(FRIDA)/build/tmp-windows/<(frida_host_msvs)/frida-core",
@@ -132,7 +132,7 @@
             "$(FRIDA)/build/sdk-<(frida_host)/include/gio-unix-2.0",
             "$(FRIDA)/build/sdk-<(frida_host)/include/glib-2.0",
             "$(FRIDA)/build/sdk-<(frida_host)/lib/glib-2.0/include",
-            "<!(node -e \"require(\'@frida/nan\')\")",
+            "<!(node -e \"require(\'nan\')\")",
           ],
           "library_dirs": [
             "$(FRIDA)/build/frida-<(frida_host)/lib",
