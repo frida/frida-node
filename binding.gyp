@@ -142,6 +142,7 @@
           "libraries": [
             "-lfrida-core-1.0",
             "-lfrida-gumjs-1.0",
+            "-lfrida-gumjs-inspector-1.0",
             "-lsoup-3.0",
             "-lnghttp2",
             "-lsqlite3",
