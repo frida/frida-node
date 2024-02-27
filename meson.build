@@ -3,7 +3,8 @@ project('frida-node', 'cpp',
 )
 
 fs = import('fs')
-node_incdir = fs.parent(fs.parent(find_program('node').full_path())) / 'include' / 'node'
+node_incroot = fs.parent(fs.parent(find_program('node').full_path())) / 'include'
+node_incdir = node_incroot / 'node'
 if not fs.exists(node_incdir)
   error('Node.js development headers not found')
 endif

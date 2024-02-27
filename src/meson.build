@@ -32,6 +32,6 @@ shared_module('frida_binding', sources,
     'cpp_eh=none',
     'cpp_rtti=false',
   ],
-  include_directories: include_directories(node_incdir),
+  include_directories: include_directories(node_incdir, node_incroot),
   dependencies: [frida_core_dep, nan_dep],
 )
