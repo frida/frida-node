@@ -1,5 +1,11 @@
-/build
-/dist
-/node_modules
+/build/
+/deps/
+/dist/
+/node_modules/
 /npm-debug.log
-/prebuilds
+/prebuilds/
+/subprojects/frida-core/
+/subprojects/frida-gum.wrap
+/subprojects/frida-gum/
+/subprojects/nan-*/
+/subprojects/packagecache/

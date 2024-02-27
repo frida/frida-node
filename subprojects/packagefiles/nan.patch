@@ -1,0 +1,13 @@
+diff -Nur nan-2.18.0-orig/meson.build nan-2.18.0/meson.build
+--- nan-2.18.0-orig/meson.build	1970-01-01 01:00:00.000000000 +0100
++++ nan-2.18.0/meson.build	2024-02-27 10:43:03.643648729 +0100
+@@ -0,0 +1,9 @@
++project('nan', 'cpp',
++  version: '2.18.0',
++)
++
++nan_dep = declare_dependency(
++  include_directories: include_directories('.'),
++)
++
++meson.override_dependency('nan', nan_dep)

@@ -4,6 +4,7 @@ export const binding = bindings({
     bindings: "frida_binding",
     try: [
         ["module_root", "build", "bindings"],
+        ["module_root", "build", "src", "bindings"],
         ["module_root", "build", "Debug", "bindings"],
         ["module_root", "build", "Release", "bindings"],
         ["module_root", "out", "Debug", "bindings"],
