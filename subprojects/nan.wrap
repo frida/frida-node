@@ -1,9 +1,7 @@
-[wrap-file]
-directory = nan-2.18.0
-
-source_url = https://github.com/nodejs/nan/archive/refs/tags/v2.18.0.tar.gz
-source_filename = nan-v2.18.0.tar.gz
-source_hash = 376361b98b931840804f8a145b28fa32c8da2634a3f93c2cbc7fdb14c6274b71
+[wrap-git]
+url = https://github.com/nodejs/nan.git
+revision = 1b630ddb3412cde35b64513662b440f9fd71e1ff
+depth = 1
 
 diff_files = nan.patch
 

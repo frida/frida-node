@@ -1,4 +1,4 @@
-sources = [
+frida_binding_sources = files(
   'addon.cc',
   'device_manager.cc',
   'device.cc',
@@ -22,16 +22,5 @@ sources = [
   'runtime.cc',
   'uv_context.cc',
   'glib_context.cc',
-]
-
-shared_module('frida_binding', sources,
-  name_prefix: '',
-  name_suffix: 'node',
-  override_options: [
-    'cpp_std=c++20',
-    'cpp_eh=none',
-    'cpp_rtti=false',
-  ],
-  include_directories: incdirs,
-  dependencies: [frida_core_dep, nan_dep],
+  'win_delay_load_hook.cc',
 )

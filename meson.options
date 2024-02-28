@@ -1,0 +1,11 @@
+option('runtime',
+  type: 'combo',
+  choices: ['node', 'electron', 'node-webkit'],
+  value: 'node',
+  description: 'Runtime to target'
+)
+
+option('target',
+  type: 'string',
+  description: 'Target version'
+)

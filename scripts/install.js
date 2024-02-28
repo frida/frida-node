@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 const pkgRoot = path.dirname(path.dirname(__filename));
-const binding = path.join(pkgRoot, 'build', 'src', 'frida_binding.node');
+const binding = path.join(pkgRoot, 'build', 'frida_binding.node');
 if (fs.existsSync(binding)) {
   process.exit(0);
 }

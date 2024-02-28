@@ -15,13 +15,22 @@ Node.js bindings for [Frida](https://frida.re).
 Install from binary:
 
 ```sh
-npm install
+$ npm install frida
 ```
 
 Install from source:
 
 ```sh
-FRIDA=/absolute/path/to/fully/compiled/frida/repo npm install
+$ make
+$ npm install
+```
+
+Build for Electron:
+
+```sh
+$ ./configure --with-runtime=electron --with-target=27.0.0
+$ make
+$ npm install
 ```
 
 ## Examples
@@ -37,20 +46,14 @@ FRIDA=/absolute/path/to/fully/compiled/frida/repo npm install
 
 ## Developing
 
-The [prebuild](https://github.com/mafintosh/prebuild) tool is used to handle
-building from source and packaging.
-
 To recompile only the C++ files that have changed, first run the
-"Install from source" step above, then simply run:
-
-```sh
-make -C build
-```
+"Install from source" step above, then simply run `make` again.
 
 ### Packaging
 
 ```sh
-npm run prebuild
+$ ./configure --with-runtime=electron --with-target=27.0.0
+$ make prebuild
 ```
 
 [npm-link]: https://www.npmjs.com/package/frida
