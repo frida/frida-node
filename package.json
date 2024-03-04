@@ -52,7 +52,8 @@
   },
   "binary": {
     "host": "https://github.com",
-    "remote_path": "frida/frida/releases/download/{version}"
+    "remote_path": "frida/frida/releases/download/{version}",
+    "module_path": "build"
   },
   "license": "LGPL-2.0 WITH WxWindows-exception-3.1",
   "repository": {
