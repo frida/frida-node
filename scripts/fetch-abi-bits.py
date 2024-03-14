@@ -215,7 +215,13 @@ def load_node_defines(gyp_os, gyp_arch, node_gypdir, gyp_pylib):
 
     target = targets[flat_list[0]]
     config = target["configurations"][target["default_configuration"]]
-    return [adapt_node_define(d) for d in config["defines"]]
+    return [adapt_node_define(d) for d in config["defines"] if want_node_define(d)]
+
+
+def want_node_define(d):
+    if d.startswith("V8_") and "DEPRECATION_WARNINGS" in d:
+        return False
+    return True
 
 
 def adapt_node_define(d):
