@@ -4,8 +4,4 @@
 /node_modules/
 /npm-debug.log
 /prebuilds/
-/subprojects/frida-core/
-/subprojects/frida-gum.wrap
-/subprojects/frida-gum/
-/subprojects/nan/
-/subprojects/packagecache/
+/subprojects/*
