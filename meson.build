@@ -127,6 +127,8 @@ binding = shared_module('frida_binding', frida_binding_sources,
   ] + extra_cpp_args,
   link_args: node_libs + extra_link_args,
   dependencies: [frida_core_dep, nan_dep],
+  install: true,
+  install_dir: pkg_install_dir / 'build',
 )
 
 custom_target('prebuild',
