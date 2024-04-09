@@ -142,7 +142,7 @@ package_json = files('package.json')
 package_lock_json = files('package-lock.json')
 tsconfig_json = files('tsconfig.json')
 
-install_data(package_json, package_lock_json,
+install_data(package_json,
   install_dir: get_option('libdir') / 'node_modules' / 'frida',
 )
 
