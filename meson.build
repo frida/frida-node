@@ -107,6 +107,8 @@ frida_core_dep = dependency('frida-core-1.0', default_options: [
 
 subdir('src')
 
+pkg_install_dir = get_option('libdir') / 'node_modules' / 'frida'
+
 binding = shared_module('frida_binding', frida_binding_sources,
   name_prefix: '',
   name_suffix: 'node',
@@ -142,8 +144,6 @@ package_json = files('package.json')
 package_lock_json = files('package-lock.json')
 tsconfig_json = files('tsconfig.json')
 
-install_data(package_json,
-  install_dir: get_option('libdir') / 'node_modules' / 'frida',
-)
+install_data(package_json, install_dir: pkg_install_dir)
 
 subdir('lib')

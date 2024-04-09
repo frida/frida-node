@@ -49,5 +49,5 @@ custom_target('js',
     '@INPUT@',
   ],
   install: true,
-  install_dir: get_option('libdir') / 'node_modules' / 'frida' / 'dist',
+  install_dir: pkg_install_dir / 'dist',
 )
