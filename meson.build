@@ -1,15 +1,14 @@
 project('frida-node', 'cpp',
-  version: '0.0.0',
+  version: run_command(find_program('scripts' / 'detect-version.py'), files('package.json'),
+    capture: true,
+    check: true,
+  ).stdout().strip(),
 )
 
 node = find_program('node')
 npm = find_program('npm')
 
-version = run_command(find_program('scripts' / 'detect-version.py'), files('package.json'),
-  capture: true,
-  check: true,
-).stdout().strip()
-
+version = meson.project_version()
 runtime = get_option('runtime')
 target = get_option('target')
 
