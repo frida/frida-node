@@ -15,7 +15,7 @@ try {
 }
 
 try {
-  execSync('node-gyp rebuild', { stdio: 'inherit' });
+  execSync('make', { stdio: 'inherit' });
   process.exit(0);
 } catch (e) {
 }
