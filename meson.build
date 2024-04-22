@@ -4,10 +4,8 @@ project('frida-node', 'cpp',
 
 node = find_program('node')
 npm = find_program('npm')
-python = import('python').find_installation()
 
-version = run_command(python, files('scripts' / 'detect-version.py'),
-  files('package.json'),
+version = run_command(find_program('scripts' / 'detect-version.py'), files('package.json'),
   capture: true,
   check: true,
 ).stdout().strip()
@@ -51,7 +49,7 @@ else
 endif
 
 message('Fetching ABI bits')
-metadata = run_command(python, files('scripts' / 'fetch-abi-bits.py'),
+metadata = run_command(find_program('scripts' / 'fetch-abi-bits.py'),
   runtime, target, gyp_os, gyp_arch,
   node, npm, meson.current_build_dir(),
   capture: true,
@@ -135,8 +133,7 @@ custom_target('prebuild',
   input: [binding],
   output: [f'frida-v@version@-@runtime@-v@abi@-@node_platform@-@gyp_arch@.tar.gz'],
   command: [
-    python,
-    files('scripts' / 'package.py'),
+    find_program('scripts' / 'package.py'),
     '@INPUT@',
     '@OUTPUT@',
   ],
