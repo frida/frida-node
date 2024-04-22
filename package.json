@@ -25,7 +25,23 @@
   },
   "main": "./dist",
   "files": [
-    "dist/"
+    "BSDmakefile",
+    "Makefile",
+    "configure",
+    "configure.bat",
+    "dist/",
+    "make.bat",
+    "meson.build",
+    "meson.options",
+    "tsconfig.json",
+    "lib/",
+    "releng/",
+    "scripts/",
+    "src/",
+    "subprojects/frida-core.wrap",
+    "subprojects/nan.wrap",
+    "subprojects/packagefiles/",
+    "test/"
   ],
   "dependencies": {
     "bindings": "^1.5.0",
