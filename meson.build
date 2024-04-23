@@ -1,12 +1,13 @@
 project('frida-node', 'cpp',
-  version: run_command(find_program('scripts' / 'detect-version.py'), files('package.json'),
+  version: run_command(find_program('python3'), files('scripts' / 'detect-version.py'),
     capture: true,
-    check: true,
-  ).stdout().strip(),
+    check: true).stdout().strip(),
+  meson_version: '>=1.1.0',
 )
 
 node = find_program('node')
 npm = find_program('npm')
+python = find_program('python3')
 
 version = meson.project_version()
 runtime = get_option('runtime')
@@ -48,7 +49,7 @@ else
 endif
 
 message('Fetching ABI bits')
-metadata = run_command(find_program('scripts' / 'fetch-abi-bits.py'),
+metadata = run_command(python, files('scripts' / 'fetch-abi-bits.py'),
   runtime, target, gyp_os, gyp_arch,
   node, npm, meson.current_build_dir(),
   capture: true,
@@ -133,7 +134,8 @@ custom_target('prebuild',
   input: [binding],
   output: [f'frida-v@version@-@runtime@-v@abi@-@node_platform@-@gyp_arch@.tar.gz'],
   command: [
-    find_program('scripts' / 'package.py'),
+    python,
+    files('scripts' / 'package.py'),
     '@INPUT@',
     '@OUTPUT@',
   ],
