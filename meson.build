@@ -141,10 +141,20 @@ custom_target('prebuild',
   ],
 )
 
-package_json = files('package.json')
+package_json = custom_target('package.json',
+  input: 'package.json',
+  output: 'package.json',
+  command: [
+    python,
+    files('scripts' / 'adjust-version.py'),
+    version,
+    '@INPUT@',
+    '@OUTPUT@',
+  ],
+  install: true,
+  install_dir: pkg_install_dir,
+)
 package_lock_json = files('package-lock.json')
 tsconfig_json = files('tsconfig.json')
-
-install_data(package_json, install_dir: pkg_install_dir)
 
 subdir('lib')
