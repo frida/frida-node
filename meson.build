@@ -7,7 +7,7 @@ project('frida-node', 'cpp',
 
 node = find_program('node')
 npm = find_program('npm')
-python = find_program('python3')
+python = import('python').find_installation()
 
 version = meson.project_version()
 runtime = get_option('runtime')
