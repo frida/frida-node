@@ -95,21 +95,23 @@ def load_dev_assets(runtime, target, gyp_os, gyp_arch, node, outdir, abidir):
     else:
         version = f"v{target}"
 
+    libs_arch = "x86" if gyp_arch == "ia32" else gyp_arch
+
     if runtime == "node":
         base_url = f"https://nodejs.org/dist/{version}"
         headers_stem = f"node-{version}-headers"
-        libs_subpath = f"/win-{gyp_arch}"
+        libs_subpath = f"/win-{libs_arch}"
         compression_formats = ["xz", "gz"]
     elif runtime == "electron":
         base_url = f"https://electronjs.org/headers/{version}"
         headers_stem = f"node-{version}-headers"
-        libs_subpath = f"/win-{gyp_arch}"
+        libs_subpath = f"/win-{libs_arch}"
         compression_formats = ["gz"]
     else:
         assert runtime == "node-webkit"
         base_url = f"https://node-webkit.s3.amazonaws.com/{version}"
         headers_stem = f"nw-headers-{version}"
-        libs_subpath = "" if gyp_arch == "ia32" else f"/{gyp_arch}"
+        libs_subpath = "" if libs_arch == "x86" else f"/{libs_arch}"
         compression_formats = ["gz"]
 
     download_error = None
