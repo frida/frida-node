@@ -146,7 +146,7 @@ def load_dev_assets(runtime, target, gyp_os, gyp_arch, node, outdir, abidir):
         with urllib.request.urlopen(f"{base_url}{libs_subpath}/node.lib") as response:
             vanilla_lib = response.read()
             redacted_lib = BytesIO(vanilla_lib)
-            redact_node_lib_symbols(redacted_lib)
+            redact_node_lib_symbols(redacted_lib, gyp_arch)
             node_lib.write_bytes(redacted_lib.getvalue())
         node_libnames.append(node_lib.name)
 
@@ -238,7 +238,7 @@ class GypOptions:
     generator_output = os.getcwd()
 
 
-def redact_node_lib_symbols(lib):
+def redact_node_lib_symbols(lib, gyp_arch):
     magic = lib.read(8)
     assert magic == IMAGE_ARCHIVE_START
 
@@ -256,6 +256,7 @@ def redact_node_lib_symbols(lib):
     string_pool_end = symbol_offsets[0]
 
     renamed_symbols = {}
+    node_prefixes = [function_name_to_cdecl_symbol(p, gyp_arch).encode("ascii") for p in {"napi_", "node", "uv_"}]
     for offset in symbol_offsets:
         lib.seek(offset)
 
@@ -268,10 +269,8 @@ def redact_node_lib_symbols(lib):
             strings = lib.read(object_header.size_of_data).split(b"\x00")
             import_name = strings[0]
             dll_name = strings[1]
-            is_node_symbol = import_name.startswith(b"?") \
-                    or import_name.startswith(b"napi_") \
-                    or import_name.startswith(b"node") \
-                    or import_name.startswith(b"uv_")
+            is_node_symbol = import_name.startswith(b"?") or (
+                    next((p for p in node_prefixes if import_name.startswith(p)), None) is not None)
             if not is_node_symbol:
                 new_prefix = b"X" if not import_name.startswith(B"X") else b"Y"
                 redacted_name = new_prefix + import_name[1:]
@@ -283,6 +282,12 @@ def redact_node_lib_symbols(lib):
     string_pool = lib.read(string_pool_end - string_pool_start)
     lib.seek(string_pool_start)
     lib.write(update_string_pool(string_pool, renamed_symbols))
+
+
+def function_name_to_cdecl_symbol(name, gyp_arch):
+    if gyp_arch == "ia32":
+        return "_" + name
+    return name
 
 
 def read_image_archive_member_header(f):
