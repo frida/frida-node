@@ -3,7 +3,7 @@ import sys
 import tarfile
 
 
-def main(argv):
+def main(argv: list[str]):
     binding = Path(argv[1])
     outfile = Path(argv[2])
 

@@ -1,5 +1,6 @@
+from __future__ import annotations
 from dataclasses import dataclass
-from io import BytesIO
+from io import BytesIO, IOBase
 import json
 import os
 from pathlib import Path
@@ -9,6 +10,7 @@ import subprocess
 import sys
 import tarfile
 import tempfile
+from typing import Union
 import urllib.request
 
 
@@ -17,7 +19,7 @@ IMAGE_FILE_MACHINE_UNKNOWN = 0
 IMPORT_OBJECT_HDR_SIG2 = 0xffff
 
 
-def main(argv):
+def main(argv: list[str]):
     runtime, target, gyp_os, gyp_arch = argv[1:5]
     flavor = "|".join(argv[1:5])
     node, npm, outdir = [Path(p) for p in argv[5:8]]
@@ -71,7 +73,7 @@ def main(argv):
     print_metadata(metadata)
 
 
-def print_metadata(metadata):
+def print_metadata(metadata: dict[str, Union[str, list[str]]]):
     print("abi:", metadata["abi"])
     print("node_defines:", " ".join(metadata["node_defines"]))
     for d in metadata["node_incdirs"]:
@@ -80,7 +82,13 @@ def print_metadata(metadata):
         print("node_lib:", l)
 
 
-def load_dev_assets(runtime, target, gyp_os, gyp_arch, node, outdir, abidir):
+def load_dev_assets(runtime: str,
+                    target: str,
+                    gyp_os: str,
+                    gyp_arch: str,
+                    node: Path,
+                    outdir: Path,
+                    abidir: Path) -> tuple[list[Path], Path, list[Path]]:
     if runtime == "node" and target == "" and gyp_os != "win":
         node_incroot = node.parent.parent / "include"
         node_incdir = node_incroot / "node"
@@ -95,23 +103,23 @@ def load_dev_assets(runtime, target, gyp_os, gyp_arch, node, outdir, abidir):
     else:
         version = f"v{target}"
 
-    libs_arch = "x86" if gyp_arch == "ia32" else gyp_arch
+    node_arch = "x86" if gyp_arch == "ia32" else gyp_arch
 
     if runtime == "node":
         base_url = f"https://nodejs.org/dist/{version}"
         headers_stem = f"node-{version}-headers"
-        libs_subpath = f"/win-{libs_arch}"
+        libs_subpath = f"/win-{node_arch}"
         compression_formats = ["xz", "gz"]
     elif runtime == "electron":
         base_url = f"https://electronjs.org/headers/{version}"
         headers_stem = f"node-{version}-headers"
-        libs_subpath = f"/win-{libs_arch}"
+        libs_subpath = f"/win-{node_arch}"
         compression_formats = ["gz"]
     else:
         assert runtime == "node-webkit"
         base_url = f"https://node-webkit.s3.amazonaws.com/{version}"
         headers_stem = f"nw-headers-{version}"
-        libs_subpath = "" if libs_arch == "x86" else f"/{libs_arch}"
+        libs_subpath = "" if node_arch == "x86" else f"/{node_arch}"
         compression_formats = ["gz"]
 
     download_error = None
@@ -175,7 +183,7 @@ def load_dev_assets(runtime, target, gyp_os, gyp_arch, node, outdir, abidir):
     return (node_incdirs, node_gypdir, node_libs)
 
 
-def load_node_defines(gyp_os, gyp_arch, node_gypdir, gyp_pylib):
+def load_node_defines(gyp_os: str, gyp_arch: str, node_gypdir: Path, gyp_pylib: Path) -> list[str]:
     sys.path.insert(0, str(gyp_pylib))
     import gyp
 
@@ -220,13 +228,13 @@ def load_node_defines(gyp_os, gyp_arch, node_gypdir, gyp_pylib):
     return [adapt_node_define(d) for d in config["defines"] if want_node_define(d)]
 
 
-def want_node_define(d):
+def want_node_define(d: str) -> bool:
     if d.startswith("V8_") and "DEPRECATION_WARNINGS" in d:
         return False
     return True
 
 
-def adapt_node_define(d):
+def adapt_node_define(d: str) -> str:
     if d.startswith("BUILDING_"):
         return "USING_" + d[9:]
     if d == "_HAS_EXCEPTIONS=1":
@@ -238,7 +246,7 @@ class GypOptions:
     generator_output = os.getcwd()
 
 
-def redact_node_lib_symbols(lib, gyp_arch):
+def redact_node_lib_symbols(lib: Path, gyp_arch: str):
     magic = lib.read(8)
     assert magic == IMAGE_ARCHIVE_START
 
@@ -284,13 +292,13 @@ def redact_node_lib_symbols(lib, gyp_arch):
     lib.write(update_string_pool(string_pool, renamed_symbols))
 
 
-def function_name_to_cdecl_symbol(name, gyp_arch):
+def function_name_to_cdecl_symbol(name: str, gyp_arch: str) -> str:
     if gyp_arch == "ia32":
         return "_" + name
     return name
 
 
-def read_image_archive_member_header(f):
+def read_image_archive_member_header(f: IOBase) -> ImageArchiveMemberHeader:
     data = f.read(60)
 
     raw_name = data[:16].decode("utf-8")
@@ -301,7 +309,7 @@ def read_image_archive_member_header(f):
     return ImageArchiveMemberHeader(name, size, data)
 
 
-def read_import_object_header(f):
+def read_import_object_header(f: IOBase) -> ImportObjectHeader:
     data = f.read(20)
 
     (sig1, sig2, version, machine, time_date_stamp, size_of_data) \
@@ -310,7 +318,7 @@ def read_import_object_header(f):
     return ImportObjectHeader(sig1, sig2, version, machine, size_of_data, data)
 
 
-def update_string_pool(pool, renames):
+def update_string_pool(pool: bytes, renames: dict[str, str]) -> bytes:
     return b"\x00".join(map(lambda s: renames.get(s, s), pool.split(b"\x00")))
 
 

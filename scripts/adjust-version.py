@@ -3,7 +3,7 @@ import re
 import sys
 
 
-def main(argv):
+def main(argv: list[str]):
     version = argv[1]
     inpkg = Path(argv[2])
     outpkg = Path(argv[3])
