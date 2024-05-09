@@ -38,6 +38,7 @@
     "releng/*.py",
     "releng/*.toml",
     "releng/devkit-assets/",
+    "releng/meson-scripts/",
     "releng/meson/meson.py",
     "releng/meson/mesonbuild/",
     "releng/tomlkit/tomlkit/",
