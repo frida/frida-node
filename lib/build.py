@@ -5,12 +5,11 @@ import sys
 
 
 def main(argv: list[str]):
-    outdir, privdir, npm, package_json, package_lock_json, tsconfig, \
-        *sources = [Path(s) for s in argv[1:]]
+    outdir, privdir, npm, package_json, tsconfig, *sources = [Path(s) for s in argv[1:]]
 
     try:
         privdir.mkdir(exist_ok=True)
-        for asset in [package_json, package_lock_json, tsconfig]:
+        for asset in [package_json, tsconfig]:
             shutil.copy(asset, privdir)
 
         libdir = privdir / "lib"

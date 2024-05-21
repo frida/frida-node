@@ -154,7 +154,6 @@ package_json = custom_target('package.json',
   install: true,
   install_dir: pkg_install_dir,
 )
-package_lock_json = files('package-lock.json')
 tsconfig_json = files('tsconfig.json')
 
 subdir('lib')
