@@ -251,6 +251,69 @@ Local<Value> Runtime::ValueFromParametersDict(GHashTable* dict) {
   return result;
 }
 
+GVariant* Runtime::ValueToVariant(Local<Value> value) {
+  if (value->IsString()) {
+    Nan::Utf8String str(value);
+    return g_variant_new_string(*str);
+  }
+
+  if (value->IsNumber()) {
+    return g_variant_new_int64(
+        static_cast<gint64>(Local<Number>::Cast(value)->Value()));
+  }
+
+  if (value->IsBoolean()) {
+    return g_variant_new_boolean(Local<Boolean>::Cast(value)->Value());
+  }
+
+  if (node::Buffer::HasInstance(value)) {
+    auto size = node::Buffer::Length(value);
+    auto copy = g_memdup2(node::Buffer::Data(value), size);
+    return g_variant_new_from_data(G_VARIANT_TYPE_BYTESTRING, copy, size, TRUE,
+        g_free, copy);
+  }
+
+  if (value->IsArray()) {
+    GVariantBuilder builder;
+    g_variant_builder_init(&builder, G_VARIANT_TYPE ("av"));
+
+    auto array = Local<Array>::Cast(value);
+    uint32_t n = array->Length();
+    for (uint32_t i = 0; i != n; i++) {
+      auto element_value = Nan::Get(array, i).ToLocalChecked();
+      g_variant_builder_add(&builder, "v", ValueToVariant(element_value));
+    }
+
+    return g_variant_builder_end(&builder);
+  }
+
+  if (value->IsObject()) {
+    GVariantBuilder builder;
+    g_variant_builder_init(&builder, G_VARIANT_TYPE_VARDICT);
+
+    auto isolate = Isolate::GetCurrent();
+    auto context = isolate->GetCurrentContext();
+
+    auto object = Local<Object>::Cast(value);
+
+    Local<Array> names(object->GetOwnPropertyNames(context).ToLocalChecked());
+    uint32_t n = names->Length();
+
+    for (uint32_t i = 0; i != n; i++) {
+      auto key = Nan::Get(names, i).ToLocalChecked();
+      auto val = Nan::Get(object, key).ToLocalChecked();
+
+      Nan::Utf8String key_str(key);
+      g_variant_builder_add(&builder, "{sv}", *key_str, ValueToVariant(val));
+    }
+
+    return g_variant_builder_end(&builder);
+  }
+
+  Nan::ThrowTypeError("Bad argument, expected value serializable to GVariant");
+  return NULL;
+}
+
 Local<Value> Runtime::ValueFromVariant(GVariant* v) {
   if (g_variant_is_of_type(v, G_VARIANT_TYPE_STRING))
     return Nan::New<String>(g_variant_get_string(v, NULL)).ToLocalChecked();

@@ -38,6 +38,7 @@ class Runtime {
 
   static v8::Local<v8::Value> ValueFromParametersDict(GHashTable* dict);
 
+  static GVariant* ValueToVariant(v8::Local<v8::Value> value);
   static v8::Local<v8::Value> ValueFromVariant(GVariant* v);
 
   static v8::Local<v8::Object> ValueFromSocketAddress(GSocketAddress* address);

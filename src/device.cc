@@ -760,20 +760,8 @@ NAN_METHOD(Device::Spawn) {
 
         Nan::Utf8String key_str(key);
 
-        GVariant* raw_value;
-        if (value->IsBoolean()) {
-          raw_value = g_variant_new_boolean(
-              Local<Boolean>::Cast(value)->Value());
-        } else if (value->IsNumber()) {
-          raw_value = g_variant_new_int64(
-              static_cast<gint64>(Local<Number>::Cast(value)->Value()));
-        } else {
-          Nan::Utf8String value_str(value);
-          raw_value = g_variant_new_string(*value_str);
-        }
-
         g_hash_table_insert(aux, g_strdup(*key_str),
-            g_variant_ref_sink(raw_value));
+            g_variant_ref_sink(Runtime::ValueToVariant(value)));
       }
     } else {
       Nan::ThrowTypeError("Bad argument, 'aux' must be an object");
