@@ -301,6 +301,11 @@ Local<Value> Runtime::ValueFromVariant(GVariant* v) {
 
     GVariant* child;
     for (int i = 0; (child = g_variant_iter_next_value(&iter)) != NULL; i++) {
+      if (g_variant_is_of_type(child, G_VARIANT_TYPE_VARIANT)) {
+        GVariant* inner = g_variant_get_variant(child);
+        g_variant_unref(child);
+        child = inner;
+      }
       Nan::Set(array, i, ValueFromVariant(child));
       g_variant_unref(child);
     }
