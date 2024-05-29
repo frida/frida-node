@@ -340,6 +340,8 @@ Local<Value> Runtime::ValueFromVariant(GVariant* v) {
       }
 
       break;
+    case G_VARIANT_CLASS_TUPLE:
+      return Nan::Undefined();
     default:
       break;
   }
