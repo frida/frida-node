@@ -320,6 +320,8 @@ Local<Value> Runtime::ValueFromVariant(GVariant* v) {
       return Nan::New<String>(g_variant_get_string(v, NULL)).ToLocalChecked();
     case G_VARIANT_CLASS_INT64:
       return Nan::New<Number>(static_cast<double>(g_variant_get_int64(v)));
+    case G_VARIANT_CLASS_DOUBLE:
+      return Nan::New<Number>(static_cast<double>(g_variant_get_double(v)));
     case G_VARIANT_CLASS_BOOLEAN:
       return Nan::New<Boolean>(static_cast<bool>(g_variant_get_boolean(v)));
     case G_VARIANT_CLASS_ARRAY:
