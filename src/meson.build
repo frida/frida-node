@@ -8,6 +8,7 @@ frida_binding_sources = files(
   'child.cc',
   'crash.cc',
   'bus.cc',
+  'service.cc',
   'session.cc',
   'script.cc',
   'relay.cc',

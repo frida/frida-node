@@ -14,6 +14,7 @@
 #include "relay.h"
 #include "runtime.h"
 #include "script.h"
+#include "service.h"
 #include "session.h"
 #include "signals.h"
 #include "spawn.h"
@@ -47,6 +48,7 @@ static void InitAll(Local<Object> exports,
   Child::Init(exports, runtime);
   Crash::Init(exports, runtime);
   Bus::Init(exports, runtime);
+  Service::Init(exports, runtime);
   Session::Init(exports, runtime);
   Script::Init(exports, runtime);
   Relay::Init(exports, runtime);

@@ -18,6 +18,7 @@ sources = [
   'process.ts',
   'relay.ts',
   'script.ts',
+  'service.ts',
   'session.ts',
   'signals.ts',
   'socket_address.ts',

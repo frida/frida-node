@@ -6,6 +6,7 @@ import { Crash } from "./crash";
 import { Icon } from "./icon";
 import { IOStream } from "./iostream";
 import { Process } from "./process";
+import { Service } from "./service";
 import { Session } from "./session";
 import { Signal } from "./signals";
 import { Spawn } from "./spawn";
@@ -188,6 +189,10 @@ export class Device {
 
     async openChannel(address: string, cancellable?: Cancellable): Promise<IOStream> {
         return new IOStream(await this.impl.openChannel(address, cancellable));
+    }
+
+    async openService(address: string, cancellable?: Cancellable): Promise<Service> {
+        return new Service(await this.impl.openService(address, cancellable));
     }
 
     async unpair(cancellable?: Cancellable): Promise<void> {

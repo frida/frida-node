@@ -7,6 +7,7 @@
 #include "iostream.h"
 #include "operation.h"
 #include "process.h"
+#include "service.h"
 #include "session.h"
 #include "signals.h"
 #include "spawn.h"
@@ -81,6 +82,7 @@ void Device::Init(Local<Object> exports, Runtime* runtime) {
   Nan::SetPrototypeMethod(tpl, "injectLibraryFile", InjectLibraryFile);
   Nan::SetPrototypeMethod(tpl, "injectLibraryBlob", InjectLibraryBlob);
   Nan::SetPrototypeMethod(tpl, "openChannel", OpenChannel);
+  Nan::SetPrototypeMethod(tpl, "openService", OpenService);
   Nan::SetPrototypeMethod(tpl, "unpair", Unpair);
 
   auto ctor = Nan::GetFunction(tpl).ToLocalChecked();
@@ -1211,6 +1213,56 @@ NAN_METHOD(Device::OpenChannel) {
   Nan::Utf8String address(info[0]);
 
   auto operation = new OpenChannelOperation(g_strdup(*address));
+  operation->Schedule(isolate, wrapper, info);
+
+  info.GetReturnValue().Set(operation->GetPromise(isolate));
+}
+
+namespace {
+
+class OpenServiceOperation : public Operation<FridaDevice> {
+ public:
+  OpenServiceOperation(gchar* address)
+    : address_(address) {
+  }
+
+  ~OpenServiceOperation() {
+    g_free(address_);
+  }
+
+ protected:
+  void Begin() {
+    frida_device_open_service(handle_, address_, cancellable_, OnReady, this);
+  }
+
+  void End(GAsyncResult* result, GError** error) {
+    service_ = frida_device_open_service_finish(handle_, result, error);
+  }
+
+  Local<Value> Result(Isolate* isolate) {
+    auto wrapper = Service::New(service_, runtime_);
+    g_object_unref(service_);
+    return wrapper;
+  }
+
+ private:
+  gchar* address_;
+  FridaService* service_;
+};
+
+}
+
+NAN_METHOD(Device::OpenService) {
+  auto isolate = info.GetIsolate();
+  auto wrapper = ObjectWrap::Unwrap<Device>(info.Holder());
+
+  if (info.Length() < 1 || !info[0]->IsString()) {
+    Nan::ThrowTypeError("Bad argument");
+    return;
+  }
+  Nan::Utf8String address(info[0]);
+
+  auto operation = new OpenServiceOperation(g_strdup(*address));
   operation->Schedule(isolate, wrapper, info);
 
   info.GetReturnValue().Set(operation->GetPromise(isolate));
