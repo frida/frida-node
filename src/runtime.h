@@ -50,6 +50,10 @@ class Runtime {
   static char* ParameterNameFromC(const char* cname);
 
  private:
+  static v8::Local<v8::Value> ValueFromVariantByteArray(GVariant* v);
+  static v8::Local<v8::Value> ValueFromVariantDict(GVariant* v);
+  static v8::Local<v8::Value> ValueFromVariantArray(GVariant* v);
+
   UVContext* uv_context_;
   GLibContext* glib_context_;
 

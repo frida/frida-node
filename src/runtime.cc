@@ -315,68 +315,83 @@ GVariant* Runtime::ValueToVariant(Local<Value> value) {
 }
 
 Local<Value> Runtime::ValueFromVariant(GVariant* v) {
-  if (g_variant_is_of_type(v, G_VARIANT_TYPE_STRING))
-    return Nan::New<String>(g_variant_get_string(v, NULL)).ToLocalChecked();
-
-  if (g_variant_is_of_type(v, G_VARIANT_TYPE_INT64))
-    return Nan::New<Number>(static_cast<double>(g_variant_get_int64(v)));
-
-  if (g_variant_is_of_type(v, G_VARIANT_TYPE_BOOLEAN))
-    return Nan::New<Boolean>(static_cast<bool>(g_variant_get_boolean(v)));
-
-  if (g_variant_is_of_type(v, G_VARIANT_TYPE("ay"))) {
-    gsize size;
-    gconstpointer data = g_variant_get_fixed_array(v, &size, sizeof(guint8));
-
-    return Nan::CopyBuffer(static_cast<const char*>(data), size)
-        .ToLocalChecked();
-  }
-
-  if (g_variant_is_of_type(v, G_VARIANT_TYPE_VARDICT)) {
-    auto dict = Nan::New<Object>();
-
-    GVariantIter iter;
-    gchar* raw_key;
-    GVariant* raw_value;
-
-    g_variant_iter_init(&iter, v);
-
-    while (g_variant_iter_next(&iter, "{sv}", &raw_key, &raw_value)) {
-      char* canonicalized_key = ParameterNameFromC(raw_key);
-
-      Local<String> key = Nan::New(canonicalized_key).ToLocalChecked();
-      Local<Value> value = ValueFromVariant(raw_value);
-      Nan::Set(dict, key, value);
-
-      g_free(canonicalized_key);
-      g_variant_unref(raw_value);
-      g_free(raw_key);
-    }
-
-    return dict;
-  }
-
-  if (g_variant_is_of_type(v, G_VARIANT_TYPE_ARRAY)) {
-    GVariantIter iter;
-    g_variant_iter_init(&iter, v);
-
-    auto array = Nan::New<Array>(g_variant_iter_n_children(&iter));
-
-    GVariant* child;
-    for (int i = 0; (child = g_variant_iter_next_value(&iter)) != NULL; i++) {
-      if (g_variant_is_of_type(child, G_VARIANT_TYPE_VARIANT)) {
-        GVariant* inner = g_variant_get_variant(child);
-        g_variant_unref(child);
-        child = inner;
+  switch (g_variant_classify(v)) {
+    case G_VARIANT_CLASS_STRING:
+      return Nan::New<String>(g_variant_get_string(v, NULL)).ToLocalChecked();
+    case G_VARIANT_CLASS_INT64:
+      return Nan::New<Number>(static_cast<double>(g_variant_get_int64(v)));
+    case G_VARIANT_CLASS_BOOLEAN:
+      return Nan::New<Boolean>(static_cast<bool>(g_variant_get_boolean(v)));
+    case G_VARIANT_CLASS_ARRAY:
+      if (g_variant_is_of_type(v, G_VARIANT_TYPE("ay"))) {
+        return ValueFromVariantByteArray(v);
       }
-      Nan::Set(array, i, ValueFromVariant(child));
-      g_variant_unref(child);
-    }
 
-    return array;
+      if (g_variant_is_of_type(v, G_VARIANT_TYPE_VARDICT)) {
+        return ValueFromVariantDict(v);
+      }
+
+      if (g_variant_is_of_type(v, G_VARIANT_TYPE_ARRAY)) {
+        return ValueFromVariantArray(v);
+      }
+
+      break;
+    default:
+      break;
   }
 
   return Nan::Null();
+}
+
+Local<Value> Runtime::ValueFromVariantByteArray(GVariant* v) {
+  gsize size;
+  gconstpointer data = g_variant_get_fixed_array(v, &size, sizeof(guint8));
+
+  return Nan::CopyBuffer(static_cast<const char*>(data), size).ToLocalChecked();
+}
+
+Local<Value> Runtime::ValueFromVariantDict(GVariant* v) {
+  auto dict = Nan::New<Object>();
+
+  GVariantIter iter;
+  gchar* raw_key;
+  GVariant* raw_value;
+
+  g_variant_iter_init(&iter, v);
+
+  while (g_variant_iter_next(&iter, "{sv}", &raw_key, &raw_value)) {
+    char* canonicalized_key = ParameterNameFromC(raw_key);
+
+    Local<String> key = Nan::New(canonicalized_key).ToLocalChecked();
+    Local<Value> value = ValueFromVariant(raw_value);
+    Nan::Set(dict, key, value);
+
+    g_free(canonicalized_key);
+    g_variant_unref(raw_value);
+    g_free(raw_key);
+  }
+
+  return dict;
+}
+
+Local<Value> Runtime::ValueFromVariantArray(GVariant* v) {
+  GVariantIter iter;
+  g_variant_iter_init(&iter, v);
+
+  auto array = Nan::New<Array>(g_variant_iter_n_children(&iter));
+
+  GVariant* child;
+  for (int i = 0; (child = g_variant_iter_next_value(&iter)) != NULL; i++) {
+    if (g_variant_is_of_type(child, G_VARIANT_TYPE_VARIANT)) {
+      GVariant* inner = g_variant_get_variant(child);
+      g_variant_unref(child);
+      child = inner;
+    }
+    Nan::Set(array, i, ValueFromVariant(child));
+    g_variant_unref(child);
+  }
+
+  return array;
 }
 
 Local<Object> Runtime::ValueFromSocketAddress(GSocketAddress* address) {
