@@ -5,6 +5,8 @@ project('frida-node', 'cpp',
   meson_version: '>=1.1.0',
 )
 
+cpp = meson.get_compiler('cpp')
+
 node = find_program('node')
 npm = find_program('npm')
 python = import('python').find_installation()
@@ -75,6 +77,7 @@ endforeach
 
 extra_cpp_args = []
 extra_link_args = []
+extra_link_depends = []
 
 foreach d : node_defines
   extra_cpp_args += '-D' + d
@@ -125,6 +128,7 @@ binding = shared_module('frida_binding', frida_binding_sources,
     '-DFRIDA_' + runtime.underscorify().to_upper(),
   ] + extra_cpp_args,
   link_args: node_libs + extra_link_args,
+  link_depends: extra_link_depends,
   dependencies: [frida_core_dep, nan_dep],
   install: true,
   install_dir: pkg_install_dir / 'build',
