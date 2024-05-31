@@ -36,6 +36,13 @@ describe("Script", function () {
                 const buf = Memory.allocUtf8String('Yo');
                 return Memory.readByteArray(buf, 2);
               },
+              speakWithMetadata() {
+                const buf = Memory.allocUtf8String('Yo');
+                return ['soft', Memory.readByteArray(buf, 2)];
+              },
+              processData(val, data) {
+                return { val, dump: hexdump(data, { header: false }) };
+              },
             };
         `);
         await script.load();
@@ -56,6 +63,14 @@ describe("Script", function () {
 
         const buf = await agent.speak();
         expect(buf.toJSON().data).to.deep.equal([0x59, 0x6f]);
+
+        const [meta, data] = await agent.speakWithMetadata();
+        expect(meta).to.equal("soft");
+        expect(data.toJSON().data).to.deep.equal([0x59, 0x6f]);
+
+        const result = await agent.processData(1337, Buffer.from([0x13, 0x37]));
+        expect(result.val).to.equal(1337);
+        expect(result.dump).to.equal("00000000  13 37                                            .7");
     });
 
     it("should fail rpc request if post() fails", async () => {

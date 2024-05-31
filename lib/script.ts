@@ -173,7 +173,7 @@ class ScriptServices extends SignalAdapter implements RpcController {
         }
     }
 
-    request(operation: string, params: any[], cancellable?: Cancellable): Promise<any> {
+    request(operation: string, params: any[], data: Buffer | null, cancellable?: Cancellable): Promise<any> {
         return new Promise((resolve, reject) => {
             const id = this.nextRequestId++;
 
@@ -202,7 +202,7 @@ class ScriptServices extends SignalAdapter implements RpcController {
 
             this.pendingRequests[id] = complete;
 
-            this.script.post(["frida:rpc", id, operation].concat(params));
+            this.script.post(["frida:rpc", id, operation, ...params], data);
             this.signals.connect("destroyed", onScriptDestroyed);
             if (cancellable !== undefined) {
                 cancellable.cancelled.connect(onOperationCancelled);
@@ -227,7 +227,11 @@ class ScriptServices extends SignalAdapter implements RpcController {
             let value = null;
             let error = null;
             if (operation === RpcOperation.Ok) {
-                value = (data !== null) ? data : params[0];
+                if (data !== null) {
+                    value = (params.length > 1) ? [params[1], data] : data;
+                } else {
+                    value = params[0];
+                }
             } else {
                 const [message, name, stack, rawErr] = params;
                 error = new Error(message);
@@ -265,7 +269,12 @@ function ScriptExportsProxy(rpcController: RpcController): void {
                     cancellable = args.pop();
                 }
 
-                return rpcController.request("call", [property, args], cancellable);
+                let data: Buffer | null = null;
+                if (Buffer.isBuffer(args[args.length - 1])) {
+                    data = args.pop();
+                }
+
+                return rpcController.request("call", [property, args], data, cancellable);
             };
         },
         set(target, property, value, receiver) {
@@ -298,7 +307,7 @@ function inspectProxy() {
 }
 
 interface RpcController {
-    request(operation: string, params: any[], cancellable?: Cancellable): Promise<any>;
+    request(operation: string, params: any[], data: ArrayBuffer | null, cancellable?: Cancellable): Promise<any>;
 }
 
 enum RpcOperation {
