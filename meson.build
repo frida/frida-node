@@ -6,6 +6,7 @@ project('frida-node', 'cpp',
 )
 
 cpp = meson.get_compiler('cpp')
+strip = (cpp.get_argument_syntax() == 'msvc') ? '' : find_program('strip')
 
 node = find_program('node')
 npm = find_program('npm')
@@ -140,6 +141,8 @@ custom_target('prebuild',
   command: [
     python,
     files('scripts' / 'package.py'),
+    '>>>', strip, '<<<',
+    get_option('strip').to_string(),
     '@INPUT@',
     '@OUTPUT@',
   ],
