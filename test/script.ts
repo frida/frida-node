@@ -21,22 +21,23 @@ describe("Script", function () {
     });
 
     it("should support rpc", async () => {
-        const script = await session.createScript(
-            "rpc.exports = {" +
-            "add: function (a, b) {" +
-            "var result = a + b;" +
-            "if (result < 0)" +
-            "throw new Error('No');" +
-            "return result;" +
-            "}," +
-            "sub: function (a, b) {" +
-            "return a - b;" +
-            "}," +
-            "speak: function () {" +
-            "var buf = Memory.allocUtf8String('Yo');" +
-            "return Memory.readByteArray(buf, 2);" +
-            "}" +
-            "};");
+        const script = await session.createScript(`
+            rpc.exports = {
+              add(a, b) {
+                const result = a + b;
+                if (result < 0)
+                  throw new Error('no');
+                return result;
+              },
+              sub(a, b) {
+                return a - b;
+              },
+              speak() {
+                const buf = Memory.allocUtf8String('Yo');
+                return Memory.readByteArray(buf, 2);
+              },
+            };
+        `);
         await script.load();
 
         const agent = script.exports;
@@ -51,18 +52,19 @@ describe("Script", function () {
             thrownException = e;
         }
         expect(thrownException).to.not.be.equal(null);
-        expect(thrownException.message).to.equal("No");
+        expect(thrownException.message).to.equal("no");
 
         const buf = await agent.speak();
         expect(buf.toJSON().data).to.deep.equal([0x59, 0x6f]);
     });
 
     it("should fail rpc request if post() fails", async () => {
-        const script = await session.createScript(
-            "rpc.exports = {" +
-            "init: function () {" +
-            "}" +
-            "};");
+        const script = await session.createScript(`
+            rpc.exports = {
+              init() {
+              }
+            };
+        `);
         await script.load();
 
         await session.detach();
@@ -78,12 +80,13 @@ describe("Script", function () {
     });
 
     it("should fail rpc request if script is unloaded mid-request", async () => {
-        const script = await session.createScript(
-            "rpc.exports = {" +
-            "waitForever: function () {" +
-            "return new Promise(function () {});" +
-            "}" +
-            "};");
+        const script = await session.createScript(`
+            rpc.exports = {
+              waitForever() {
+                return new Promise(() => {});
+              }
+            };
+        `);
         await script.load();
 
         setTimeout(() => script.unload(), 100);
@@ -99,12 +102,13 @@ describe("Script", function () {
     });
 
     it("should fail rpc request if session gets detached mid-request", async () => {
-        const script = await session.createScript(
-            "rpc.exports = {" +
-            "waitForever: function () {" +
-            "return new Promise(function () {});" +
-            "}" +
-            "};");
+        const script = await session.createScript(`
+            rpc.exports = {
+              waitForever() {
+                return new Promise(() => {});
+              }
+            };
+        `);
         await script.load();
 
         setTimeout(() => target.stop(), 100);
@@ -122,12 +126,13 @@ describe("Script", function () {
     it("should fail rpc request if cancelled mid-request", async () => {
         const cancellable = new frida.Cancellable();
 
-        const script = await session.createScript(
-            "rpc.exports = {" +
-            "waitForever: function () {" +
-            "return new Promise(function () {});" +
-            "}" +
-            "};", {}, cancellable);
+        const script = await session.createScript(`
+            rpc.exports = {
+              waitForever() {
+                return new Promise(() => {});
+              }
+            };
+        `, {}, cancellable);
         await script.load(cancellable);
 
         setTimeout(() => cancellable.cancel(), 100);
@@ -148,9 +153,10 @@ describe("Script", function () {
 
         async function load(): Promise<frida.ScriptExports> {
             const script = await session.createScript(`
-            rpc.exports.hello = function () {
-                return "Is it me you're looking for?";
-            };`);
+                rpc.exports.hello = function () {
+                  return "Is it me you're looking for?";
+                };`
+            );
             await script.load();
 
             const api = script.exports;
