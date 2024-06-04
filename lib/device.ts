@@ -141,11 +141,8 @@ export class Device {
 
         function consumeOption(name) {
             const value = pendingOptions[name];
-            if (value === undefined) {
-                return null;
-            }
             delete pendingOptions[name];
-            return value;
+            return value ?? null;
         }
     }
 
