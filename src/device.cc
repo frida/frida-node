@@ -760,10 +760,15 @@ NAN_METHOD(Device::Spawn) {
         auto key = Nan::Get(keys, i).ToLocalChecked();
         auto value = Nan::Get(object, key).ToLocalChecked();
 
-        Nan::Utf8String key_str(key);
+        Nan::Utf8String k(key);
 
-        g_hash_table_insert(aux, g_strdup(*key_str),
-            g_variant_ref_sink(Runtime::ValueToVariant(value)));
+        auto v = Runtime::ValueToVariant(value);
+        if (v == NULL) {
+          valid = false;
+          break;
+        }
+
+        g_hash_table_insert(aux, g_strdup(*k), g_variant_ref_sink(v));
       }
     } else {
       Nan::ThrowTypeError("Bad argument, 'aux' must be an object");

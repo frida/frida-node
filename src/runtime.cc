@@ -280,8 +280,12 @@ GVariant* Runtime::ValueToVariant(Local<Value> value) {
     auto array = Local<Array>::Cast(value);
     uint32_t n = array->Length();
     for (uint32_t i = 0; i != n; i++) {
-      auto element_value = Nan::Get(array, i).ToLocalChecked();
-      g_variant_builder_add(&builder, "v", ValueToVariant(element_value));
+      auto v = ValueToVariant(Nan::Get(array, i).ToLocalChecked());
+      if (v == NULL) {
+        g_variant_builder_clear(&builder);
+        return NULL;
+      }
+      g_variant_builder_add(&builder, "v", v);
     }
 
     return g_variant_builder_end(&builder);
@@ -303,8 +307,15 @@ GVariant* Runtime::ValueToVariant(Local<Value> value) {
       auto key = Nan::Get(names, i).ToLocalChecked();
       auto val = Nan::Get(object, key).ToLocalChecked();
 
-      Nan::Utf8String key_str(key);
-      g_variant_builder_add(&builder, "{sv}", *key_str, ValueToVariant(val));
+      Nan::Utf8String k(key);
+
+      auto v = ValueToVariant(val);
+      if (v == NULL) {
+        g_variant_builder_clear(&builder);
+        return NULL;
+      }
+
+      g_variant_builder_add(&builder, "{sv}", *k, v);
     }
 
     return g_variant_builder_end(&builder);
