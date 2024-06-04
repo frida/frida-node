@@ -306,6 +306,9 @@ GVariant* Runtime::ValueToVariant(Local<Value> value) {
     for (uint32_t i = 0; i != n; i++) {
       auto key = Nan::Get(names, i).ToLocalChecked();
       auto val = Nan::Get(object, key).ToLocalChecked();
+      if (val->IsUndefined()) {
+        continue;
+      }
 
       Nan::Utf8String k(key);
 
