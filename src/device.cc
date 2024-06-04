@@ -759,6 +759,9 @@ NAN_METHOD(Device::Spawn) {
       for (uint32_t i = 0; i != n; i++) {
         auto key = Nan::Get(keys, i).ToLocalChecked();
         auto value = Nan::Get(object, key).ToLocalChecked();
+        if (value->IsUndefined()) {
+          continue;
+        }
 
         Nan::Utf8String k(key);
 
