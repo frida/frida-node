@@ -20,6 +20,11 @@ export interface SystemParameters {
     }
 
     /**
+         * Human-readable HW type, e.g. `"iPad6,3"`.
+    */
+    model: string;
+
+    /**
      * Platform, same as `Process.platform` in GumJS.
      */
     platform: "windows" | "darwin" | "linux" | "qnx";
