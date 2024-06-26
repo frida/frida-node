@@ -17,7 +17,22 @@ export interface SystemParameters {
          * Human-readable version string, e.g. `"11.2.2"`.
          */
         version?: string;
+
+        /**
+         * Build version, e.g. "21B91"
+         */
+        build?: string;
     }
+
+    /**
+     * Hardware Model, e.g. "J71bAP"
+     */
+    hwmodel?: string;
+
+    /**
+     * Hardware Platform, e.g. "t8010"
+     */
+    hwplatform?: string;
 
     /**
      * Platform, same as `Process.platform` in GumJS.
