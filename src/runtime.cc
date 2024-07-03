@@ -16,6 +16,7 @@ using v8::Local;
 using v8::Number;
 using v8::Object;
 using v8::String;
+using v8::Symbol;
 using v8::Value;
 
 namespace frida {
@@ -274,11 +275,28 @@ GVariant* Runtime::ValueToVariant(Local<Value> value) {
   }
 
   if (value->IsArray()) {
+    auto array = Local<Array>::Cast(value);
+    uint32_t n = array->Length();
+    if (n == 2) {
+      auto first = Nan::Get(array, 0).ToLocalChecked();
+      if (first->IsSymbol()) {
+        auto sym = first.As<Symbol>();
+        auto desc = sym->Description(Isolate::GetCurrent());
+        Nan::Utf8String type(desc);
+
+        auto val = ValueToVariant(Nan::Get(array, 1).ToLocalChecked());
+        if (val == NULL) {
+          return NULL;
+        }
+
+        GVariant* t[2] = { g_variant_new_string(*type), val };
+        return g_variant_new_tuple(t, G_N_ELEMENTS(t));
+      }
+    }
+
     GVariantBuilder builder;
     g_variant_builder_init(&builder, G_VARIANT_TYPE ("av"));
 
-    auto array = Local<Array>::Cast(value);
-    uint32_t n = array->Length();
     for (uint32_t i = 0; i != n; i++) {
       auto v = ValueToVariant(Nan::Get(array, i).ToLocalChecked());
       if (v == NULL) {
