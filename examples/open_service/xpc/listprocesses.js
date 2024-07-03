@@ -1,4 +1,4 @@
-const frida = require('../..');
+const frida = require('../../..');
 const util = require('util');
 
 async function main() {
