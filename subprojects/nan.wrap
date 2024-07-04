@@ -1,6 +1,6 @@
 [wrap-git]
 url = https://github.com/nodejs/nan.git
-revision = 56585a1cd21f25b4d56168063cedaf0831c63fef
+revision = 4d1d74e0a9ea8fa8091b88e45dc57e4c7eb9cdf7
 depth = 1
 diff_files = nan.patch
 
