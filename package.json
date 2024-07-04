@@ -21,7 +21,7 @@
   ],
   "homepage": "https://frida.re",
   "engines": {
-    "node": ">=8.0.0"
+    "node": ">=16 || 14 >=14.17"
   },
   "main": "./dist",
   "files": [
