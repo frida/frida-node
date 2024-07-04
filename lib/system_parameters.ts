@@ -25,14 +25,22 @@ export interface SystemParameters {
     }
 
     /**
-     * Hardware Model, e.g. "J71bAP"
+     * Hardware details.
      */
-    hwmodel?: string;
-
-    /**
-     * Hardware Platform, e.g. "t8010"
-     */
-    hwplatform?: string;
+    hardware: {
+        /**
+         * Human-readable Product type, e.g. `"iPad6,3"`.
+         */
+        id: string;
+        /**
+         * Hardware Platform, e.g. "t8010"
+         */
+        platform?: string;
+        /**
+         * Hardware Model, e.g. "J71bAP"
+         */
+        model?: string;
+    }
 
     /**
      * Platform, same as `Process.platform` in GumJS.
