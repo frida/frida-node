@@ -281,7 +281,11 @@ GVariant* Runtime::ValueToVariant(Local<Value> value) {
       auto first = Nan::Get(array, 0).ToLocalChecked();
       if (first->IsSymbol()) {
         auto sym = first.As<Symbol>();
-        auto desc = sym->Description(Isolate::GetCurrent());
+        auto desc = sym->Description(
+#if V8_MAJOR_VERSION > 9 || (V8_MAJOR_VERSION == 9 && V8_MINOR_VERSION >= 5)
+            Isolate::GetCurrent()
+#endif
+        );
         Nan::Utf8String type(desc);
 
         auto val = ValueToVariant(Nan::Get(array, 1).ToLocalChecked());
