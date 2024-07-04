@@ -5,7 +5,6 @@
 
 #define IOSTREAM_DATA_CONSTRUCTOR "iostream:ctor"
 
-using v8::CopyablePersistentTraits;
 using v8::DEFAULT;
 using v8::External;
 using v8::Function;
@@ -185,12 +184,9 @@ class WriteOperation : public Operation<GIOStream> {
  public:
   WriteOperation(Isolate* isolate, Local<Value> buffer)
     : stream_(NULL),
-      buffer_(isolate, buffer),
       data_(node::Buffer::Data(buffer)),
       count_(node::Buffer::Length(buffer)) {
-  }
-
-  ~WriteOperation() {
+    buffer_.Reset(buffer);
   }
 
  protected:
@@ -211,7 +207,7 @@ class WriteOperation : public Operation<GIOStream> {
 
  private:
   GOutputStream* stream_;
-  Persistent<Value, CopyablePersistentTraits<Value>> buffer_;
+  Nan::Persistent<Value, Nan::CopyablePersistentTraits<Value>> buffer_;
   const void* data_;
   gsize count_;
 };
