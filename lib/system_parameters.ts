@@ -17,6 +17,11 @@ export interface SystemParameters {
          * Human-readable version string, e.g. `"11.2.2"`.
          */
         version?: string;
+
+        /**
+         * Build version, e.g. `"21B91"`.
+         */
+        build?: string;
     }
 
     /**
@@ -28,6 +33,26 @@ export interface SystemParameters {
      * Architecture, same as `Process.arch` in GumJS.
      */
     arch: "ia32" | "x64" | "arm" | "arm64" | "mips";
+
+    /**
+     * Hardware details.
+     */
+    hardware?: {
+        /**
+         * Product type, e.g. `"iPad6,3"`.
+         */
+        product?: string;
+
+        /**
+         * Hardware platform, e.g. `"t8010"`.
+         */
+        platform?: string;
+
+        /**
+         * Hardware model, e.g. `"J71bAP"`.
+         */
+        model?: string;
+    }
 
     /**
      * Level of access.
