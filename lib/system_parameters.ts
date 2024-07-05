@@ -19,7 +19,7 @@ export interface SystemParameters {
         version?: string;
 
         /**
-         * Build version, e.g. "21B91"
+         * Build version, e.g. `"21B91"`.
          */
         build?: string;
     }
