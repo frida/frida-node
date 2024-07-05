@@ -25,24 +25,6 @@ export interface SystemParameters {
     }
 
     /**
-     * Hardware details.
-     */
-    hardware: {
-        /**
-         * Human-readable Product type, e.g. `"iPad6,3"`.
-         */
-        id: string;
-        /**
-         * Hardware Platform, e.g. "t8010"
-         */
-        platform?: string;
-        /**
-         * Hardware Model, e.g. "J71bAP"
-         */
-        model?: string;
-    }
-
-    /**
      * Platform, same as `Process.platform` in GumJS.
      */
     platform: "windows" | "darwin" | "linux" | "qnx";
@@ -51,6 +33,26 @@ export interface SystemParameters {
      * Architecture, same as `Process.arch` in GumJS.
      */
     arch: "ia32" | "x64" | "arm" | "arm64" | "mips";
+
+    /**
+     * Hardware details.
+     */
+    hardware?: {
+        /**
+         * Product type, e.g. `"iPad6,3"`.
+         */
+        product?: string;
+
+        /**
+         * Hardware platform, e.g. `"t8010"`.
+         */
+        platform?: string;
+
+        /**
+         * Hardware model, e.g. `"J71bAP"`.
+         */
+        model?: string;
+    }
 
     /**
      * Level of access.
