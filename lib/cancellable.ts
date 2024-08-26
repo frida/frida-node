@@ -28,6 +28,12 @@ export class Cancellable {
     [inspect.custom]() {
         return "Cancellable {}";
     }
+
+    public static withTimeout(ms): Cancellable {
+        var cancel = new Cancellable();
+        setTimeout(() => cancel.cancel(), ms);
+        return cancel;
+    }
 }
 
 export type CancelledHandler = () => void;
