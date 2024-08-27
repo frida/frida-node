@@ -30,8 +30,8 @@ export class Cancellable {
     }
 
     public static withTimeout(ms): Cancellable {
-        var cancel = new Cancellable();
-        setTimeout(() => cancel.cancel(), ms);
+        const cancel = new Cancellable();
+        setTimeout(() => cancel.cancel(), ms).unref();
         return cancel;
     }
 }
