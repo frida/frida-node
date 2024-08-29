@@ -29,7 +29,7 @@ export class Cancellable {
         return "Cancellable {}";
     }
 
-    combine (other: Cancellable): Cancellable {
+    combine(other: Cancellable): Cancellable {
         const cancel = new Cancellable();
         this.cancelled.connect(() => cancel.cancel());
         other.cancelled.connect(() => cancel.cancel());
