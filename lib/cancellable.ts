@@ -29,6 +29,15 @@ export class Cancellable {
         return "Cancellable {}";
     }
 
+    combine(other: Cancellable): Cancellable {
+        const cancel = new Cancellable();
+        this.cancelled.connect(() => cancel.cancel());
+        other.cancelled.connect(() => cancel.cancel());
+        if (this.isCancelled) cancel.cancel();
+        if (other.isCancelled) cancel.cancel();
+        return cancel;
+    }
+
     public static withTimeout(ms): Cancellable {
         const cancel = new Cancellable();
         setTimeout(() => cancel.cancel(), ms).unref();
