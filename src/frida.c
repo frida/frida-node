@@ -2,6 +2,83 @@
 #include <node_api.h>
 
 
+static napi_threadsafe_function device_manager_close_tsfn;
+static napi_threadsafe_function device_manager_get_device_by_id_tsfn;
+static napi_threadsafe_function device_manager_get_device_by_type_tsfn;
+static napi_threadsafe_function device_manager_find_device_by_id_tsfn;
+static napi_threadsafe_function device_manager_find_device_by_type_tsfn;
+static napi_threadsafe_function device_manager_enumerate_devices_tsfn;
+static napi_threadsafe_function device_manager_add_remote_device_tsfn;
+static napi_threadsafe_function device_manager_remove_remote_device_tsfn;
+
+static napi_value
+Init (napi_env env,
+      napi_value exports)
+{
+  napi_status status;
+  napi_property_descriptor properties[] =
+  {
+    { "close", 0, device_manager_close, 0, 0, 0, napi_default, 0 },
+    { "getDeviceById", 0, device_manager_get_device_by_id, 0, 0, 0, napi_default, 0 },
+    { "getDeviceByType", 0, device_manager_get_device_by_type, 0, 0, 0, napi_default, 0 },
+    { "findDeviceById", 0, device_manager_find_device_by_id, 0, 0, 0, napi_default, 0 },
+    { "findDeviceByType", 0, device_manager_find_device_by_type, 0, 0, 0, napi_default, 0 },
+    { "enumerateDevices", 0, device_manager_enumerate_devices, 0, 0, 0, napi_default, 0 },
+    { "addRemoteDevice", 0, device_manager_add_remote_device, 0, 0, 0, napi_default, 0 },
+    { "removeRemoteDevice", 0, device_manager_remove_remote_device, 0, 0, 0, napi_default, 0 },
+  };
+
+  napi_value constructor;
+  napi_define_class (env, "DeviceManager", NAPI_AUTO_LENGTH, device_manager_constructor, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+
+  napi_set_named_property (env, exports, "DeviceManager", constructor);
+
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "close", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_close_deliver, &device_manager_close_tsfn);
+  }
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "getDeviceById", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_get_device_by_id_deliver, &device_manager_get_device_by_id_tsfn);
+  }
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "getDeviceByType", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_get_device_by_type_deliver, &device_manager_get_device_by_type_tsfn);
+  }
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "findDeviceById", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_find_device_by_id_deliver, &device_manager_find_device_by_id_tsfn);
+  }
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "findDeviceByType", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_find_device_by_type_deliver, &device_manager_find_device_by_type_tsfn);
+  }
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "enumerateDevices", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_enumerate_devices_deliver, &device_manager_enumerate_devices_tsfn);
+  }
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "addRemoteDevice", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_add_remote_device_deliver, &device_manager_add_remote_device_tsfn);
+  }
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "removeRemoteDevice", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_remove_remote_device_deliver, &device_manager_remove_remote_device_tsfn);
+  }
+
+  return exports;
+}
+
+NAPI_MODULE(NODE_GYP_MODULE_NAME, Init)
+
 typedef struct {
   napi_env env;
   napi_deferred deferred;
@@ -1290,81 +1367,4 @@ device_manager_remove_remote_device_operation_free (DeviceManagerRemoveRemoteDev
   g_slice_free (DeviceManagerRemoveRemoteDeviceOperation, operation);
 }
 
-
-static napi_threadsafe_function device_manager_close_tsfn;
-static napi_threadsafe_function device_manager_get_device_by_id_tsfn;
-static napi_threadsafe_function device_manager_get_device_by_type_tsfn;
-static napi_threadsafe_function device_manager_find_device_by_id_tsfn;
-static napi_threadsafe_function device_manager_find_device_by_type_tsfn;
-static napi_threadsafe_function device_manager_enumerate_devices_tsfn;
-static napi_threadsafe_function device_manager_add_remote_device_tsfn;
-static napi_threadsafe_function device_manager_remove_remote_device_tsfn;
-
-static napi_value
-Init (napi_env env,
-      napi_value exports)
-{
-  napi_status status;
-  napi_property_descriptor properties[] =
-  {
-    { "close", 0, device_manager_close, 0, 0, 0, napi_default, 0 },
-    { "getDeviceById", 0, device_manager_get_device_by_id, 0, 0, 0, napi_default, 0 },
-    { "getDeviceByType", 0, device_manager_get_device_by_type, 0, 0, 0, napi_default, 0 },
-    { "findDeviceById", 0, device_manager_find_device_by_id, 0, 0, 0, napi_default, 0 },
-    { "findDeviceByType", 0, device_manager_find_device_by_type, 0, 0, 0, napi_default, 0 },
-    { "enumerateDevices", 0, device_manager_enumerate_devices, 0, 0, 0, napi_default, 0 },
-    { "addRemoteDevice", 0, device_manager_add_remote_device, 0, 0, 0, napi_default, 0 },
-    { "removeRemoteDevice", 0, device_manager_remove_remote_device, 0, 0, 0, napi_default, 0 },
-  };
-
-  napi_value constructor;
-  napi_define_class (env, "DeviceManager", NAPI_AUTO_LENGTH, device_manager_constructor, NULL, G_N_ELEMENTS (properties), properties, &constructor);
-
-  napi_set_named_property (env, exports, "DeviceManager", constructor);
-
-  {
-    napi_value resource_name;
-    napi_create_string_utf8 (env, "close", NAPI_AUTO_LENGTH, &resource_name);
-    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_close_deliver, &device_manager_close_tsfn);
-  }
-  {
-    napi_value resource_name;
-    napi_create_string_utf8 (env, "getDeviceById", NAPI_AUTO_LENGTH, &resource_name);
-    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_get_device_by_id_deliver, &device_manager_get_device_by_id_tsfn);
-  }
-  {
-    napi_value resource_name;
-    napi_create_string_utf8 (env, "getDeviceByType", NAPI_AUTO_LENGTH, &resource_name);
-    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_get_device_by_type_deliver, &device_manager_get_device_by_type_tsfn);
-  }
-  {
-    napi_value resource_name;
-    napi_create_string_utf8 (env, "findDeviceById", NAPI_AUTO_LENGTH, &resource_name);
-    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_find_device_by_id_deliver, &device_manager_find_device_by_id_tsfn);
-  }
-  {
-    napi_value resource_name;
-    napi_create_string_utf8 (env, "findDeviceByType", NAPI_AUTO_LENGTH, &resource_name);
-    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_find_device_by_type_deliver, &device_manager_find_device_by_type_tsfn);
-  }
-  {
-    napi_value resource_name;
-    napi_create_string_utf8 (env, "enumerateDevices", NAPI_AUTO_LENGTH, &resource_name);
-    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_enumerate_devices_deliver, &device_manager_enumerate_devices_tsfn);
-  }
-  {
-    napi_value resource_name;
-    napi_create_string_utf8 (env, "addRemoteDevice", NAPI_AUTO_LENGTH, &resource_name);
-    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_add_remote_device_deliver, &device_manager_add_remote_device_tsfn);
-  }
-  {
-    napi_value resource_name;
-    napi_create_string_utf8 (env, "removeRemoteDevice", NAPI_AUTO_LENGTH, &resource_name);
-    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_remove_remote_device_deliver, &device_manager_remove_remote_device_tsfn);
-  }
-
-  return exports;
-}
-
-NAPI_MODULE(NODE_GYP_MODULE_NAME, Init)
 
