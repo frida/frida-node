@@ -8,7 +8,7 @@ typedef struct {
   FridaDeviceManager * handle;
   napi_threadsafe_function tsfn;
   GError * error;
-  GCancellable* cancellable;
+  GCancellable * cancellable;
 } DeviceManagerCloseOperation;
 
 static gboolean device_manager_close_begin (gpointer user_data);
@@ -104,7 +104,7 @@ device_manager_close_end (GObject * source_object,
 {
   DeviceManagerCloseOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_close_finish (operation->handle, res,
+  operation->return_value = frida_device_manager_close_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
@@ -155,9 +155,10 @@ typedef struct {
   FridaDeviceManager * handle;
   napi_threadsafe_function tsfn;
   GError * error;
-  const gchar* id;
+  const gchar * id;
   gint timeout;
-  GCancellable* cancellable;
+  GCancellable * cancellable;
+FridaDevice * return_value;
 } DeviceManagerGetDeviceByIdOperation;
 
 static gboolean device_manager_get_device_by_id_begin (gpointer user_data);
@@ -280,7 +281,7 @@ device_manager_get_device_by_id_end (GObject * source_object,
 {
   DeviceManagerGetDeviceByIdOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_get_device_by_id_finish (operation->handle, res,
+  operation->return_value = frida_device_manager_get_device_by_id_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
@@ -333,7 +334,8 @@ typedef struct {
   GError * error;
   FridaDeviceType type;
   gint timeout;
-  GCancellable* cancellable;
+  GCancellable * cancellable;
+FridaDevice * return_value;
 } DeviceManagerGetDeviceByTypeOperation;
 
 static gboolean device_manager_get_device_by_type_begin (gpointer user_data);
@@ -453,7 +455,7 @@ device_manager_get_device_by_type_end (GObject * source_object,
 {
   DeviceManagerGetDeviceByTypeOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_get_device_by_type_finish (operation->handle, res,
+  operation->return_value = frida_device_manager_get_device_by_type_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
@@ -504,9 +506,10 @@ typedef struct {
   FridaDeviceManager * handle;
   napi_threadsafe_function tsfn;
   GError * error;
-  const gchar* id;
+  const gchar * id;
   gint timeout;
-  GCancellable* cancellable;
+  GCancellable * cancellable;
+FridaDevice * return_value;
 } DeviceManagerFindDeviceByIdOperation;
 
 static gboolean device_manager_find_device_by_id_begin (gpointer user_data);
@@ -629,7 +632,7 @@ device_manager_find_device_by_id_end (GObject * source_object,
 {
   DeviceManagerFindDeviceByIdOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_find_device_by_id_finish (operation->handle, res,
+  operation->return_value = frida_device_manager_find_device_by_id_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
@@ -682,7 +685,8 @@ typedef struct {
   GError * error;
   FridaDeviceType type;
   gint timeout;
-  GCancellable* cancellable;
+  GCancellable * cancellable;
+FridaDevice * return_value;
 } DeviceManagerFindDeviceByTypeOperation;
 
 static gboolean device_manager_find_device_by_type_begin (gpointer user_data);
@@ -802,7 +806,7 @@ device_manager_find_device_by_type_end (GObject * source_object,
 {
   DeviceManagerFindDeviceByTypeOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_find_device_by_type_finish (operation->handle, res,
+  operation->return_value = frida_device_manager_find_device_by_type_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
@@ -853,7 +857,8 @@ typedef struct {
   FridaDeviceManager * handle;
   napi_threadsafe_function tsfn;
   GError * error;
-  GCancellable* cancellable;
+  GCancellable * cancellable;
+FridaDeviceList * return_value;
 } DeviceManagerEnumerateDevicesOperation;
 
 static gboolean device_manager_enumerate_devices_begin (gpointer user_data);
@@ -949,7 +954,7 @@ device_manager_enumerate_devices_end (GObject * source_object,
 {
   DeviceManagerEnumerateDevicesOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_enumerate_devices_finish (operation->handle, res,
+  operation->return_value = frida_device_manager_enumerate_devices_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
@@ -1000,9 +1005,10 @@ typedef struct {
   FridaDeviceManager * handle;
   napi_threadsafe_function tsfn;
   GError * error;
-  const gchar* address;
-  FridaRemoteDeviceOptions* options;
-  GCancellable* cancellable;
+  const gchar * address;
+  FridaRemoteDeviceOptions * options;
+  GCancellable * cancellable;
+FridaDevice * return_value;
 } DeviceManagerAddRemoteDeviceOperation;
 
 static gboolean device_manager_add_remote_device_begin (gpointer user_data);
@@ -1125,7 +1131,7 @@ device_manager_add_remote_device_end (GObject * source_object,
 {
   DeviceManagerAddRemoteDeviceOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_add_remote_device_finish (operation->handle, res,
+  operation->return_value = frida_device_manager_add_remote_device_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
@@ -1176,8 +1182,8 @@ typedef struct {
   FridaDeviceManager * handle;
   napi_threadsafe_function tsfn;
   GError * error;
-  const gchar* address;
-  GCancellable* cancellable;
+  const gchar * address;
+  GCancellable * cancellable;
 } DeviceManagerRemoveRemoteDeviceOperation;
 
 static gboolean device_manager_remove_remote_device_begin (gpointer user_data);
@@ -1288,7 +1294,7 @@ device_manager_remove_remote_device_end (GObject * source_object,
 {
   DeviceManagerRemoveRemoteDeviceOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_remove_remote_device_finish (operation->handle, res,
+  operation->return_value = frida_device_manager_remove_remote_device_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
