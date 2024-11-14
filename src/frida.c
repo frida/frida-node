@@ -6,7 +6,6 @@ typedef struct {
   napi_env env;
   napi_deferred deferred;
   FridaDeviceManager * handle;
-  napi_threadsafe_function tsfn;
   GError * error;
   GCancellable * cancellable;
 } DeviceManagerCloseOperation;
@@ -61,18 +60,13 @@ device_manager_close (napi_env env,
     operation->cancellable = NULL;
   }
 
-  status = napi_create_threadsafe_function (env, NULL, NULL,
-      napi_create_string_utf8 (env, "close",
-      NAPI_AUTO_LENGTH, NULL), 0, 1, NULL, NULL, NULL,
-      device_manager_close_deliver, &operation->tsfn);
-  if (status != napi_ok)
-    return NULL;
-
   source = g_idle_source_new ();
   g_source_set_callback (source, device_manager_close_begin,
       operation, NULL);
   g_source_attach (source, frida_get_main_context ());
   g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, device_manager_close_tsfn);
 
   return promise;
 
@@ -106,8 +100,7 @@ device_manager_close_end (GObject * source_object,
   frida_device_manager_close_finish (operation->handle, res,
       &operation->error);
 
-  napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
-  napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
+  napi_call_threadsafe_function (device_manager_close_tsfn, operation, napi_tsfn_blocking);
 }
 
 static void
@@ -136,6 +129,8 @@ device_manager_close_deliver (napi_env env,
   }
 
   device_manager_close_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, device_manager_close_tsfn);
 }
 
 
@@ -152,7 +147,6 @@ typedef struct {
   napi_env env;
   napi_deferred deferred;
   FridaDeviceManager * handle;
-  napi_threadsafe_function tsfn;
   GError * error;
   const gchar * id;
   gint timeout;
@@ -237,18 +231,13 @@ device_manager_get_device_by_id (napi_env env,
     operation->cancellable = NULL;
   }
 
-  status = napi_create_threadsafe_function (env, NULL, NULL,
-      napi_create_string_utf8 (env, "get_device_by_id",
-      NAPI_AUTO_LENGTH, NULL), 0, 1, NULL, NULL, NULL,
-      device_manager_get_device_by_id_deliver, &operation->tsfn);
-  if (status != napi_ok)
-    return NULL;
-
   source = g_idle_source_new ();
   g_source_set_callback (source, device_manager_get_device_by_id_begin,
       operation, NULL);
   g_source_attach (source, frida_get_main_context ());
   g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, device_manager_get_device_by_id_tsfn);
 
   return promise;
 
@@ -282,8 +271,7 @@ device_manager_get_device_by_id_end (GObject * source_object,
   operation->return_value = frida_device_manager_get_device_by_id_finish (operation->handle, res,
       &operation->error);
 
-  napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
-  napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
+  napi_call_threadsafe_function (device_manager_get_device_by_id_tsfn, operation, napi_tsfn_blocking);
 }
 
 static void
@@ -312,6 +300,8 @@ device_manager_get_device_by_id_deliver (napi_env env,
   }
 
   device_manager_get_device_by_id_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, device_manager_get_device_by_id_tsfn);
 }
 
 
@@ -328,7 +318,6 @@ typedef struct {
   napi_env env;
   napi_deferred deferred;
   FridaDeviceManager * handle;
-  napi_threadsafe_function tsfn;
   GError * error;
   FridaDeviceType type;
   gint timeout;
@@ -410,18 +399,13 @@ device_manager_get_device_by_type (napi_env env,
     operation->cancellable = NULL;
   }
 
-  status = napi_create_threadsafe_function (env, NULL, NULL,
-      napi_create_string_utf8 (env, "get_device_by_type",
-      NAPI_AUTO_LENGTH, NULL), 0, 1, NULL, NULL, NULL,
-      device_manager_get_device_by_type_deliver, &operation->tsfn);
-  if (status != napi_ok)
-    return NULL;
-
   source = g_idle_source_new ();
   g_source_set_callback (source, device_manager_get_device_by_type_begin,
       operation, NULL);
   g_source_attach (source, frida_get_main_context ());
   g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, device_manager_get_device_by_type_tsfn);
 
   return promise;
 
@@ -455,8 +439,7 @@ device_manager_get_device_by_type_end (GObject * source_object,
   operation->return_value = frida_device_manager_get_device_by_type_finish (operation->handle, res,
       &operation->error);
 
-  napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
-  napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
+  napi_call_threadsafe_function (device_manager_get_device_by_type_tsfn, operation, napi_tsfn_blocking);
 }
 
 static void
@@ -485,6 +468,8 @@ device_manager_get_device_by_type_deliver (napi_env env,
   }
 
   device_manager_get_device_by_type_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, device_manager_get_device_by_type_tsfn);
 }
 
 
@@ -501,7 +486,6 @@ typedef struct {
   napi_env env;
   napi_deferred deferred;
   FridaDeviceManager * handle;
-  napi_threadsafe_function tsfn;
   GError * error;
   const gchar * id;
   gint timeout;
@@ -586,18 +570,13 @@ device_manager_find_device_by_id (napi_env env,
     operation->cancellable = NULL;
   }
 
-  status = napi_create_threadsafe_function (env, NULL, NULL,
-      napi_create_string_utf8 (env, "find_device_by_id",
-      NAPI_AUTO_LENGTH, NULL), 0, 1, NULL, NULL, NULL,
-      device_manager_find_device_by_id_deliver, &operation->tsfn);
-  if (status != napi_ok)
-    return NULL;
-
   source = g_idle_source_new ();
   g_source_set_callback (source, device_manager_find_device_by_id_begin,
       operation, NULL);
   g_source_attach (source, frida_get_main_context ());
   g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, device_manager_find_device_by_id_tsfn);
 
   return promise;
 
@@ -631,8 +610,7 @@ device_manager_find_device_by_id_end (GObject * source_object,
   operation->return_value = frida_device_manager_find_device_by_id_finish (operation->handle, res,
       &operation->error);
 
-  napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
-  napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
+  napi_call_threadsafe_function (device_manager_find_device_by_id_tsfn, operation, napi_tsfn_blocking);
 }
 
 static void
@@ -661,6 +639,8 @@ device_manager_find_device_by_id_deliver (napi_env env,
   }
 
   device_manager_find_device_by_id_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, device_manager_find_device_by_id_tsfn);
 }
 
 
@@ -677,7 +657,6 @@ typedef struct {
   napi_env env;
   napi_deferred deferred;
   FridaDeviceManager * handle;
-  napi_threadsafe_function tsfn;
   GError * error;
   FridaDeviceType type;
   gint timeout;
@@ -759,18 +738,13 @@ device_manager_find_device_by_type (napi_env env,
     operation->cancellable = NULL;
   }
 
-  status = napi_create_threadsafe_function (env, NULL, NULL,
-      napi_create_string_utf8 (env, "find_device_by_type",
-      NAPI_AUTO_LENGTH, NULL), 0, 1, NULL, NULL, NULL,
-      device_manager_find_device_by_type_deliver, &operation->tsfn);
-  if (status != napi_ok)
-    return NULL;
-
   source = g_idle_source_new ();
   g_source_set_callback (source, device_manager_find_device_by_type_begin,
       operation, NULL);
   g_source_attach (source, frida_get_main_context ());
   g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, device_manager_find_device_by_type_tsfn);
 
   return promise;
 
@@ -804,8 +778,7 @@ device_manager_find_device_by_type_end (GObject * source_object,
   operation->return_value = frida_device_manager_find_device_by_type_finish (operation->handle, res,
       &operation->error);
 
-  napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
-  napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
+  napi_call_threadsafe_function (device_manager_find_device_by_type_tsfn, operation, napi_tsfn_blocking);
 }
 
 static void
@@ -834,6 +807,8 @@ device_manager_find_device_by_type_deliver (napi_env env,
   }
 
   device_manager_find_device_by_type_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, device_manager_find_device_by_type_tsfn);
 }
 
 
@@ -850,7 +825,6 @@ typedef struct {
   napi_env env;
   napi_deferred deferred;
   FridaDeviceManager * handle;
-  napi_threadsafe_function tsfn;
   GError * error;
   GCancellable * cancellable;
   FridaDeviceList * return_value;
@@ -906,18 +880,13 @@ device_manager_enumerate_devices (napi_env env,
     operation->cancellable = NULL;
   }
 
-  status = napi_create_threadsafe_function (env, NULL, NULL,
-      napi_create_string_utf8 (env, "enumerate_devices",
-      NAPI_AUTO_LENGTH, NULL), 0, 1, NULL, NULL, NULL,
-      device_manager_enumerate_devices_deliver, &operation->tsfn);
-  if (status != napi_ok)
-    return NULL;
-
   source = g_idle_source_new ();
   g_source_set_callback (source, device_manager_enumerate_devices_begin,
       operation, NULL);
   g_source_attach (source, frida_get_main_context ());
   g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, device_manager_enumerate_devices_tsfn);
 
   return promise;
 
@@ -951,8 +920,7 @@ device_manager_enumerate_devices_end (GObject * source_object,
   operation->return_value = frida_device_manager_enumerate_devices_finish (operation->handle, res,
       &operation->error);
 
-  napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
-  napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
+  napi_call_threadsafe_function (device_manager_enumerate_devices_tsfn, operation, napi_tsfn_blocking);
 }
 
 static void
@@ -981,6 +949,8 @@ device_manager_enumerate_devices_deliver (napi_env env,
   }
 
   device_manager_enumerate_devices_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, device_manager_enumerate_devices_tsfn);
 }
 
 
@@ -997,7 +967,6 @@ typedef struct {
   napi_env env;
   napi_deferred deferred;
   FridaDeviceManager * handle;
-  napi_threadsafe_function tsfn;
   GError * error;
   const gchar * address;
   FridaRemoteDeviceOptions * options;
@@ -1082,18 +1051,13 @@ device_manager_add_remote_device (napi_env env,
     operation->cancellable = NULL;
   }
 
-  status = napi_create_threadsafe_function (env, NULL, NULL,
-      napi_create_string_utf8 (env, "add_remote_device",
-      NAPI_AUTO_LENGTH, NULL), 0, 1, NULL, NULL, NULL,
-      device_manager_add_remote_device_deliver, &operation->tsfn);
-  if (status != napi_ok)
-    return NULL;
-
   source = g_idle_source_new ();
   g_source_set_callback (source, device_manager_add_remote_device_begin,
       operation, NULL);
   g_source_attach (source, frida_get_main_context ());
   g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, device_manager_add_remote_device_tsfn);
 
   return promise;
 
@@ -1127,8 +1091,7 @@ device_manager_add_remote_device_end (GObject * source_object,
   operation->return_value = frida_device_manager_add_remote_device_finish (operation->handle, res,
       &operation->error);
 
-  napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
-  napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
+  napi_call_threadsafe_function (device_manager_add_remote_device_tsfn, operation, napi_tsfn_blocking);
 }
 
 static void
@@ -1157,6 +1120,8 @@ device_manager_add_remote_device_deliver (napi_env env,
   }
 
   device_manager_add_remote_device_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, device_manager_add_remote_device_tsfn);
 }
 
 
@@ -1173,7 +1138,6 @@ typedef struct {
   napi_env env;
   napi_deferred deferred;
   FridaDeviceManager * handle;
-  napi_threadsafe_function tsfn;
   GError * error;
   const gchar * address;
   GCancellable * cancellable;
@@ -1244,18 +1208,13 @@ device_manager_remove_remote_device (napi_env env,
     operation->cancellable = NULL;
   }
 
-  status = napi_create_threadsafe_function (env, NULL, NULL,
-      napi_create_string_utf8 (env, "remove_remote_device",
-      NAPI_AUTO_LENGTH, NULL), 0, 1, NULL, NULL, NULL,
-      device_manager_remove_remote_device_deliver, &operation->tsfn);
-  if (status != napi_ok)
-    return NULL;
-
   source = g_idle_source_new ();
   g_source_set_callback (source, device_manager_remove_remote_device_begin,
       operation, NULL);
   g_source_attach (source, frida_get_main_context ());
   g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, device_manager_remove_remote_device_tsfn);
 
   return promise;
 
@@ -1289,8 +1248,7 @@ device_manager_remove_remote_device_end (GObject * source_object,
   frida_device_manager_remove_remote_device_finish (operation->handle, res,
       &operation->error);
 
-  napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
-  napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
+  napi_call_threadsafe_function (device_manager_remove_remote_device_tsfn, operation, napi_tsfn_blocking);
 }
 
 static void
@@ -1319,6 +1277,8 @@ device_manager_remove_remote_device_deliver (napi_env env,
   }
 
   device_manager_remove_remote_device_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, device_manager_remove_remote_device_tsfn);
 }
 
 
@@ -1330,6 +1290,15 @@ device_manager_remove_remote_device_operation_free (DeviceManagerRemoveRemoteDev
   g_slice_free (DeviceManagerRemoveRemoteDeviceOperation, operation);
 }
 
+
+static napi_threadsafe_function device_manager_close_tsfn;
+static napi_threadsafe_function device_manager_get_device_by_id_tsfn;
+static napi_threadsafe_function device_manager_get_device_by_type_tsfn;
+static napi_threadsafe_function device_manager_find_device_by_id_tsfn;
+static napi_threadsafe_function device_manager_find_device_by_type_tsfn;
+static napi_threadsafe_function device_manager_enumerate_devices_tsfn;
+static napi_threadsafe_function device_manager_add_remote_device_tsfn;
+static napi_threadsafe_function device_manager_remove_remote_device_tsfn;
 
 static napi_value
 Init (napi_env env,
@@ -1349,13 +1318,50 @@ Init (napi_env env,
   };
 
   napi_value constructor;
-  status = napi_define_class (env, "DeviceManager", NAPI_AUTO_LENGTH, device_manager_constructor, NULL, G_N_ELEMENTS (properties), properties, &constructor);
-  if (status != napi_ok)
-    return NULL;
+  napi_define_class (env, "DeviceManager", NAPI_AUTO_LENGTH, device_manager_constructor, NULL, G_N_ELEMENTS (properties), properties, &constructor);
 
-  status = napi_set_named_property (env, exports, "DeviceManager", constructor);
-  if (status != napi_ok)
-    return NULL;
+  napi_set_named_property (env, exports, "DeviceManager", constructor);
+
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "close", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_close_deliver, &device_manager_close_tsfn);
+  }
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "getDeviceById", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_get_device_by_id_deliver, &device_manager_get_device_by_id_tsfn);
+  }
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "getDeviceByType", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_get_device_by_type_deliver, &device_manager_get_device_by_type_tsfn);
+  }
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "findDeviceById", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_find_device_by_id_deliver, &device_manager_find_device_by_id_tsfn);
+  }
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "findDeviceByType", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_find_device_by_type_deliver, &device_manager_find_device_by_type_tsfn);
+  }
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "enumerateDevices", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_enumerate_devices_deliver, &device_manager_enumerate_devices_tsfn);
+  }
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "addRemoteDevice", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_add_remote_device_deliver, &device_manager_add_remote_device_tsfn);
+  }
+  {
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "removeRemoteDevice", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_remove_remote_device_deliver, &device_manager_remove_remote_device_tsfn);
+  }
 
   return exports;
 }
