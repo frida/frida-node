@@ -69,9 +69,11 @@ def parse_gir(file_path: str) -> Class:
             continue
 
         c_identifier = method_element.get(f"{{{c_ns}}}identifier")
-        return_value = method_element.find(".//return-value/type", ns)
-        return_type = return_value.get("name") if return_value is not None else "void"
+        return_type = method_element.find(".//return-value/type", ns).get("name")
         parameters = method_element.findall("./parameters/parameter", ns)
+        has_closure_param = any((param.get("closure") == "1" for param in parameters))
+        if has_closure_param:
+            continue
         is_async = any(param.find("type", ns).get("name") == "Gio.AsyncReadyCallback" for param in parameters)
 
         param_list = []
@@ -204,7 +206,7 @@ static gboolean
 {{
   {class_name}{method_name_pascal}Operation * operation = user_data;
 
-  {method.c_identifier} (operation->device->handle_,
+  {method.c_identifier} (operation->handle,
       {", ".join([f"operation->{param.name}" for param in method.parameters])},
       {class_name_snake}_{method.name}_end, operation);
 
@@ -218,8 +220,8 @@ static void
 {{
   {class_name}{method_name_pascal}Operation * operation = user_data;
 
-  operation->parameters = {method.c_identifier}_finish (
-      {klass.c_cast_macro} (source_object), res, &operation->error);
+  operation->parameters = {method.c_identifier}_finish (operation->handle, res,
+      &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
   napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
@@ -329,8 +331,8 @@ def generate_parameter_conversion_code(param_name: str, param_type: str, napi_ty
     napi_throw_error (env, NULL, "failed to get string length");
     goto invalid_argument;
   }}
-  {param_name} = g_malloc ({param_name}_length + 1);
-  status = napi_get_value_string_utf8 (env, args[{index}], {param_name}, {param_name}_length + 1, &{param_name}_length);
+  operation->{param_name} = g_malloc ({param_name}_length + 1);
+  status = napi_get_value_string_utf8 (env, args[{index}], operation->{param_name}, {param_name}_length + 1, &{param_name}_length);
   if (status != napi_ok)
   {{
     napi_throw_error (env, NULL, "failed to get string value");
