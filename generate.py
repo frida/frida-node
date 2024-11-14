@@ -1,19 +1,25 @@
 import xml.etree.ElementTree as ET
-from typing import List, Dict
+from typing import Dict, List, Optional
 from dataclasses import dataclass
+
+C_NAMESPACE = "http://www.gtk.org/introspection/c/1.0"
+
+@dataclass
+class Type:
+    name: str
+    c: str
+    napi: str
 
 @dataclass
 class Parameter:
     name: str
-    param_type: str
-    c_type: str
-    napi_type: str
+    type: Type
 
 @dataclass
 class Method:
     name: str
     c_identifier: str
-    return_type: str
+    return_type: Optional[Type]
     parameters: List[Parameter]
     is_async: bool
 
@@ -56,40 +62,47 @@ def parse_gir(file_path: str) -> Class:
     root = tree.getroot()
     ns = {"": "http://www.gtk.org/introspection/core/1.0"}
 
-    c_ns = "http://www.gtk.org/introspection/c/1.0"
-
     klass_element = root.find(".//class[@name='DeviceManager']", ns)
     class_name = klass_element.get("name")
-    class_c_type = klass_element.get(f"{{{c_ns}}}type")
+    class_c_type = klass_element.get(f"{{{C_NAMESPACE}}}type")
     methods = []
 
-    for method_element in klass_element.findall(".//method", ns):
+    all_methods = klass_element.findall(".//method", ns)
+
+    for method_element in all_methods:
         method_name = method_element.get("name")
         if method_name.startswith("_") or method_name.endswith("_sync") or method_name.endswith("_finish"):
             continue
 
-        c_identifier = method_element.get(f"{{{c_ns}}}identifier")
-        return_type = method_element.find(".//return-value/type", ns).get("name")
+        c_identifier = method_element.get(f"{{{C_NAMESPACE}}}identifier")
         parameters = method_element.findall("./parameters/parameter", ns)
         has_closure_param = any((param.get("closure") == "1" for param in parameters))
         if has_closure_param:
             continue
         is_async = any(param.find("type", ns).get("name") == "Gio.AsyncReadyCallback" for param in parameters)
 
+        result_element = next((m for m in all_methods if m.get("name") == f"{method_name}_finish")) if is_async else method_element
+        return_type = parse_type(result_element.find(".//return-value/type", ns))
+
         param_list = []
         for param in parameters:
             param_name = param.get("name")
             if param_name.startswith("_"):
                 continue
-            type_element = param.find("type", ns)
-            param_type = type_element.get("name")
-            c_type = type_element.get(f"{{{c_ns}}}type")
-            napi_type = node_api_types.get(param_type, "unknown")
-            param_list.append(Parameter(param_name, param_type, c_type, napi_type))
+            type = parse_type(param.find("type", ns))
+            param_list.append(Parameter(param_name, type))
 
         methods.append(Method(method_name, c_identifier, return_type, param_list, is_async))
 
     return Class(class_name, class_c_type, methods)
+
+def parse_type(type_element: ET.Element) -> Optional[Type]:
+    name = type_element.get("name")
+    if name == "none":
+        return None
+    c = type_element.get(f"{{{C_NAMESPACE}}}type").replace("*", " *")
+    napi = node_api_types.get(name, "unknown")
+    return Type(name, c, napi)
 
 def generate_includes() -> str:
     return """\
@@ -103,14 +116,15 @@ def generate_method_code(klass: Class, method: Method) -> str:
     class_name = klass.name
     class_name_snake = to_snake_case(class_name)
 
-    param_declarations = [f"{param.c_type} {param.name};" for param in method.parameters]
-    param_initializations = [f"operation->{param.name} = {param.name};" for param in method.parameters]
-    param_names = [f"operation->{param.name}" for param in method.parameters]
-    param_conversions = [generate_parameter_conversion_code(param.name, param.param_type, param.napi_type, i) for i, param in enumerate(method.parameters)]
-    param_frees = [f"g_free (operation->{param.name});" for param in method.parameters if param.napi_type == "string_utf8"]
+    param_declarations = [f"{param.type.c} {param.name};" for param in method.parameters]
+    param_conversions = [generate_parameter_conversion_code(param.name, param.type, i) for i, param in enumerate(method.parameters)]
+    param_frees = [f"g_free (operation->{param.name});" for param in method.parameters if param.type.name == "utf8"]
 
     param_declarations_str = "\n  ".join(param_declarations)
     param_frees_str = "\n  ".join(param_frees)
+
+    return_declaration = f"\n{method.return_type.c} return_value;" if method.return_type is not None else ""
+    return_assignment = f"operation->return_value = " if method.return_type != "none" else ""
 
     def calculate_indent(suffix: str) -> str:
         return " " * (len(class_name_snake) + 1 + len(method.name) + len(suffix) + 2)
@@ -139,7 +153,7 @@ typedef struct {{
   {klass.c_type} * handle;
   napi_threadsafe_function tsfn;
   GError * error;
-  {param_declarations_str}
+  {param_declarations_str}{return_declaration}
 }} {class_name}{method_name_pascal}Operation;
 
 {prototypes}
@@ -220,7 +234,7 @@ static void
 {{
   {class_name}{method_name_pascal}Operation * operation = user_data;
 
-  operation->parameters = {method.c_identifier}_finish (operation->handle, res,
+  {return_assignment}{method.c_identifier}_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
@@ -306,12 +320,12 @@ invalid_argument:
 """
     return code
 
-def generate_parameter_conversion_code(param_name: str, param_type: str, napi_type: str, index: int) -> str:
-    if param_type == "Gio.Cancellable":
+def generate_parameter_conversion_code(param_name: str, param_type: Type, index: int) -> str:
+    if param_type.name == "Gio.Cancellable":
         return f"""\
   if (argc > {index})
   {{
-    status = napi_get_value_{napi_type} (env, args[{index}], &{param_name});
+    status = napi_get_value_{param_type.napi} (env, args[{index}], &{param_name});
     if (status != napi_ok)
     {{
       napi_throw_error (env, NULL, "failed to get argument value");
@@ -322,7 +336,7 @@ def generate_parameter_conversion_code(param_name: str, param_type: str, napi_ty
       {param_name} = NULL;
     }}
   }}"""
-    elif napi_type == "string_utf8":
+    elif param_type.name == "utf8":
         return f"""\
   size_t {param_name}_length;
   status = napi_get_value_string_utf8 (env, args[{index}], NULL, 0, &{param_name}_length);
@@ -345,7 +359,7 @@ def generate_parameter_conversion_code(param_name: str, param_type: str, napi_ty
     napi_throw_type_error (env, NULL, "missing argument: {param_name}");
     goto invalid_argument;
   }}
-  status = napi_get_value_{napi_type} (env, args[{index}], &{param_name});
+  status = napi_get_value_{param_type.napi} (env, args[{index}], &{param_name});
   if (status != napi_ok)
   {{
     napi_throw_error (env, NULL, "failed to get argument value");
