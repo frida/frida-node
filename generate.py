@@ -329,16 +329,15 @@ def generate_parameter_conversion_code(param_name: str, param_type: Type, index:
         return f"""\
   if (argc > {index})
   {{
-    status = napi_get_value_{param_type.napi} (env, args[{index}], &{param_name});
+    status = napi_get_value_{param_type.napi} (env, args[{index}], &operation->{param_name});
     if (status != napi_ok)
     {{
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }}
-    else
-    {{
-      {param_name} = NULL;
-    }}
+  else
+  {{
+    operation->{param_name} = NULL;
   }}"""
     elif param_type.name == "utf8":
         return f"""\
@@ -363,7 +362,7 @@ def generate_parameter_conversion_code(param_name: str, param_type: Type, index:
     napi_throw_type_error (env, NULL, "missing argument: {param_name}");
     goto invalid_argument;
   }}
-  status = napi_get_value_{param_type.napi} (env, args[{index}], &{param_name});
+  status = napi_get_value_{param_type.napi} (env, args[{index}], &operation->{param_name});
   if (status != napi_ok)
   {{
     napi_throw_error (env, NULL, "failed to get argument value");

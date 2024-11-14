@@ -50,16 +50,15 @@ device_manager_close (napi_env env,
 
   if (argc > 0)
   {
-    status = napi_get_value_object (env, args[0], &cancellable);
+    status = napi_get_value_object (env, args[0], &operation->cancellable);
     if (status != napi_ok)
     {
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
-    else
-    {
-      cancellable = NULL;
-    }
+  else
+  {
+    operation->cancellable = NULL;
   }
 
   status = napi_create_threadsafe_function (env, NULL, NULL,
@@ -218,7 +217,7 @@ device_manager_get_device_by_id (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: timeout");
     goto invalid_argument;
   }
-  status = napi_get_value_int32 (env, args[1], &timeout);
+  status = napi_get_value_int32 (env, args[1], &operation->timeout);
   if (status != napi_ok)
   {
     napi_throw_error (env, NULL, "failed to get argument value");
@@ -227,16 +226,15 @@ device_manager_get_device_by_id (napi_env env,
 
   if (argc > 2)
   {
-    status = napi_get_value_object (env, args[2], &cancellable);
+    status = napi_get_value_object (env, args[2], &operation->cancellable);
     if (status != napi_ok)
     {
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
-    else
-    {
-      cancellable = NULL;
-    }
+  else
+  {
+    operation->cancellable = NULL;
   }
 
   status = napi_create_threadsafe_function (env, NULL, NULL,
@@ -380,7 +378,7 @@ device_manager_get_device_by_type (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: type");
     goto invalid_argument;
   }
-  status = napi_get_value_unknown (env, args[0], &type);
+  status = napi_get_value_unknown (env, args[0], &operation->type);
   if (status != napi_ok)
   {
     napi_throw_error (env, NULL, "failed to get argument value");
@@ -392,7 +390,7 @@ device_manager_get_device_by_type (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: timeout");
     goto invalid_argument;
   }
-  status = napi_get_value_int32 (env, args[1], &timeout);
+  status = napi_get_value_int32 (env, args[1], &operation->timeout);
   if (status != napi_ok)
   {
     napi_throw_error (env, NULL, "failed to get argument value");
@@ -401,16 +399,15 @@ device_manager_get_device_by_type (napi_env env,
 
   if (argc > 2)
   {
-    status = napi_get_value_object (env, args[2], &cancellable);
+    status = napi_get_value_object (env, args[2], &operation->cancellable);
     if (status != napi_ok)
     {
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
-    else
-    {
-      cancellable = NULL;
-    }
+  else
+  {
+    operation->cancellable = NULL;
   }
 
   status = napi_create_threadsafe_function (env, NULL, NULL,
@@ -569,7 +566,7 @@ device_manager_find_device_by_id (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: timeout");
     goto invalid_argument;
   }
-  status = napi_get_value_int32 (env, args[1], &timeout);
+  status = napi_get_value_int32 (env, args[1], &operation->timeout);
   if (status != napi_ok)
   {
     napi_throw_error (env, NULL, "failed to get argument value");
@@ -578,16 +575,15 @@ device_manager_find_device_by_id (napi_env env,
 
   if (argc > 2)
   {
-    status = napi_get_value_object (env, args[2], &cancellable);
+    status = napi_get_value_object (env, args[2], &operation->cancellable);
     if (status != napi_ok)
     {
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
-    else
-    {
-      cancellable = NULL;
-    }
+  else
+  {
+    operation->cancellable = NULL;
   }
 
   status = napi_create_threadsafe_function (env, NULL, NULL,
@@ -731,7 +727,7 @@ device_manager_find_device_by_type (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: type");
     goto invalid_argument;
   }
-  status = napi_get_value_unknown (env, args[0], &type);
+  status = napi_get_value_unknown (env, args[0], &operation->type);
   if (status != napi_ok)
   {
     napi_throw_error (env, NULL, "failed to get argument value");
@@ -743,7 +739,7 @@ device_manager_find_device_by_type (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: timeout");
     goto invalid_argument;
   }
-  status = napi_get_value_int32 (env, args[1], &timeout);
+  status = napi_get_value_int32 (env, args[1], &operation->timeout);
   if (status != napi_ok)
   {
     napi_throw_error (env, NULL, "failed to get argument value");
@@ -752,16 +748,15 @@ device_manager_find_device_by_type (napi_env env,
 
   if (argc > 2)
   {
-    status = napi_get_value_object (env, args[2], &cancellable);
+    status = napi_get_value_object (env, args[2], &operation->cancellable);
     if (status != napi_ok)
     {
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
-    else
-    {
-      cancellable = NULL;
-    }
+  else
+  {
+    operation->cancellable = NULL;
   }
 
   status = napi_create_threadsafe_function (env, NULL, NULL,
@@ -900,16 +895,15 @@ device_manager_enumerate_devices (napi_env env,
 
   if (argc > 0)
   {
-    status = napi_get_value_object (env, args[0], &cancellable);
+    status = napi_get_value_object (env, args[0], &operation->cancellable);
     if (status != napi_ok)
     {
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
-    else
-    {
-      cancellable = NULL;
-    }
+  else
+  {
+    operation->cancellable = NULL;
   }
 
   status = napi_create_threadsafe_function (env, NULL, NULL,
@@ -1068,7 +1062,7 @@ device_manager_add_remote_device (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: options");
     goto invalid_argument;
   }
-  status = napi_get_value_unknown (env, args[1], &options);
+  status = napi_get_value_unknown (env, args[1], &operation->options);
   if (status != napi_ok)
   {
     napi_throw_error (env, NULL, "failed to get argument value");
@@ -1077,16 +1071,15 @@ device_manager_add_remote_device (napi_env env,
 
   if (argc > 2)
   {
-    status = napi_get_value_object (env, args[2], &cancellable);
+    status = napi_get_value_object (env, args[2], &operation->cancellable);
     if (status != napi_ok)
     {
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
-    else
-    {
-      cancellable = NULL;
-    }
+  else
+  {
+    operation->cancellable = NULL;
   }
 
   status = napi_create_threadsafe_function (env, NULL, NULL,
@@ -1240,16 +1233,15 @@ device_manager_remove_remote_device (napi_env env,
 
   if (argc > 1)
   {
-    status = napi_get_value_object (env, args[1], &cancellable);
+    status = napi_get_value_object (env, args[1], &operation->cancellable);
     if (status != napi_ok)
     {
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
-    else
-    {
-      cancellable = NULL;
-    }
+  else
+  {
+    operation->cancellable = NULL;
   }
 
   status = napi_create_threadsafe_function (env, NULL, NULL,
