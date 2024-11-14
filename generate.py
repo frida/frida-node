@@ -45,18 +45,6 @@ node_api_types: Dict[str, str] = {
     "Gio.Cancellable": "object",
 }
 
-def generate_code(file_path: str) -> str:
-    klass = parse_gir(file_path)
-
-    code = generate_includes()
-
-    for method in klass.methods:
-        code += generate_method_code(klass, method)
-
-    code += generate_registration_code(klass)
-
-    return code
-
 def parse_gir(file_path: str) -> Class:
     tree = ET.parse(file_path)
     root = tree.getroot()
@@ -110,6 +98,17 @@ def generate_includes() -> str:
 #include <node_api.h>
 
 """
+
+def generate_code(file_path: str) -> str:
+    klass = parse_gir(file_path)
+
+    code = generate_includes()
+    code += generate_registration_code(klass)
+
+    for method in klass.methods:
+        code += generate_method_code(klass, method)
+
+    return code
 
 def generate_method_code(klass: Class, method: Method) -> str:
     method_name_pascal = to_pascal_case(method.name)
