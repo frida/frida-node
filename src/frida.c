@@ -104,7 +104,7 @@ device_manager_close_end (GObject * source_object,
 {
   DeviceManagerCloseOperation * operation = user_data;
 
-  operation->return_value = frida_device_manager_close_finish (operation->handle, res,
+  frida_device_manager_close_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
@@ -118,7 +118,6 @@ device_manager_close_deliver (napi_env env,
                               void * data)
 {
   DeviceManagerCloseOperation * operation = data;
-  napi_value result;
 
   if (operation->error != NULL)
   {
@@ -132,8 +131,8 @@ device_manager_close_deliver (napi_env env,
   }
   else
   {
-    result = Runtime_ValueFromParametersDict (env, operation->parameters);
-    g_hash_table_unref (operation->parameters);
+    napi_value result;
+    napi_get_undefined (env, &result);
     napi_resolve_deferred (env, operation->deferred, result);
   }
 
@@ -144,6 +143,7 @@ device_manager_close_deliver (napi_env env,
 static void
 device_manager_close_operation_free (DeviceManagerCloseOperation * operation)
 {
+  
   
   g_slice_free (DeviceManagerCloseOperation, operation);
 }
@@ -158,7 +158,7 @@ typedef struct {
   const gchar * id;
   gint timeout;
   GCancellable * cancellable;
-FridaDevice * return_value;
+  FridaDevice * return_value;
 } DeviceManagerGetDeviceByIdOperation;
 
 static gboolean device_manager_get_device_by_id_begin (gpointer user_data);
@@ -295,7 +295,6 @@ device_manager_get_device_by_id_deliver (napi_env env,
                                          void * data)
 {
   DeviceManagerGetDeviceByIdOperation * operation = data;
-  napi_value result;
 
   if (operation->error != NULL)
   {
@@ -309,8 +308,8 @@ device_manager_get_device_by_id_deliver (napi_env env,
   }
   else
   {
-    result = Runtime_ValueFromParametersDict (env, operation->parameters);
-    g_hash_table_unref (operation->parameters);
+    napi_value result;
+    result = Runtime_ValueFromFrida.device (env, operation->return_value);
     napi_resolve_deferred (env, operation->deferred, result);
   }
 
@@ -322,6 +321,7 @@ static void
 device_manager_get_device_by_id_operation_free (DeviceManagerGetDeviceByIdOperation * operation)
 {
   g_free (operation->id);
+  
   g_slice_free (DeviceManagerGetDeviceByIdOperation, operation);
 }
 
@@ -335,7 +335,7 @@ typedef struct {
   FridaDeviceType type;
   gint timeout;
   GCancellable * cancellable;
-FridaDevice * return_value;
+  FridaDevice * return_value;
 } DeviceManagerGetDeviceByTypeOperation;
 
 static gboolean device_manager_get_device_by_type_begin (gpointer user_data);
@@ -469,7 +469,6 @@ device_manager_get_device_by_type_deliver (napi_env env,
                                            void * data)
 {
   DeviceManagerGetDeviceByTypeOperation * operation = data;
-  napi_value result;
 
   if (operation->error != NULL)
   {
@@ -483,8 +482,8 @@ device_manager_get_device_by_type_deliver (napi_env env,
   }
   else
   {
-    result = Runtime_ValueFromParametersDict (env, operation->parameters);
-    g_hash_table_unref (operation->parameters);
+    napi_value result;
+    result = Runtime_ValueFromFrida.device (env, operation->return_value);
     napi_resolve_deferred (env, operation->deferred, result);
   }
 
@@ -495,6 +494,7 @@ device_manager_get_device_by_type_deliver (napi_env env,
 static void
 device_manager_get_device_by_type_operation_free (DeviceManagerGetDeviceByTypeOperation * operation)
 {
+  
   
   g_slice_free (DeviceManagerGetDeviceByTypeOperation, operation);
 }
@@ -509,7 +509,7 @@ typedef struct {
   const gchar * id;
   gint timeout;
   GCancellable * cancellable;
-FridaDevice * return_value;
+  FridaDevice * return_value;
 } DeviceManagerFindDeviceByIdOperation;
 
 static gboolean device_manager_find_device_by_id_begin (gpointer user_data);
@@ -646,7 +646,6 @@ device_manager_find_device_by_id_deliver (napi_env env,
                                           void * data)
 {
   DeviceManagerFindDeviceByIdOperation * operation = data;
-  napi_value result;
 
   if (operation->error != NULL)
   {
@@ -660,8 +659,8 @@ device_manager_find_device_by_id_deliver (napi_env env,
   }
   else
   {
-    result = Runtime_ValueFromParametersDict (env, operation->parameters);
-    g_hash_table_unref (operation->parameters);
+    napi_value result;
+    result = Runtime_ValueFromFrida.device (env, operation->return_value);
     napi_resolve_deferred (env, operation->deferred, result);
   }
 
@@ -673,6 +672,7 @@ static void
 device_manager_find_device_by_id_operation_free (DeviceManagerFindDeviceByIdOperation * operation)
 {
   g_free (operation->id);
+  
   g_slice_free (DeviceManagerFindDeviceByIdOperation, operation);
 }
 
@@ -686,7 +686,7 @@ typedef struct {
   FridaDeviceType type;
   gint timeout;
   GCancellable * cancellable;
-FridaDevice * return_value;
+  FridaDevice * return_value;
 } DeviceManagerFindDeviceByTypeOperation;
 
 static gboolean device_manager_find_device_by_type_begin (gpointer user_data);
@@ -820,7 +820,6 @@ device_manager_find_device_by_type_deliver (napi_env env,
                                             void * data)
 {
   DeviceManagerFindDeviceByTypeOperation * operation = data;
-  napi_value result;
 
   if (operation->error != NULL)
   {
@@ -834,8 +833,8 @@ device_manager_find_device_by_type_deliver (napi_env env,
   }
   else
   {
-    result = Runtime_ValueFromParametersDict (env, operation->parameters);
-    g_hash_table_unref (operation->parameters);
+    napi_value result;
+    result = Runtime_ValueFromFrida.device (env, operation->return_value);
     napi_resolve_deferred (env, operation->deferred, result);
   }
 
@@ -846,6 +845,7 @@ device_manager_find_device_by_type_deliver (napi_env env,
 static void
 device_manager_find_device_by_type_operation_free (DeviceManagerFindDeviceByTypeOperation * operation)
 {
+  
   
   g_slice_free (DeviceManagerFindDeviceByTypeOperation, operation);
 }
@@ -858,7 +858,7 @@ typedef struct {
   napi_threadsafe_function tsfn;
   GError * error;
   GCancellable * cancellable;
-FridaDeviceList * return_value;
+  FridaDeviceList * return_value;
 } DeviceManagerEnumerateDevicesOperation;
 
 static gboolean device_manager_enumerate_devices_begin (gpointer user_data);
@@ -968,7 +968,6 @@ device_manager_enumerate_devices_deliver (napi_env env,
                                           void * data)
 {
   DeviceManagerEnumerateDevicesOperation * operation = data;
-  napi_value result;
 
   if (operation->error != NULL)
   {
@@ -982,8 +981,8 @@ device_manager_enumerate_devices_deliver (napi_env env,
   }
   else
   {
-    result = Runtime_ValueFromParametersDict (env, operation->parameters);
-    g_hash_table_unref (operation->parameters);
+    napi_value result;
+    result = Runtime_ValueFromFrida.devicelist (env, operation->return_value);
     napi_resolve_deferred (env, operation->deferred, result);
   }
 
@@ -994,6 +993,7 @@ device_manager_enumerate_devices_deliver (napi_env env,
 static void
 device_manager_enumerate_devices_operation_free (DeviceManagerEnumerateDevicesOperation * operation)
 {
+  
   
   g_slice_free (DeviceManagerEnumerateDevicesOperation, operation);
 }
@@ -1008,7 +1008,7 @@ typedef struct {
   const gchar * address;
   FridaRemoteDeviceOptions * options;
   GCancellable * cancellable;
-FridaDevice * return_value;
+  FridaDevice * return_value;
 } DeviceManagerAddRemoteDeviceOperation;
 
 static gboolean device_manager_add_remote_device_begin (gpointer user_data);
@@ -1145,7 +1145,6 @@ device_manager_add_remote_device_deliver (napi_env env,
                                           void * data)
 {
   DeviceManagerAddRemoteDeviceOperation * operation = data;
-  napi_value result;
 
   if (operation->error != NULL)
   {
@@ -1159,8 +1158,8 @@ device_manager_add_remote_device_deliver (napi_env env,
   }
   else
   {
-    result = Runtime_ValueFromParametersDict (env, operation->parameters);
-    g_hash_table_unref (operation->parameters);
+    napi_value result;
+    result = Runtime_ValueFromFrida.device (env, operation->return_value);
     napi_resolve_deferred (env, operation->deferred, result);
   }
 
@@ -1172,6 +1171,7 @@ static void
 device_manager_add_remote_device_operation_free (DeviceManagerAddRemoteDeviceOperation * operation)
 {
   g_free (operation->address);
+  
   g_slice_free (DeviceManagerAddRemoteDeviceOperation, operation);
 }
 
@@ -1294,7 +1294,7 @@ device_manager_remove_remote_device_end (GObject * source_object,
 {
   DeviceManagerRemoveRemoteDeviceOperation * operation = user_data;
 
-  operation->return_value = frida_device_manager_remove_remote_device_finish (operation->handle, res,
+  frida_device_manager_remove_remote_device_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
@@ -1308,7 +1308,6 @@ device_manager_remove_remote_device_deliver (napi_env env,
                                              void * data)
 {
   DeviceManagerRemoveRemoteDeviceOperation * operation = data;
-  napi_value result;
 
   if (operation->error != NULL)
   {
@@ -1322,8 +1321,8 @@ device_manager_remove_remote_device_deliver (napi_env env,
   }
   else
   {
-    result = Runtime_ValueFromParametersDict (env, operation->parameters);
-    g_hash_table_unref (operation->parameters);
+    napi_value result;
+    napi_get_undefined (env, &result);
     napi_resolve_deferred (env, operation->deferred, result);
   }
 
@@ -1335,6 +1334,7 @@ static void
 device_manager_remove_remote_device_operation_free (DeviceManagerRemoveRemoteDeviceOperation * operation)
 {
   g_free (operation->address);
+  
   g_slice_free (DeviceManagerRemoveRemoteDeviceOperation, operation);
 }
 
