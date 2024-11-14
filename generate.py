@@ -92,13 +92,6 @@ def parse_type(type_element: ET.Element) -> Optional[Type]:
     napi = node_api_types.get(name, "unknown")
     return Type(name, c, napi)
 
-def generate_includes() -> str:
-    return """\
-#include <frida-core.h>
-#include <node_api.h>
-
-"""
-
 def generate_code(file_path: str) -> str:
     klass = parse_gir(file_path)
 
@@ -109,6 +102,60 @@ def generate_code(file_path: str) -> str:
         code += generate_method_code(klass, method)
 
     return code
+
+def generate_includes() -> str:
+    return """\
+#include <frida-core.h>
+#include <node_api.h>
+
+"""
+
+def generate_registration_code(klass: Class) -> str:
+    class_name_snake = to_snake_case(klass.name)
+    method_registrations = []
+    tsfn_declarations = []
+    tsfn_initializations = []
+
+    for method in klass.methods:
+        method_name_camel = to_camel_case(method.name)
+        method_registrations.append(f"""{{ "{method_name_camel}", 0, {class_name_snake}_{method.name}, 0, 0, 0, napi_default, 0 }},""")
+        if method.is_async:
+            tsfn_declarations.append(f"static napi_threadsafe_function {class_name_snake}_{method.name}_tsfn;")
+            tsfn_initializations.append(f"""{{
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, {class_name_snake}_{method.name}_deliver, &{class_name_snake}_{method.name}_tsfn);
+  }}""")
+
+    method_registrations_str = "\n    ".join(method_registrations)
+    tsfn_declarations_str = "\n".join(tsfn_declarations)
+    tsfn_initializations_str = "\n  ".join(tsfn_initializations)
+
+    return f"""
+{tsfn_declarations_str}
+
+static napi_value
+Init (napi_env env,
+      napi_value exports)
+{{
+  napi_status status;
+  napi_property_descriptor properties[] =
+  {{
+    {method_registrations_str}
+  }};
+
+  napi_value constructor;
+  napi_define_class (env, "{klass.name}", NAPI_AUTO_LENGTH, {class_name_snake}_constructor, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+
+  napi_set_named_property (env, exports, "{klass.name}", constructor);
+
+  {tsfn_initializations_str}
+
+  return exports;
+}}
+
+NAPI_MODULE (NODE_GYP_MODULE_NAME, Init)
+"""
 
 def generate_method_code(klass: Class, method: Method) -> str:
     method_name_pascal = to_pascal_case(method.name)
@@ -362,53 +409,6 @@ def generate_parameter_conversion_code(param_name: str, param_type: Type, index:
     napi_throw_error (env, NULL, "failed to get argument value");
     goto invalid_argument;
   }}"""
-
-def generate_registration_code(klass: Class) -> str:
-    class_name_snake = to_snake_case(klass.name)
-    method_registrations = []
-    tsfn_declarations = []
-    tsfn_initializations = []
-
-    for method in klass.methods:
-        method_name_camel = to_camel_case(method.name)
-        method_registrations.append(f"""{{ "{method_name_camel}", 0, {class_name_snake}_{method.name}, 0, 0, 0, napi_default, 0 }},""")
-        if method.is_async:
-            tsfn_declarations.append(f"static napi_threadsafe_function {class_name_snake}_{method.name}_tsfn;")
-            tsfn_initializations.append(f"""{{
-    napi_value resource_name;
-    napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource_name);
-    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, {class_name_snake}_{method.name}_deliver, &{class_name_snake}_{method.name}_tsfn);
-  }}""")
-
-    method_registrations_str = "\n    ".join(method_registrations)
-    tsfn_declarations_str = "\n".join(tsfn_declarations)
-    tsfn_initializations_str = "\n  ".join(tsfn_initializations)
-
-    return f"""
-{tsfn_declarations_str}
-
-static napi_value
-Init (napi_env env,
-      napi_value exports)
-{{
-  napi_status status;
-  napi_property_descriptor properties[] =
-  {{
-    {method_registrations_str}
-  }};
-
-  napi_value constructor;
-  napi_define_class (env, "{klass.name}", NAPI_AUTO_LENGTH, {class_name_snake}_constructor, NULL, G_N_ELEMENTS (properties), properties, &constructor);
-
-  napi_set_named_property (env, exports, "{klass.name}", constructor);
-
-  {tsfn_initializations_str}
-
-  return exports;
-}}
-
-NAPI_MODULE(NODE_GYP_MODULE_NAME, Init)
-"""
 
 def to_snake_case(name: str) -> str:
     return "".join(["_" + c.lower() if c.isupper() else c for c in name]).lstrip("_")
