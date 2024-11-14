@@ -77,7 +77,7 @@ Init (napi_env env,
   return exports;
 }
 
-NAPI_MODULE(NODE_GYP_MODULE_NAME, Init)
+NAPI_MODULE (NODE_GYP_MODULE_NAME, Init)
 
 typedef struct {
   napi_env env;
