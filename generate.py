@@ -96,6 +96,8 @@ def generate_code(file_path: str) -> str:
     klass = parse_gir(file_path)
 
     code = generate_includes()
+    code += generate_operation_structs(klass)
+    code += generate_prototypes(klass)
     code += generate_registration_code(klass)
 
     for method in klass.methods:
@@ -110,8 +112,41 @@ def generate_includes() -> str:
 
 """
 
+def generate_operation_structs(klass: Class) -> str:
+    structs = []
+    for method in klass.methods:
+        if method.is_async:
+            param_declarations = [f"{param.type.c} {param.name};" for param in method.parameters]
+            param_declarations_str = "\n  ".join(param_declarations)
+            return_declaration = f"\n  {method.return_type.c} return_value;" if method.return_type is not None else ""
+            structs.append(f"""\
+typedef struct {{
+  napi_env env;
+  napi_deferred deferred;
+  {klass.c_type} * handle;
+  GError * error;
+  {param_declarations_str}{return_declaration}
+}} {klass.name}{to_pascal_case(method.name)}Operation;
+""")
+    return "\n".join(structs) + "\n"
+
+def generate_prototypes(klass: Class) -> str:
+    prototypes = []
+    for method in klass.methods:
+        method_cprefix = f"{to_snake_case(klass.name)}_{method.name}"
+        prototypes.append(f"static napi_value {method_cprefix} (napi_env env, napi_callback_info info);")
+        if method.is_async:
+            prototypes += [
+                f"static gboolean {method_cprefix}_begin (gpointer user_data);",
+                f"static void {method_cprefix}_end (GObject * source_object, GAsyncResult * res, gpointer user_data);",
+                f"static void {method_cprefix}_deliver (napi_env env, napi_value js_cb, void * context, void * data);",
+                f"static void {method_cprefix}_operation_free ({klass.name}{to_pascal_case(method.name)}Operation * operation);",
+            ]
+    return "\n".join(prototypes) + "\n\n"
+
 def generate_registration_code(klass: Class) -> str:
     class_name_snake = to_snake_case(klass.name)
+
     method_registrations = []
     tsfn_declarations = []
     tsfn_initializations = []
@@ -121,24 +156,21 @@ def generate_registration_code(klass: Class) -> str:
         method_registrations.append(f"""{{ "{method_name_camel}", 0, {class_name_snake}_{method.name}, 0, 0, 0, napi_default, 0 }},""")
         if method.is_async:
             tsfn_declarations.append(f"static napi_threadsafe_function {class_name_snake}_{method.name}_tsfn;")
-            tsfn_initializations.append(f"""{{
-    napi_value resource_name;
-    napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource_name);
-    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, {class_name_snake}_{method.name}_deliver, &{class_name_snake}_{method.name}_tsfn);
-  }}""")
+            tsfn_initializations.append(f"""\
+napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource_name);
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, {class_name_snake}_{method.name}_deliver, &{class_name_snake}_{method.name}_tsfn);""")
 
     method_registrations_str = "\n    ".join(method_registrations)
     tsfn_declarations_str = "\n".join(tsfn_declarations)
-    tsfn_initializations_str = "\n  ".join(tsfn_initializations)
+    tsfn_initializations_str = "\n\n  ".join(tsfn_initializations)
 
-    return f"""
+    return f"""\
 {tsfn_declarations_str}
 
 static napi_value
 Init (napi_env env,
       napi_value exports)
 {{
-  napi_status status;
   napi_property_descriptor properties[] =
   {{
     {method_registrations_str}
@@ -149,12 +181,15 @@ Init (napi_env env,
 
   napi_set_named_property (env, exports, "{klass.name}", constructor);
 
+  napi_value resource_name;
+
   {tsfn_initializations_str}
 
   return exports;
 }}
 
 NAPI_MODULE (NODE_GYP_MODULE_NAME, Init)
+
 """
 
 def generate_method_code(klass: Class, method: Method) -> str:
@@ -180,14 +215,8 @@ def generate_method_code(klass: Class, method: Method) -> str:
         return " " * (len(class_name_snake) + 1 + len(method.name) + len(suffix) + 2)
 
     if method.is_async:
-        prototypes = f"""\
-static gboolean {class_name_snake}_{method.name}_begin (gpointer user_data);
-static void {class_name_snake}_{method.name}_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
-static void {class_name_snake}_{method.name}_deliver (napi_env env, napi_value js_cb, void * context, void * data);
-static void {class_name_snake}_{method.name}_operation_free ({class_name}{method_name_pascal}Operation * operation);"""
-
         param_conversions_str = "\n\n".join(param_conversions)
-        operation_free_function = f"""
+        operation_free_function = f"""\
 static void
 {class_name_snake}_{method.name}_operation_free ({class_name}{method_name_pascal}Operation * operation)
 {{
@@ -197,17 +226,7 @@ static void
 }}
 """
 
-        code = f"""
-typedef struct {{
-  napi_env env;
-  napi_deferred deferred;
-  {klass.c_type} * handle;
-  GError * error;
-  {param_declarations_str}{return_declaration}
-}} {class_name}{method_name_pascal}Operation;
-
-{prototypes}
-
+        code = f"""\
 static napi_value
 {class_name_snake}_{method.name} (napi_env env,
 {calculate_indent('')}napi_callback_info info)
