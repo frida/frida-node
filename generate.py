@@ -156,7 +156,6 @@ typedef struct {{
   napi_env env;
   napi_deferred deferred;
   {klass.c_type} * handle;
-  napi_threadsafe_function tsfn;
   GError * error;
   {param_declarations_str}{return_declaration}
 }} {class_name}{method_name_pascal}Operation;
@@ -197,18 +196,13 @@ static napi_value
 
 {param_conversions_str}
 
-  status = napi_create_threadsafe_function (env, NULL, NULL,
-      napi_create_string_utf8 (env, "{method.name}",
-      NAPI_AUTO_LENGTH, NULL), 0, 1, NULL, NULL, NULL,
-      {class_name_snake}_{method.name}_deliver, &operation->tsfn);
-  if (status != napi_ok)
-    return NULL;
-
   source = g_idle_source_new ();
   g_source_set_callback (source, {class_name_snake}_{method.name}_begin,
       operation, NULL);
   g_source_attach (source, frida_get_main_context ());
   g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, {class_name_snake}_{method.name}_tsfn);
 
   return promise;
 
@@ -242,8 +236,7 @@ static void
   {return_assignment}{method.c_identifier}_finish (operation->handle, res,
       &operation->error);
 
-  napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
-  napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
+  napi_call_threadsafe_function ({class_name_snake}_{method.name}_tsfn, operation, napi_tsfn_blocking);
 }}
 
 static void
@@ -272,6 +265,8 @@ static void
   }}
 
   {class_name_snake}_{method.name}_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, {class_name_snake}_{method.name}_tsfn);
 }}
 
 {operation_free_function}
@@ -372,14 +367,27 @@ def generate_parameter_conversion_code(param_name: str, param_type: Type, index:
 def generate_registration_code(klass: Class) -> str:
     class_name_snake = to_snake_case(klass.name)
     method_registrations = []
+    tsfn_declarations = []
+    tsfn_initializations = []
 
     for method in klass.methods:
         method_name_camel = to_camel_case(method.name)
         method_registrations.append(f"""{{ "{method_name_camel}", 0, {class_name_snake}_{method.name}, 0, 0, 0, napi_default, 0 }},""")
+        if method.is_async:
+            tsfn_declarations.append(f"static napi_threadsafe_function {class_name_snake}_{method.name}_tsfn;")
+            tsfn_initializations.append(f"""{{
+    napi_value resource_name;
+    napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource_name);
+    napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, {class_name_snake}_{method.name}_deliver, &{class_name_snake}_{method.name}_tsfn);
+  }}""")
 
     method_registrations_str = "\n    ".join(method_registrations)
+    tsfn_declarations_str = "\n".join(tsfn_declarations)
+    tsfn_initializations_str = "\n  ".join(tsfn_initializations)
 
     return f"""
+{tsfn_declarations_str}
+
 static napi_value
 Init (napi_env env,
       napi_value exports)
@@ -391,13 +399,11 @@ Init (napi_env env,
   }};
 
   napi_value constructor;
-  status = napi_define_class (env, "{klass.name}", NAPI_AUTO_LENGTH, {class_name_snake}_constructor, NULL, G_N_ELEMENTS (properties), properties, &constructor);
-  if (status != napi_ok)
-    return NULL;
+  napi_define_class (env, "{klass.name}", NAPI_AUTO_LENGTH, {class_name_snake}_constructor, NULL, G_N_ELEMENTS (properties), properties, &constructor);
 
-  status = napi_set_named_property (env, exports, "{klass.name}", constructor);
-  if (status != napi_ok)
-    return NULL;
+  napi_set_named_property (env, exports, "{klass.name}", constructor);
+
+  {tsfn_initializations_str}
 
   return exports;
 }}
