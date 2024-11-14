@@ -90,7 +90,7 @@ device_manager_close_begin (gpointer user_data)
 {
   DeviceManagerCloseOperation * operation = user_data;
 
-  frida_device_manager_close (operation->device->handle_,
+  frida_device_manager_close (operation->handle,
       operation->cancellable,
       device_manager_close_end, operation);
 
@@ -104,8 +104,8 @@ device_manager_close_end (GObject * source_object,
 {
   DeviceManagerCloseOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_close_finish (
-      FRIDA_DEVICE_MANAGER (source_object), res, &operation->error);
+  operation->parameters = frida_device_manager_close_finish (operation->handle, res,
+      &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
   napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
@@ -204,8 +204,8 @@ device_manager_get_device_by_id (napi_env env,
     napi_throw_error (env, NULL, "failed to get string length");
     goto invalid_argument;
   }
-  id = g_malloc (id_length + 1);
-  status = napi_get_value_string_utf8 (env, args[0], id, id_length + 1, &id_length);
+  operation->id = g_malloc (id_length + 1);
+  status = napi_get_value_string_utf8 (env, args[0], operation->id, id_length + 1, &id_length);
   if (status != napi_ok)
   {
     napi_throw_error (env, NULL, "failed to get string value");
@@ -266,7 +266,7 @@ device_manager_get_device_by_id_begin (gpointer user_data)
 {
   DeviceManagerGetDeviceByIdOperation * operation = user_data;
 
-  frida_device_manager_get_device_by_id (operation->device->handle_,
+  frida_device_manager_get_device_by_id (operation->handle,
       operation->id, operation->timeout, operation->cancellable,
       device_manager_get_device_by_id_end, operation);
 
@@ -280,8 +280,8 @@ device_manager_get_device_by_id_end (GObject * source_object,
 {
   DeviceManagerGetDeviceByIdOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_get_device_by_id_finish (
-      FRIDA_DEVICE_MANAGER (source_object), res, &operation->error);
+  operation->parameters = frida_device_manager_get_device_by_id_finish (operation->handle, res,
+      &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
   napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
@@ -439,7 +439,7 @@ device_manager_get_device_by_type_begin (gpointer user_data)
 {
   DeviceManagerGetDeviceByTypeOperation * operation = user_data;
 
-  frida_device_manager_get_device_by_type (operation->device->handle_,
+  frida_device_manager_get_device_by_type (operation->handle,
       operation->type, operation->timeout, operation->cancellable,
       device_manager_get_device_by_type_end, operation);
 
@@ -453,8 +453,8 @@ device_manager_get_device_by_type_end (GObject * source_object,
 {
   DeviceManagerGetDeviceByTypeOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_get_device_by_type_finish (
-      FRIDA_DEVICE_MANAGER (source_object), res, &operation->error);
+  operation->parameters = frida_device_manager_get_device_by_type_finish (operation->handle, res,
+      &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
   napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
@@ -495,192 +495,6 @@ device_manager_get_device_by_type_operation_free (DeviceManagerGetDeviceByTypeOp
 {
   
   g_slice_free (DeviceManagerGetDeviceByTypeOperation, operation);
-}
-
-
-typedef struct {
-  napi_env env;
-  napi_deferred deferred;
-  FridaDeviceManager * handle;
-  napi_threadsafe_function tsfn;
-  GError * error;
-  FridaDeviceManagerPredicate predicate;
-  void* predicate_target;
-  gint timeout;
-  GCancellable* cancellable;
-} DeviceManagerGetDeviceOperation;
-
-static gboolean device_manager_get_device_begin (gpointer user_data);
-static void device_manager_get_device_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
-static void device_manager_get_device_deliver (napi_env env, napi_value js_cb, void * context, void * data);
-static void device_manager_get_device_operation_free (DeviceManagerGetDeviceOperation * operation);
-
-static napi_value
-device_manager_get_device (napi_env env,
-                           napi_callback_info info)
-{
-  size_t argc = 4;
-  napi_value args[4];
-  napi_status status;
-  napi_value jsthis;
-  FridaDeviceManager * handle;
-  napi_deferred deferred;
-  napi_value promise;
-  DeviceManagerGetDeviceOperation * operation;
-  GSource * source;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    return NULL;
-
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
-    return NULL;
-
-  status = napi_create_promise (env, &deferred, &promise);
-  if (status != napi_ok)
-    return NULL;
-
-  operation = g_slice_new0 (DeviceManagerGetDeviceOperation);
-  operation->env = env;
-  operation->deferred = deferred;
-  operation->handle = handle;
-  operation->error = NULL;
-
-  if (argc <= 0)
-  {
-    napi_throw_type_error (env, NULL, "missing argument: predicate");
-    goto invalid_argument;
-  }
-  status = napi_get_value_unknown (env, args[0], &predicate);
-  if (status != napi_ok)
-  {
-    napi_throw_error (env, NULL, "failed to get argument value");
-    goto invalid_argument;
-  }
-
-  if (argc <= 1)
-  {
-    napi_throw_type_error (env, NULL, "missing argument: predicate_target");
-    goto invalid_argument;
-  }
-  status = napi_get_value_unknown (env, args[1], &predicate_target);
-  if (status != napi_ok)
-  {
-    napi_throw_error (env, NULL, "failed to get argument value");
-    goto invalid_argument;
-  }
-
-  if (argc <= 2)
-  {
-    napi_throw_type_error (env, NULL, "missing argument: timeout");
-    goto invalid_argument;
-  }
-  status = napi_get_value_int32 (env, args[2], &timeout);
-  if (status != napi_ok)
-  {
-    napi_throw_error (env, NULL, "failed to get argument value");
-    goto invalid_argument;
-  }
-
-  if (argc > 3)
-  {
-    status = napi_get_value_object (env, args[3], &cancellable);
-    if (status != napi_ok)
-    {
-      napi_throw_error (env, NULL, "failed to get argument value");
-      goto invalid_argument;
-    }
-    else
-    {
-      cancellable = NULL;
-    }
-  }
-
-  status = napi_create_threadsafe_function (env, NULL, NULL,
-      napi_create_string_utf8 (env, "get_device",
-      NAPI_AUTO_LENGTH, NULL), 0, 1, NULL, NULL, NULL,
-      device_manager_get_device_deliver, &operation->tsfn);
-  if (status != napi_ok)
-    return NULL;
-
-  source = g_idle_source_new ();
-  g_source_set_callback (source, device_manager_get_device_begin,
-      operation, NULL);
-  g_source_attach (source, frida_get_main_context ());
-  g_source_unref (source);
-
-  return promise;
-
-invalid_argument:
-  {
-    napi_reject_deferred (env, deferred, NULL);
-    device_manager_get_device_operation_free (operation);
-    return NULL;
-  }
-}
-
-static gboolean
-device_manager_get_device_begin (gpointer user_data)
-{
-  DeviceManagerGetDeviceOperation * operation = user_data;
-
-  frida_device_manager_get_device (operation->device->handle_,
-      operation->predicate, operation->predicate_target, operation->timeout, operation->cancellable,
-      device_manager_get_device_end, operation);
-
-  return G_SOURCE_REMOVE;
-}
-
-static void
-device_manager_get_device_end (GObject * source_object,
-                               GAsyncResult * res,
-                               gpointer user_data)
-{
-  DeviceManagerGetDeviceOperation * operation = user_data;
-
-  operation->parameters = frida_device_manager_get_device_finish (
-      FRIDA_DEVICE_MANAGER (source_object), res, &operation->error);
-
-  napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
-  napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
-}
-
-static void
-device_manager_get_device_deliver (napi_env env,
-                                   napi_value js_cb,
-                                   void * context,
-                                   void * data)
-{
-  DeviceManagerGetDeviceOperation * operation = data;
-  napi_value result;
-
-  if (operation->error != NULL)
-  {
-    napi_value message;
-    napi_create_string_utf8 (env, operation->error->message, NAPI_AUTO_LENGTH,
-        &message);
-    napi_value error_obj;
-    napi_create_error (env, NULL, message, &error_obj);
-    napi_reject_deferred (env, operation->deferred, error_obj);
-    g_error_free (operation->error);
-  }
-  else
-  {
-    result = Runtime_ValueFromParametersDict (env, operation->parameters);
-    g_hash_table_unref (operation->parameters);
-    napi_resolve_deferred (env, operation->deferred, result);
-  }
-
-  device_manager_get_device_operation_free (operation);
-}
-
-
-static void
-device_manager_get_device_operation_free (DeviceManagerGetDeviceOperation * operation)
-{
-  
-  g_slice_free (DeviceManagerGetDeviceOperation, operation);
 }
 
 
@@ -739,8 +553,8 @@ device_manager_find_device_by_id (napi_env env,
     napi_throw_error (env, NULL, "failed to get string length");
     goto invalid_argument;
   }
-  id = g_malloc (id_length + 1);
-  status = napi_get_value_string_utf8 (env, args[0], id, id_length + 1, &id_length);
+  operation->id = g_malloc (id_length + 1);
+  status = napi_get_value_string_utf8 (env, args[0], operation->id, id_length + 1, &id_length);
   if (status != napi_ok)
   {
     napi_throw_error (env, NULL, "failed to get string value");
@@ -801,7 +615,7 @@ device_manager_find_device_by_id_begin (gpointer user_data)
 {
   DeviceManagerFindDeviceByIdOperation * operation = user_data;
 
-  frida_device_manager_find_device_by_id (operation->device->handle_,
+  frida_device_manager_find_device_by_id (operation->handle,
       operation->id, operation->timeout, operation->cancellable,
       device_manager_find_device_by_id_end, operation);
 
@@ -815,8 +629,8 @@ device_manager_find_device_by_id_end (GObject * source_object,
 {
   DeviceManagerFindDeviceByIdOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_find_device_by_id_finish (
-      FRIDA_DEVICE_MANAGER (source_object), res, &operation->error);
+  operation->parameters = frida_device_manager_find_device_by_id_finish (operation->handle, res,
+      &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
   napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
@@ -974,7 +788,7 @@ device_manager_find_device_by_type_begin (gpointer user_data)
 {
   DeviceManagerFindDeviceByTypeOperation * operation = user_data;
 
-  frida_device_manager_find_device_by_type (operation->device->handle_,
+  frida_device_manager_find_device_by_type (operation->handle,
       operation->type, operation->timeout, operation->cancellable,
       device_manager_find_device_by_type_end, operation);
 
@@ -988,8 +802,8 @@ device_manager_find_device_by_type_end (GObject * source_object,
 {
   DeviceManagerFindDeviceByTypeOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_find_device_by_type_finish (
-      FRIDA_DEVICE_MANAGER (source_object), res, &operation->error);
+  operation->parameters = frida_device_manager_find_device_by_type_finish (operation->handle, res,
+      &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
   napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
@@ -1030,192 +844,6 @@ device_manager_find_device_by_type_operation_free (DeviceManagerFindDeviceByType
 {
   
   g_slice_free (DeviceManagerFindDeviceByTypeOperation, operation);
-}
-
-
-typedef struct {
-  napi_env env;
-  napi_deferred deferred;
-  FridaDeviceManager * handle;
-  napi_threadsafe_function tsfn;
-  GError * error;
-  FridaDeviceManagerPredicate predicate;
-  void* predicate_target;
-  gint timeout;
-  GCancellable* cancellable;
-} DeviceManagerFindDeviceOperation;
-
-static gboolean device_manager_find_device_begin (gpointer user_data);
-static void device_manager_find_device_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
-static void device_manager_find_device_deliver (napi_env env, napi_value js_cb, void * context, void * data);
-static void device_manager_find_device_operation_free (DeviceManagerFindDeviceOperation * operation);
-
-static napi_value
-device_manager_find_device (napi_env env,
-                            napi_callback_info info)
-{
-  size_t argc = 4;
-  napi_value args[4];
-  napi_status status;
-  napi_value jsthis;
-  FridaDeviceManager * handle;
-  napi_deferred deferred;
-  napi_value promise;
-  DeviceManagerFindDeviceOperation * operation;
-  GSource * source;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    return NULL;
-
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
-    return NULL;
-
-  status = napi_create_promise (env, &deferred, &promise);
-  if (status != napi_ok)
-    return NULL;
-
-  operation = g_slice_new0 (DeviceManagerFindDeviceOperation);
-  operation->env = env;
-  operation->deferred = deferred;
-  operation->handle = handle;
-  operation->error = NULL;
-
-  if (argc <= 0)
-  {
-    napi_throw_type_error (env, NULL, "missing argument: predicate");
-    goto invalid_argument;
-  }
-  status = napi_get_value_unknown (env, args[0], &predicate);
-  if (status != napi_ok)
-  {
-    napi_throw_error (env, NULL, "failed to get argument value");
-    goto invalid_argument;
-  }
-
-  if (argc <= 1)
-  {
-    napi_throw_type_error (env, NULL, "missing argument: predicate_target");
-    goto invalid_argument;
-  }
-  status = napi_get_value_unknown (env, args[1], &predicate_target);
-  if (status != napi_ok)
-  {
-    napi_throw_error (env, NULL, "failed to get argument value");
-    goto invalid_argument;
-  }
-
-  if (argc <= 2)
-  {
-    napi_throw_type_error (env, NULL, "missing argument: timeout");
-    goto invalid_argument;
-  }
-  status = napi_get_value_int32 (env, args[2], &timeout);
-  if (status != napi_ok)
-  {
-    napi_throw_error (env, NULL, "failed to get argument value");
-    goto invalid_argument;
-  }
-
-  if (argc > 3)
-  {
-    status = napi_get_value_object (env, args[3], &cancellable);
-    if (status != napi_ok)
-    {
-      napi_throw_error (env, NULL, "failed to get argument value");
-      goto invalid_argument;
-    }
-    else
-    {
-      cancellable = NULL;
-    }
-  }
-
-  status = napi_create_threadsafe_function (env, NULL, NULL,
-      napi_create_string_utf8 (env, "find_device",
-      NAPI_AUTO_LENGTH, NULL), 0, 1, NULL, NULL, NULL,
-      device_manager_find_device_deliver, &operation->tsfn);
-  if (status != napi_ok)
-    return NULL;
-
-  source = g_idle_source_new ();
-  g_source_set_callback (source, device_manager_find_device_begin,
-      operation, NULL);
-  g_source_attach (source, frida_get_main_context ());
-  g_source_unref (source);
-
-  return promise;
-
-invalid_argument:
-  {
-    napi_reject_deferred (env, deferred, NULL);
-    device_manager_find_device_operation_free (operation);
-    return NULL;
-  }
-}
-
-static gboolean
-device_manager_find_device_begin (gpointer user_data)
-{
-  DeviceManagerFindDeviceOperation * operation = user_data;
-
-  frida_device_manager_find_device (operation->device->handle_,
-      operation->predicate, operation->predicate_target, operation->timeout, operation->cancellable,
-      device_manager_find_device_end, operation);
-
-  return G_SOURCE_REMOVE;
-}
-
-static void
-device_manager_find_device_end (GObject * source_object,
-                                GAsyncResult * res,
-                                gpointer user_data)
-{
-  DeviceManagerFindDeviceOperation * operation = user_data;
-
-  operation->parameters = frida_device_manager_find_device_finish (
-      FRIDA_DEVICE_MANAGER (source_object), res, &operation->error);
-
-  napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
-  napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
-}
-
-static void
-device_manager_find_device_deliver (napi_env env,
-                                    napi_value js_cb,
-                                    void * context,
-                                    void * data)
-{
-  DeviceManagerFindDeviceOperation * operation = data;
-  napi_value result;
-
-  if (operation->error != NULL)
-  {
-    napi_value message;
-    napi_create_string_utf8 (env, operation->error->message, NAPI_AUTO_LENGTH,
-        &message);
-    napi_value error_obj;
-    napi_create_error (env, NULL, message, &error_obj);
-    napi_reject_deferred (env, operation->deferred, error_obj);
-    g_error_free (operation->error);
-  }
-  else
-  {
-    result = Runtime_ValueFromParametersDict (env, operation->parameters);
-    g_hash_table_unref (operation->parameters);
-    napi_resolve_deferred (env, operation->deferred, result);
-  }
-
-  device_manager_find_device_operation_free (operation);
-}
-
-
-static void
-device_manager_find_device_operation_free (DeviceManagerFindDeviceOperation * operation)
-{
-  
-  g_slice_free (DeviceManagerFindDeviceOperation, operation);
 }
 
 
@@ -1307,7 +935,7 @@ device_manager_enumerate_devices_begin (gpointer user_data)
 {
   DeviceManagerEnumerateDevicesOperation * operation = user_data;
 
-  frida_device_manager_enumerate_devices (operation->device->handle_,
+  frida_device_manager_enumerate_devices (operation->handle,
       operation->cancellable,
       device_manager_enumerate_devices_end, operation);
 
@@ -1321,8 +949,8 @@ device_manager_enumerate_devices_end (GObject * source_object,
 {
   DeviceManagerEnumerateDevicesOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_enumerate_devices_finish (
-      FRIDA_DEVICE_MANAGER (source_object), res, &operation->error);
+  operation->parameters = frida_device_manager_enumerate_devices_finish (operation->handle, res,
+      &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
   napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
@@ -1421,8 +1049,8 @@ device_manager_add_remote_device (napi_env env,
     napi_throw_error (env, NULL, "failed to get string length");
     goto invalid_argument;
   }
-  address = g_malloc (address_length + 1);
-  status = napi_get_value_string_utf8 (env, args[0], address, address_length + 1, &address_length);
+  operation->address = g_malloc (address_length + 1);
+  status = napi_get_value_string_utf8 (env, args[0], operation->address, address_length + 1, &address_length);
   if (status != napi_ok)
   {
     napi_throw_error (env, NULL, "failed to get string value");
@@ -1483,7 +1111,7 @@ device_manager_add_remote_device_begin (gpointer user_data)
 {
   DeviceManagerAddRemoteDeviceOperation * operation = user_data;
 
-  frida_device_manager_add_remote_device (operation->device->handle_,
+  frida_device_manager_add_remote_device (operation->handle,
       operation->address, operation->options, operation->cancellable,
       device_manager_add_remote_device_end, operation);
 
@@ -1497,8 +1125,8 @@ device_manager_add_remote_device_end (GObject * source_object,
 {
   DeviceManagerAddRemoteDeviceOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_add_remote_device_finish (
-      FRIDA_DEVICE_MANAGER (source_object), res, &operation->error);
+  operation->parameters = frida_device_manager_add_remote_device_finish (operation->handle, res,
+      &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
   napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
@@ -1596,8 +1224,8 @@ device_manager_remove_remote_device (napi_env env,
     napi_throw_error (env, NULL, "failed to get string length");
     goto invalid_argument;
   }
-  address = g_malloc (address_length + 1);
-  status = napi_get_value_string_utf8 (env, args[0], address, address_length + 1, &address_length);
+  operation->address = g_malloc (address_length + 1);
+  status = napi_get_value_string_utf8 (env, args[0], operation->address, address_length + 1, &address_length);
   if (status != napi_ok)
   {
     napi_throw_error (env, NULL, "failed to get string value");
@@ -1646,7 +1274,7 @@ device_manager_remove_remote_device_begin (gpointer user_data)
 {
   DeviceManagerRemoveRemoteDeviceOperation * operation = user_data;
 
-  frida_device_manager_remove_remote_device (operation->device->handle_,
+  frida_device_manager_remove_remote_device (operation->handle,
       operation->address, operation->cancellable,
       device_manager_remove_remote_device_end, operation);
 
@@ -1660,8 +1288,8 @@ device_manager_remove_remote_device_end (GObject * source_object,
 {
   DeviceManagerRemoveRemoteDeviceOperation * operation = user_data;
 
-  operation->parameters = frida_device_manager_remove_remote_device_finish (
-      FRIDA_DEVICE_MANAGER (source_object), res, &operation->error);
+  operation->parameters = frida_device_manager_remove_remote_device_finish (operation->handle, res,
+      &operation->error);
 
   napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
   napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
@@ -1715,10 +1343,8 @@ Init (napi_env env,
     { "close", 0, device_manager_close, 0, 0, 0, napi_default, 0 },
     { "getDeviceById", 0, device_manager_get_device_by_id, 0, 0, 0, napi_default, 0 },
     { "getDeviceByType", 0, device_manager_get_device_by_type, 0, 0, 0, napi_default, 0 },
-    { "getDevice", 0, device_manager_get_device, 0, 0, 0, napi_default, 0 },
     { "findDeviceById", 0, device_manager_find_device_by_id, 0, 0, 0, napi_default, 0 },
     { "findDeviceByType", 0, device_manager_find_device_by_type, 0, 0, 0, napi_default, 0 },
-    { "findDevice", 0, device_manager_find_device, 0, 0, 0, napi_default, 0 },
     { "enumerateDevices", 0, device_manager_enumerate_devices, 0, 0, 0, napi_default, 0 },
     { "addRemoteDevice", 0, device_manager_add_remote_device, 0, 0, 0, napi_default, 0 },
     { "removeRemoteDevice", 0, device_manager_remove_remote_device, 0, 0, 0, napi_default, 0 },
