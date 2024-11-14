@@ -123,8 +123,12 @@ def generate_method_code(klass: Class, method: Method) -> str:
     param_declarations_str = "\n  ".join(param_declarations)
     param_frees_str = "\n  ".join(param_frees)
 
-    return_declaration = f"\n{method.return_type.c} return_value;" if method.return_type is not None else ""
-    return_assignment = f"operation->return_value = " if method.return_type != "none" else ""
+    return_declaration = f"\n  {method.return_type.c} return_value;" if method.return_type is not None else ""
+    return_assignment = f"operation->return_value = " if method.return_type is not None else ""
+    if method.return_type is not None:
+        return_conversion = f"result = Runtime_ValueFrom{to_pascal_case(method.return_type.name)} (env, operation->return_value);"
+    else:
+        return_conversion = "napi_get_undefined (env, &result);"
 
     def calculate_indent(suffix: str) -> str:
         return " " * (len(class_name_snake) + 1 + len(method.name) + len(suffix) + 2)
@@ -142,6 +146,7 @@ static void
 {class_name_snake}_{method.name}_operation_free ({class_name}{method_name_pascal}Operation * operation)
 {{
   {param_frees_str}
+  {f"g_free (operation->return_value);" if method.return_type is not None and method.return_type.name == "utf8" else ""}
   g_slice_free ({class_name}{method_name_pascal}Operation, operation);
 }}
 """
@@ -248,7 +253,6 @@ static void
 {calculate_indent('_deliver')}void * data)
 {{
   {class_name}{method_name_pascal}Operation * operation = data;
-  napi_value result;
 
   if (operation->error != NULL)
   {{
@@ -262,8 +266,8 @@ static void
   }}
   else
   {{
-    result = Runtime_ValueFromParametersDict (env, operation->parameters);
-    g_hash_table_unref (operation->parameters);
+    napi_value result;
+    {return_conversion}
     napi_resolve_deferred (env, operation->deferred, result);
   }}
 
@@ -305,9 +309,9 @@ static napi_value
 
   {param_conversions_str_sync}
 
-  {method.return_type} ret = {method.c_identifier} (obj->handle_{param_call_str});
+  {method.return_type.c} ret = {method.c_identifier} (obj->handle_{param_call_str});
 
-  result = Runtime_ValueFrom{to_pascal_case(method.return_type)} (env, ret);
+  result = Runtime_ValueFrom{to_pascal_case(method.return_type.name)} (env, ret);
 
   {param_frees_str}
 
