@@ -82,6 +82,7 @@ typedef struct {
   GCancellable * cancellable;
 } DeviceManagerRemoveRemoteDeviceOperation;
 
+static napi_value device_manager_constructor (napi_env env, napi_callback_info info);
 static napi_value device_manager_close (napi_env env, napi_callback_info info);
 static gboolean device_manager_close_begin (gpointer user_data);
 static void device_manager_close_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
@@ -184,6 +185,27 @@ Init (napi_env env,
 
 NAPI_MODULE (NODE_GYP_MODULE_NAME, Init)
 
+static napi_value
+device_manager_constructor (napi_env env, napi_callback_info info)
+{
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaDeviceManager * obj;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  obj = g_object_new (FRIDA_DEVICE_MANAGER, NULL);
+
+  status = napi_wrap (env, jsthis, obj, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
+}
 static napi_value
 device_manager_close (napi_env env,
                       napi_callback_info info)

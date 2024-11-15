@@ -99,6 +99,7 @@ def generate_code(file_path: str) -> str:
     code += generate_operation_structs(klass)
     code += generate_prototypes(klass)
     code += generate_registration_code(klass)
+    code += generate_constructor(klass)
 
     for method in klass.methods:
         code += generate_method_code(klass, method)
@@ -132,8 +133,12 @@ typedef struct {{
 
 def generate_prototypes(klass: Class) -> str:
     prototypes = []
+
+    class_cprefix = to_snake_case(klass.name)
+    prototypes.append(f"static napi_value {class_cprefix}_constructor (napi_env env, napi_callback_info info);")
+
     for method in klass.methods:
-        method_cprefix = f"{to_snake_case(klass.name)}_{method.name}"
+        method_cprefix = f"{class_cprefix}_{method.name}"
         prototypes.append(f"static napi_value {method_cprefix} (napi_env env, napi_callback_info info);")
         if method.is_async:
             prototypes += [
@@ -142,6 +147,7 @@ def generate_prototypes(klass: Class) -> str:
                 f"static void {method_cprefix}_deliver (napi_env env, napi_value js_cb, void * context, void * data);",
                 f"static void {method_cprefix}_operation_free ({klass.name}{to_pascal_case(method.name)}Operation * operation);",
             ]
+
     return "\n".join(prototypes) + "\n\n"
 
 def generate_registration_code(klass: Class) -> str:
@@ -189,7 +195,31 @@ Init (napi_env env,
 }}
 
 NAPI_MODULE (NODE_GYP_MODULE_NAME, Init)
+"""
 
+def generate_constructor(klass: Class) -> str:
+    return f"""
+static napi_value
+{to_snake_case(klass.name)}_constructor (napi_env env, napi_callback_info info)
+{{
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  {klass.c_type} * obj;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  obj = g_object_new ({klass.c_cast_macro}, NULL);
+
+  status = napi_wrap (env, jsthis, obj, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
+}}
 """
 
 def generate_method_code(klass: Class, method: Method) -> str:
