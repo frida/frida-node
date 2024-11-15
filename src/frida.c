@@ -256,6 +256,7 @@ device_manager_close (napi_env env,
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
+  }
   else
   {
     operation->cancellable = NULL;
@@ -409,6 +410,7 @@ device_manager_get_device_by_id (napi_env env,
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
+  }
   else
   {
     operation->cancellable = NULL;
@@ -559,6 +561,7 @@ device_manager_get_device_by_type (napi_env env,
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
+  }
   else
   {
     operation->cancellable = NULL;
@@ -712,6 +715,7 @@ device_manager_find_device_by_id (napi_env env,
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
+  }
   else
   {
     operation->cancellable = NULL;
@@ -862,6 +866,7 @@ device_manager_find_device_by_type (napi_env env,
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
+  }
   else
   {
     operation->cancellable = NULL;
@@ -988,6 +993,7 @@ device_manager_enumerate_devices (napi_env env,
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
+  }
   else
   {
     operation->cancellable = NULL;
@@ -1141,6 +1147,7 @@ device_manager_add_remote_device (napi_env env,
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
+  }
   else
   {
     operation->cancellable = NULL;
@@ -1282,6 +1289,7 @@ device_manager_remove_remote_device (napi_env env,
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }
+  }
   else
   {
     operation->cancellable = NULL;

@@ -468,6 +468,7 @@ def generate_parameter_conversion_code(param_name: str, param_type: Type, index:
       napi_throw_error (env, NULL, "failed to get argument value");
       goto invalid_argument;
     }}
+  }}
   else
   {{
     operation->{param_name} = NULL;
