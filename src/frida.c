@@ -82,42 +82,51 @@ typedef struct {
   GCancellable * cancellable;
 } DeviceManagerRemoveRemoteDeviceOperation;
 
+
 static napi_value device_manager_constructor (napi_env env, napi_callback_info info);
+
 static napi_value device_manager_close (napi_env env, napi_callback_info info);
 static gboolean device_manager_close_begin (gpointer user_data);
 static void device_manager_close_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
 static void device_manager_close_deliver (napi_env env, napi_value js_cb, void * context, void * data);
 static void device_manager_close_operation_free (DeviceManagerCloseOperation * operation);
+
 static napi_value device_manager_get_device_by_id (napi_env env, napi_callback_info info);
 static gboolean device_manager_get_device_by_id_begin (gpointer user_data);
 static void device_manager_get_device_by_id_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
 static void device_manager_get_device_by_id_deliver (napi_env env, napi_value js_cb, void * context, void * data);
 static void device_manager_get_device_by_id_operation_free (DeviceManagerGetDeviceByIdOperation * operation);
+
 static napi_value device_manager_get_device_by_type (napi_env env, napi_callback_info info);
 static gboolean device_manager_get_device_by_type_begin (gpointer user_data);
 static void device_manager_get_device_by_type_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
 static void device_manager_get_device_by_type_deliver (napi_env env, napi_value js_cb, void * context, void * data);
 static void device_manager_get_device_by_type_operation_free (DeviceManagerGetDeviceByTypeOperation * operation);
+
 static napi_value device_manager_find_device_by_id (napi_env env, napi_callback_info info);
 static gboolean device_manager_find_device_by_id_begin (gpointer user_data);
 static void device_manager_find_device_by_id_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
 static void device_manager_find_device_by_id_deliver (napi_env env, napi_value js_cb, void * context, void * data);
 static void device_manager_find_device_by_id_operation_free (DeviceManagerFindDeviceByIdOperation * operation);
+
 static napi_value device_manager_find_device_by_type (napi_env env, napi_callback_info info);
 static gboolean device_manager_find_device_by_type_begin (gpointer user_data);
 static void device_manager_find_device_by_type_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
 static void device_manager_find_device_by_type_deliver (napi_env env, napi_value js_cb, void * context, void * data);
 static void device_manager_find_device_by_type_operation_free (DeviceManagerFindDeviceByTypeOperation * operation);
+
 static napi_value device_manager_enumerate_devices (napi_env env, napi_callback_info info);
 static gboolean device_manager_enumerate_devices_begin (gpointer user_data);
 static void device_manager_enumerate_devices_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
 static void device_manager_enumerate_devices_deliver (napi_env env, napi_value js_cb, void * context, void * data);
 static void device_manager_enumerate_devices_operation_free (DeviceManagerEnumerateDevicesOperation * operation);
+
 static napi_value device_manager_add_remote_device (napi_env env, napi_callback_info info);
 static gboolean device_manager_add_remote_device_begin (gpointer user_data);
 static void device_manager_add_remote_device_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
 static void device_manager_add_remote_device_deliver (napi_env env, napi_value js_cb, void * context, void * data);
 static void device_manager_add_remote_device_operation_free (DeviceManagerAddRemoteDeviceOperation * operation);
+
 static napi_value device_manager_remove_remote_device (napi_env env, napi_callback_info info);
 static gboolean device_manager_remove_remote_device_begin (gpointer user_data);
 static void device_manager_remove_remote_device_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
@@ -186,26 +195,27 @@ Init (napi_env env,
 NAPI_MODULE (NODE_GYP_MODULE_NAME, Init)
 
 static napi_value
-device_manager_constructor (napi_env env, napi_callback_info info)
+device_manager_constructor (napi_env env,
+                            napi_callback_info info)
 {
-  size_t argc = 1;
-  napi_value args[1];
+  size_t argc = 0;
   napi_value jsthis;
   napi_status status;
-  FridaDeviceManager * obj;
+  FridaDeviceManager * handle;
 
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  obj = g_object_new (FRIDA_DEVICE_MANAGER, NULL);
+  handle = frida_device_manager_new ();
 
-  status = napi_wrap (env, jsthis, obj, NULL, NULL, NULL);
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
     return NULL;
 
   return jsthis;
 }
+
 static napi_value
 device_manager_close (napi_env env,
                       napi_callback_info info)
@@ -1357,5 +1367,4 @@ device_manager_remove_remote_device_operation_free (DeviceManagerRemoveRemoteDev
   
   g_slice_free (DeviceManagerRemoveRemoteDeviceOperation, operation);
 }
-
 

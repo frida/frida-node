@@ -156,11 +156,17 @@ def generate_prototypes(klass: Class) -> str:
     prototypes = []
 
     class_cprefix = to_snake_case(klass.name)
-    prototypes.append(f"static napi_value {class_cprefix}_constructor (napi_env env, napi_callback_info info);")
+    prototypes += [
+        "",
+        f"static napi_value {class_cprefix}_constructor (napi_env env, napi_callback_info info);",
+    ]
 
     for method in klass.methods:
         method_cprefix = f"{class_cprefix}_{method.name}"
-        prototypes.append(f"static napi_value {method_cprefix} (napi_env env, napi_callback_info info);")
+        prototypes += [
+            "",
+            f"static napi_value {method_cprefix} (napi_env env, napi_callback_info info);",
+        ]
         if method.is_async:
             prototypes += [
                 f"static gboolean {method_cprefix}_begin (gpointer user_data);",
@@ -219,27 +225,44 @@ NAPI_MODULE (NODE_GYP_MODULE_NAME, Init)
 """
 
 def generate_constructor(klass: Class) -> str:
-    return f"""
+    class_name_snake = to_snake_case(klass.name)
+
+    def calculate_indent(suffix: str) -> str:
+        return " " * (len(class_name_snake) + len(suffix) + 2)
+
+    default_constructor = next((ctor for ctor in klass.constructors if not ctor.parameters), None)
+    if default_constructor is not None:
+        return f"""
 static napi_value
-{to_snake_case(klass.name)}_constructor (napi_env env, napi_callback_info info)
+{class_name_snake}_constructor (napi_env env,
+{calculate_indent('_constructor')}napi_callback_info info)
 {{
-  size_t argc = 1;
-  napi_value args[1];
+  size_t argc = 0;
   napi_value jsthis;
   napi_status status;
-  {klass.c_type} * obj;
+  {klass.c_type} * handle;
 
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  obj = g_object_new ({klass.c_cast_macro}, NULL);
+  handle = {default_constructor.c_identifier} ();
 
-  status = napi_wrap (env, jsthis, obj, NULL, NULL, NULL);
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
     return NULL;
 
   return jsthis;
+}}
+"""
+    else:
+        return f"""
+static napi_value
+{class_name_snake}_constructor (napi_env env,
+{calculate_indent('_constructor')}napi_callback_info info)
+{{
+  napi_throw_error (env, NULL, "Class {klass.name} cannot be constructed because it lacks a default constructor");
+  return NULL;
 }}
 """
 
@@ -274,10 +297,9 @@ static void
   {param_frees_str}
   {f"g_free (operation->return_value);" if method.return_type is not None and method.return_type.name == "utf8" else ""}
   g_slice_free ({class_name}{method_name_pascal}Operation, operation);
-}}
-"""
+}}"""
 
-        code = f"""\
+        code = f"""
 static napi_value
 {class_name_snake}_{method.name} (napi_env env,
 {calculate_indent('')}napi_callback_info info)
