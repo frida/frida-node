@@ -1,3 +1,4 @@
+from __future__ import annotations
 import xml.etree.ElementTree as ET
 from typing import Dict, List, Optional
 from dataclasses import dataclass
@@ -5,15 +6,21 @@ from dataclasses import dataclass
 C_NAMESPACE = "http://www.gtk.org/introspection/c/1.0"
 
 @dataclass
-class Type:
+class Class:
     name: str
-    c: str
-    napi: str
+    c_type: str
+    constructors: List[Constructor]
+    methods: List[Method]
+
+    @property
+    def c_cast_macro(self):
+        return to_macro_case(self.c_type)
 
 @dataclass
-class Parameter:
+class Constructor:
     name: str
-    type: Type
+    c_identifier: str
+    parameters: List[Parameter]
 
 @dataclass
 class Method:
@@ -24,14 +31,15 @@ class Method:
     is_async: bool
 
 @dataclass
-class Class:
+class Parameter:
     name: str
-    c_type: str
-    methods: List[Method]
+    type: Type
 
-    @property
-    def c_cast_macro(self):
-        return to_macro_case(self.c_type)
+@dataclass
+class Type:
+    name: str
+    c: str
+    napi: str
 
 node_api_types: Dict[str, str] = {
     "gboolean": "bool",
@@ -53,10 +61,23 @@ def parse_gir(file_path: str) -> Class:
     klass_element = root.find(".//class[@name='DeviceManager']", ns)
     class_name = klass_element.get("name")
     class_c_type = klass_element.get(f"{{{C_NAMESPACE}}}type")
+    constructors = []
     methods = []
 
-    all_methods = klass_element.findall(".//method", ns)
+    for constructor_element in klass_element.findall(".//constructor", ns):
+            constructor_name = constructor_element.get("name")
+            c_identifier = constructor_element.get(f"{{{C_NAMESPACE}}}identifier")
+            parameters = constructor_element.findall("./parameters/parameter", ns)
 
+            param_list = []
+            for param in parameters:
+                param_name = param.get("name")
+                type = parse_type(param.find("type", ns))
+                param_list.append(Parameter(param_name, type))
+
+            constructors.append(Constructor(constructor_name, c_identifier, param_list))
+
+    all_methods = klass_element.findall(".//method", ns)
     for method_element in all_methods:
         method_name = method_element.get("name")
         if method_name.startswith("_") or method_name.endswith("_sync") or method_name.endswith("_finish"):
@@ -82,7 +103,7 @@ def parse_gir(file_path: str) -> Class:
 
         methods.append(Method(method_name, c_identifier, return_type, param_list, is_async))
 
-    return Class(class_name, class_c_type, methods)
+    return Class(class_name, class_c_type, constructors, methods)
 
 def parse_type(type_element: ET.Element) -> Optional[Type]:
     name = type_element.get("name")
