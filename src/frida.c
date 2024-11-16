@@ -83,6 +83,32 @@ typedef struct {
 } DeviceManagerRemoveRemoteDeviceOperation;
 
 
+static void cancellable_register (napi_env env, napi_value exports);
+static napi_value cancellable_constructor (napi_env env, napi_callback_info info);
+
+static napi_value cancellable_cancel (napi_env env, napi_callback_info info);
+
+static napi_value cancellable_disconnect (napi_env env, napi_callback_info info);
+
+static napi_value cancellable_get_fd (napi_env env, napi_callback_info info);
+
+static napi_value cancellable_is_cancelled (napi_env env, napi_callback_info info);
+
+static napi_value cancellable_make_pollfd (napi_env env, napi_callback_info info);
+
+static napi_value cancellable_pop_current (napi_env env, napi_callback_info info);
+
+static napi_value cancellable_push_current (napi_env env, napi_callback_info info);
+
+static napi_value cancellable_release_fd (napi_env env, napi_callback_info info);
+
+static napi_value cancellable_reset (napi_env env, napi_callback_info info);
+
+static napi_value cancellable_set_error_if_cancelled (napi_env env, napi_callback_info info);
+
+static napi_value cancellable_source_new (napi_env env, napi_callback_info info);
+
+static void device_manager_register (napi_env env, napi_value exports);
 static napi_value device_manager_constructor (napi_env env, napi_callback_info info);
 
 static napi_value device_manager_close (napi_env env, napi_callback_info info);
@@ -133,6 +159,9 @@ static void device_manager_remove_remote_device_end (GObject * source_object, GA
 static void device_manager_remove_remote_device_deliver (napi_env env, napi_value js_cb, void * context, void * data);
 static void device_manager_remove_remote_device_operation_free (DeviceManagerRemoveRemoteDeviceOperation * operation);
 
+static napi_type_tag cancellable_type_tag = { 0xe258d3e0c6da4984, 0x8ec8c75be8b3e9dc };
+static napi_type_tag device_manager_type_tag = { 0x64bfca34997d4dbe, 0xbf2a7cdd317e0469 };
+
 static napi_threadsafe_function device_manager_close_tsfn;
 static napi_threadsafe_function device_manager_get_device_by_id_tsfn;
 static napi_threadsafe_function device_manager_get_device_by_type_tsfn;
@@ -145,6 +174,399 @@ static napi_threadsafe_function device_manager_remove_remote_device_tsfn;
 static napi_value
 Init (napi_env env,
       napi_value exports)
+{
+  cancellable_register (env, exports);
+  device_manager_register (env, exports);
+  return exports;
+}
+
+NAPI_MODULE (NODE_GYP_MODULE_NAME, Init)
+
+static void
+cancellable_register (napi_env env,
+                      napi_value exports)
+{
+  napi_property_descriptor properties[] =
+  {
+    { "cancel", 0, cancellable_cancel, 0, 0, 0, napi_default, 0 },
+    { "disconnect", 0, cancellable_disconnect, 0, 0, 0, napi_default, 0 },
+    { "getFd", 0, cancellable_get_fd, 0, 0, 0, napi_default, 0 },
+    { "isCancelled", 0, cancellable_is_cancelled, 0, 0, 0, napi_default, 0 },
+    { "makePollfd", 0, cancellable_make_pollfd, 0, 0, 0, napi_default, 0 },
+    { "popCurrent", 0, cancellable_pop_current, 0, 0, 0, napi_default, 0 },
+    { "pushCurrent", 0, cancellable_push_current, 0, 0, 0, napi_default, 0 },
+    { "releaseFd", 0, cancellable_release_fd, 0, 0, 0, napi_default, 0 },
+    { "reset", 0, cancellable_reset, 0, 0, 0, napi_default, 0 },
+    { "setErrorIfCancelled", 0, cancellable_set_error_if_cancelled, 0, 0, 0, napi_default, 0 },
+    { "sourceNew", 0, cancellable_source_new, 0, 0, 0, napi_default, 0 },
+  };
+
+  napi_value constructor;
+  napi_define_class (env, "Cancellable", NAPI_AUTO_LENGTH, cancellable_constructor, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+
+  napi_set_named_property (env, exports, "Cancellable", constructor);
+}
+
+static napi_value
+cancellable_constructor (napi_env env,
+                         napi_callback_info info)
+{
+  size_t argc = 0;
+  napi_value jsthis;
+  napi_status status;
+  GCancellable * handle;
+
+  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  handle = g_cancellable_new ();
+
+  status = napi_type_tag_object (env, jsthis, &cancellable_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
+}
+
+static napi_value
+cancellable_cancel (napi_env env,
+                    napi_callback_info info)
+{
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  GCancellable * handle;
+  napi_value result;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  g_cancellable_cancel (handle);
+
+  napi_get_undefined (env, &result);
+
+  return result;
+}
+
+static napi_value
+cancellable_disconnect (napi_env env,
+                        napi_callback_info info)
+{
+  size_t argc = 1;
+  napi_value args[1];
+  napi_status status;
+  napi_value jsthis;
+  GCancellable * handle;
+  napi_value result;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  
+
+  if (argc <= 0)
+  {
+    napi_throw_type_error (env, NULL, "missing argument: handler_id");
+    goto invalid_argument;
+  }
+  status = napi_get_value_unknown (env, args[0], &handler_id);
+  if (status != napi_ok)
+  {
+    napi_throw_error (env, NULL, "failed to get argument value");
+    goto invalid_argument;
+  }g_cancellable_disconnect (handle, handler_id);
+
+  napi_get_undefined (env, &result);
+
+  return result;
+
+invalid_argument:
+  {
+    return NULL;
+  }
+
+}
+
+static napi_value
+cancellable_get_fd (napi_env env,
+                    napi_callback_info info)
+{
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  GCancellable * handle;
+  napi_value result;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  
+
+  operation->return_value = g_cancellable_get_fd (handle);
+
+  result = Runtime_ValueFromGint (env, ret);
+
+  return result;
+}
+
+static napi_value
+cancellable_is_cancelled (napi_env env,
+                          napi_callback_info info)
+{
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  GCancellable * handle;
+  napi_value result;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  
+
+  operation->return_value = g_cancellable_is_cancelled (handle);
+
+  result = Runtime_ValueFromGboolean (env, ret);
+
+  return result;
+}
+
+static napi_value
+cancellable_make_pollfd (napi_env env,
+                         napi_callback_info info)
+{
+  size_t argc = 1;
+  napi_value args[1];
+  napi_status status;
+  napi_value jsthis;
+  GCancellable * handle;
+  napi_value result;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  
+
+  if (argc <= 0)
+  {
+    napi_throw_type_error (env, NULL, "missing argument: pollfd");
+    goto invalid_argument;
+  }
+  status = napi_get_value_unknown (env, args[0], &pollfd);
+  if (status != napi_ok)
+  {
+    napi_throw_error (env, NULL, "failed to get argument value");
+    goto invalid_argument;
+  }
+
+  operation->return_value = g_cancellable_make_pollfd (handle, pollfd);
+
+  result = Runtime_ValueFromGboolean (env, ret);
+
+  return result;
+
+invalid_argument:
+  {
+    return NULL;
+  }
+
+}
+
+static napi_value
+cancellable_pop_current (napi_env env,
+                         napi_callback_info info)
+{
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  GCancellable * handle;
+  napi_value result;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  g_cancellable_pop_current (handle);
+
+  napi_get_undefined (env, &result);
+
+  return result;
+}
+
+static napi_value
+cancellable_push_current (napi_env env,
+                          napi_callback_info info)
+{
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  GCancellable * handle;
+  napi_value result;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  g_cancellable_push_current (handle);
+
+  napi_get_undefined (env, &result);
+
+  return result;
+}
+
+static napi_value
+cancellable_release_fd (napi_env env,
+                        napi_callback_info info)
+{
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  GCancellable * handle;
+  napi_value result;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  g_cancellable_release_fd (handle);
+
+  napi_get_undefined (env, &result);
+
+  return result;
+}
+
+static napi_value
+cancellable_reset (napi_env env,
+                   napi_callback_info info)
+{
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  GCancellable * handle;
+  napi_value result;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  g_cancellable_reset (handle);
+
+  napi_get_undefined (env, &result);
+
+  return result;
+}
+
+static napi_value
+cancellable_set_error_if_cancelled (napi_env env,
+                                    napi_callback_info info)
+{
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  GCancellable * handle;
+  napi_value result;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  
+
+  operation->return_value = g_cancellable_set_error_if_cancelled (handle);
+
+  result = Runtime_ValueFromGboolean (env, ret);
+
+  return result;
+}
+
+static napi_value
+cancellable_source_new (napi_env env,
+                        napi_callback_info info)
+{
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  GCancellable * handle;
+  napi_value result;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  
+
+  operation->return_value = g_cancellable_source_new (handle);
+
+  result = Runtime_ValueFromGlib.source (env, ret);
+
+  return result;
+}
+static void
+device_manager_register (napi_env env,
+                         napi_value exports)
 {
   napi_property_descriptor properties[] =
   {
@@ -188,11 +610,7 @@ Init (napi_env env,
 
   napi_create_string_utf8 (env, "removeRemoteDevice", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, device_manager_remove_remote_device_deliver, &device_manager_remove_remote_device_tsfn);
-
-  return exports;
 }
-
-NAPI_MODULE (NODE_GYP_MODULE_NAME, Init)
 
 static napi_value
 device_manager_constructor (napi_env env,
@@ -208,6 +626,10 @@ device_manager_constructor (napi_env env,
     return NULL;
 
   handle = frida_device_manager_new ();
+
+  status = napi_type_tag_object (env, jsthis, &device_manager_type_tag);
+  if (status != napi_ok)
+    return NULL;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
@@ -338,8 +760,6 @@ device_manager_close_deliver (napi_env env,
 static void
 device_manager_close_operation_free (DeviceManagerCloseOperation * operation)
 {
-  
-  
   g_slice_free (DeviceManagerCloseOperation, operation);
 }
 
@@ -453,6 +873,8 @@ device_manager_get_device_by_id_end (GObject * source_object,
 {
   DeviceManagerGetDeviceByIdOperation * operation = user_data;
 
+  
+
   operation->return_value = frida_device_manager_get_device_by_id_finish (operation->handle, res,
       &operation->error);
 
@@ -492,8 +914,7 @@ device_manager_get_device_by_id_deliver (napi_env env,
 static void
 device_manager_get_device_by_id_operation_free (DeviceManagerGetDeviceByIdOperation * operation)
 {
-  g_free (operation->id);
-  
+g_free (operation->id);
   g_slice_free (DeviceManagerGetDeviceByIdOperation, operation);
 }
 
@@ -604,6 +1025,8 @@ device_manager_get_device_by_type_end (GObject * source_object,
 {
   DeviceManagerGetDeviceByTypeOperation * operation = user_data;
 
+  
+
   operation->return_value = frida_device_manager_get_device_by_type_finish (operation->handle, res,
       &operation->error);
 
@@ -643,8 +1066,6 @@ device_manager_get_device_by_type_deliver (napi_env env,
 static void
 device_manager_get_device_by_type_operation_free (DeviceManagerGetDeviceByTypeOperation * operation)
 {
-  
-  
   g_slice_free (DeviceManagerGetDeviceByTypeOperation, operation);
 }
 
@@ -758,6 +1179,8 @@ device_manager_find_device_by_id_end (GObject * source_object,
 {
   DeviceManagerFindDeviceByIdOperation * operation = user_data;
 
+  
+
   operation->return_value = frida_device_manager_find_device_by_id_finish (operation->handle, res,
       &operation->error);
 
@@ -797,8 +1220,7 @@ device_manager_find_device_by_id_deliver (napi_env env,
 static void
 device_manager_find_device_by_id_operation_free (DeviceManagerFindDeviceByIdOperation * operation)
 {
-  g_free (operation->id);
-  
+g_free (operation->id);
   g_slice_free (DeviceManagerFindDeviceByIdOperation, operation);
 }
 
@@ -909,6 +1331,8 @@ device_manager_find_device_by_type_end (GObject * source_object,
 {
   DeviceManagerFindDeviceByTypeOperation * operation = user_data;
 
+  
+
   operation->return_value = frida_device_manager_find_device_by_type_finish (operation->handle, res,
       &operation->error);
 
@@ -948,8 +1372,6 @@ device_manager_find_device_by_type_deliver (napi_env env,
 static void
 device_manager_find_device_by_type_operation_free (DeviceManagerFindDeviceByTypeOperation * operation)
 {
-  
-  
   g_slice_free (DeviceManagerFindDeviceByTypeOperation, operation);
 }
 
@@ -1036,6 +1458,8 @@ device_manager_enumerate_devices_end (GObject * source_object,
 {
   DeviceManagerEnumerateDevicesOperation * operation = user_data;
 
+  
+
   operation->return_value = frida_device_manager_enumerate_devices_finish (operation->handle, res,
       &operation->error);
 
@@ -1075,8 +1499,6 @@ device_manager_enumerate_devices_deliver (napi_env env,
 static void
 device_manager_enumerate_devices_operation_free (DeviceManagerEnumerateDevicesOperation * operation)
 {
-  
-  
   g_slice_free (DeviceManagerEnumerateDevicesOperation, operation);
 }
 
@@ -1190,6 +1612,8 @@ device_manager_add_remote_device_end (GObject * source_object,
 {
   DeviceManagerAddRemoteDeviceOperation * operation = user_data;
 
+  
+
   operation->return_value = frida_device_manager_add_remote_device_finish (operation->handle, res,
       &operation->error);
 
@@ -1229,8 +1653,7 @@ device_manager_add_remote_device_deliver (napi_env env,
 static void
 device_manager_add_remote_device_operation_free (DeviceManagerAddRemoteDeviceOperation * operation)
 {
-  g_free (operation->address);
-  
+g_free (operation->address);
   g_slice_free (DeviceManagerAddRemoteDeviceOperation, operation);
 }
 
@@ -1371,8 +1794,7 @@ device_manager_remove_remote_device_deliver (napi_env env,
 static void
 device_manager_remove_remote_device_operation_free (DeviceManagerRemoveRemoteDeviceOperation * operation)
 {
-  g_free (operation->address);
-  
+g_free (operation->address);
   g_slice_free (DeviceManagerRemoveRemoteDeviceOperation, operation);
 }
 
