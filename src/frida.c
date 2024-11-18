@@ -161,8 +161,8 @@ static napi_value fdn_cancellable_source_new (napi_env env, napi_callback_info i
 
 static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0x0a8bd9c5dde44f81, 0x8d5b3e160cfa87d0 };
-static napi_type_tag fdn_cancellable_type_tag = { 0x5fe84a6fff014ac2, 0xaf5eea4ea5adffa3 };
+static napi_type_tag fdn_device_manager_type_tag = { 0x41c6423e3fb14ed1, 0xa8d40a6a8cf17633 };
+static napi_type_tag fdn_cancellable_type_tag = { 0x5add34e15ffb4060, 0xad0f12b3d5ca4fc8 };
 
 static napi_threadsafe_function fdn_device_manager_close_tsfn;
 static napi_threadsafe_function fdn_device_manager_get_device_by_id_tsfn;
@@ -1452,7 +1452,9 @@ fdn_cancellable_disconnect (napi_env env,
   {
     napi_throw_type_error (env, NULL, "missing argument: handler_id");
     goto invalid_argument;
-  }g_cancellable_disconnect (handle, handler_id);
+  }
+
+  g_cancellable_disconnect (handle, handler_id);
 
   napi_get_undefined (env, &result);
 
@@ -1549,6 +1551,8 @@ fdn_cancellable_make_pollfd (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: pollfd");
     goto invalid_argument;
   }
+
+  
 
   operation->return_value = g_cancellable_make_pollfd (handle, pollfd);
 

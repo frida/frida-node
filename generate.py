@@ -481,7 +481,7 @@ static void
                 for line in param_conversions
             ])
         else:
-            param_conversions_str_sync = "\n\n  "
+            param_conversions_str_sync = ""
 
         if method.parameters:
             param_call_str = ", " + ", ".join([param.name for param in method.parameters])
@@ -518,7 +518,9 @@ static napi_value
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;{param_conversions_str_sync}{return_assignment}{method.c_identifier} (handle{param_call_str});
+    return NULL;{param_conversions_str_sync}
+
+  {return_assignment}{method.c_identifier} (handle{param_call_str});
 
   {result_assignment}{param_frees_str}
 
