@@ -17,7 +17,11 @@ class Class:
     _constructors: List[ET.Element]
     _methods: List[ET.Element]
 
-    @property
+    @cached_property
+    def c_symbol_prefix(self):
+        return f"fdn_{to_snake_case(self.name)}"
+
+    @cached_property
     def c_cast_macro(self):
         return to_macro_case(self.c_type)
 
@@ -64,7 +68,7 @@ class Class:
                 type = parse_type(param.find("type", GIR_NAMESPACES))
                 param_list.append(Parameter(param_name, type))
 
-            methods.append(Method(method_name, c_identifier, return_type, param_list, is_async))
+            methods.append(Method(method_name, c_identifier, return_type, param_list, is_async, self))
         return methods
 
 @dataclass
@@ -80,6 +84,12 @@ class Method:
     return_type: Optional[Type]
     parameters: List[Parameter]
     is_async: bool
+
+    klass: Class
+
+    @cached_property
+    def operation_type_name(self) -> str:
+        return f"Fdn{self.klass.name}{to_pascal_case(self.name)}Operation"
 
 @dataclass
 class Parameter:
@@ -177,14 +187,14 @@ typedef struct {{
   {klass.c_type} * handle;
   GError * error;
   {param_declarations_str}{return_declaration}
-}} {klass.name}{to_pascal_case(method.name)}Operation;
+}} {method.operation_type_name};
 """)
     return "\n".join(structs) + "\n"
 
 def generate_prototypes(classes: List[Class]) -> str:
     prototypes = []
     for klass in classes:
-        class_cprefix = to_snake_case(klass.name)
+        class_cprefix = klass.c_symbol_prefix
         prototypes += [
             "",
             f"static void {class_cprefix}_register (napi_env env, napi_value exports);",
@@ -202,7 +212,7 @@ def generate_prototypes(classes: List[Class]) -> str:
                     f"static gboolean {method_cprefix}_begin (gpointer user_data);",
                     f"static void {method_cprefix}_end (GObject * source_object, GAsyncResult * res, gpointer user_data);",
                     f"static void {method_cprefix}_deliver (napi_env env, napi_value js_cb, void * context, void * data);",
-                    f"static void {method_cprefix}_operation_free ({klass.name}{to_pascal_case(method.name)}Operation * operation);",
+                    f"static void {method_cprefix}_operation_free ({method.operation_type_name} * operation);",
                 ]
 
     return "\n".join(prototypes) + "\n\n"
@@ -210,25 +220,23 @@ def generate_prototypes(classes: List[Class]) -> str:
 def generate_type_tags(classes: List[Class]) -> str:
     type_tags = []
     for klass in classes:
-        class_name_snake = to_snake_case(klass.name)
         uuid_str = uuid.uuid4().hex
         uuid_formatted = f"0x{uuid_str[:16]}, 0x{uuid_str[16:]}"
-        type_tags.append(f"static napi_type_tag {class_name_snake}_type_tag = {{ {uuid_formatted} }};")
+        type_tags.append(f"static napi_type_tag {klass.c_symbol_prefix}_type_tag = {{ {uuid_formatted} }};")
     return "\n".join(type_tags) + "\n"
 
 def generate_tsfn_declarations(classes: List[Class]) -> str:
     declarations = []
     for klass in classes:
-        class_name_snake = to_snake_case(klass.name)
         async_methods = [method for method in klass.methods if method.is_async]
         if async_methods:
             declarations.append("")
             for method in async_methods:
-                declarations.append(f"static napi_threadsafe_function {class_name_snake}_{method.name}_tsfn;")
+                declarations.append(f"static napi_threadsafe_function {klass.c_symbol_prefix}_{method.name}_tsfn;")
     return "\n".join(declarations) + "\n"
 
 def generate_init_function(classes: List[Class]) -> str:
-    registration_calls = "\n  ".join([f"{to_snake_case(klass.name)}_register (env, exports);" for klass in classes])
+    registration_calls = "\n  ".join([f"{klass.c_symbol_prefix}_register (env, exports);" for klass in classes])
     return f"""
 static napi_value
 Init (napi_env env,
@@ -243,29 +251,29 @@ NAPI_MODULE (NODE_GYP_MODULE_NAME, Init)
 """
 
 def generate_registration_code(klass: Class) -> str:
-    class_name_snake = to_snake_case(klass.name)
+    class_cprefix = klass.c_symbol_prefix
 
     method_registrations = []
     tsfn_initializations = []
 
     for method in klass.methods:
         method_name_camel = to_camel_case(method.name)
-        method_registrations.append(f"""{{ "{method_name_camel}", 0, {class_name_snake}_{method.name}, 0, 0, 0, napi_default, 0 }},""")
+        method_registrations.append(f"""{{ "{method_name_camel}", 0, {class_cprefix}_{method.name}, 0, 0, 0, napi_default, 0 }},""")
         if method.is_async:
             tsfn_initializations.append(f"""\
 napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource_name);
-  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, {class_name_snake}_{method.name}_deliver, &{class_name_snake}_{method.name}_tsfn);""")
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, {class_cprefix}_{method.name}_deliver, &{class_cprefix}_{method.name}_tsfn);""")
 
     method_registrations_str = "\n    ".join(method_registrations)
     resource_name_declaration = "\n\n  napi_value resource_name;" if tsfn_initializations else ""
     tsfn_initializations_str = "\n\n  " + "\n\n  ".join(tsfn_initializations) if tsfn_initializations else ""
 
     def calculate_indent(suffix: str) -> str:
-        return " " * (len(class_name_snake) + len(suffix) + 2)
+        return " " * (len(class_cprefix) + len(suffix) + 2)
 
     return f"""\
 static void
-{class_name_snake}_register (napi_env env,
+{class_cprefix}_register (napi_env env,
 {calculate_indent('_register')}napi_value exports)
 {{
   napi_property_descriptor properties[] =
@@ -274,23 +282,23 @@ static void
   }};
 
   napi_value constructor;
-  napi_define_class (env, "{klass.name}", NAPI_AUTO_LENGTH, {class_name_snake}_constructor, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_define_class (env, "{klass.name}", NAPI_AUTO_LENGTH, {class_cprefix}_constructor, NULL, G_N_ELEMENTS (properties), properties, &constructor);
 
   napi_set_named_property (env, exports, "{klass.name}", constructor);{resource_name_declaration}{tsfn_initializations_str}
 }}
 """
 
 def generate_constructor(klass: Class) -> str:
-    class_name_snake = to_snake_case(klass.name)
+    class_cprefix = klass.c_symbol_prefix
 
     def calculate_indent(suffix: str) -> str:
-        return " " * (len(class_name_snake) + len(suffix) + 2)
+        return " " * (len(class_cprefix) + len(suffix) + 2)
 
     default_constructor = next((ctor for ctor in klass.constructors if not ctor.parameters), None)
     if default_constructor is not None:
         return f"""
 static napi_value
-{class_name_snake}_constructor (napi_env env,
+{class_cprefix}_constructor (napi_env env,
 {calculate_indent('_constructor')}napi_callback_info info)
 {{
   size_t argc = 0;
@@ -304,7 +312,7 @@ static napi_value
 
   handle = {default_constructor.c_identifier} ();
 
-  status = napi_type_tag_object (env, jsthis, &{class_name_snake}_type_tag);
+  status = napi_type_tag_object (env, jsthis, &{class_cprefix}_type_tag);
   if (status != napi_ok)
     return NULL;
 
@@ -318,7 +326,7 @@ static napi_value
     else:
         return f"""
 static napi_value
-{class_name_snake}_constructor (napi_env env,
+{class_cprefix}_constructor (napi_env env,
 {calculate_indent('_constructor')}napi_callback_info info)
 {{
   napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
@@ -327,9 +335,8 @@ static napi_value
 """
 
 def generate_method_code(klass: Class, method: Method) -> str:
-    method_name_pascal = to_pascal_case(method.name)
-    class_name = klass.name
-    class_name_snake = to_snake_case(class_name)
+    operation_type_name = method.operation_type_name
+    class_cprefix = klass.c_symbol_prefix
 
     param_conversions = [generate_parameter_conversion_code(param.name, param.type, i) for i, param in enumerate(method.parameters)]
     param_frees = [f"g_free (operation->{param.name});" for param in method.parameters if param.type.name == "utf8"]
@@ -342,20 +349,20 @@ def generate_method_code(klass: Class, method: Method) -> str:
         return_conversion = "napi_get_undefined (env, &result);"
 
     def calculate_indent(suffix: str) -> str:
-        return " " * (len(class_name_snake) + 1 + len(method.name) + len(suffix) + 2)
+        return " " * (len(class_cprefix) + 1 + len(method.name) + len(suffix) + 2)
 
     if method.is_async:
         param_conversions_str = "\n\n".join(param_conversions)
         operation_free_function = f"""\
 static void
-{class_name_snake}_{method.name}_operation_free ({class_name}{method_name_pascal}Operation * operation)
+{class_cprefix}_{method.name}_operation_free ({operation_type_name} * operation)
 {{{param_frees_str}{f"\n  g_free (operation->return_value);" if method.return_type is not None and method.return_type.name == "utf8" else ""}
-  g_slice_free ({class_name}{method_name_pascal}Operation, operation);
+  g_slice_free ({operation_type_name}, operation);
 }}"""
 
         code = f"""
 static napi_value
-{class_name_snake}_{method.name} (napi_env env,
+{class_cprefix}_{method.name} (napi_env env,
 {calculate_indent('')}napi_callback_info info)
 {{
   size_t argc = {len(method.parameters)};
@@ -365,7 +372,7 @@ static napi_value
   {klass.c_type} * handle;
   napi_deferred deferred;
   napi_value promise;
-  {class_name}{method_name_pascal}Operation * operation;
+  {operation_type_name} * operation;
   GSource * source;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
@@ -380,7 +387,7 @@ static napi_value
   if (status != napi_ok)
     return NULL;
 
-  operation = g_slice_new0 ({class_name}{method_name_pascal}Operation);
+  operation = g_slice_new0 ({operation_type_name});
   operation->env = env;
   operation->deferred = deferred;
   operation->handle = handle;
@@ -389,55 +396,55 @@ static napi_value
 {param_conversions_str}
 
   source = g_idle_source_new ();
-  g_source_set_callback (source, {class_name_snake}_{method.name}_begin,
+  g_source_set_callback (source, {class_cprefix}_{method.name}_begin,
       operation, NULL);
   g_source_attach (source, frida_get_main_context ());
   g_source_unref (source);
 
-  napi_ref_threadsafe_function (env, {class_name_snake}_{method.name}_tsfn);
+  napi_ref_threadsafe_function (env, {class_cprefix}_{method.name}_tsfn);
 
   return promise;
 
 invalid_argument:
   {{
     napi_reject_deferred (env, deferred, NULL);
-    {class_name_snake}_{method.name}_operation_free (operation);
+    {class_cprefix}_{method.name}_operation_free (operation);
     return NULL;
   }}
 }}
 
 static gboolean
-{class_name_snake}_{method.name}_begin (gpointer user_data)
+{class_cprefix}_{method.name}_begin (gpointer user_data)
 {{
-  {class_name}{method_name_pascal}Operation * operation = user_data;
+  {operation_type_name} * operation = user_data;
 
   {method.c_identifier} (operation->handle,
       {", ".join([f"operation->{param.name}" for param in method.parameters])},
-      {class_name_snake}_{method.name}_end, operation);
+      {class_cprefix}_{method.name}_end, operation);
 
   return G_SOURCE_REMOVE;
 }}
 
 static void
-{class_name_snake}_{method.name}_end (GObject * source_object,
+{class_cprefix}_{method.name}_end (GObject * source_object,
 {calculate_indent('_end')}GAsyncResult * res,
 {calculate_indent('_end')}gpointer user_data)
 {{
-  {class_name}{method_name_pascal}Operation * operation = user_data;
+  {operation_type_name} * operation = user_data;
 
   {return_assignment}{method.c_identifier}_finish (operation->handle, res,
       &operation->error);
 
-  napi_call_threadsafe_function ({class_name_snake}_{method.name}_tsfn, operation, napi_tsfn_blocking);
+  napi_call_threadsafe_function ({class_cprefix}_{method.name}_tsfn, operation, napi_tsfn_blocking);
 }}
 
 static void
-{class_name_snake}_{method.name}_deliver (napi_env env,
+{class_cprefix}_{method.name}_deliver (napi_env env,
 {calculate_indent('_deliver')}napi_value js_cb,
 {calculate_indent('_deliver')}void * context,
 {calculate_indent('_deliver')}void * data)
 {{
-  {class_name}{method_name_pascal}Operation * operation = data;
+  {operation_type_name} * operation = data;
 
   if (operation->error != NULL)
   {{
@@ -456,9 +463,9 @@ static void
     napi_resolve_deferred (env, operation->deferred, result);
   }}
 
-  {class_name_snake}_{method.name}_operation_free (operation);
+  {class_cprefix}_{method.name}_operation_free (operation);
 
-  napi_unref_threadsafe_function (env, {class_name_snake}_{method.name}_tsfn);
+  napi_unref_threadsafe_function (env, {class_cprefix}_{method.name}_tsfn);
 }}
 
 {operation_free_function}
@@ -492,7 +499,7 @@ invalid_argument:
 
         code = f"""
 static napi_value
-{class_name_snake}_{method.name} (napi_env env,
+{class_cprefix}_{method.name} (napi_env env,
 {calculate_indent('')}napi_callback_info info)
 {{
   size_t argc = {len(method.parameters)};
