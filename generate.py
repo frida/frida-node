@@ -66,7 +66,8 @@ class Class:
                 if param_name.startswith("_"):
                     continue
                 type = parse_type(param.find("type", GIR_NAMESPACES))
-                param_list.append(Parameter(param_name, type))
+                nullable = param.get("nullable") == "1"
+                param_list.append(Parameter(param_name, type, nullable))
 
             methods.append(Method(method_name, c_identifier, return_type, param_list, is_async, self))
         return methods
@@ -95,6 +96,7 @@ class Method:
 class Parameter:
     name: str
     type: Type
+    nullable: bool
 
 @dataclass
 class Type:
@@ -344,7 +346,7 @@ def generate_method_code(klass: Class, method: Method) -> str:
     operation_type_name = method.operation_type_name
     class_cprefix = klass.c_symbol_prefix
 
-    param_conversions = [generate_parameter_conversion_code(param.name, param.type, i) for i, param in enumerate(method.parameters)]
+    param_conversions = [generate_parameter_conversion_code(param, i) for i, param in enumerate(method.parameters)]
     param_frees = [f"g_free (operation->{param.name});" for param in method.parameters if param.type.name == "utf8"]
     param_frees_str = "\n  " + "\n  ".join(param_frees) if param_frees else ""
 
@@ -358,7 +360,7 @@ def generate_method_code(klass: Class, method: Method) -> str:
         return " " * (len(class_cprefix) + 1 + len(method.name) + len(suffix) + 2)
 
     if method.is_async:
-        param_conversions_str = "\n\n".join(param_conversions)
+        param_conversions_str = "\n\n" + "\n\n".join(param_conversions)
         operation_free_function = f"""\
 static void
 {class_cprefix}_{method.name}_operation_free ({operation_type_name} * operation)
@@ -529,21 +531,21 @@ static napi_value
 """
     return code
 
-def generate_parameter_conversion_code(param_name: str, param_type: Type, index: int) -> str:
+def generate_parameter_conversion_code(param: Parameter, index: int) -> str:
     code = f"""\
   if (argc > {index})
   {{
-    if (!fdn_{param_type.nick}_from_value (env, args[{index}], &operation->{param_name}))
+    if (!fdn_{param.type.nick}_from_value (env, args[{index}], &operation->{param.name}))
       goto invalid_argument;
   }}
   else
   {{
 """
 
-    if param_type.name == "Gio.Cancellable":
-        code += f"    operation->{param_name} = NULL;"
+    if param.nullable:
+        code += f"    operation->{param.name} = NULL;"
     else:
-        code += f"""    napi_throw_type_error (env, NULL, "missing argument: {param_name}");
+        code += f"""    napi_throw_type_error (env, NULL, "missing argument: {param.name}");
     goto invalid_argument;"""
         
     code += "\n  }"
