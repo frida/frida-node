@@ -139,14 +139,16 @@ def type_nick_from_name(name: str) -> str:
     return to_snake_case(tokens[1])
 
 def generate_code() -> str:
-    code = generate_includes()
-
     srcroot = Path(__file__).parent
+    frida_classes = parse_gir(srcroot / "frida-core.gir")
     gio_classes = parse_gir(srcroot / "Gio-2.0.gir")
 
-    classes = []
-    classes += [klass for klass in parse_gir(srcroot / "frida-core.gir").values() if klass.name in {"DeviceManager"}]
-    classes += [gio_classes["Cancellable"]]
+    classes = [
+        frida_classes["DeviceManager"],
+        gio_classes["Cancellable"],
+    ]
+
+    code = generate_includes()
 
     code += generate_operation_structs(classes)
 
