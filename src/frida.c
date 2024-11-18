@@ -161,8 +161,8 @@ static napi_value fdn_cancellable_source_new (napi_env env, napi_callback_info i
 
 static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0x41c6423e3fb14ed1, 0xa8d40a6a8cf17633 };
-static napi_type_tag fdn_cancellable_type_tag = { 0x5add34e15ffb4060, 0xad0f12b3d5ca4fc8 };
+static napi_type_tag fdn_device_manager_type_tag = { 0x31bc30d928fc4bc7, 0x89dea8057df4de42 };
+static napi_type_tag fdn_cancellable_type_tag = { 0xe31d84ef0a9b411b, 0xa1f7a294de2af2f0 };
 
 static napi_threadsafe_function fdn_device_manager_close_tsfn;
 static napi_threadsafe_function fdn_device_manager_get_device_by_id_tsfn;
@@ -288,7 +288,9 @@ fdn_device_manager_close (napi_env env,
   operation->env = env;
   operation->deferred = deferred;
   operation->handle = handle;
-  operation->error = NULL;  if (argc > 0)
+  operation->error = NULL;
+
+  if (argc > 0)
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -407,7 +409,9 @@ fdn_device_manager_get_device_by_id (napi_env env,
   operation->env = env;
   operation->deferred = deferred;
   operation->handle = handle;
-  operation->error = NULL;  if (argc > 0)
+  operation->error = NULL;
+
+  if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->id))
       goto invalid_argument;
@@ -551,7 +555,9 @@ fdn_device_manager_get_device_by_type (napi_env env,
   operation->env = env;
   operation->deferred = deferred;
   operation->handle = handle;
-  operation->error = NULL;  if (argc > 0)
+  operation->error = NULL;
+
+  if (argc > 0)
   {
     if (!fdn_device_type_from_value (env, args[0], &operation->type))
       goto invalid_argument;
@@ -694,7 +700,9 @@ fdn_device_manager_find_device_by_id (napi_env env,
   operation->env = env;
   operation->deferred = deferred;
   operation->handle = handle;
-  operation->error = NULL;  if (argc > 0)
+  operation->error = NULL;
+
+  if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->id))
       goto invalid_argument;
@@ -838,7 +846,9 @@ fdn_device_manager_find_device_by_type (napi_env env,
   operation->env = env;
   operation->deferred = deferred;
   operation->handle = handle;
-  operation->error = NULL;  if (argc > 0)
+  operation->error = NULL;
+
+  if (argc > 0)
   {
     if (!fdn_device_type_from_value (env, args[0], &operation->type))
       goto invalid_argument;
@@ -981,7 +991,9 @@ fdn_device_manager_enumerate_devices (napi_env env,
   operation->env = env;
   operation->deferred = deferred;
   operation->handle = handle;
-  operation->error = NULL;  if (argc > 0)
+  operation->error = NULL;
+
+  if (argc > 0)
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -1102,7 +1114,9 @@ fdn_device_manager_add_remote_device (napi_env env,
   operation->env = env;
   operation->deferred = deferred;
   operation->handle = handle;
-  operation->error = NULL;  if (argc > 0)
+  operation->error = NULL;
+
+  if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->address))
       goto invalid_argument;
@@ -1120,8 +1134,7 @@ fdn_device_manager_add_remote_device (napi_env env,
   }
   else
   {
-    napi_throw_type_error (env, NULL, "missing argument: options");
-    goto invalid_argument;
+    operation->options = NULL;
   }
 
   if (argc > 2)
@@ -1246,7 +1259,9 @@ fdn_device_manager_remove_remote_device (napi_env env,
   operation->env = env;
   operation->deferred = deferred;
   operation->handle = handle;
-  operation->error = NULL;  if (argc > 0)
+  operation->error = NULL;
+
+  if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->address))
       goto invalid_argument;
