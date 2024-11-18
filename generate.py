@@ -99,20 +99,8 @@ class Parameter:
 @dataclass
 class Type:
     name: str
+    nick: str
     c: str
-    napi: str
-
-node_api_types: Dict[str, str] = {
-    "gboolean": "bool",
-    "gint": "int32",
-    "guint": "uint32",
-    "gint64": "int64",
-    "guint64": "uint64",
-    "gfloat": "float",
-    "gdouble": "double",
-    "utf8": "string_utf8",
-    "Gio.Cancellable": "object",
-}
 
 def parse_gir(file_path: str) -> OrderedDict[str, Class]:
     tree = ET.parse(file_path)
@@ -133,9 +121,20 @@ def parse_type(type_element: ET.Element) -> Optional[Type]:
     name = type_element.get("name")
     if name == "none":
         return None
+    nick = type_nick_from_name(name)
     c = type_element.get(f"{{{C_NAMESPACE}}}type").replace("*", " *")
-    napi = node_api_types.get(name, "unknown")
-    return Type(name, c, napi)
+    return Type(name, nick, c)
+
+def type_nick_from_name(name: str) -> str:
+    if name == "GLib.PollFD":
+        return "pollfd"
+    tokens = name.split(".", maxsplit=1)
+    if len(tokens) == 1:
+        result = tokens[0]
+        if result.startswith("g"):
+            result = result[1:]
+        return result
+    return to_snake_case(tokens[1])
 
 def generate_code() -> str:
     code = generate_includes()
@@ -143,8 +142,9 @@ def generate_code() -> str:
     srcroot = Path(__file__).parent
     gio_classes = parse_gir(srcroot / "Gio-2.0.gir")
 
-    classes = [gio_classes["Cancellable"]]
+    classes = []
     classes += [klass for klass in parse_gir(srcroot / "frida-core.gir").values() if klass.name in {"DeviceManager"}]
+    classes += [gio_classes["Cancellable"]]
 
     code += generate_operation_structs(classes)
 
@@ -162,6 +162,8 @@ def generate_code() -> str:
 
         for method in klass.methods:
             code += generate_method_code(klass, method)
+
+    code += generate_builtin_conversion_helpers()
 
     return code
 
@@ -215,6 +217,11 @@ def generate_prototypes(classes: List[Class]) -> str:
                     f"static void {method_cprefix}_operation_free ({method.operation_type_name} * operation);",
                 ]
 
+    prototypes += [
+        "",
+        "static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);",
+    ]
+
     return "\n".join(prototypes) + "\n\n"
 
 def generate_type_tags(classes: List[Class]) -> str:
@@ -247,7 +254,6 @@ Init (napi_env env,
 }}
 
 NAPI_MODULE (NODE_GYP_MODULE_NAME, Init)
-
 """
 
 def generate_registration_code(klass: Class) -> str:
@@ -271,7 +277,7 @@ napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource
     def calculate_indent(suffix: str) -> str:
         return " " * (len(class_cprefix) + len(suffix) + 2)
 
-    return f"""\
+    return f"""
 static void
 {class_cprefix}_register (napi_env env,
 {calculate_indent('_register')}napi_value exports)
@@ -340,11 +346,11 @@ def generate_method_code(klass: Class, method: Method) -> str:
 
     param_conversions = [generate_parameter_conversion_code(param.name, param.type, i) for i, param in enumerate(method.parameters)]
     param_frees = [f"g_free (operation->{param.name});" for param in method.parameters if param.type.name == "utf8"]
-    param_frees_str = "\n" + "\n  ".join(param_frees) if param_frees else ""
+    param_frees_str = "\n  " + "\n  ".join(param_frees) if param_frees else ""
 
     return_assignment = f"\n\n  operation->return_value = " if method.return_type is not None else ""
     if method.return_type is not None:
-        return_conversion = f"result = Runtime_ValueFrom{to_pascal_case(method.return_type.name)} (env, operation->return_value);"
+        return_conversion = f"result = fdn_{method.return_type.nick}_to_value (env, operation->return_value);"
     else:
         return_conversion = "napi_get_undefined (env, &result);"
 
@@ -391,9 +397,7 @@ static napi_value
   operation->env = env;
   operation->deferred = deferred;
   operation->handle = handle;
-  operation->error = NULL;
-
-{param_conversions_str}
+  operation->error = NULL;{param_conversions_str}
 
   source = g_idle_source_new ();
   g_source_set_callback (source, {class_cprefix}_{method.name}_begin,
@@ -477,14 +481,14 @@ static void
                 for line in param_conversions
             ])
         else:
-            param_conversions_str_sync = ""
+            param_conversions_str_sync = "\n\n  "
 
         if method.parameters:
             param_call_str = ", " + ", ".join([param.name for param in method.parameters])
         else:
             param_call_str = ""
 
-        result_assignment = "napi_get_undefined (env, &result);" if method.return_type is None else f"result = Runtime_ValueFrom{to_pascal_case(method.return_type.name)} (env, ret);"
+        result_assignment = "napi_get_undefined (env, &result);" if method.return_type is None else f"result = fdn_{method.return_type.nick}_to_value (env, ret);"
 
         if method.parameters:
             invalid_argument_label = f"""
@@ -492,8 +496,7 @@ static void
 invalid_argument:
   {{
     {param_frees_str}return NULL;
-  }}
-"""
+  }}"""
         else:
             invalid_argument_label = ""
 
@@ -515,9 +518,7 @@ static napi_value
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
-
-  {param_conversions_str_sync}{return_assignment}{method.c_identifier} (handle{param_call_str});
+    return NULL;{param_conversions_str_sync}{return_assignment}{method.c_identifier} (handle{param_call_str});
 
   {result_assignment}{param_frees_str}
 
@@ -527,50 +528,53 @@ static napi_value
     return code
 
 def generate_parameter_conversion_code(param_name: str, param_type: Type, index: int) -> str:
-    if param_type.name == "Gio.Cancellable":
-        return f"""\
+    code = f"""\
   if (argc > {index})
   {{
-    status = napi_get_value_{param_type.napi} (env, args[{index}], &operation->{param_name});
-    if (status != napi_ok)
-    {{
-      napi_throw_error (env, NULL, "failed to get argument value");
+    if (!fdn_{param_type.nick}_from_value (env, args[{index}], &operation->{param_name}))
       goto invalid_argument;
-    }}
   }}
   else
   {{
-    operation->{param_name} = NULL;
-  }}"""
-    elif param_type.name == "utf8":
-        return f"""\
-  size_t {param_name}_length;
-  status = napi_get_value_string_utf8 (env, args[{index}], NULL, 0, &{param_name}_length);
-  if (status != napi_ok)
-  {{
-    napi_throw_error (env, NULL, "failed to get string length");
-    goto invalid_argument;
-  }}
-  operation->{param_name} = g_malloc ({param_name}_length + 1);
-  status = napi_get_value_string_utf8 (env, args[{index}], operation->{param_name}, {param_name}_length + 1, &{param_name}_length);
-  if (status != napi_ok)
-  {{
-    napi_throw_error (env, NULL, "failed to get string value");
-    goto invalid_argument;
-  }}"""
+"""
+
+    if param_type.name == "Gio.Cancellable":
+        code += f"    operation->{param_name} = NULL;"
     else:
-        return f"""\
-  if (argc <= {index})
-  {{
-    napi_throw_type_error (env, NULL, "missing argument: {param_name}");
+        code += f"""    napi_throw_type_error (env, NULL, "missing argument: {param_name}");
+    goto invalid_argument;"""
+        
+    code += "\n  }"
+
+    return code
+
+def generate_builtin_conversion_helpers() -> str:
+    return """
+static gboolean
+fdn_utf8_from_value (napi_env env,
+                     napi_value value,
+                     gchar ** str)
+{
+  gchar * result = NULL;
+  size_t length;
+
+  if (napi_get_value_string_utf8 (env, value, NULL, 0, &length) != napi_ok)
     goto invalid_argument;
-  }}
-  status = napi_get_value_{param_type.napi} (env, args[{index}], &operation->{param_name});
-  if (status != napi_ok)
-  {{
-    napi_throw_error (env, NULL, "failed to get argument value");
+
+  result = g_malloc (length + 1);
+  if (napi_get_value_string_utf8 (env, value, result, length + 1, &length) != napi_ok)
     goto invalid_argument;
-  }}"""
+
+  *str = result;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected a string");
+    g_free (result);
+    return FALSE;
+  }
+}"""
 
 def to_snake_case(name: str) -> str:
     return "".join(["_" + c.lower() if c.isupper() else c for c in name]).lstrip("_")
