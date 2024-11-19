@@ -161,8 +161,11 @@ static napi_value fdn_cancellable_source_new (napi_env env, napi_callback_info i
 
 static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0x31bc30d928fc4bc7, 0x89dea8057df4de42 };
-static napi_type_tag fdn_cancellable_type_tag = { 0xe31d84ef0a9b411b, 0xa1f7a294de2af2f0 };
+static napi_type_tag fdn_device_manager_type_tag = { 0xd06704157e4f408d, 0xaf18ddf4df179580 };
+static napi_type_tag fdn_cancellable_type_tag = { 0x02642914de044fe9, 0xbd2ea618196221cf };
+
+static napi_ref fdn_device_manager_constructor;
+static napi_ref fdn_cancellable_constructor;
 
 static napi_threadsafe_function fdn_device_manager_close_tsfn;
 static napi_threadsafe_function fdn_device_manager_get_device_by_id_tsfn;
@@ -201,7 +204,8 @@ fdn_device_manager_register (napi_env env,
   };
 
   napi_value constructor;
-  napi_define_class (env, "DeviceManager", NAPI_AUTO_LENGTH, fdn_device_manager_constructor, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_define_class (env, "DeviceManager", NAPI_AUTO_LENGTH, fdn_device_manager_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_create_reference (env, constructor, 1, &fdn_device_manager_constructor);
 
   napi_set_named_property (env, exports, "DeviceManager", constructor);
 
@@ -232,9 +236,48 @@ fdn_device_manager_register (napi_env env,
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_manager_remove_remote_device_deliver, &fdn_device_manager_remove_remote_device_tsfn);
 }
 
+static gboolean
+fdn_device_manager_from_value (napi_env env,
+                               napi_value value,
+                               FridaDeviceManager ** result)
+{
+  napi_status status;
+  bool is_instance;
+  FridaDeviceManager * handle;
+
+  status = napi_check_object_type_tag (env, value, &fdn_device_manager_type_tag, &is_instance);
+  if (status != napi_ok || !is_instance)
+  {
+    napi_throw_type_error (env, NULL, "expected an instance of DeviceManager");
+    return FALSE;
+  }
+
+  napi_unwrap (env, value, (void **) &handle);
+
+  g_object_ref (handle);
+  *result = handle;
+
+  return TRUE;
+}
+
 static napi_value
-fdn_device_manager_constructor (napi_env env,
-                                napi_callback_info info)
+fdn_device_manager_to_value (napi_env env,
+                             FridaDeviceManager * handle)
+{
+  napi_value result, constructor, handle_wrapper;
+
+  napi_get_reference_value (env, fdn_device_manager_constructor, &constructor);
+
+  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+
+  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+
+  return result;
+}
+
+static napi_value
+fdn_device_manager_construct (napi_env env,
+                              napi_callback_info info)
 {
   size_t argc = 0;
   napi_value jsthis;
@@ -1382,14 +1425,54 @@ fdn_cancellable_register (napi_env env,
   };
 
   napi_value constructor;
-  napi_define_class (env, "Cancellable", NAPI_AUTO_LENGTH, fdn_cancellable_constructor, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_define_class (env, "Cancellable", NAPI_AUTO_LENGTH, fdn_cancellable_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_create_reference (env, constructor, 1, &fdn_cancellable_constructor);
 
   napi_set_named_property (env, exports, "Cancellable", constructor);
 }
 
+static gboolean
+fdn_cancellable_from_value (napi_env env,
+                            napi_value value,
+                            GCancellable ** result)
+{
+  napi_status status;
+  bool is_instance;
+  GCancellable * handle;
+
+  status = napi_check_object_type_tag (env, value, &fdn_cancellable_type_tag, &is_instance);
+  if (status != napi_ok || !is_instance)
+  {
+    napi_throw_type_error (env, NULL, "expected an instance of Cancellable");
+    return FALSE;
+  }
+
+  napi_unwrap (env, value, (void **) &handle);
+
+  g_object_ref (handle);
+  *result = handle;
+
+  return TRUE;
+}
+
 static napi_value
-fdn_cancellable_constructor (napi_env env,
-                             napi_callback_info info)
+fdn_cancellable_to_value (napi_env env,
+                          GCancellable * handle)
+{
+  napi_value result, constructor, handle_wrapper;
+
+  napi_get_reference_value (env, fdn_cancellable_constructor, &constructor);
+
+  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+
+  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+
+  return result;
+}
+
+static napi_value
+fdn_cancellable_construct (napi_env env,
+                           napi_callback_info info)
 {
   size_t argc = 0;
   napi_value jsthis;
