@@ -149,19 +149,16 @@ def generate_code() -> str:
     ]
 
     code = generate_includes()
-
     code += generate_operation_structs(classes)
-
     code += generate_prototypes(classes)
-
     code += generate_type_tags(classes)
-
+    code += generate_constructor_declarations(classes)
     code += generate_tsfn_declarations(classes)
-
     code += generate_init_function(classes)
 
     for klass in classes:
         code += generate_registration_code(klass)
+        code += generate_class_conversion_functions(klass)
         code += generate_constructor(klass)
 
         for method in klass.methods:
@@ -236,6 +233,12 @@ def generate_type_tags(classes: List[Class]) -> str:
         type_tags.append(f"static napi_type_tag {klass.c_symbol_prefix}_type_tag = {{ {uuid_formatted} }};")
     return "\n".join(type_tags) + "\n"
 
+def generate_constructor_declarations(classes: List[Class]) -> str:
+    declarations = []
+    for klass in classes:
+        declarations.append(f"static napi_ref {klass.c_symbol_prefix}_constructor;")
+    return "\n" + "\n".join(declarations) + "\n"
+
 def generate_tsfn_declarations(classes: List[Class]) -> str:
     declarations = []
     for klass in classes:
@@ -292,11 +295,63 @@ static void
   }};
 
   napi_value constructor;
-  napi_define_class (env, "{klass.name}", NAPI_AUTO_LENGTH, {class_cprefix}_constructor, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_define_class (env, "{klass.name}", NAPI_AUTO_LENGTH, {class_cprefix}_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_create_reference (env, constructor, 1, &{class_cprefix}_constructor);
 
   napi_set_named_property (env, exports, "{klass.name}", constructor);{resource_name_declaration}{tsfn_initializations_str}
 }}
 """
+
+def generate_class_conversion_functions(klass: Class) -> str:
+    class_cprefix = klass.c_symbol_prefix
+
+    def calculate_indent(suffix: str) -> str:
+        return " " * (len(class_cprefix) + len(suffix) + 2)
+
+    from_value_function = f"""
+static gboolean
+{class_cprefix}_from_value (napi_env env,
+{calculate_indent("_from_value")}napi_value value,
+{calculate_indent("_from_value")}{klass.c_type} ** result)
+{{
+  napi_status status;
+  bool is_instance;
+  {klass.c_type} * handle;
+
+  status = napi_check_object_type_tag (env, value, &{class_cprefix}_type_tag, &is_instance);
+  if (status != napi_ok || !is_instance)
+  {{
+    napi_throw_type_error (env, NULL, "expected an instance of {klass.name}");
+    return FALSE;
+  }}
+
+  napi_unwrap (env, value, (void **) &handle);
+
+  g_object_ref (handle);
+  *result = handle;
+
+  return TRUE;
+}}
+"""
+
+    to_value_function = f"""
+static napi_value
+{class_cprefix}_to_value (napi_env env,
+{calculate_indent("_to_value")}{klass.c_type} * handle)
+{{
+  napi_value result, constructor, handle_wrapper;
+
+  napi_get_reference_value (env, {class_cprefix}_constructor, &constructor);
+
+  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+
+  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+
+  return result;
+}}
+"""
+
+    return from_value_function + to_value_function
 
 def generate_constructor(klass: Class) -> str:
     class_cprefix = klass.c_symbol_prefix
@@ -308,8 +363,8 @@ def generate_constructor(klass: Class) -> str:
     if default_constructor is not None:
         return f"""
 static napi_value
-{class_cprefix}_constructor (napi_env env,
-{calculate_indent('_constructor')}napi_callback_info info)
+{class_cprefix}_construct (napi_env env,
+{calculate_indent('_construct')}napi_callback_info info)
 {{
   size_t argc = 0;
   napi_value jsthis;
@@ -336,8 +391,8 @@ static napi_value
     else:
         return f"""
 static napi_value
-{class_cprefix}_constructor (napi_env env,
-{calculate_indent('_constructor')}napi_callback_info info)
+{class_cprefix}_construct (napi_env env,
+{calculate_indent('_construct')}napi_callback_info info)
 {{
   napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
