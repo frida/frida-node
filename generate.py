@@ -223,6 +223,8 @@ def generate_prototypes(classes: List[Class]) -> str:
     prototypes += [
         "",
         "static napi_value fdn_boolean_to_value (napi_env env, gboolean value);",
+        "static gboolean fdn_int_from_value (napi_env env, napi_value value, gint * result);",
+        "static napi_value fdn_int_to_value (napi_env env, gint value);",
         "static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * result);",
         "static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);",
     ]
@@ -627,6 +629,36 @@ fdn_boolean_to_value (napi_env env,
 }
 
 static gboolean
+fdn_int_from_value (napi_env env,
+                    napi_value value,
+                    gint * result)
+{
+  int32_t number;
+
+  if (napi_get_value_int32 (env, value, &number) != napi_ok)
+    goto invalid_argument;
+
+  *result = number;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected an integer");
+    g_free (result);
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_int_to_value (napi_env env,
+                  gint value)
+{
+  napi_value result;
+  napi_create_int32 (env, value, &result);
+  return result;
+}
+
+static gboolean
 fdn_ulong_from_value (napi_env env,
                       napi_value value,
                       gulong * result)
@@ -636,12 +668,15 @@ fdn_ulong_from_value (napi_env env,
   if (napi_get_value_double (env, value, &number) != napi_ok)
     goto invalid_argument;
 
+  if (number < 0 || number > G_MAXULONG)
+    goto invalid_argument;
+
   *result = number;
   return TRUE;
 
 invalid_argument:
   {
-    napi_throw_error (env, NULL, "expected a number");
+    napi_throw_error (env, NULL, "expected an unsigned integer");
     g_free (result);
     return FALSE;
   }

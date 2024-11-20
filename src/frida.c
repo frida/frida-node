@@ -164,11 +164,13 @@ static napi_value fdn_cancellable_set_error_if_cancelled (napi_env env, napi_cal
 static napi_value fdn_cancellable_source_new (napi_env env, napi_callback_info info);
 
 static napi_value fdn_boolean_to_value (napi_env env, gboolean value);
+static gboolean fdn_int_from_value (napi_env env, napi_value value, gint * result);
+static napi_value fdn_int_to_value (napi_env env, gint value);
 static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * result);
 static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0x2397c5c305a24ad4, 0xacf81155b7c0ead4 };
-static napi_type_tag fdn_cancellable_type_tag = { 0xce35d3adaa714ad8, 0xa76dad34a39266c7 };
+static napi_type_tag fdn_device_manager_type_tag = { 0x384d6c2121054246, 0x82d9f6a20b7644b2 };
+static napi_type_tag fdn_cancellable_type_tag = { 0xe6f3cbdb083c4add, 0x84fffe1e30bbe1cd };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_cancellable_constructor;
@@ -1835,6 +1837,36 @@ fdn_boolean_to_value (napi_env env,
 }
 
 static gboolean
+fdn_int_from_value (napi_env env,
+                    napi_value value,
+                    gint * result)
+{
+  int32_t number;
+
+  if (napi_get_value_int32 (env, value, &number) != napi_ok)
+    goto invalid_argument;
+
+  *result = number;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected an integer");
+    g_free (result);
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_int_to_value (napi_env env,
+                  gint value)
+{
+  napi_value result;
+  napi_create_int32 (env, value, &result);
+  return result;
+}
+
+static gboolean
 fdn_ulong_from_value (napi_env env,
                       napi_value value,
                       gulong * result)
@@ -1844,12 +1876,15 @@ fdn_ulong_from_value (napi_env env,
   if (napi_get_value_double (env, value, &number) != napi_ok)
     goto invalid_argument;
 
+  if (number < 0 || number > G_MAXULONG)
+    goto invalid_argument;
+
   *result = number;
   return TRUE;
 
 invalid_argument:
   {
-    napi_throw_error (env, NULL, "expected a number");
+    napi_throw_error (env, NULL, "expected an unsigned integer");
     g_free (result);
     return FALSE;
   }
