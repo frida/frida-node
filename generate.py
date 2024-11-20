@@ -124,7 +124,7 @@ def parse_type(type_element: ET.Element) -> Optional[Type]:
     if name == "none":
         return None
     nick = type_nick_from_name(name)
-    c = type_element.get(f"{{{C_NAMESPACE}}}type").replace("*", " *")
+    c = type_element.get(f"{{{C_NAMESPACE}}}type").replace("const ", "").replace("*", " *")
     return Type(name, nick, c)
 
 def type_nick_from_name(name: str) -> str:
@@ -201,7 +201,9 @@ def generate_prototypes(classes: List[Class]) -> str:
         prototypes += [
             "",
             f"static void {class_cprefix}_register (napi_env env, napi_value exports);",
-            f"static napi_value {class_cprefix}_constructor (napi_env env, napi_callback_info info);",
+            f"static gboolean {class_cprefix}_from_value (napi_env env, napi_value value, {klass.c_type} ** result);",
+            f"static napi_value {class_cprefix}_to_value (napi_env env, {klass.c_type} * handle);",
+            f"static napi_value {class_cprefix}_construct (napi_env env, napi_callback_info info);",
         ]
 
         for method in klass.methods:
@@ -220,6 +222,8 @@ def generate_prototypes(classes: List[Class]) -> str:
 
     prototypes += [
         "",
+        "static napi_value fdn_boolean_to_value (napi_env env, gboolean value);",
+        "static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * result);",
         "static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);",
     ]
 
@@ -547,8 +551,6 @@ static void
         else:
             param_call_str = ""
 
-        result_assignment = "napi_get_undefined (env, &result);" if method.return_type is None else f"result = fdn_{method.return_type.nick}_to_value (env, ret);"
-
         if method.parameters:
             invalid_argument_label = f"""
 
@@ -559,17 +561,21 @@ invalid_argument:
         else:
             invalid_argument_label = ""
 
+        return_variable_declaration = f"\n  {method.return_type.c} return_value;" if method.return_type is not None else ""
+        return_assignment = return_assignment.replace("operation->", "").lstrip()
+        return_conversion = return_conversion.replace("operation->", "")
+
         code = f"""
 static napi_value
 {class_cprefix}_{method.name} (napi_env env,
 {calculate_indent('')}napi_callback_info info)
 {{
+  napi_value result;
   size_t argc = {len(method.parameters)};
   napi_value args[{len(method.parameters)}];
   napi_status status;
   napi_value jsthis;
-  {klass.c_type} * handle;
-  napi_value result;
+  {klass.c_type} * handle;{return_variable_declaration}
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -581,7 +587,7 @@ static napi_value
 
   {return_assignment}{method.c_identifier} (handle{param_call_str});
 
-  {result_assignment}{param_frees_str}
+  {return_conversion}{param_frees_str}
 
   return result;{invalid_argument_label}
 }}
@@ -611,6 +617,36 @@ def generate_parameter_conversion_code(param: Parameter, index: int) -> str:
 
 def generate_builtin_conversion_helpers() -> str:
     return """
+static napi_value
+fdn_boolean_to_value (napi_env env,
+                      gboolean value)
+{
+  napi_value result;
+  napi_get_boolean (env, value, &result);
+  return result;
+}
+
+static gboolean
+fdn_ulong_from_value (napi_env env,
+                      napi_value value,
+                      gulong * result)
+{
+  double number;
+
+  if (napi_get_value_double (env, value, &number) != napi_ok)
+    goto invalid_argument;
+
+  *result = number;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected a number");
+    g_free (result);
+    return FALSE;
+  }
+}
+
 static gboolean
 fdn_utf8_from_value (napi_env env,
                      napi_value value,
