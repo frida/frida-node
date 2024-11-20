@@ -14,7 +14,7 @@ typedef struct {
   napi_deferred deferred;
   FridaDeviceManager * handle;
   GError * error;
-  const gchar * id;
+  gchar * id;
   gint timeout;
   GCancellable * cancellable;
   FridaDevice * return_value;
@@ -36,7 +36,7 @@ typedef struct {
   napi_deferred deferred;
   FridaDeviceManager * handle;
   GError * error;
-  const gchar * id;
+  gchar * id;
   gint timeout;
   GCancellable * cancellable;
   FridaDevice * return_value;
@@ -67,7 +67,7 @@ typedef struct {
   napi_deferred deferred;
   FridaDeviceManager * handle;
   GError * error;
-  const gchar * address;
+  gchar * address;
   FridaRemoteDeviceOptions * options;
   GCancellable * cancellable;
   FridaDevice * return_value;
@@ -78,13 +78,15 @@ typedef struct {
   napi_deferred deferred;
   FridaDeviceManager * handle;
   GError * error;
-  const gchar * address;
+  gchar * address;
   GCancellable * cancellable;
 } FdnDeviceManagerRemoveRemoteDeviceOperation;
 
 
 static void fdn_device_manager_register (napi_env env, napi_value exports);
-static napi_value fdn_device_manager_constructor (napi_env env, napi_callback_info info);
+static gboolean fdn_device_manager_from_value (napi_env env, napi_value value, FridaDeviceManager ** result);
+static napi_value fdn_device_manager_to_value (napi_env env, FridaDeviceManager * handle);
+static napi_value fdn_device_manager_construct (napi_env env, napi_callback_info info);
 
 static napi_value fdn_device_manager_close (napi_env env, napi_callback_info info);
 static gboolean fdn_device_manager_close_begin (gpointer user_data);
@@ -135,7 +137,9 @@ static void fdn_device_manager_remove_remote_device_deliver (napi_env env, napi_
 static void fdn_device_manager_remove_remote_device_operation_free (FdnDeviceManagerRemoveRemoteDeviceOperation * operation);
 
 static void fdn_cancellable_register (napi_env env, napi_value exports);
-static napi_value fdn_cancellable_constructor (napi_env env, napi_callback_info info);
+static gboolean fdn_cancellable_from_value (napi_env env, napi_value value, GCancellable ** result);
+static napi_value fdn_cancellable_to_value (napi_env env, GCancellable * handle);
+static napi_value fdn_cancellable_construct (napi_env env, napi_callback_info info);
 
 static napi_value fdn_cancellable_cancel (napi_env env, napi_callback_info info);
 
@@ -159,10 +163,12 @@ static napi_value fdn_cancellable_set_error_if_cancelled (napi_env env, napi_cal
 
 static napi_value fdn_cancellable_source_new (napi_env env, napi_callback_info info);
 
+static napi_value fdn_boolean_to_value (napi_env env, gboolean value);
+static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * result);
 static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0xd06704157e4f408d, 0xaf18ddf4df179580 };
-static napi_type_tag fdn_cancellable_type_tag = { 0x02642914de044fe9, 0xbd2ea618196221cf };
+static napi_type_tag fdn_device_manager_type_tag = { 0x2397c5c305a24ad4, 0xacf81155b7c0ead4 };
+static napi_type_tag fdn_cancellable_type_tag = { 0xce35d3adaa714ad8, 0xa76dad34a39266c7 };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_cancellable_constructor;
@@ -1500,12 +1506,12 @@ static napi_value
 fdn_cancellable_cancel (napi_env env,
                         napi_callback_info info)
 {
+  napi_value result;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   GCancellable * handle;
-  napi_value result;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -1526,12 +1532,12 @@ static napi_value
 fdn_cancellable_disconnect (napi_env env,
                             napi_callback_info info)
 {
+  napi_value result;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   GCancellable * handle;
-  napi_value result;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -1568,12 +1574,13 @@ static napi_value
 fdn_cancellable_get_fd (napi_env env,
                         napi_callback_info info)
 {
+  napi_value result;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   GCancellable * handle;
-  napi_value result;
+  int return_value;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -1583,11 +1590,9 @@ fdn_cancellable_get_fd (napi_env env,
   if (status != napi_ok)
     return NULL;
 
-  
+  return_value = g_cancellable_get_fd (handle);
 
-  operation->return_value = g_cancellable_get_fd (handle);
-
-  result = fdn_int_to_value (env, ret);
+  result = fdn_int_to_value (env, return_value);
 
   return result;
 }
@@ -1596,12 +1601,13 @@ static napi_value
 fdn_cancellable_is_cancelled (napi_env env,
                               napi_callback_info info)
 {
+  napi_value result;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   GCancellable * handle;
-  napi_value result;
+  gboolean return_value;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -1611,11 +1617,9 @@ fdn_cancellable_is_cancelled (napi_env env,
   if (status != napi_ok)
     return NULL;
 
-  
+  return_value = g_cancellable_is_cancelled (handle);
 
-  operation->return_value = g_cancellable_is_cancelled (handle);
-
-  result = fdn_boolean_to_value (env, ret);
+  result = fdn_boolean_to_value (env, return_value);
 
   return result;
 }
@@ -1624,12 +1628,13 @@ static napi_value
 fdn_cancellable_make_pollfd (napi_env env,
                              napi_callback_info info)
 {
+  napi_value result;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   GCancellable * handle;
-  napi_value result;
+  gboolean return_value;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -1650,11 +1655,9 @@ fdn_cancellable_make_pollfd (napi_env env,
     goto invalid_argument;
   }
 
-  
+  return_value = g_cancellable_make_pollfd (handle, pollfd);
 
-  operation->return_value = g_cancellable_make_pollfd (handle, pollfd);
-
-  result = fdn_boolean_to_value (env, ret);
+  result = fdn_boolean_to_value (env, return_value);
 
   return result;
 
@@ -1668,12 +1671,12 @@ static napi_value
 fdn_cancellable_pop_current (napi_env env,
                              napi_callback_info info)
 {
+  napi_value result;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   GCancellable * handle;
-  napi_value result;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -1694,12 +1697,12 @@ static napi_value
 fdn_cancellable_push_current (napi_env env,
                               napi_callback_info info)
 {
+  napi_value result;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   GCancellable * handle;
-  napi_value result;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -1720,12 +1723,12 @@ static napi_value
 fdn_cancellable_release_fd (napi_env env,
                             napi_callback_info info)
 {
+  napi_value result;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   GCancellable * handle;
-  napi_value result;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -1746,12 +1749,12 @@ static napi_value
 fdn_cancellable_reset (napi_env env,
                        napi_callback_info info)
 {
+  napi_value result;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   GCancellable * handle;
-  napi_value result;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -1772,12 +1775,13 @@ static napi_value
 fdn_cancellable_set_error_if_cancelled (napi_env env,
                                         napi_callback_info info)
 {
+  napi_value result;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   GCancellable * handle;
-  napi_value result;
+  gboolean return_value;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -1787,11 +1791,9 @@ fdn_cancellable_set_error_if_cancelled (napi_env env,
   if (status != napi_ok)
     return NULL;
 
-  
+  return_value = g_cancellable_set_error_if_cancelled (handle);
 
-  operation->return_value = g_cancellable_set_error_if_cancelled (handle);
-
-  result = fdn_boolean_to_value (env, ret);
+  result = fdn_boolean_to_value (env, return_value);
 
   return result;
 }
@@ -1800,12 +1802,13 @@ static napi_value
 fdn_cancellable_source_new (napi_env env,
                             napi_callback_info info)
 {
+  napi_value result;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   GCancellable * handle;
-  napi_value result;
+  GSource * return_value;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -1815,13 +1818,41 @@ fdn_cancellable_source_new (napi_env env,
   if (status != napi_ok)
     return NULL;
 
-  
+  return_value = g_cancellable_source_new (handle);
 
-  operation->return_value = g_cancellable_source_new (handle);
-
-  result = fdn_source_to_value (env, ret);
+  result = fdn_source_to_value (env, return_value);
 
   return result;
+}
+
+static napi_value
+fdn_boolean_to_value (napi_env env,
+                      gboolean value)
+{
+  napi_value result;
+  napi_get_boolean (env, value, &result);
+  return result;
+}
+
+static gboolean
+fdn_ulong_from_value (napi_env env,
+                      napi_value value,
+                      gulong * result)
+{
+  double number;
+
+  if (napi_get_value_double (env, value, &number) != napi_ok)
+    goto invalid_argument;
+
+  *result = number;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected a number");
+    g_free (result);
+    return FALSE;
+  }
 }
 
 static gboolean
