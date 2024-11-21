@@ -9,6 +9,12 @@ import xml.etree.ElementTree as ET
 
 GIR_NAMESPACES = {"": "http://www.gtk.org/introspection/core/1.0"}
 C_NAMESPACE = "http://www.gtk.org/introspection/c/1.0"
+GLIB_NAMESPACE = "http://www.gtk.org/introspection/glib/1.0"
+
+@dataclass
+class Model:
+    classes: OrderedDict[str, Class]
+    enumerations: OrderedDict[str, Enumeration]
 
 @dataclass
 class Class:
@@ -112,16 +118,21 @@ class Type:
     nick: str
     c: str
 
+@dataclass
+class Enumeration:
+    name: str
+    c_type: str
+    get_type: str
+
 MethodFilter = Callable[[str, str], bool]
 MethodNameTransformer = Callable[[str, str], str]
 
 def parse_gir(file_path: str,
               method_filter: Optional[MethodFilter] = None,
-              method_name_transformer: Optional[MethodNameTransformer] = None) -> OrderedDict[str, Class]:
+              method_name_transformer: Optional[MethodNameTransformer] = None) -> Model:
     tree = ET.parse(file_path)
 
     classes = OrderedDict()
-
     for klass_element in tree.getroot().findall(".//class", GIR_NAMESPACES):
         class_name = klass_element.get("name")
         class_c_type = klass_element.get(f"{{{C_NAMESPACE}}}type")
@@ -130,7 +141,14 @@ def parse_gir(file_path: str,
 
         classes[class_name] = Class(class_name, class_c_type, constructors, methods, method_filter, method_name_transformer)
 
-    return classes
+    enumerations = OrderedDict()
+    for enum_element in tree.getroot().findall(".//enumeration", GIR_NAMESPACES):
+        enum_name = enum_element.get("name")
+        enum_c_type = enum_element.get(f"{{{C_NAMESPACE}}}type")
+        get_type = enum_element.get(f"{{{GLIB_NAMESPACE}}}get-type")
+        enumerations[enum_name] = Enumeration(enum_name, enum_c_type, get_type)
+
+    return Model(classes, enumerations)
 
 def parse_type(type_element: ET.Element) -> Optional[Type]:
     name = type_element.get("name")
@@ -153,21 +171,30 @@ def type_nick_from_name(name: str) -> str:
 
 def generate_code() -> str:
     srcroot = Path(__file__).parent
-    frida_classes = parse_gir(srcroot / "frida-core.gir")
+    frida = parse_gir(srcroot / "frida-core.gir")
 
-    gio_classes = parse_gir(srcroot / "Gio-2.0.gir",
-                            method_filter=filter_gio_methods,
-                            method_name_transformer=transform_gio_method_name)
+    gio = parse_gir(srcroot / "Gio-2.0.gir",
+                    method_filter=filter_gio_methods,
+                    method_name_transformer=transform_gio_method_name)
 
     classes = [
-        frida_classes["DeviceManager"],
-        frida_classes["Device"],
-        gio_classes["Cancellable"],
+        frida.classes["DeviceManager"],
+        frida.classes["DeviceList"],
+        frida.classes["Device"],
+        #frida.classes["Application"],
+        #frida.classes["Process"],
+        #frida.classes["SpawnOptions"],
+        #frida.classes["ProcessMatchOptions"],
+        gio.classes["Cancellable"],
+    ]
+
+    enumerations = [
+        frida.enumerations["DeviceType"],
     ]
 
     code = generate_includes()
     code += generate_operation_structs(classes)
-    code += generate_prototypes(classes)
+    code += generate_prototypes(classes, enumerations)
     code += generate_type_tags(classes)
     code += generate_constructor_declarations(classes)
     code += generate_tsfn_declarations(classes)
@@ -181,7 +208,8 @@ def generate_code() -> str:
         for method in klass.methods:
             code += generate_method_code(klass, method)
 
-    code += generate_builtin_conversion_helpers()
+    for enum in enumerations:
+        code += generate_enum_conversion_functions(enum)
 
     return code
 
@@ -221,8 +249,9 @@ typedef struct {{
 """)
     return "\n".join(structs) + "\n"
 
-def generate_prototypes(classes: List[Class]) -> str:
+def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -> str:
     prototypes = []
+
     for klass in classes:
         class_cprefix = klass.c_symbol_prefix
         prototypes += [
@@ -247,13 +276,24 @@ def generate_prototypes(classes: List[Class]) -> str:
                     f"static void {method_cprefix}_operation_free ({method.operation_type_name} * operation);",
                 ]
 
+    for enum in enumerations:
+        enum_name_snake = to_snake_case(enum.name)
+        prototypes += [
+            "",
+            f"static gboolean fdn_{enum_name_snake}_from_value (napi_env env, napi_value value, {enum.c_type} * result);",
+            f"static napi_value fdn_{enum_name_snake}_to_value (napi_env env, {enum.c_type} value);",
+        ]
+
     prototypes += [
         "",
         "static napi_value fdn_boolean_to_value (napi_env env, gboolean value);",
         "static gboolean fdn_int_from_value (napi_env env, napi_value value, gint * result);",
         "static napi_value fdn_int_to_value (napi_env env, gint value);",
+        "static gboolean fdn_uint_from_value (napi_env env, napi_value value, guint * result);",
         "static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * result);",
         "static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);",
+        "static gboolean fdn_enum_from_value (napi_env env, GType enum_type, napi_value value, gint * result);",
+        "static napi_value fdn_enum_to_value (napi_env env, GType enum_type, gint value);",
     ]
 
     return "\n".join(prototypes) + "\n\n"
@@ -320,7 +360,7 @@ napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource
     return f"""
 static void
 {class_cprefix}_register (napi_env env,
-{calculate_indent('_register')}napi_value exports)
+{calculate_indent("_register")}napi_value exports)
 {{
   napi_property_descriptor properties[] =
   {{
@@ -397,7 +437,7 @@ def generate_constructor(klass: Class) -> str:
         return f"""
 static napi_value
 {class_cprefix}_construct (napi_env env,
-{calculate_indent('_construct')}napi_callback_info info)
+{calculate_indent("_construct")}napi_callback_info info)
 {{
   size_t argc = 0;
   napi_value jsthis;
@@ -425,7 +465,7 @@ static napi_value
         return f"""
 static napi_value
 {class_cprefix}_construct (napi_env env,
-{calculate_indent('_construct')}napi_callback_info info)
+{calculate_indent("_construct")}napi_callback_info info)
 {{
   napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
@@ -524,8 +564,8 @@ static gboolean
 
 static void
 {class_cprefix}_{method.name}_end (GObject * source_object,
-{calculate_indent('_end')}GAsyncResult * res,
-{calculate_indent('_end')}gpointer user_data)
+{calculate_indent("_end")}GAsyncResult * res,
+{calculate_indent("_end")}gpointer user_data)
 {{
   {operation_type_name} * operation = user_data;
 
@@ -537,9 +577,9 @@ static void
 
 static void
 {class_cprefix}_{method.name}_deliver (napi_env env,
-{calculate_indent('_deliver')}napi_value js_cb,
-{calculate_indent('_deliver')}void * context,
-{calculate_indent('_deliver')}void * data)
+{calculate_indent("_deliver")}napi_value js_cb,
+{calculate_indent("_deliver")}void * context,
+{calculate_indent("_deliver")}void * data)
 {{
   {operation_type_name} * operation = data;
 
@@ -662,6 +702,29 @@ def generate_parameter_conversion_code(param: Parameter, index: int) -> str:
 
     return code
 
+def generate_enum_conversion_functions(enum: Enumeration) -> str:
+    enum_name_snake = to_snake_case(enum.name)
+
+    def calculate_indent(suffix: str) -> str:
+        return " " * (4 + len(enum_name_snake) + len(suffix) + 2)
+
+    return f"""
+static gboolean
+fdn_{enum_name_snake}_from_value (napi_env env,
+{calculate_indent("_from_value")}napi_value value,
+{calculate_indent("_from_value")}{enum.c_type} * result)
+{{
+  return fdn_enum_from_value (env, {enum.get_type} (), value, (gint *) result);
+}}
+
+static napi_value
+fdn_{enum_name_snake}_to_value (napi_env env,
+{calculate_indent("_to_value")}{enum.c_type} value)
+{{
+  return fdn_enum_to_value (env, {enum.get_type} (), value);
+}}
+"""
+
 def generate_builtin_conversion_helpers() -> str:
     return """
 static napi_value
@@ -689,7 +752,6 @@ fdn_int_from_value (napi_env env,
 invalid_argument:
   {
     napi_throw_error (env, NULL, "expected an integer");
-    g_free (result);
     return FALSE;
   }
 }
@@ -701,6 +763,26 @@ fdn_int_to_value (napi_env env,
   napi_value result;
   napi_create_int32 (env, value, &result);
   return result;
+}
+
+static gboolean
+fdn_uint_from_value (napi_env env,
+                     napi_value value,
+                     guint * result)
+{
+  uint32_t number;
+
+  if (napi_get_value_uint32 (env, value, &number) != napi_ok)
+    goto invalid_argument;
+
+  *result = number;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected an unsigned integer");
+    return FALSE;
+  }
 }
 
 static gboolean
@@ -722,7 +804,6 @@ fdn_ulong_from_value (napi_env env,
 invalid_argument:
   {
     napi_throw_error (env, NULL, "expected an unsigned integer");
-    g_free (result);
     return FALSE;
   }
 }
@@ -751,6 +832,64 @@ invalid_argument:
     g_free (result);
     return FALSE;
   }
+}
+
+static gboolean
+fdn_enum_from_value (napi_env env,
+                     GType enum_type,
+                     napi_value value,
+                     gint * result)
+{
+  gboolean success = FALSE;
+  gchar * nick;
+  GEnumClass * enum_class;
+  guint i;
+
+  if (!fdn_utf8_from_value (env, value, &nick))
+    return FALSE;
+
+  enum_class = G_ENUM_CLASS (g_type_class_ref (enum_type));
+
+  for (i = 0; i != enum_class->n_values; i++)
+  {
+    GEnumValue * enum_value = &enum_class->values[i];
+    if (strcmp (enum_value->value_nick, nick) == 0)
+    {
+      *result = enum_value->value;
+      success = TRUE;
+      break;
+    }
+  }
+
+  g_type_class_unref (enum_class);
+
+  g_free (nick);
+
+  if (!success)
+    napi_throw_error (env, NULL, "invalid enumeration value");
+
+  return success;
+}
+
+static napi_value
+fdn_enum_to_value (napi_env env,
+                   GType enum_type,
+                   gint value)
+{
+  napi_value result;
+  GEnumClass * enum_class;
+  GEnumValue * enum_value;
+
+  enum_class = G_ENUM_CLASS (g_type_class_ref (enum_type));
+
+  enum_value = g_enum_get_value (enum_class, value);
+  g_assert (enum_value != NULL);
+
+  napi_create_string_utf8 (env, enum_value->value_nick, NAPI_AUTO_LENGTH, &result);
+
+  g_type_class_unref (enum_class);
+
+  return result;
 }"""
 
 def to_snake_case(name: str) -> str:
