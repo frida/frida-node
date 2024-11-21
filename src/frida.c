@@ -534,6 +534,72 @@ static napi_value fdn_device_get_provider (napi_env env, napi_callback_info info
 
 static napi_value fdn_device_get_manager (napi_env env, napi_callback_info info);
 
+static void fdn_application_register (napi_env env, napi_value exports);
+static gboolean fdn_application_from_value (napi_env env, napi_value value, FridaApplication ** result);
+static napi_value fdn_application_to_value (napi_env env, FridaApplication * handle);
+static napi_value fdn_application_construct (napi_env env, napi_callback_info info);
+
+static napi_value fdn_application_get_identifier (napi_env env, napi_callback_info info);
+
+static napi_value fdn_application_get_name (napi_env env, napi_callback_info info);
+
+static napi_value fdn_application_get_pid (napi_env env, napi_callback_info info);
+
+static napi_value fdn_application_get_parameters (napi_env env, napi_callback_info info);
+
+static void fdn_process_register (napi_env env, napi_value exports);
+static gboolean fdn_process_from_value (napi_env env, napi_value value, FridaProcess ** result);
+static napi_value fdn_process_to_value (napi_env env, FridaProcess * handle);
+static napi_value fdn_process_construct (napi_env env, napi_callback_info info);
+
+static napi_value fdn_process_get_pid (napi_env env, napi_callback_info info);
+
+static napi_value fdn_process_get_name (napi_env env, napi_callback_info info);
+
+static napi_value fdn_process_get_parameters (napi_env env, napi_callback_info info);
+
+static void fdn_spawn_options_register (napi_env env, napi_value exports);
+static gboolean fdn_spawn_options_from_value (napi_env env, napi_value value, FridaSpawnOptions ** result);
+static napi_value fdn_spawn_options_to_value (napi_env env, FridaSpawnOptions * handle);
+static napi_value fdn_spawn_options_construct (napi_env env, napi_callback_info info);
+
+static napi_value fdn_spawn_options_get_argv (napi_env env, napi_callback_info info);
+
+static napi_value fdn_spawn_options_set_argv (napi_env env, napi_callback_info info);
+
+static napi_value fdn_spawn_options_get_envp (napi_env env, napi_callback_info info);
+
+static napi_value fdn_spawn_options_set_envp (napi_env env, napi_callback_info info);
+
+static napi_value fdn_spawn_options_get_env (napi_env env, napi_callback_info info);
+
+static napi_value fdn_spawn_options_set_env (napi_env env, napi_callback_info info);
+
+static napi_value fdn_spawn_options_get_cwd (napi_env env, napi_callback_info info);
+
+static napi_value fdn_spawn_options_set_cwd (napi_env env, napi_callback_info info);
+
+static napi_value fdn_spawn_options_get_stdio (napi_env env, napi_callback_info info);
+
+static napi_value fdn_spawn_options_set_stdio (napi_env env, napi_callback_info info);
+
+static napi_value fdn_spawn_options_get_aux (napi_env env, napi_callback_info info);
+
+static napi_value fdn_spawn_options_set_aux (napi_env env, napi_callback_info info);
+
+static void fdn_process_match_options_register (napi_env env, napi_value exports);
+static gboolean fdn_process_match_options_from_value (napi_env env, napi_value value, FridaProcessMatchOptions ** result);
+static napi_value fdn_process_match_options_to_value (napi_env env, FridaProcessMatchOptions * handle);
+static napi_value fdn_process_match_options_construct (napi_env env, napi_callback_info info);
+
+static napi_value fdn_process_match_options_get_timeout (napi_env env, napi_callback_info info);
+
+static napi_value fdn_process_match_options_set_timeout (napi_env env, napi_callback_info info);
+
+static napi_value fdn_process_match_options_get_scope (napi_env env, napi_callback_info info);
+
+static napi_value fdn_process_match_options_set_scope (napi_env env, napi_callback_info info);
+
 static void fdn_cancellable_register (napi_env env, napi_value exports);
 static gboolean fdn_cancellable_from_value (napi_env env, napi_value value, GCancellable ** result);
 static napi_value fdn_cancellable_to_value (napi_env env, GCancellable * handle);
@@ -567,14 +633,22 @@ static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** st
 static gboolean fdn_enum_from_value (napi_env env, GType enum_type, napi_value value, gint * result);
 static napi_value fdn_enum_to_value (napi_env env, GType enum_type, gint value);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0xc52e65ee601d4097, 0xaae3068e7353eaba };
-static napi_type_tag fdn_device_list_type_tag = { 0xb215b123fc0d4a78, 0x926ae6252a4ded9a };
-static napi_type_tag fdn_device_type_tag = { 0x65ba9eac2cb3478c, 0x99cf6ff6a57a5620 };
-static napi_type_tag fdn_cancellable_type_tag = { 0xbd483c2872884287, 0xb018de200edafaa4 };
+static napi_type_tag fdn_device_manager_type_tag = { 0xa31496a2d0fa4b98, 0xac542f5823510b19 };
+static napi_type_tag fdn_device_list_type_tag = { 0x1c394865c5f04e0b, 0xbda64f029ba7971b };
+static napi_type_tag fdn_device_type_tag = { 0x2f6d5ad956c84d09, 0xbd2109eadc44e863 };
+static napi_type_tag fdn_application_type_tag = { 0x802bdbac364646f1, 0x959f2187adbe8b2e };
+static napi_type_tag fdn_process_type_tag = { 0x5e0fd18104294900, 0xbe2a03344a8e131e };
+static napi_type_tag fdn_spawn_options_type_tag = { 0xf8c6abcafa694641, 0x936ec5d3da1cb6a7 };
+static napi_type_tag fdn_process_match_options_type_tag = { 0xfabc865c16604bcd, 0x9dd6e253eda4d9f6 };
+static napi_type_tag fdn_cancellable_type_tag = { 0x0a24bb61718747db, 0xa2830cdd896e2455 };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_list_constructor;
 static napi_ref fdn_device_constructor;
+static napi_ref fdn_application_constructor;
+static napi_ref fdn_process_constructor;
+static napi_ref fdn_spawn_options_constructor;
+static napi_ref fdn_process_match_options_constructor;
 static napi_ref fdn_cancellable_constructor;
 
 static napi_threadsafe_function fdn_device_manager_close_tsfn;
@@ -617,6 +691,10 @@ Init (napi_env env,
   fdn_device_manager_register (env, exports);
   fdn_device_list_register (env, exports);
   fdn_device_register (env, exports);
+  fdn_application_register (env, exports);
+  fdn_process_register (env, exports);
+  fdn_spawn_options_register (env, exports);
+  fdn_process_match_options_register (env, exports);
   fdn_cancellable_register (env, exports);
   return exports;
 }
@@ -5491,6 +5569,1144 @@ fdn_device_get_manager (napi_env env,
   result = fdn_device_manager_to_value (env, return_value);
 
   return result;
+}
+
+static void
+fdn_application_register (napi_env env,
+                          napi_value exports)
+{
+  napi_property_descriptor properties[] =
+  {
+    { "getIdentifier", NULL, fdn_application_get_identifier, NULL, NULL, NULL, napi_default, NULL },
+    { "getName", NULL, fdn_application_get_name, NULL, NULL, NULL, napi_default, NULL },
+    { "getPid", NULL, fdn_application_get_pid, NULL, NULL, NULL, napi_default, NULL },
+    { "getParameters", NULL, fdn_application_get_parameters, NULL, NULL, NULL, napi_default, NULL },
+  };
+
+  napi_value constructor;
+  napi_define_class (env, "Application", NAPI_AUTO_LENGTH, fdn_application_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_create_reference (env, constructor, 1, &fdn_application_constructor);
+
+  napi_set_named_property (env, exports, "Application", constructor);
+}
+
+static gboolean
+fdn_application_from_value (napi_env env,
+                            napi_value value,
+                            FridaApplication ** result)
+{
+  napi_status status;
+  bool is_instance;
+  FridaApplication * handle;
+
+  status = napi_check_object_type_tag (env, value, &fdn_application_type_tag, &is_instance);
+  if (status != napi_ok || !is_instance)
+  {
+    napi_throw_type_error (env, NULL, "expected an instance of Application");
+    return FALSE;
+  }
+
+  napi_unwrap (env, value, (void **) &handle);
+
+  g_object_ref (handle);
+  *result = handle;
+
+  return TRUE;
+}
+
+static napi_value
+fdn_application_to_value (napi_env env,
+                          FridaApplication * handle)
+{
+  napi_value result, constructor, handle_wrapper;
+
+  napi_get_reference_value (env, fdn_application_constructor, &constructor);
+
+  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+
+  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+
+  return result;
+}
+
+static napi_value
+fdn_application_construct (napi_env env,
+                           napi_callback_info info)
+{
+  napi_throw_error (env, NULL, "class Application cannot be constructed because it lacks a default constructor");
+  return NULL;
+}
+
+static napi_value
+fdn_application_get_identifier (napi_env env,
+                                napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  FridaApplication * handle;
+  gchar * return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  return_value = frida_application_get_identifier (handle);
+
+  result = fdn_utf8_to_value (env, return_value);
+
+  return result;
+}
+
+static napi_value
+fdn_application_get_name (napi_env env,
+                          napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  FridaApplication * handle;
+  gchar * return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  return_value = frida_application_get_name (handle);
+
+  result = fdn_utf8_to_value (env, return_value);
+
+  return result;
+}
+
+static napi_value
+fdn_application_get_pid (napi_env env,
+                         napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  FridaApplication * handle;
+  guint return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  return_value = frida_application_get_pid (handle);
+
+  result = fdn_uint_to_value (env, return_value);
+
+  return result;
+}
+
+static napi_value
+fdn_application_get_parameters (napi_env env,
+                                napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  FridaApplication * handle;
+  GHashTable * return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  return_value = frida_application_get_parameters (handle);
+
+  result = fdn_hash_table_to_value (env, return_value);
+
+  return result;
+}
+
+static void
+fdn_process_register (napi_env env,
+                      napi_value exports)
+{
+  napi_property_descriptor properties[] =
+  {
+    { "getPid", NULL, fdn_process_get_pid, NULL, NULL, NULL, napi_default, NULL },
+    { "getName", NULL, fdn_process_get_name, NULL, NULL, NULL, napi_default, NULL },
+    { "getParameters", NULL, fdn_process_get_parameters, NULL, NULL, NULL, napi_default, NULL },
+  };
+
+  napi_value constructor;
+  napi_define_class (env, "Process", NAPI_AUTO_LENGTH, fdn_process_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_create_reference (env, constructor, 1, &fdn_process_constructor);
+
+  napi_set_named_property (env, exports, "Process", constructor);
+}
+
+static gboolean
+fdn_process_from_value (napi_env env,
+                        napi_value value,
+                        FridaProcess ** result)
+{
+  napi_status status;
+  bool is_instance;
+  FridaProcess * handle;
+
+  status = napi_check_object_type_tag (env, value, &fdn_process_type_tag, &is_instance);
+  if (status != napi_ok || !is_instance)
+  {
+    napi_throw_type_error (env, NULL, "expected an instance of Process");
+    return FALSE;
+  }
+
+  napi_unwrap (env, value, (void **) &handle);
+
+  g_object_ref (handle);
+  *result = handle;
+
+  return TRUE;
+}
+
+static napi_value
+fdn_process_to_value (napi_env env,
+                      FridaProcess * handle)
+{
+  napi_value result, constructor, handle_wrapper;
+
+  napi_get_reference_value (env, fdn_process_constructor, &constructor);
+
+  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+
+  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+
+  return result;
+}
+
+static napi_value
+fdn_process_construct (napi_env env,
+                       napi_callback_info info)
+{
+  napi_throw_error (env, NULL, "class Process cannot be constructed because it lacks a default constructor");
+  return NULL;
+}
+
+static napi_value
+fdn_process_get_pid (napi_env env,
+                     napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  FridaProcess * handle;
+  guint return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  return_value = frida_process_get_pid (handle);
+
+  result = fdn_uint_to_value (env, return_value);
+
+  return result;
+}
+
+static napi_value
+fdn_process_get_name (napi_env env,
+                      napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  FridaProcess * handle;
+  gchar * return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  return_value = frida_process_get_name (handle);
+
+  result = fdn_utf8_to_value (env, return_value);
+
+  return result;
+}
+
+static napi_value
+fdn_process_get_parameters (napi_env env,
+                            napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  FridaProcess * handle;
+  GHashTable * return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  return_value = frida_process_get_parameters (handle);
+
+  result = fdn_hash_table_to_value (env, return_value);
+
+  return result;
+}
+
+static void
+fdn_spawn_options_register (napi_env env,
+                            napi_value exports)
+{
+  napi_property_descriptor properties[] =
+  {
+    { "getArgv", NULL, fdn_spawn_options_get_argv, NULL, NULL, NULL, napi_default, NULL },
+    { "setArgv", NULL, fdn_spawn_options_set_argv, NULL, NULL, NULL, napi_default, NULL },
+    { "getEnvp", NULL, fdn_spawn_options_get_envp, NULL, NULL, NULL, napi_default, NULL },
+    { "setEnvp", NULL, fdn_spawn_options_set_envp, NULL, NULL, NULL, napi_default, NULL },
+    { "getEnv", NULL, fdn_spawn_options_get_env, NULL, NULL, NULL, napi_default, NULL },
+    { "setEnv", NULL, fdn_spawn_options_set_env, NULL, NULL, NULL, napi_default, NULL },
+    { "getCwd", NULL, fdn_spawn_options_get_cwd, NULL, NULL, NULL, napi_default, NULL },
+    { "setCwd", NULL, fdn_spawn_options_set_cwd, NULL, NULL, NULL, napi_default, NULL },
+    { "getStdio", NULL, fdn_spawn_options_get_stdio, NULL, NULL, NULL, napi_default, NULL },
+    { "setStdio", NULL, fdn_spawn_options_set_stdio, NULL, NULL, NULL, napi_default, NULL },
+    { "getAux", NULL, fdn_spawn_options_get_aux, NULL, NULL, NULL, napi_default, NULL },
+    { "setAux", NULL, fdn_spawn_options_set_aux, NULL, NULL, NULL, napi_default, NULL },
+  };
+
+  napi_value constructor;
+  napi_define_class (env, "SpawnOptions", NAPI_AUTO_LENGTH, fdn_spawn_options_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_create_reference (env, constructor, 1, &fdn_spawn_options_constructor);
+
+  napi_set_named_property (env, exports, "SpawnOptions", constructor);
+}
+
+static gboolean
+fdn_spawn_options_from_value (napi_env env,
+                              napi_value value,
+                              FridaSpawnOptions ** result)
+{
+  napi_status status;
+  bool is_instance;
+  FridaSpawnOptions * handle;
+
+  status = napi_check_object_type_tag (env, value, &fdn_spawn_options_type_tag, &is_instance);
+  if (status != napi_ok || !is_instance)
+  {
+    napi_throw_type_error (env, NULL, "expected an instance of SpawnOptions");
+    return FALSE;
+  }
+
+  napi_unwrap (env, value, (void **) &handle);
+
+  g_object_ref (handle);
+  *result = handle;
+
+  return TRUE;
+}
+
+static napi_value
+fdn_spawn_options_to_value (napi_env env,
+                            FridaSpawnOptions * handle)
+{
+  napi_value result, constructor, handle_wrapper;
+
+  napi_get_reference_value (env, fdn_spawn_options_constructor, &constructor);
+
+  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+
+  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+
+  return result;
+}
+
+static napi_value
+fdn_spawn_options_construct (napi_env env,
+                             napi_callback_info info)
+{
+  size_t argc = 0;
+  napi_value jsthis;
+  napi_status status;
+  FridaSpawnOptions * handle;
+
+  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  handle = frida_spawn_options_new ();
+
+  status = napi_type_tag_object (env, jsthis, &fdn_spawn_options_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
+}
+
+static napi_value
+fdn_spawn_options_get_argv (napi_env env,
+                            napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 1;
+  napi_value args[1];
+  napi_status status;
+  napi_value jsthis;
+  FridaSpawnOptions * handle;
+  gint * result_length1;
+  gchar ** return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc > 0)
+  {
+    if (!fdn_int_from_value (env, args[0], &result_length1))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: resultLength1");
+    goto invalid_argument;
+  }
+
+  return_value = frida_spawn_options_get_argv (handle, result_length1);
+
+  result = fdn_strv_to_value (env, return_value);
+
+  return result;
+
+invalid_argument:
+  {
+    return NULL;
+  }
+}
+
+static napi_value
+fdn_spawn_options_set_argv (napi_env env,
+                            napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 2;
+  napi_value args[2];
+  napi_status status;
+  napi_value jsthis;
+  FridaSpawnOptions * handle;
+  gchar ** value;
+  gint value_length1;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc > 0)
+  {
+    if (!fdn_strv_from_value (env, args[0], &value))
+      goto invalid_argument;
+  }
+  else
+  {
+    value = NULL;
+  }
+  if (argc > 1)
+  {
+    if (!fdn_int_from_value (env, args[1], &value_length1))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: valueLength1");
+    goto invalid_argument;
+  }
+
+  frida_spawn_options_set_argv (handle, value, value_length1);
+
+  napi_get_undefined (env, &result);
+
+  return result;
+
+invalid_argument:
+  {
+    return NULL;
+  }
+}
+
+static napi_value
+fdn_spawn_options_get_envp (napi_env env,
+                            napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 1;
+  napi_value args[1];
+  napi_status status;
+  napi_value jsthis;
+  FridaSpawnOptions * handle;
+  gint * result_length1;
+  gchar ** return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc > 0)
+  {
+    if (!fdn_int_from_value (env, args[0], &result_length1))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: resultLength1");
+    goto invalid_argument;
+  }
+
+  return_value = frida_spawn_options_get_envp (handle, result_length1);
+
+  result = fdn_strv_to_value (env, return_value);
+
+  return result;
+
+invalid_argument:
+  {
+    return NULL;
+  }
+}
+
+static napi_value
+fdn_spawn_options_set_envp (napi_env env,
+                            napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 2;
+  napi_value args[2];
+  napi_status status;
+  napi_value jsthis;
+  FridaSpawnOptions * handle;
+  gchar ** value;
+  gint value_length1;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc > 0)
+  {
+    if (!fdn_strv_from_value (env, args[0], &value))
+      goto invalid_argument;
+  }
+  else
+  {
+    value = NULL;
+  }
+  if (argc > 1)
+  {
+    if (!fdn_int_from_value (env, args[1], &value_length1))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: valueLength1");
+    goto invalid_argument;
+  }
+
+  frida_spawn_options_set_envp (handle, value, value_length1);
+
+  napi_get_undefined (env, &result);
+
+  return result;
+
+invalid_argument:
+  {
+    return NULL;
+  }
+}
+
+static napi_value
+fdn_spawn_options_get_env (napi_env env,
+                           napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 1;
+  napi_value args[1];
+  napi_status status;
+  napi_value jsthis;
+  FridaSpawnOptions * handle;
+  gint * result_length1;
+  gchar ** return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc > 0)
+  {
+    if (!fdn_int_from_value (env, args[0], &result_length1))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: resultLength1");
+    goto invalid_argument;
+  }
+
+  return_value = frida_spawn_options_get_env (handle, result_length1);
+
+  result = fdn_strv_to_value (env, return_value);
+
+  return result;
+
+invalid_argument:
+  {
+    return NULL;
+  }
+}
+
+static napi_value
+fdn_spawn_options_set_env (napi_env env,
+                           napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 2;
+  napi_value args[2];
+  napi_status status;
+  napi_value jsthis;
+  FridaSpawnOptions * handle;
+  gchar ** value;
+  gint value_length1;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc > 0)
+  {
+    if (!fdn_strv_from_value (env, args[0], &value))
+      goto invalid_argument;
+  }
+  else
+  {
+    value = NULL;
+  }
+  if (argc > 1)
+  {
+    if (!fdn_int_from_value (env, args[1], &value_length1))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: valueLength1");
+    goto invalid_argument;
+  }
+
+  frida_spawn_options_set_env (handle, value, value_length1);
+
+  napi_get_undefined (env, &result);
+
+  return result;
+
+invalid_argument:
+  {
+    return NULL;
+  }
+}
+
+static napi_value
+fdn_spawn_options_get_cwd (napi_env env,
+                           napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  FridaSpawnOptions * handle;
+  gchar * return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  return_value = frida_spawn_options_get_cwd (handle);
+
+  result = fdn_utf8_to_value (env, return_value);
+
+  return result;
+}
+
+static napi_value
+fdn_spawn_options_set_cwd (napi_env env,
+                           napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 1;
+  napi_value args[1];
+  napi_status status;
+  napi_value jsthis;
+  FridaSpawnOptions * handle;
+  gchar * value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc > 0)
+  {
+    if (!fdn_utf8_from_value (env, args[0], &value))
+      goto invalid_argument;
+  }
+  else
+  {
+    value = NULL;
+  }
+
+  frida_spawn_options_set_cwd (handle, value);
+
+  
+  g_free (operation->value);napi_get_undefined (env, &result);
+
+  return result;
+
+invalid_argument:
+  {
+    
+  g_free (operation->value);return NULL;
+  }
+}
+
+static napi_value
+fdn_spawn_options_get_stdio (napi_env env,
+                             napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  FridaSpawnOptions * handle;
+  FridaStdio return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  return_value = frida_spawn_options_get_stdio (handle);
+
+  result = fdn_stdio_to_value (env, return_value);
+
+  return result;
+}
+
+static napi_value
+fdn_spawn_options_set_stdio (napi_env env,
+                             napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 1;
+  napi_value args[1];
+  napi_status status;
+  napi_value jsthis;
+  FridaSpawnOptions * handle;
+  FridaStdio value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc > 0)
+  {
+    if (!fdn_stdio_from_value (env, args[0], &value))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: value");
+    goto invalid_argument;
+  }
+
+  frida_spawn_options_set_stdio (handle, value);
+
+  napi_get_undefined (env, &result);
+
+  return result;
+
+invalid_argument:
+  {
+    return NULL;
+  }
+}
+
+static napi_value
+fdn_spawn_options_get_aux (napi_env env,
+                           napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  FridaSpawnOptions * handle;
+  GHashTable * return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  return_value = frida_spawn_options_get_aux (handle);
+
+  result = fdn_hash_table_to_value (env, return_value);
+
+  return result;
+}
+
+static napi_value
+fdn_spawn_options_set_aux (napi_env env,
+                           napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 1;
+  napi_value args[1];
+  napi_status status;
+  napi_value jsthis;
+  FridaSpawnOptions * handle;
+  GHashTable * value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc > 0)
+  {
+    if (!fdn_hash_table_from_value (env, args[0], &value))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: value");
+    goto invalid_argument;
+  }
+
+  frida_spawn_options_set_aux (handle, value);
+
+  napi_get_undefined (env, &result);
+
+  return result;
+
+invalid_argument:
+  {
+    return NULL;
+  }
+}
+
+static void
+fdn_process_match_options_register (napi_env env,
+                                    napi_value exports)
+{
+  napi_property_descriptor properties[] =
+  {
+    { "getTimeout", NULL, fdn_process_match_options_get_timeout, NULL, NULL, NULL, napi_default, NULL },
+    { "setTimeout", NULL, fdn_process_match_options_set_timeout, NULL, NULL, NULL, napi_default, NULL },
+    { "getScope", NULL, fdn_process_match_options_get_scope, NULL, NULL, NULL, napi_default, NULL },
+    { "setScope", NULL, fdn_process_match_options_set_scope, NULL, NULL, NULL, napi_default, NULL },
+  };
+
+  napi_value constructor;
+  napi_define_class (env, "ProcessMatchOptions", NAPI_AUTO_LENGTH, fdn_process_match_options_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_create_reference (env, constructor, 1, &fdn_process_match_options_constructor);
+
+  napi_set_named_property (env, exports, "ProcessMatchOptions", constructor);
+}
+
+static gboolean
+fdn_process_match_options_from_value (napi_env env,
+                                      napi_value value,
+                                      FridaProcessMatchOptions ** result)
+{
+  napi_status status;
+  bool is_instance;
+  FridaProcessMatchOptions * handle;
+
+  status = napi_check_object_type_tag (env, value, &fdn_process_match_options_type_tag, &is_instance);
+  if (status != napi_ok || !is_instance)
+  {
+    napi_throw_type_error (env, NULL, "expected an instance of ProcessMatchOptions");
+    return FALSE;
+  }
+
+  napi_unwrap (env, value, (void **) &handle);
+
+  g_object_ref (handle);
+  *result = handle;
+
+  return TRUE;
+}
+
+static napi_value
+fdn_process_match_options_to_value (napi_env env,
+                                    FridaProcessMatchOptions * handle)
+{
+  napi_value result, constructor, handle_wrapper;
+
+  napi_get_reference_value (env, fdn_process_match_options_constructor, &constructor);
+
+  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+
+  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+
+  return result;
+}
+
+static napi_value
+fdn_process_match_options_construct (napi_env env,
+                                     napi_callback_info info)
+{
+  size_t argc = 0;
+  napi_value jsthis;
+  napi_status status;
+  FridaProcessMatchOptions * handle;
+
+  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  handle = frida_process_match_options_new ();
+
+  status = napi_type_tag_object (env, jsthis, &fdn_process_match_options_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
+}
+
+static napi_value
+fdn_process_match_options_get_timeout (napi_env env,
+                                       napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  FridaProcessMatchOptions * handle;
+  gint return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  return_value = frida_process_match_options_get_timeout (handle);
+
+  result = fdn_int_to_value (env, return_value);
+
+  return result;
+}
+
+static napi_value
+fdn_process_match_options_set_timeout (napi_env env,
+                                       napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 1;
+  napi_value args[1];
+  napi_status status;
+  napi_value jsthis;
+  FridaProcessMatchOptions * handle;
+  gint value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc > 0)
+  {
+    if (!fdn_int_from_value (env, args[0], &value))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: value");
+    goto invalid_argument;
+  }
+
+  frida_process_match_options_set_timeout (handle, value);
+
+  napi_get_undefined (env, &result);
+
+  return result;
+
+invalid_argument:
+  {
+    return NULL;
+  }
+}
+
+static napi_value
+fdn_process_match_options_get_scope (napi_env env,
+                                     napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  FridaProcessMatchOptions * handle;
+  FridaScope return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  return_value = frida_process_match_options_get_scope (handle);
+
+  result = fdn_scope_to_value (env, return_value);
+
+  return result;
+}
+
+static napi_value
+fdn_process_match_options_set_scope (napi_env env,
+                                     napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 1;
+  napi_value args[1];
+  napi_status status;
+  napi_value jsthis;
+  FridaProcessMatchOptions * handle;
+  FridaScope value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc > 0)
+  {
+    if (!fdn_scope_from_value (env, args[0], &value))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: value");
+    goto invalid_argument;
+  }
+
+  frida_process_match_options_set_scope (handle, value);
+
+  napi_get_undefined (env, &result);
+
+  return result;
+
+invalid_argument:
+  {
+    return NULL;
+  }
 }
 
 static void

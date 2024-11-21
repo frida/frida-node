@@ -7,9 +7,10 @@ from typing import Callable, List, Optional
 import uuid
 import xml.etree.ElementTree as ET
 
-GIR_NAMESPACES = {"": "http://www.gtk.org/introspection/core/1.0"}
+CORE_NAMESPACE = "http://www.gtk.org/introspection/core/1.0"
 C_NAMESPACE = "http://www.gtk.org/introspection/c/1.0"
 GLIB_NAMESPACE = "http://www.gtk.org/introspection/glib/1.0"
+GIR_NAMESPACES = {"": CORE_NAMESPACE}
 
 @dataclass
 class Model:
@@ -44,7 +45,7 @@ class Class:
             param_list = []
             for param in parameters:
                 param_name = param.get("name")
-                type = parse_type(param.find("type", ns))
+                type = parse_type(param)
                 param_list.append(Parameter(param_name, type))
 
             constructors.append(Constructor(constructor_name, c_identifier, param_list))
@@ -68,17 +69,17 @@ class Class:
                 continue
 
             throws = method_element.get("throws") == "1"
-            is_async = any(param.find("type", GIR_NAMESPACES).get("name") == "Gio.AsyncReadyCallback" for param in parameters)
+            is_async = any(param[0].get("name") == "Gio.AsyncReadyCallback" for param in parameters)
 
             result_element = next((m for m in self._methods if m.get("name") == f"{method_name}_finish")) if is_async else method_element
-            return_type = parse_type(result_element.find(".//return-value/type", GIR_NAMESPACES))
+            return_type = parse_type(result_element.find(".//return-value", GIR_NAMESPACES))
 
             param_list = []
             for param in parameters:
                 param_name = param.get("name")
                 if param_name.startswith("_"):
                     continue
-                type = parse_type(param.find("type", GIR_NAMESPACES))
+                type = parse_type(param)
                 nullable = param.get("nullable") == "1"
                 param_list.append(Parameter(param_name, type, nullable))
 
@@ -150,12 +151,19 @@ def parse_gir(file_path: str,
 
     return Model(classes, enumerations)
 
-def parse_type(type_element: ET.Element) -> Optional[Type]:
-    name = type_element.get("name")
+def parse_type(parent_element: ET.Element) -> Optional[Type]:
+    child = parent_element.find("type", GIR_NAMESPACES)
+    if child is None:
+        child = parent_element.find("array", GIR_NAMESPACES)
+        assert child is not None
+        element_type = parse_type(child)
+        assert element_type.name == "utf8", "only string arrays are supported for now"
+        return Type("utf8[]", "strv", "gchar **")
+    name = child.get("name")
     if name == "none":
         return None
     nick = type_nick_from_name(name)
-    c = type_element.get(f"{{{C_NAMESPACE}}}type").replace("const ", "").replace("*", " *")
+    c = child.get(f"{{{C_NAMESPACE}}}type").replace("const ", "").replace("*", " *")
     return Type(name, nick, c)
 
 def type_nick_from_name(name: str) -> str:
@@ -181,10 +189,10 @@ def generate_code() -> str:
         frida.classes["DeviceManager"],
         frida.classes["DeviceList"],
         frida.classes["Device"],
-        #frida.classes["Application"],
-        #frida.classes["Process"],
-        #frida.classes["SpawnOptions"],
-        #frida.classes["ProcessMatchOptions"],
+        frida.classes["Application"],
+        frida.classes["Process"],
+        frida.classes["SpawnOptions"],
+        frida.classes["ProcessMatchOptions"],
         gio.classes["Cancellable"],
     ]
 
