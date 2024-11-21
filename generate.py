@@ -3,7 +3,7 @@ from collections import OrderedDict
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Callable, List, Optional
 import uuid
 import xml.etree.ElementTree as ET
 
@@ -16,6 +16,8 @@ class Class:
     c_type: str
     _constructors: List[ET.Element]
     _methods: List[ET.Element]
+    method_filter: Optional[MethodFilter]
+    method_name_transformer: Optional[MethodNameTransformer]
 
     @cached_property
     def c_symbol_prefix(self):
@@ -47,14 +49,19 @@ class Class:
         methods = []
         for method_element in self._methods:
             method_name = method_element.get("name")
+            if self.method_filter is not None and not self.method_filter(self.name, method_name):
+                continue
             if method_name.startswith("_") or method_name.endswith("_sync") or method_name.endswith("_finish"):
                 continue
+            transformed_method_name = self.method_name_transformer(self.name, method_name) if self.method_name_transformer is not None else method_name
 
             c_identifier = method_element.get(f"{{{C_NAMESPACE}}}identifier")
             parameters = method_element.findall("./parameters/parameter", GIR_NAMESPACES)
             has_closure_param = any((param.get("closure") == "1" for param in parameters))
             if has_closure_param:
                 continue
+
+            throws = method_element.get("throws") == "1"
             is_async = any(param.find("type", GIR_NAMESPACES).get("name") == "Gio.AsyncReadyCallback" for param in parameters)
 
             result_element = next((m for m in self._methods if m.get("name") == f"{method_name}_finish")) if is_async else method_element
@@ -69,7 +76,7 @@ class Class:
                 nullable = param.get("nullable") == "1"
                 param_list.append(Parameter(param_name, type, nullable))
 
-            methods.append(Method(method_name, c_identifier, return_type, param_list, is_async, self))
+            methods.append(Method(transformed_method_name, c_identifier, return_type, param_list, throws, is_async, self))
         return methods
 
 @dataclass
@@ -84,6 +91,7 @@ class Method:
     c_identifier: str
     return_type: Optional[Type]
     parameters: List[Parameter]
+    throws: bool
     is_async: bool
 
     klass: Class
@@ -104,7 +112,12 @@ class Type:
     nick: str
     c: str
 
-def parse_gir(file_path: str) -> OrderedDict[str, Class]:
+MethodFilter = Callable[[str, str], bool]
+MethodNameTransformer = Callable[[str, str], str]
+
+def parse_gir(file_path: str,
+              method_filter: Optional[MethodFilter] = None,
+              method_name_transformer: Optional[MethodNameTransformer] = None) -> OrderedDict[str, Class]:
     tree = ET.parse(file_path)
 
     classes = OrderedDict()
@@ -115,7 +128,7 @@ def parse_gir(file_path: str) -> OrderedDict[str, Class]:
         constructors = klass_element.findall(".//constructor", GIR_NAMESPACES)
         methods = klass_element.findall(".//method", GIR_NAMESPACES)
 
-        classes[class_name] = Class(class_name, class_c_type, constructors, methods)
+        classes[class_name] = Class(class_name, class_c_type, constructors, methods, method_filter, method_name_transformer)
 
     return classes
 
@@ -141,10 +154,14 @@ def type_nick_from_name(name: str) -> str:
 def generate_code() -> str:
     srcroot = Path(__file__).parent
     frida_classes = parse_gir(srcroot / "frida-core.gir")
-    gio_classes = parse_gir(srcroot / "Gio-2.0.gir")
+
+    gio_classes = parse_gir(srcroot / "Gio-2.0.gir",
+                            method_filter=filter_gio_methods,
+                            method_name_transformer=transform_gio_method_name)
 
     classes = [
         frida_classes["DeviceManager"],
+        frida_classes["Device"],
         gio_classes["Cancellable"],
     ]
 
@@ -167,6 +184,16 @@ def generate_code() -> str:
     code += generate_builtin_conversion_helpers()
 
     return code
+
+def filter_gio_methods(klass: str, method: str) -> bool:
+    if klass == "Cancellable" and method in {"make_pollfd", "release_fd", "source_new"}:
+        return False
+    return True
+
+def transform_gio_method_name(klass: str, name: str) -> str:
+    if klass == "Cancellable" and name == "set_error_if_cancelled":
+        return "throw_if_cancelled"
+    return name
 
 def generate_includes() -> str:
     return """\
@@ -277,7 +304,7 @@ def generate_registration_code(klass: Class) -> str:
 
     for method in klass.methods:
         method_name_camel = to_camel_case(method.name)
-        method_registrations.append(f"""{{ "{method_name_camel}", 0, {class_cprefix}_{method.name}, 0, 0, 0, napi_default, 0 }},""")
+        method_registrations.append(f"""{{ "{method_name_camel}", NULL, {class_cprefix}_{method.name}, NULL, NULL, NULL, napi_default, NULL }},""")
         if method.is_async:
             tsfn_initializations.append(f"""\
 napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource_name);
@@ -418,6 +445,7 @@ def generate_method_code(klass: Class, method: Method) -> str:
         return_conversion = f"result = fdn_{method.return_type.nick}_to_value (env, operation->return_value);"
     else:
         return_conversion = "napi_get_undefined (env, &result);"
+    return_frees_str = f"\n  g_free (operation->return_value);" if method.return_type is not None and method.return_type.name == "utf8" else ""
 
     def calculate_indent(suffix: str) -> str:
         return " " * (len(class_cprefix) + 1 + len(method.name) + len(suffix) + 2)
@@ -427,7 +455,7 @@ def generate_method_code(klass: Class, method: Method) -> str:
         operation_free_function = f"""\
 static void
 {class_cprefix}_{method.name}_operation_free ({operation_type_name} * operation)
-{{{param_frees_str}{f"\n  g_free (operation->return_value);" if method.return_type is not None and method.return_type.name == "utf8" else ""}
+{{{param_frees_str}{return_frees_str}
   g_slice_free ({operation_type_name}, operation);
 }}"""
 
@@ -540,6 +568,11 @@ static void
 {operation_free_function}
 """
     else:
+        param_declarations = [f"{param.type.c} {param.name};" for param in method.parameters]
+        if method.throws:
+            param_declarations.append("GError * error = NULL;")
+        param_declarations_str = "\n  " + "\n  ".join(param_declarations) if param_declarations else ""
+
         if param_conversions:
             param_conversions_str_sync = "\n\n" + "\n".join([
                 line.replace("operation->", "")
@@ -548,10 +581,10 @@ static void
         else:
             param_conversions_str_sync = ""
 
-        if method.parameters:
-            param_call_str = ", " + ", ".join([param.name for param in method.parameters])
-        else:
-            param_call_str = ""
+        param_call_names = [param.name for param in method.parameters]
+        if method.throws:
+            param_call_names.append("&error")
+        param_call_str = ", " + ", ".join(param_call_names) if param_call_names else ""
 
         if method.parameters:
             invalid_argument_label = f"""
@@ -562,6 +595,18 @@ invalid_argument:
   }}"""
         else:
             invalid_argument_label = ""
+
+        if method.throws:
+            error_check = """if (error != NULL)
+  {
+    napi_throw_error (env, NULL, error->message);
+    g_error_free (error);
+    return NULL;
+  }
+
+  """
+        else:
+            error_check = ""
 
         return_variable_declaration = f"\n  {method.return_type.c} return_value;" if method.return_type is not None else ""
         return_assignment = return_assignment.replace("operation->", "").lstrip()
@@ -577,7 +622,7 @@ static napi_value
   napi_value args[{len(method.parameters)}];
   napi_status status;
   napi_value jsthis;
-  {klass.c_type} * handle;{return_variable_declaration}
+  {klass.c_type} * handle;{param_declarations_str}{return_variable_declaration}
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -589,7 +634,7 @@ static napi_value
 
   {return_assignment}{method.c_identifier} (handle{param_call_str});
 
-  {return_conversion}{param_frees_str}
+  {param_frees_str}{error_check}{return_conversion}
 
   return result;{invalid_argument_label}
 }}
@@ -610,7 +655,7 @@ def generate_parameter_conversion_code(param: Parameter, index: int) -> str:
     if param.nullable:
         code += f"    operation->{param.name} = NULL;"
     else:
-        code += f"""    napi_throw_type_error (env, NULL, "missing argument: {param.name}");
+        code += f"""    napi_throw_type_error (env, NULL, "missing argument: {to_camel_case(param.name)}");
     goto invalid_argument;"""
         
     code += "\n  }"
