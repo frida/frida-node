@@ -366,6 +366,15 @@ static void fdn_device_manager_remove_remote_device_end (GObject * source_object
 static void fdn_device_manager_remove_remote_device_deliver (napi_env env, napi_value js_cb, void * context, void * data);
 static void fdn_device_manager_remove_remote_device_operation_free (FdnDeviceManagerRemoveRemoteDeviceOperation * operation);
 
+static void fdn_device_list_register (napi_env env, napi_value exports);
+static gboolean fdn_device_list_from_value (napi_env env, napi_value value, FridaDeviceList ** result);
+static napi_value fdn_device_list_to_value (napi_env env, FridaDeviceList * handle);
+static napi_value fdn_device_list_construct (napi_env env, napi_callback_info info);
+
+static napi_value fdn_device_list_size (napi_env env, napi_callback_info info);
+
+static napi_value fdn_device_list_get (napi_env env, napi_callback_info info);
+
 static void fdn_device_register (napi_env env, napi_value exports);
 static gboolean fdn_device_from_value (napi_env env, napi_value value, FridaDevice ** result);
 static napi_value fdn_device_to_value (napi_env env, FridaDevice * handle);
@@ -546,17 +555,25 @@ static napi_value fdn_cancellable_reset (napi_env env, napi_callback_info info);
 
 static napi_value fdn_cancellable_throw_if_cancelled (napi_env env, napi_callback_info info);
 
+static gboolean fdn_device_type_from_value (napi_env env, napi_value value, FridaDeviceType * result);
+static napi_value fdn_device_type_to_value (napi_env env, FridaDeviceType value);
+
 static napi_value fdn_boolean_to_value (napi_env env, gboolean value);
 static gboolean fdn_int_from_value (napi_env env, napi_value value, gint * result);
 static napi_value fdn_int_to_value (napi_env env, gint value);
+static gboolean fdn_uint_from_value (napi_env env, napi_value value, guint * result);
 static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * result);
 static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);
+static gboolean fdn_enum_from_value (napi_env env, GType enum_type, napi_value value, gint * result);
+static napi_value fdn_enum_to_value (napi_env env, GType enum_type, gint value);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0xd2b1ceaa6a47478d, 0x85a09853ae47a97a };
-static napi_type_tag fdn_device_type_tag = { 0x29b76d8bd2b648bf, 0x9276d1b278402c15 };
-static napi_type_tag fdn_cancellable_type_tag = { 0x82b40fe2e82f47e5, 0x86fc43ab085bc81a };
+static napi_type_tag fdn_device_manager_type_tag = { 0xc52e65ee601d4097, 0xaae3068e7353eaba };
+static napi_type_tag fdn_device_list_type_tag = { 0xb215b123fc0d4a78, 0x926ae6252a4ded9a };
+static napi_type_tag fdn_device_type_tag = { 0x65ba9eac2cb3478c, 0x99cf6ff6a57a5620 };
+static napi_type_tag fdn_cancellable_type_tag = { 0xbd483c2872884287, 0xb018de200edafaa4 };
 
 static napi_ref fdn_device_manager_constructor;
+static napi_ref fdn_device_list_constructor;
 static napi_ref fdn_device_constructor;
 static napi_ref fdn_cancellable_constructor;
 
@@ -598,6 +615,7 @@ Init (napi_env env,
       napi_value exports)
 {
   fdn_device_manager_register (env, exports);
+  fdn_device_list_register (env, exports);
   fdn_device_register (env, exports);
   fdn_cancellable_register (env, exports);
   return exports;
@@ -1821,6 +1839,141 @@ fdn_device_manager_remove_remote_device_operation_free (FdnDeviceManagerRemoveRe
 {
   g_free (operation->address);
   g_slice_free (FdnDeviceManagerRemoveRemoteDeviceOperation, operation);
+}
+
+static void
+fdn_device_list_register (napi_env env,
+                          napi_value exports)
+{
+  napi_property_descriptor properties[] =
+  {
+    { "size", NULL, fdn_device_list_size, NULL, NULL, NULL, napi_default, NULL },
+    { "get", NULL, fdn_device_list_get, NULL, NULL, NULL, napi_default, NULL },
+  };
+
+  napi_value constructor;
+  napi_define_class (env, "DeviceList", NAPI_AUTO_LENGTH, fdn_device_list_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_create_reference (env, constructor, 1, &fdn_device_list_constructor);
+
+  napi_set_named_property (env, exports, "DeviceList", constructor);
+}
+
+static gboolean
+fdn_device_list_from_value (napi_env env,
+                            napi_value value,
+                            FridaDeviceList ** result)
+{
+  napi_status status;
+  bool is_instance;
+  FridaDeviceList * handle;
+
+  status = napi_check_object_type_tag (env, value, &fdn_device_list_type_tag, &is_instance);
+  if (status != napi_ok || !is_instance)
+  {
+    napi_throw_type_error (env, NULL, "expected an instance of DeviceList");
+    return FALSE;
+  }
+
+  napi_unwrap (env, value, (void **) &handle);
+
+  g_object_ref (handle);
+  *result = handle;
+
+  return TRUE;
+}
+
+static napi_value
+fdn_device_list_to_value (napi_env env,
+                          FridaDeviceList * handle)
+{
+  napi_value result, constructor, handle_wrapper;
+
+  napi_get_reference_value (env, fdn_device_list_constructor, &constructor);
+
+  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+
+  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+
+  return result;
+}
+
+static napi_value
+fdn_device_list_construct (napi_env env,
+                           napi_callback_info info)
+{
+  napi_throw_error (env, NULL, "class DeviceList cannot be constructed because it lacks a default constructor");
+  return NULL;
+}
+
+static napi_value
+fdn_device_list_size (napi_env env,
+                      napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  FridaDeviceList * handle;
+  gint return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  return_value = frida_device_list_size (handle);
+
+  result = fdn_int_to_value (env, return_value);
+
+  return result;
+}
+
+static napi_value
+fdn_device_list_get (napi_env env,
+                     napi_callback_info info)
+{
+  napi_value result;
+  size_t argc = 1;
+  napi_value args[1];
+  napi_status status;
+  napi_value jsthis;
+  FridaDeviceList * handle;
+  gint index;
+  FridaDevice * return_value;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc > 0)
+  {
+    if (!fdn_int_from_value (env, args[0], &index))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: index");
+    goto invalid_argument;
+  }
+
+  return_value = frida_device_list_get (handle, index);
+
+  result = fdn_device_to_value (env, return_value);
+
+  return result;
+
+invalid_argument:
+  {
+    return NULL;
+  }
 }
 
 static void
@@ -5664,91 +5817,18 @@ fdn_cancellable_throw_if_cancelled (napi_env env,
   return result;
 }
 
-static napi_value
-fdn_boolean_to_value (napi_env env,
-                      gboolean value)
-{
-  napi_value result;
-  napi_get_boolean (env, value, &result);
-  return result;
-}
-
 static gboolean
-fdn_int_from_value (napi_env env,
-                    napi_value value,
-                    gint * result)
+fdn_device_type_from_value (napi_env env,
+                            napi_value value,
+                            FridaDeviceType * result)
 {
-  int32_t number;
-
-  if (napi_get_value_int32 (env, value, &number) != napi_ok)
-    goto invalid_argument;
-
-  *result = number;
-  return TRUE;
-
-invalid_argument:
-  {
-    napi_throw_error (env, NULL, "expected an integer");
-    g_free (result);
-    return FALSE;
-  }
+  return fdn_enum_from_value (env, frida_device_type_get_type (), value, (gint *) result);
 }
 
 static napi_value
-fdn_int_to_value (napi_env env,
-                  gint value)
+fdn_device_type_to_value (napi_env env,
+                          FridaDeviceType value)
 {
-  napi_value result;
-  napi_create_int32 (env, value, &result);
-  return result;
+  return fdn_enum_to_value (env, frida_device_type_get_type (), value);
 }
 
-static gboolean
-fdn_ulong_from_value (napi_env env,
-                      napi_value value,
-                      gulong * result)
-{
-  double number;
-
-  if (napi_get_value_double (env, value, &number) != napi_ok)
-    goto invalid_argument;
-
-  if (number < 0 || number > G_MAXULONG)
-    goto invalid_argument;
-
-  *result = number;
-  return TRUE;
-
-invalid_argument:
-  {
-    napi_throw_error (env, NULL, "expected an unsigned integer");
-    g_free (result);
-    return FALSE;
-  }
-}
-
-static gboolean
-fdn_utf8_from_value (napi_env env,
-                     napi_value value,
-                     gchar ** str)
-{
-  gchar * result = NULL;
-  size_t length;
-
-  if (napi_get_value_string_utf8 (env, value, NULL, 0, &length) != napi_ok)
-    goto invalid_argument;
-
-  result = g_malloc (length + 1);
-  if (napi_get_value_string_utf8 (env, value, result, length + 1, &length) != napi_ok)
-    goto invalid_argument;
-
-  *str = result;
-  return TRUE;
-
-invalid_argument:
-  {
-    napi_throw_error (env, NULL, "expected a string");
-    g_free (result);
-    return FALSE;
-  }
-}
