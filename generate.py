@@ -42,13 +42,16 @@ class Class:
             c_identifier = constructor_element.get(f"{{{C_NAMESPACE}}}identifier")
             parameters = constructor_element.findall("./parameters/parameter", GIR_NAMESPACES)
 
+            throws = constructor_element.get("throws") == "1"
+
             param_list = []
             for param in parameters:
                 param_name = param.get("name")
                 type = parse_type(param)
-                param_list.append(Parameter(param_name, type))
+                nullable = param.get("nullable") == "1"
+                param_list.append(Parameter(param_name, type, nullable))
 
-            constructors.append(Constructor(constructor_name, c_identifier, param_list))
+            constructors.append(Constructor(constructor_name, c_identifier, param_list, throws))
         return constructors
 
     @cached_property
@@ -91,6 +94,7 @@ class Constructor:
     name: str
     c_identifier: str
     parameters: List[Parameter]
+    throws: bool
 
 @dataclass
 class Method:
@@ -144,6 +148,8 @@ def parse_gir(file_path: str,
 
     enumerations = OrderedDict()
     for enum_element in tree.getroot().findall(".//enumeration", GIR_NAMESPACES):
+        if enum_element.get(f"{{{GLIB_NAMESPACE}}}error-domain") is not None:
+            continue
         enum_name = enum_element.get("name")
         enum_c_type = enum_element.get(f"{{{C_NAMESPACE}}}type")
         get_type = enum_element.get(f"{{{GLIB_NAMESPACE}}}get-type")
@@ -179,26 +185,16 @@ def type_nick_from_name(name: str) -> str:
 
 def generate_code() -> str:
     srcroot = Path(__file__).parent
-    frida = parse_gir(srcroot / "frida-core.gir")
+    frida = parse_gir(srcroot / "Frida-1.0.gir")
 
     gio = parse_gir(srcroot / "Gio-2.0.gir",
                     method_filter=filter_gio_methods,
                     method_name_transformer=transform_gio_method_name)
 
-    classes = [
-        frida.classes["DeviceManager"],
-        frida.classes["DeviceList"],
-        frida.classes["Device"],
-        frida.classes["Application"],
-        frida.classes["Process"],
-        frida.classes["SpawnOptions"],
-        frida.classes["ProcessMatchOptions"],
-        gio.classes["Cancellable"],
-    ]
+    classes = [klass for name, klass in frida.classes.items() if name not in {"ControlService", "RpcClient", "RpcPeer"}]
+    classes.append(gio.classes["Cancellable"])
 
-    enumerations = [
-        frida.enumerations["DeviceType"],
-    ]
+    enumerations = frida.enumerations.values()
 
     code = generate_includes()
     code += generate_operation_structs(classes)
@@ -218,6 +214,8 @@ def generate_code() -> str:
 
     for enum in enumerations:
         code += generate_enum_conversion_functions(enum)
+
+    code += generate_builtin_conversion_helpers()
 
     return code
 
@@ -265,8 +263,8 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
         prototypes += [
             "",
             f"static void {class_cprefix}_register (napi_env env, napi_value exports);",
-            f"static gboolean {class_cprefix}_from_value (napi_env env, napi_value value, {klass.c_type} ** result);",
-            f"static napi_value {class_cprefix}_to_value (napi_env env, {klass.c_type} * handle);",
+            f"G_GNUC_UNUSED static gboolean {class_cprefix}_from_value (napi_env env, napi_value value, {klass.c_type} ** result);",
+            f"G_GNUC_UNUSED static napi_value {class_cprefix}_to_value (napi_env env, {klass.c_type} * handle);",
             f"static napi_value {class_cprefix}_construct (napi_env env, napi_callback_info info);",
         ]
 
@@ -288,8 +286,8 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
         enum_name_snake = to_snake_case(enum.name)
         prototypes += [
             "",
-            f"static gboolean fdn_{enum_name_snake}_from_value (napi_env env, napi_value value, {enum.c_type} * result);",
-            f"static napi_value fdn_{enum_name_snake}_to_value (napi_env env, {enum.c_type} value);",
+            f"G_GNUC_UNUSED static gboolean fdn_{enum_name_snake}_from_value (napi_env env, napi_value value, {enum.c_type} * result);",
+            f"G_GNUC_UNUSED static napi_value fdn_{enum_name_snake}_to_value (napi_env env, {enum.c_type} value);",
         ]
 
     prototypes += [
