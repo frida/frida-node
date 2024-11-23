@@ -246,6 +246,7 @@ def generate_includes() -> str:
     return """\
 #include <frida-core.h>
 #include <node_api.h>
+#include <string.h>
 
 """
 
@@ -305,25 +306,34 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
 
     prototypes += [
         "",
+        "static gboolean fdn_boolean_from_value (napi_env env, napi_value value, gboolean * result);",
         "static napi_value fdn_boolean_to_value (napi_env env, gboolean value);",
         "static gboolean fdn_int_from_value (napi_env env, napi_value value, gint * result);",
         "static napi_value fdn_int_to_value (napi_env env, gint value);",
         "static gboolean fdn_uint_from_value (napi_env env, napi_value value, guint * result);",
         "static napi_value fdn_uint_to_value (napi_env env, guint value);",
+        "static napi_value fdn_uint16_to_value (napi_env env, guint16 value);",
         "static gboolean fdn_int64_from_value (napi_env env, napi_value value, gint64 * result);",
         "static napi_value fdn_int64_to_value (napi_env env, gint64 value);",
         "static gboolean fdn_uint64_from_value (napi_env env, napi_value value, guint64 * result);",
         "static napi_value fdn_uint64_to_value (napi_env env, guint64 value);",
         "static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * result);",
         "static napi_value fdn_double_to_value (napi_env env, gdouble value);",
-        "static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);",
-        "static napi_value fdn_utf8_to_value (napi_env env, const gchar * str);",
         "static gboolean fdn_enum_from_value (napi_env env, GType enum_type, napi_value value, gint * result);",
         "static napi_value fdn_enum_to_value (napi_env env, GType enum_type, gint value);",
+        "static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);",
+        "static napi_value fdn_utf8_to_value (napi_env env, const gchar * str);",
+        "static napi_value fdn_buffer_to_value (napi_env env, const guint8 * data, gsize size);",
+        "static gboolean fdn_bytes_from_value (napi_env env, napi_value value, GBytes ** result);",
+        "static napi_value fdn_bytes_to_value (napi_env env, GBytes * bytes);",
         "static gboolean fdn_vardict_from_value (napi_env env, napi_value value, GHashTable ** result);",
         "static napi_value fdn_vardict_to_value (napi_env env, GHashTable * vardict);",
         "static gboolean fdn_variant_from_value (napi_env env, napi_value value, GVariant ** result);",
         "static napi_value fdn_variant_to_value (napi_env env, GVariant * variant);",
+        "static gboolean fdn_file_from_value (napi_env env, napi_value value, GFile ** result);",
+        "static napi_value fdn_file_to_value (napi_env env, GFile * file);",
+        "static gboolean fdn_tls_certificate_from_value (napi_env env, napi_value value, GTlsCertificate ** result);",
+        "static napi_value fdn_tls_certificate_to_value (napi_env env, GTlsCertificate * certificate);",
     ]
 
     return "\n".join(prototypes) + "\n\n"
@@ -752,6 +762,26 @@ fdn_{enum_name_snake}_to_value (napi_env env,
 
 def generate_builtin_conversion_helpers() -> str:
     return """
+static gboolean
+fdn_boolean_from_value (napi_env env,
+                        napi_value value,
+                        gboolean * result)
+{
+  bool b;
+
+  if (napi_get_value_bool (env, value, &b) != napi_ok)
+    goto invalid_argument;
+
+  *result = b;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected a boolean");
+    return FALSE;
+  }
+}
+
 static napi_value
 fdn_boolean_to_value (napi_env env,
                       gboolean value)
@@ -813,6 +843,15 @@ invalid_argument:
 static napi_value
 fdn_uint_to_value (napi_env env,
                    guint value)
+{
+  napi_value result;
+  napi_create_uint32 (env, value, &result);
+  return result;
+}
+
+static napi_value
+fdn_uint16_to_value (napi_env env,
+                     guint16 value)
 {
   napi_value result;
   napi_create_uint32 (env, value, &result);
@@ -910,41 +949,6 @@ fdn_double_to_value (napi_env env,
 }
 
 static gboolean
-fdn_utf8_from_value (napi_env env,
-                     napi_value value,
-                     gchar ** str)
-{
-  gchar * result = NULL;
-  size_t length;
-
-  if (napi_get_value_string_utf8 (env, value, NULL, 0, &length) != napi_ok)
-    goto invalid_argument;
-
-  result = g_malloc (length + 1);
-  if (napi_get_value_string_utf8 (env, value, result, length + 1, &length) != napi_ok)
-    goto invalid_argument;
-
-  *str = result;
-  return TRUE;
-
-invalid_argument:
-  {
-    napi_throw_error (env, NULL, "expected a string");
-    g_free (result);
-    return FALSE;
-  }
-}
-
-static napi_value
-fdn_utf8_to_value (napi_env env,
-                   const gchar * str)
-{
-  napi_value result;
-  napi_create_string_utf8 (env, str, NAPI_AUTO_LENGTH, &result);
-  return result;
-}
-
-static gboolean
 fdn_enum_from_value (napi_env env,
                      GType enum_type,
                      napi_value value,
@@ -1000,6 +1004,84 @@ fdn_enum_to_value (napi_env env,
   g_type_class_unref (enum_class);
 
   return result;
+}
+
+static gboolean
+fdn_utf8_from_value (napi_env env,
+                     napi_value value,
+                     gchar ** str)
+{
+  gchar * result = NULL;
+  size_t length;
+
+  if (napi_get_value_string_utf8 (env, value, NULL, 0, &length) != napi_ok)
+    goto invalid_argument;
+
+  result = g_malloc (length + 1);
+  if (napi_get_value_string_utf8 (env, value, result, length + 1, &length) != napi_ok)
+    goto invalid_argument;
+
+  *str = result;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected a string");
+    g_free (result);
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_utf8_to_value (napi_env env,
+                   const gchar * str)
+{
+  napi_value result;
+  napi_create_string_utf8 (env, str, NAPI_AUTO_LENGTH, &result);
+  return result;
+}
+
+static napi_value
+fdn_buffer_to_value (napi_env env,
+                     const guint8 * data,
+                     gsize size)
+{
+  napi_value result;
+  napi_create_buffer_copy (env, size, data, NULL, &result);
+  return result;
+}
+
+static gboolean
+fdn_bytes_from_value (napi_env env,
+                      napi_value value,
+                      GBytes ** result)
+{
+  void * data;
+  size_t size;
+
+  if (napi_get_buffer_info (env, value, &data, &size) != napi_ok)
+    goto invalid_argument;
+
+  *result = g_bytes_new (data, size);
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected a buffer");
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_bytes_to_value (napi_env env,
+                    GBytes * bytes)
+{
+  const guint8 * data;
+  gsize size;
+
+  data = g_bytes_get_data (bytes, &size);
+
+  return fdn_buffer_to_value (env, data, size);
 }
 
 static gboolean
@@ -1344,6 +1426,81 @@ fdn_variant_to_value (napi_env env,
   }
 
   napi_get_null (env, &result);
+  return result;
+}
+
+static gboolean
+fdn_file_from_value (napi_env env,
+                     napi_value value,
+                     GFile ** result)
+{
+  gchar * path;
+  GFile * file;
+
+  if (!fdn_utf8_from_value (env, value, &path))
+    return FALSE;
+  file = g_file_new_for_path (path);
+  g_free (path);
+
+  *result = file;
+  return TRUE;
+}
+
+static napi_value
+fdn_file_to_value (napi_env env,
+                   GFile * file)
+{
+  napi_value result;
+  gchar * path;
+
+  path = g_file_get_path (file);
+  result = fdn_utf8_to_value (env, path);
+  g_free (path);
+
+  return result;
+}
+
+static gboolean
+fdn_tls_certificate_from_value (napi_env env,
+                                napi_value value,
+                                GTlsCertificate ** result)
+{
+  gchar * str;
+  GError * error = NULL;
+
+  if (!fdn_utf8_from_value (env, value, &str))
+    return FALSE;
+
+  if (strchr (str, '\\n') != NULL)
+    *result = g_tls_certificate_new_from_pem (str, -1, &error);
+  else
+    *result = g_tls_certificate_new_from_file (str, &error);
+
+  g_free (str);
+
+  if (error != NULL)
+    goto invalid_argument;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, error->message);
+    g_error_free (error);
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_tls_certificate_to_value (napi_env env,
+                              GTlsCertificate * certificate)
+{
+  napi_value result;
+  gchar * pem;
+
+  g_object_get (certificate, "certificate-pem", &pem, NULL);
+  result = fdn_utf8_to_value (env, pem);
+  g_free (pem);
+
   return result;
 }
 """

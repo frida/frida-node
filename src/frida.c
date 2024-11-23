@@ -1,5 +1,6 @@
 #include <frida-core.h>
 #include <node_api.h>
+#include <string.h>
 
 typedef struct {
   napi_env env;
@@ -1391,64 +1392,73 @@ G_GNUC_UNUSED static napi_value fdn_port_conflict_behavior_to_value (napi_env en
 G_GNUC_UNUSED static gboolean fdn_string_terminator_from_value (napi_env env, napi_value value, FridaStringTerminator * result);
 G_GNUC_UNUSED static napi_value fdn_string_terminator_to_value (napi_env env, FridaStringTerminator value);
 
+static gboolean fdn_boolean_from_value (napi_env env, napi_value value, gboolean * result);
 static napi_value fdn_boolean_to_value (napi_env env, gboolean value);
 static gboolean fdn_int_from_value (napi_env env, napi_value value, gint * result);
 static napi_value fdn_int_to_value (napi_env env, gint value);
 static gboolean fdn_uint_from_value (napi_env env, napi_value value, guint * result);
 static napi_value fdn_uint_to_value (napi_env env, guint value);
+static napi_value fdn_uint16_to_value (napi_env env, guint16 value);
 static gboolean fdn_int64_from_value (napi_env env, napi_value value, gint64 * result);
 static napi_value fdn_int64_to_value (napi_env env, gint64 value);
 static gboolean fdn_uint64_from_value (napi_env env, napi_value value, guint64 * result);
 static napi_value fdn_uint64_to_value (napi_env env, guint64 value);
 static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * result);
 static napi_value fdn_double_to_value (napi_env env, gdouble value);
-static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);
-static napi_value fdn_utf8_to_value (napi_env env, const gchar * str);
 static gboolean fdn_enum_from_value (napi_env env, GType enum_type, napi_value value, gint * result);
 static napi_value fdn_enum_to_value (napi_env env, GType enum_type, gint value);
+static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);
+static napi_value fdn_utf8_to_value (napi_env env, const gchar * str);
+static napi_value fdn_buffer_to_value (napi_env env, const guint8 * data, gsize size);
+static gboolean fdn_bytes_from_value (napi_env env, napi_value value, GBytes ** result);
+static napi_value fdn_bytes_to_value (napi_env env, GBytes * bytes);
 static gboolean fdn_vardict_from_value (napi_env env, napi_value value, GHashTable ** result);
 static napi_value fdn_vardict_to_value (napi_env env, GHashTable * vardict);
 static gboolean fdn_variant_from_value (napi_env env, napi_value value, GVariant ** result);
 static napi_value fdn_variant_to_value (napi_env env, GVariant * variant);
+static gboolean fdn_file_from_value (napi_env env, napi_value value, GFile ** result);
+static napi_value fdn_file_to_value (napi_env env, GFile * file);
+static gboolean fdn_tls_certificate_from_value (napi_env env, napi_value value, GTlsCertificate ** result);
+static napi_value fdn_tls_certificate_to_value (napi_env env, GTlsCertificate * certificate);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0xb6e55dcc9e25459e, 0x8d86e42df4ab3263 };
-static napi_type_tag fdn_device_list_type_tag = { 0x73f520e5a22b4b25, 0x8128e62deef061fb };
-static napi_type_tag fdn_device_type_tag = { 0x883e0cc74ee34dab, 0x84164c7cd54852f1 };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0xc57cfb1eb4b7402d, 0x9f89a373d44beb9a };
-static napi_type_tag fdn_application_list_type_tag = { 0xb668c9a5508949be, 0xa745703e63f093d7 };
-static napi_type_tag fdn_application_type_tag = { 0x42547210ecd84ac5, 0xa25205326a160b88 };
-static napi_type_tag fdn_process_list_type_tag = { 0x2d5f7d4664a54021, 0xafbbea11b1048d07 };
-static napi_type_tag fdn_process_type_tag = { 0x9df73524be3a4a3a, 0x938c7690a5366957 };
-static napi_type_tag fdn_process_match_options_type_tag = { 0xa320e6e6d078429b, 0x8a1a854081d47f45 };
-static napi_type_tag fdn_spawn_options_type_tag = { 0x7e5cbb3d547841ef, 0xb32f6a57cc45150e };
-static napi_type_tag fdn_spawn_list_type_tag = { 0x59353a6dad4d441c, 0x871c54c6eba8234a };
-static napi_type_tag fdn_spawn_type_tag = { 0x24678025bcca4cce, 0xb598e8e2de6b3bff };
-static napi_type_tag fdn_child_list_type_tag = { 0xccfb1779a0554932, 0xb058c94af046ca50 };
-static napi_type_tag fdn_child_type_tag = { 0xabd68bc9423d441e, 0x8e8d81ea5fc44f88 };
-static napi_type_tag fdn_crash_type_tag = { 0x2357bc09a56244c8, 0xad9e6f9fd09fd8bf };
-static napi_type_tag fdn_bus_type_tag = { 0xd627517923a144cd, 0x9668fa9190c0f697 };
-static napi_type_tag fdn_session_type_tag = { 0x88014d1e8e984dfd, 0xa464c3b477d5dd10 };
-static napi_type_tag fdn_script_type_tag = { 0xddc0b21acff74b26, 0xb13306fe17393e07 };
-static napi_type_tag fdn_portal_membership_type_tag = { 0x9ac7ede2defe411c, 0x9dff6d1e1ccd5441 };
-static napi_type_tag fdn_control_service_options_type_tag = { 0x9f300a80a1b74f2a, 0xbe7ffb878804d114 };
-static napi_type_tag fdn_portal_service_type_tag = { 0xd4cea065a5274388, 0x94065eea85e6cf7b };
-static napi_type_tag fdn_file_monitor_type_tag = { 0x388179c55b544aee, 0x8b835c8d197ab6a5 };
-static napi_type_tag fdn_compiler_type_tag = { 0x75731d933e0849f5, 0x98aa30e45ad8b466 };
-static napi_type_tag fdn_compiler_options_type_tag = { 0x865fef9c688d424a, 0xae5d4dcfb6a38dfc };
-static napi_type_tag fdn_build_options_type_tag = { 0x127ad7d0c81b44c1, 0x8aea385a52b71cb1 };
-static napi_type_tag fdn_watch_options_type_tag = { 0xed14aeeebb454105, 0xbccb684d5ee3aada };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0xdcdcc0085021417c, 0x970dd3d6c2566289 };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0xe516db0468cb481f, 0x8c929345d5ca3f09 };
-static napi_type_tag fdn_application_query_options_type_tag = { 0xe9ddfe8457164c76, 0xb4d562403fde3611 };
-static napi_type_tag fdn_process_query_options_type_tag = { 0xaee2a594bdd44184, 0x8a8072f4f475379f };
-static napi_type_tag fdn_session_options_type_tag = { 0x9a41680dbc054102, 0x9b175da4e34e74c7 };
-static napi_type_tag fdn_script_options_type_tag = { 0x652f40c92a8f4d2c, 0xad7b8d3aedee28c1 };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0x2f1ed4399561430e, 0x83d4ddd751c0304e };
-static napi_type_tag fdn_portal_options_type_tag = { 0xf899cfcf57a54f36, 0xa85ecd3bb1db351a };
-static napi_type_tag fdn_peer_options_type_tag = { 0x17b84524fd904a7d, 0x982d95db51ea2847 };
-static napi_type_tag fdn_relay_type_tag = { 0x0cbaad77b6dd4d9f, 0xb74b258c8492e13f };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0xb7857e8f5e114059, 0x95f570f3eea076c1 };
-static napi_type_tag fdn_cancellable_type_tag = { 0xa05a04826f984159, 0xad70bb25d3595d85 };
+static napi_type_tag fdn_device_manager_type_tag = { 0x0d1a5b6291d245ae, 0xa1a0b8b4489a0ad8 };
+static napi_type_tag fdn_device_list_type_tag = { 0x7bff5812f4934997, 0xba112d11a5adeb83 };
+static napi_type_tag fdn_device_type_tag = { 0x89fb3e9ab1444d28, 0x9c5e68fd42cb4150 };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0xbc8e9ae2a6bc4a9d, 0xa50ac47d909c4f1c };
+static napi_type_tag fdn_application_list_type_tag = { 0xa7959b11902d4a3f, 0xb39b3baa1e761be2 };
+static napi_type_tag fdn_application_type_tag = { 0x870978b0ac724893, 0xb3579d9298cee165 };
+static napi_type_tag fdn_process_list_type_tag = { 0x00aacf4c719f4ae9, 0x99950ce8a3653ac7 };
+static napi_type_tag fdn_process_type_tag = { 0x0ae8d77620b04f6d, 0xbf558d904b1e35b9 };
+static napi_type_tag fdn_process_match_options_type_tag = { 0x1c6685ba71dd4de7, 0xa364133a8fc279d3 };
+static napi_type_tag fdn_spawn_options_type_tag = { 0x874938acf1704399, 0x81a070e7701fea85 };
+static napi_type_tag fdn_spawn_list_type_tag = { 0x5e68a80893834ec1, 0x8207ccab6d1b0c15 };
+static napi_type_tag fdn_spawn_type_tag = { 0xd0d6e59e72a04c86, 0xb7469a1ae53432d0 };
+static napi_type_tag fdn_child_list_type_tag = { 0x6d4ce992a5ee4eb3, 0xb6611f8c4014fb80 };
+static napi_type_tag fdn_child_type_tag = { 0x8f37c7d9702f4c8c, 0xb530ded715633360 };
+static napi_type_tag fdn_crash_type_tag = { 0x16fa92f6821143b8, 0x9cd4d0258c14379e };
+static napi_type_tag fdn_bus_type_tag = { 0x8658c1ca37754c6d, 0x835d757b73bd1007 };
+static napi_type_tag fdn_session_type_tag = { 0xec39537912cb40db, 0xa10bf77865867dd7 };
+static napi_type_tag fdn_script_type_tag = { 0x02bf696216f24ca9, 0xa79e19a1c5ce98e9 };
+static napi_type_tag fdn_portal_membership_type_tag = { 0xab91074a786646c5, 0x8258f50375a975b6 };
+static napi_type_tag fdn_control_service_options_type_tag = { 0x6c85fc7cb0e94f78, 0xb7b40b053ca0606b };
+static napi_type_tag fdn_portal_service_type_tag = { 0xa626dbc30e97458a, 0x8be1ce7feae12835 };
+static napi_type_tag fdn_file_monitor_type_tag = { 0x047ed468097c4925, 0x939abe4ec2160f6a };
+static napi_type_tag fdn_compiler_type_tag = { 0xfb7d01a5d0a540c4, 0x8a9fecccadb33dd9 };
+static napi_type_tag fdn_compiler_options_type_tag = { 0xee5ee88e7ccb49f2, 0xba6a419f500a9cfa };
+static napi_type_tag fdn_build_options_type_tag = { 0x2c37804454a840e2, 0xbb2b1d5cdf564c82 };
+static napi_type_tag fdn_watch_options_type_tag = { 0xb088539a2757450a, 0xad6a4f879bd93c34 };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0x08f3f9a7a62f4f43, 0x9e9f055bc55acc98 };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x68e86aee76294761, 0xb6b7ff98f48f9d7f };
+static napi_type_tag fdn_application_query_options_type_tag = { 0xd680b24c735849af, 0x9de984c3dd07d5eb };
+static napi_type_tag fdn_process_query_options_type_tag = { 0x814b9aebe68342d1, 0x8536dcabb3970f9b };
+static napi_type_tag fdn_session_options_type_tag = { 0x64f9cc4666fa4fe6, 0xa67a42541fc07e5e };
+static napi_type_tag fdn_script_options_type_tag = { 0x3edd31dc5c594c8e, 0x9f2d54c8d6830849 };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0x2247c3e51b2349d0, 0xad8501afc7856566 };
+static napi_type_tag fdn_portal_options_type_tag = { 0xd7834167b4a841f9, 0xb93762f799a81e30 };
+static napi_type_tag fdn_peer_options_type_tag = { 0xda5054db12514b31, 0xb458de7b7839ace7 };
+static napi_type_tag fdn_relay_type_tag = { 0xb823f26a74cd4b67, 0xbc963bd63183670b };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x1fb36d6de4194be0, 0xb6ab6b19173ded93 };
+static napi_type_tag fdn_cancellable_type_tag = { 0xac6b971ea8fc4120, 0x81a552286f48a916 };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_list_constructor;
@@ -17272,6 +17282,26 @@ fdn_string_terminator_to_value (napi_env env,
   return fdn_enum_to_value (env, frida_string_terminator_get_type (), value);
 }
 
+static gboolean
+fdn_boolean_from_value (napi_env env,
+                        napi_value value,
+                        gboolean * result)
+{
+  bool b;
+
+  if (napi_get_value_bool (env, value, &b) != napi_ok)
+    goto invalid_argument;
+
+  *result = b;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected a boolean");
+    return FALSE;
+  }
+}
+
 static napi_value
 fdn_boolean_to_value (napi_env env,
                       gboolean value)
@@ -17333,6 +17363,15 @@ invalid_argument:
 static napi_value
 fdn_uint_to_value (napi_env env,
                    guint value)
+{
+  napi_value result;
+  napi_create_uint32 (env, value, &result);
+  return result;
+}
+
+static napi_value
+fdn_uint16_to_value (napi_env env,
+                     guint16 value)
 {
   napi_value result;
   napi_create_uint32 (env, value, &result);
@@ -17430,41 +17469,6 @@ fdn_double_to_value (napi_env env,
 }
 
 static gboolean
-fdn_utf8_from_value (napi_env env,
-                     napi_value value,
-                     gchar ** str)
-{
-  gchar * result = NULL;
-  size_t length;
-
-  if (napi_get_value_string_utf8 (env, value, NULL, 0, &length) != napi_ok)
-    goto invalid_argument;
-
-  result = g_malloc (length + 1);
-  if (napi_get_value_string_utf8 (env, value, result, length + 1, &length) != napi_ok)
-    goto invalid_argument;
-
-  *str = result;
-  return TRUE;
-
-invalid_argument:
-  {
-    napi_throw_error (env, NULL, "expected a string");
-    g_free (result);
-    return FALSE;
-  }
-}
-
-static napi_value
-fdn_utf8_to_value (napi_env env,
-                   const gchar * str)
-{
-  napi_value result;
-  napi_create_string_utf8 (env, str, NAPI_AUTO_LENGTH, &result);
-  return result;
-}
-
-static gboolean
 fdn_enum_from_value (napi_env env,
                      GType enum_type,
                      napi_value value,
@@ -17520,6 +17524,84 @@ fdn_enum_to_value (napi_env env,
   g_type_class_unref (enum_class);
 
   return result;
+}
+
+static gboolean
+fdn_utf8_from_value (napi_env env,
+                     napi_value value,
+                     gchar ** str)
+{
+  gchar * result = NULL;
+  size_t length;
+
+  if (napi_get_value_string_utf8 (env, value, NULL, 0, &length) != napi_ok)
+    goto invalid_argument;
+
+  result = g_malloc (length + 1);
+  if (napi_get_value_string_utf8 (env, value, result, length + 1, &length) != napi_ok)
+    goto invalid_argument;
+
+  *str = result;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected a string");
+    g_free (result);
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_utf8_to_value (napi_env env,
+                   const gchar * str)
+{
+  napi_value result;
+  napi_create_string_utf8 (env, str, NAPI_AUTO_LENGTH, &result);
+  return result;
+}
+
+static napi_value
+fdn_buffer_to_value (napi_env env,
+                     const guint8 * data,
+                     gsize size)
+{
+  napi_value result;
+  napi_create_buffer_copy (env, size, data, NULL, &result);
+  return result;
+}
+
+static gboolean
+fdn_bytes_from_value (napi_env env,
+                      napi_value value,
+                      GBytes ** result)
+{
+  void * data;
+  size_t size;
+
+  if (napi_get_buffer_info (env, value, &data, &size) != napi_ok)
+    goto invalid_argument;
+
+  *result = g_bytes_new (data, size);
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected a buffer");
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_bytes_to_value (napi_env env,
+                    GBytes * bytes)
+{
+  const guint8 * data;
+  gsize size;
+
+  data = g_bytes_get_data (bytes, &size);
+
+  return fdn_buffer_to_value (env, data, size);
 }
 
 static gboolean
@@ -17864,6 +17946,81 @@ fdn_variant_to_value (napi_env env,
   }
 
   napi_get_null (env, &result);
+  return result;
+}
+
+static gboolean
+fdn_file_from_value (napi_env env,
+                     napi_value value,
+                     GFile ** result)
+{
+  gchar * path;
+  GFile * file;
+
+  if (!fdn_utf8_from_value (env, value, &path))
+    return FALSE;
+  file = g_file_new_for_path (path);
+  g_free (path);
+
+  *result = file;
+  return TRUE;
+}
+
+static napi_value
+fdn_file_to_value (napi_env env,
+                   GFile * file)
+{
+  napi_value result;
+  gchar * path;
+
+  path = g_file_get_path (file);
+  result = fdn_utf8_to_value (env, path);
+  g_free (path);
+
+  return result;
+}
+
+static gboolean
+fdn_tls_certificate_from_value (napi_env env,
+                                napi_value value,
+                                GTlsCertificate ** result)
+{
+  gchar * str;
+  GError * error = NULL;
+
+  if (!fdn_utf8_from_value (env, value, &str))
+    return FALSE;
+
+  if (strchr (str, '\n') != NULL)
+    *result = g_tls_certificate_new_from_pem (str, -1, &error);
+  else
+    *result = g_tls_certificate_new_from_file (str, &error);
+
+  g_free (str);
+
+  if (error != NULL)
+    goto invalid_argument;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, error->message);
+    g_error_free (error);
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_tls_certificate_to_value (napi_env env,
+                              GTlsCertificate * certificate)
+{
+  napi_value result;
+  gchar * pem;
+
+  g_object_get (certificate, "certificate-pem", &pem, NULL);
+  result = fdn_utf8_to_value (env, pem);
+  g_free (pem);
+
   return result;
 }
 
