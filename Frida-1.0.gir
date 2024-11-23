@@ -13,7 +13,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -32,7 +32,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -45,7 +45,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -58,7 +58,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="id" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -79,11 +79,11 @@
       </method>
       <method name="get_device_by_id_finish" c:identifier="frida_device_manager_get_device_by_id_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -92,11 +92,11 @@
       </method>
       <method name="get_device_by_id_sync" c:identifier="frida_device_manager_get_device_by_id_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="id" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -115,10 +115,10 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="type" transfer-ownership="none">
-            <type name="FridaBase.DeviceType" c:type="FridaDeviceType" />
+            <type name="Frida.DeviceType" c:type="FridaDeviceType" />
           </parameter>
           <parameter name="timeout" transfer-ownership="none">
             <type name="gint" c:type="gint" />
@@ -136,11 +136,11 @@
       </method>
       <method name="get_device_by_type_finish" c:identifier="frida_device_manager_get_device_by_type_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -149,14 +149,14 @@
       </method>
       <method name="get_device_by_type_sync" c:identifier="frida_device_manager_get_device_by_type_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="type" transfer-ownership="none">
-            <type name="FridaBase.DeviceType" c:type="FridaDeviceType" />
+            <type name="Frida.DeviceType" c:type="FridaDeviceType" />
           </parameter>
           <parameter name="timeout" transfer-ownership="none">
             <type name="gint" c:type="gint" />
@@ -172,7 +172,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="predicate" transfer-ownership="none" closure="1" scope="call">
             <type name="Frida.DeviceManagerPredicate" c:type="FridaDeviceManagerPredicate" />
@@ -196,11 +196,11 @@
       </method>
       <method name="get_device_finish" c:identifier="frida_device_manager_get_device_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -209,11 +209,11 @@
       </method>
       <method name="get_device_sync" c:identifier="frida_device_manager_get_device_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="predicate" transfer-ownership="none" closure="1" scope="call">
             <type name="Frida.DeviceManagerPredicate" c:type="FridaDeviceManagerPredicate" />
@@ -235,7 +235,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="id" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -256,11 +256,11 @@
       </method>
       <method name="find_device_by_id_finish" c:identifier="frida_device_manager_find_device_by_id_finish" throws="1">
         <return-value transfer-ownership="full" nullable="1">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -269,11 +269,11 @@
       </method>
       <method name="find_device_by_id_sync" c:identifier="frida_device_manager_find_device_by_id_sync" throws="1">
         <return-value transfer-ownership="full" nullable="1">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="id" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -292,10 +292,10 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="type" transfer-ownership="none">
-            <type name="FridaBase.DeviceType" c:type="FridaDeviceType" />
+            <type name="Frida.DeviceType" c:type="FridaDeviceType" />
           </parameter>
           <parameter name="timeout" transfer-ownership="none">
             <type name="gint" c:type="gint" />
@@ -313,11 +313,11 @@
       </method>
       <method name="find_device_by_type_finish" c:identifier="frida_device_manager_find_device_by_type_finish" throws="1">
         <return-value transfer-ownership="full" nullable="1">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -326,14 +326,14 @@
       </method>
       <method name="find_device_by_type_sync" c:identifier="frida_device_manager_find_device_by_type_sync" throws="1">
         <return-value transfer-ownership="full" nullable="1">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="type" transfer-ownership="none">
-            <type name="FridaBase.DeviceType" c:type="FridaDeviceType" />
+            <type name="Frida.DeviceType" c:type="FridaDeviceType" />
           </parameter>
           <parameter name="timeout" transfer-ownership="none">
             <type name="gint" c:type="gint" />
@@ -349,7 +349,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="predicate" transfer-ownership="none" closure="1" scope="call">
             <type name="Frida.DeviceManagerPredicate" c:type="FridaDeviceManagerPredicate" />
@@ -373,11 +373,11 @@
       </method>
       <method name="find_device_finish" c:identifier="frida_device_manager_find_device_finish" throws="1">
         <return-value transfer-ownership="full" nullable="1">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -386,11 +386,11 @@
       </method>
       <method name="find_device_sync" c:identifier="frida_device_manager_find_device_sync" throws="1">
         <return-value transfer-ownership="full" nullable="1">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="predicate" transfer-ownership="none" closure="1" scope="call">
             <type name="Frida.DeviceManagerPredicate" c:type="FridaDeviceManagerPredicate" />
@@ -412,7 +412,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -427,11 +427,11 @@
       </method>
       <method name="enumerate_devices_finish" c:identifier="frida_device_manager_enumerate_devices_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.DeviceList" c:type="FridaDeviceList*" />
+          <type name="Frida.DeviceList" c:type="FridaDeviceList*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -440,11 +440,11 @@
       </method>
       <method name="enumerate_devices_sync" c:identifier="frida_device_manager_enumerate_devices_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.DeviceList" c:type="FridaDeviceList*" />
+          <type name="Frida.DeviceList" c:type="FridaDeviceList*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -457,13 +457,13 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="address" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
+            <type name="Frida.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -478,11 +478,11 @@
       </method>
       <method name="add_remote_device_finish" c:identifier="frida_device_manager_add_remote_device_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -491,17 +491,17 @@
       </method>
       <method name="add_remote_device_sync" c:identifier="frida_device_manager_add_remote_device_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="address" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
+            <type name="Frida.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -514,7 +514,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="address" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -536,7 +536,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -549,7 +549,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </instance-parameter>
           <parameter name="address" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -561,7 +561,7 @@
       </method>
       <constructor name="new" c:identifier="frida_device_manager_new">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+          <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
         </return-value>
       </constructor>
       <glib:signal name="added">
@@ -570,7 +570,7 @@
         </return-value>
         <parameters>
           <parameter name="device" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </parameter>
         </parameters>
       </glib:signal>
@@ -580,7 +580,7 @@
         </return-value>
         <parameters>
           <parameter name="device" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </parameter>
         </parameters>
       </glib:signal>
@@ -595,7 +595,7 @@
         </return-value>
         <parameters>
           <parameter name="device" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </parameter>
           <parameter name="user_data" transfer-ownership="none" closure="1">
             <type name="gpointer" c:type="void*" />
@@ -610,17 +610,17 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceList" c:type="FridaDeviceList*" />
+            <type name="Frida.DeviceList" c:type="FridaDeviceList*" />
           </instance-parameter>
         </parameters>
       </method>
       <method name="get" c:identifier="frida_device_list_get">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.DeviceList" c:type="FridaDeviceList*" />
+            <type name="Frida.DeviceList" c:type="FridaDeviceList*" />
           </instance-parameter>
           <parameter name="index" transfer-ownership="none">
             <type name="gint" c:type="gint" />
@@ -635,7 +635,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -645,7 +645,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -667,7 +667,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -683,7 +683,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -696,7 +696,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
             <type name="FridaBase.FrontmostQueryOptions" c:type="FridaFrontmostQueryOptions*" />
@@ -714,11 +714,11 @@
       </method>
       <method name="get_frontmost_application_finish" c:identifier="frida_device_get_frontmost_application_finish" throws="1">
         <return-value transfer-ownership="full" nullable="1">
-          <type name="FridaBase.Application" c:type="FridaApplication*" />
+          <type name="Frida.Application" c:type="FridaApplication*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -727,11 +727,11 @@
       </method>
       <method name="get_frontmost_application_sync" c:identifier="frida_device_get_frontmost_application_sync" throws="1">
         <return-value transfer-ownership="full" nullable="1">
-          <type name="FridaBase.Application" c:type="FridaApplication*" />
+          <type name="Frida.Application" c:type="FridaApplication*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
             <type name="FridaBase.FrontmostQueryOptions" c:type="FridaFrontmostQueryOptions*" />
@@ -747,7 +747,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
             <type name="FridaBase.ApplicationQueryOptions" c:type="FridaApplicationQueryOptions*" />
@@ -765,11 +765,11 @@
       </method>
       <method name="enumerate_applications_finish" c:identifier="frida_device_enumerate_applications_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.ApplicationList" c:type="FridaApplicationList*" />
+          <type name="Frida.ApplicationList" c:type="FridaApplicationList*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -778,11 +778,11 @@
       </method>
       <method name="enumerate_applications_sync" c:identifier="frida_device_enumerate_applications_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.ApplicationList" c:type="FridaApplicationList*" />
+          <type name="Frida.ApplicationList" c:type="FridaApplicationList*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
             <type name="FridaBase.ApplicationQueryOptions" c:type="FridaApplicationQueryOptions*" />
@@ -798,13 +798,13 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -819,11 +819,11 @@
       </method>
       <method name="get_process_by_pid_finish" c:identifier="frida_device_get_process_by_pid_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Process" c:type="FridaProcess*" />
+          <type name="Frida.Process" c:type="FridaProcess*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -832,17 +832,17 @@
       </method>
       <method name="get_process_by_pid_sync" c:identifier="frida_device_get_process_by_pid_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Process" c:type="FridaProcess*" />
+          <type name="Frida.Process" c:type="FridaProcess*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -855,13 +855,13 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="name" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -876,11 +876,11 @@
       </method>
       <method name="get_process_by_name_finish" c:identifier="frida_device_get_process_by_name_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Process" c:type="FridaProcess*" />
+          <type name="Frida.Process" c:type="FridaProcess*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -889,17 +889,17 @@
       </method>
       <method name="get_process_by_name_sync" c:identifier="frida_device_get_process_by_name_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Process" c:type="FridaProcess*" />
+          <type name="Frida.Process" c:type="FridaProcess*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="name" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -912,7 +912,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="predicate" transfer-ownership="none" closure="1" scope="call">
             <type name="Frida.DeviceProcessPredicate" c:type="FridaDeviceProcessPredicate" />
@@ -921,7 +921,7 @@
             <type name="gpointer" c:type="void*" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -936,11 +936,11 @@
       </method>
       <method name="get_process_finish" c:identifier="frida_device_get_process_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Process" c:type="FridaProcess*" />
+          <type name="Frida.Process" c:type="FridaProcess*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -949,11 +949,11 @@
       </method>
       <method name="get_process_sync" c:identifier="frida_device_get_process_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Process" c:type="FridaProcess*" />
+          <type name="Frida.Process" c:type="FridaProcess*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="predicate" transfer-ownership="none" closure="1" scope="call">
             <type name="Frida.DeviceProcessPredicate" c:type="FridaDeviceProcessPredicate" />
@@ -962,7 +962,7 @@
             <type name="gpointer" c:type="void*" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -975,13 +975,13 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -996,11 +996,11 @@
       </method>
       <method name="find_process_by_pid_finish" c:identifier="frida_device_find_process_by_pid_finish" throws="1">
         <return-value transfer-ownership="full" nullable="1">
-          <type name="FridaBase.Process" c:type="FridaProcess*" />
+          <type name="Frida.Process" c:type="FridaProcess*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1009,17 +1009,17 @@
       </method>
       <method name="find_process_by_pid_sync" c:identifier="frida_device_find_process_by_pid_sync" throws="1">
         <return-value transfer-ownership="full" nullable="1">
-          <type name="FridaBase.Process" c:type="FridaProcess*" />
+          <type name="Frida.Process" c:type="FridaProcess*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1032,13 +1032,13 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="name" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1053,11 +1053,11 @@
       </method>
       <method name="find_process_by_name_finish" c:identifier="frida_device_find_process_by_name_finish" throws="1">
         <return-value transfer-ownership="full" nullable="1">
-          <type name="FridaBase.Process" c:type="FridaProcess*" />
+          <type name="Frida.Process" c:type="FridaProcess*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1066,17 +1066,17 @@
       </method>
       <method name="find_process_by_name_sync" c:identifier="frida_device_find_process_by_name_sync" throws="1">
         <return-value transfer-ownership="full" nullable="1">
-          <type name="FridaBase.Process" c:type="FridaProcess*" />
+          <type name="Frida.Process" c:type="FridaProcess*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="name" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1089,7 +1089,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="predicate" transfer-ownership="none" closure="1" scope="call">
             <type name="Frida.DeviceProcessPredicate" c:type="FridaDeviceProcessPredicate" />
@@ -1098,7 +1098,7 @@
             <type name="gpointer" c:type="void*" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1113,11 +1113,11 @@
       </method>
       <method name="find_process_finish" c:identifier="frida_device_find_process_finish" throws="1">
         <return-value transfer-ownership="full" nullable="1">
-          <type name="FridaBase.Process" c:type="FridaProcess*" />
+          <type name="Frida.Process" c:type="FridaProcess*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1126,11 +1126,11 @@
       </method>
       <method name="find_process_sync" c:identifier="frida_device_find_process_sync" throws="1">
         <return-value transfer-ownership="full" nullable="1">
-          <type name="FridaBase.Process" c:type="FridaProcess*" />
+          <type name="Frida.Process" c:type="FridaProcess*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="predicate" transfer-ownership="none" closure="1" scope="call">
             <type name="Frida.DeviceProcessPredicate" c:type="FridaDeviceProcessPredicate" />
@@ -1139,7 +1139,7 @@
             <type name="gpointer" c:type="void*" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1152,7 +1152,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
             <type name="FridaBase.ProcessQueryOptions" c:type="FridaProcessQueryOptions*" />
@@ -1170,11 +1170,11 @@
       </method>
       <method name="enumerate_processes_finish" c:identifier="frida_device_enumerate_processes_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.ProcessList" c:type="FridaProcessList*" />
+          <type name="Frida.ProcessList" c:type="FridaProcessList*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1183,11 +1183,11 @@
       </method>
       <method name="enumerate_processes_sync" c:identifier="frida_device_enumerate_processes_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.ProcessList" c:type="FridaProcessList*" />
+          <type name="Frida.ProcessList" c:type="FridaProcessList*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
             <type name="FridaBase.ProcessQueryOptions" c:type="FridaProcessQueryOptions*" />
@@ -1203,7 +1203,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1222,7 +1222,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1235,7 +1235,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1248,7 +1248,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1267,7 +1267,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1280,7 +1280,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1293,7 +1293,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1308,11 +1308,11 @@
       </method>
       <method name="enumerate_pending_spawn_finish" c:identifier="frida_device_enumerate_pending_spawn_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.SpawnList" c:type="FridaSpawnList*" />
+          <type name="Frida.SpawnList" c:type="FridaSpawnList*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1321,11 +1321,11 @@
       </method>
       <method name="enumerate_pending_spawn_sync" c:identifier="frida_device_enumerate_pending_spawn_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.SpawnList" c:type="FridaSpawnList*" />
+          <type name="Frida.SpawnList" c:type="FridaSpawnList*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1338,7 +1338,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1353,11 +1353,11 @@
       </method>
       <method name="enumerate_pending_children_finish" c:identifier="frida_device_enumerate_pending_children_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.ChildList" c:type="FridaChildList*" />
+          <type name="Frida.ChildList" c:type="FridaChildList*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1366,11 +1366,11 @@
       </method>
       <method name="enumerate_pending_children_sync" c:identifier="frida_device_enumerate_pending_children_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.ChildList" c:type="FridaChildList*" />
+          <type name="Frida.ChildList" c:type="FridaChildList*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1383,13 +1383,13 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="program" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.SpawnOptions" c:type="FridaSpawnOptions*" />
+            <type name="Frida.SpawnOptions" c:type="FridaSpawnOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1408,7 +1408,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1421,13 +1421,13 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="program" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.SpawnOptions" c:type="FridaSpawnOptions*" />
+            <type name="Frida.SpawnOptions" c:type="FridaSpawnOptions*" />
           </parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1440,7 +1440,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -1465,7 +1465,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1478,7 +1478,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -1497,7 +1497,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -1519,7 +1519,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1532,7 +1532,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -1548,7 +1548,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -1570,7 +1570,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1583,7 +1583,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -1599,7 +1599,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -1620,11 +1620,11 @@
       </method>
       <method name="attach_finish" c:identifier="frida_device_attach_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Session" c:type="FridaSession*" />
+          <type name="Frida.Session" c:type="FridaSession*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1633,11 +1633,11 @@
       </method>
       <method name="attach_sync" c:identifier="frida_device_attach_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Session" c:type="FridaSession*" />
+          <type name="Frida.Session" c:type="FridaSession*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -1656,7 +1656,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -1687,7 +1687,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1700,7 +1700,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -1725,7 +1725,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -1756,7 +1756,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1769,7 +1769,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -1794,7 +1794,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="address" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -1816,7 +1816,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1829,7 +1829,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="address" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -1845,7 +1845,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="address" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -1863,11 +1863,11 @@
       </method>
       <method name="open_service_finish" c:identifier="frida_device_open_service_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Service" c:type="FridaService*" />
+          <type name="Frida.Service" c:type="FridaService*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1876,11 +1876,11 @@
       </method>
       <method name="open_service_sync" c:identifier="frida_device_open_service_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Service" c:type="FridaService*" />
+          <type name="Frida.Service" c:type="FridaService*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="address" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -1896,7 +1896,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1915,7 +1915,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -1928,7 +1928,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -1944,7 +1944,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -1957,7 +1957,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -1970,46 +1970,33 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
         </parameters>
       </method>
       <property name="dtype">
-        <type name="FridaBase.DeviceType" c:type="FridaDeviceType" />
+        <type name="Frida.DeviceType" c:type="FridaDeviceType" />
       </property>
       <method name="get_dtype" c:identifier="frida_device_get_dtype">
         <return-value transfer-ownership="none">
-          <type name="FridaBase.DeviceType" c:type="FridaDeviceType" />
+          <type name="Frida.DeviceType" c:type="FridaDeviceType" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
         </parameters>
       </method>
       <property name="bus">
-        <type name="FridaBase.Bus" c:type="FridaBus*" />
+        <type name="Frida.Bus" c:type="FridaBus*" />
       </property>
       <method name="get_bus" c:identifier="frida_device_get_bus">
         <return-value transfer-ownership="none">
-          <type name="FridaBase.Bus" c:type="FridaBus*" />
+          <type name="Frida.Bus" c:type="FridaBus*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
-          </instance-parameter>
-        </parameters>
-      </method>
-      <property name="manager" writable="1" construct-only="1">
-        <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
-      </property>
-      <method name="get_manager" c:identifier="frida_device_get_manager">
-        <return-value transfer-ownership="none" nullable="1">
-          <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Device" c:type="FridaDevice*" />
+            <type name="Frida.Device" c:type="FridaDevice*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2019,7 +2006,7 @@
         </return-value>
         <parameters>
           <parameter name="spawn" transfer-ownership="none">
-            <type name="FridaBase.Spawn" c:type="FridaSpawn*" />
+            <type name="Frida.Spawn" c:type="FridaSpawn*" />
           </parameter>
         </parameters>
       </glib:signal>
@@ -2029,7 +2016,7 @@
         </return-value>
         <parameters>
           <parameter name="spawn" transfer-ownership="none">
-            <type name="FridaBase.Spawn" c:type="FridaSpawn*" />
+            <type name="Frida.Spawn" c:type="FridaSpawn*" />
           </parameter>
         </parameters>
       </glib:signal>
@@ -2039,7 +2026,7 @@
         </return-value>
         <parameters>
           <parameter name="child" transfer-ownership="none">
-            <type name="FridaBase.Child" c:type="FridaChild*" />
+            <type name="Frida.Child" c:type="FridaChild*" />
           </parameter>
         </parameters>
       </glib:signal>
@@ -2049,7 +2036,7 @@
         </return-value>
         <parameters>
           <parameter name="child" transfer-ownership="none">
-            <type name="FridaBase.Child" c:type="FridaChild*" />
+            <type name="Frida.Child" c:type="FridaChild*" />
           </parameter>
         </parameters>
       </glib:signal>
@@ -2059,7 +2046,7 @@
         </return-value>
         <parameters>
           <parameter name="crash" transfer-ownership="none">
-            <type name="FridaBase.Crash" c:type="FridaCrash*" />
+            <type name="Frida.Crash" c:type="FridaCrash*" />
           </parameter>
         </parameters>
       </glib:signal>
@@ -2100,7 +2087,7 @@
         </return-value>
         <parameters>
           <parameter name="process" transfer-ownership="none">
-            <type name="FridaBase.Process" c:type="FridaProcess*" />
+            <type name="Frida.Process" c:type="FridaProcess*" />
           </parameter>
           <parameter name="user_data" transfer-ownership="none" closure="1">
             <type name="gpointer" c:type="void*" />
@@ -2111,7 +2098,7 @@
     <class name="RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions" c:symbol-prefix="remote_device_options" glib:type-name="FridaRemoteDeviceOptions" glib:get-type="frida_remote_device_options_get_type" glib:type-struct="RemoteDeviceOptionsClass" parent="GObject.Object">
       <constructor name="new" c:identifier="frida_remote_device_options_new">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
+          <type name="Frida.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
         </return-value>
       </constructor>
       <property name="certificate" writable="1">
@@ -2123,7 +2110,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
+            <type name="Frida.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2133,7 +2120,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
+            <type name="Frida.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
           </instance-parameter>
           <parameter name="value" transfer-ownership="none" nullable="1">
             <type name="Gio.TlsCertificate" c:type="GTlsCertificate*" />
@@ -2149,7 +2136,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
+            <type name="Frida.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2159,7 +2146,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
+            <type name="Frida.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
           </instance-parameter>
           <parameter name="value" transfer-ownership="none" nullable="1">
             <type name="utf8" c:type="const gchar*" />
@@ -2175,7 +2162,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
+            <type name="Frida.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2185,7 +2172,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
+            <type name="Frida.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
           </instance-parameter>
           <parameter name="value" transfer-ownership="none" nullable="1">
             <type name="utf8" c:type="const gchar*" />
@@ -2201,7 +2188,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
+            <type name="Frida.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2211,7 +2198,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
+            <type name="Frida.RemoteDeviceOptions" c:type="FridaRemoteDeviceOptions*" />
           </instance-parameter>
           <parameter name="value" transfer-ownership="none">
             <type name="gint" c:type="gint" />
@@ -2226,17 +2213,17 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.ApplicationList" c:type="FridaApplicationList*" />
+            <type name="Frida.ApplicationList" c:type="FridaApplicationList*" />
           </instance-parameter>
         </parameters>
       </method>
       <method name="get" c:identifier="frida_application_list_get">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Application" c:type="FridaApplication*" />
+          <type name="Frida.Application" c:type="FridaApplication*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.ApplicationList" c:type="FridaApplicationList*" />
+            <type name="Frida.ApplicationList" c:type="FridaApplicationList*" />
           </instance-parameter>
           <parameter name="index" transfer-ownership="none">
             <type name="gint" c:type="gint" />
@@ -2254,7 +2241,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Application" c:type="FridaApplication*" />
+            <type name="Frida.Application" c:type="FridaApplication*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2267,7 +2254,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Application" c:type="FridaApplication*" />
+            <type name="Frida.Application" c:type="FridaApplication*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2280,7 +2267,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Application" c:type="FridaApplication*" />
+            <type name="Frida.Application" c:type="FridaApplication*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2299,7 +2286,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Application" c:type="FridaApplication*" />
+            <type name="Frida.Application" c:type="FridaApplication*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2311,17 +2298,17 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.ProcessList" c:type="FridaProcessList*" />
+            <type name="Frida.ProcessList" c:type="FridaProcessList*" />
           </instance-parameter>
         </parameters>
       </method>
       <method name="get" c:identifier="frida_process_list_get">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Process" c:type="FridaProcess*" />
+          <type name="Frida.Process" c:type="FridaProcess*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.ProcessList" c:type="FridaProcessList*" />
+            <type name="Frida.ProcessList" c:type="FridaProcessList*" />
           </instance-parameter>
           <parameter name="index" transfer-ownership="none">
             <type name="gint" c:type="gint" />
@@ -2339,7 +2326,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Process" c:type="FridaProcess*" />
+            <type name="Frida.Process" c:type="FridaProcess*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2352,7 +2339,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Process" c:type="FridaProcess*" />
+            <type name="Frida.Process" c:type="FridaProcess*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2371,7 +2358,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Process" c:type="FridaProcess*" />
+            <type name="Frida.Process" c:type="FridaProcess*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2379,7 +2366,7 @@
     <class name="ProcessMatchOptions" c:type="FridaProcessMatchOptions" c:symbol-prefix="process_match_options" glib:type-name="FridaProcessMatchOptions" glib:get-type="frida_process_match_options_get_type" glib:type-struct="ProcessMatchOptionsClass" parent="GObject.Object">
       <constructor name="new" c:identifier="frida_process_match_options_new">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+          <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
         </return-value>
       </constructor>
       <property name="timeout" writable="1">
@@ -2391,7 +2378,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2401,7 +2388,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </instance-parameter>
           <parameter name="value" transfer-ownership="none">
             <type name="gint" c:type="gint" />
@@ -2417,7 +2404,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2427,7 +2414,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
+            <type name="Frida.ProcessMatchOptions" c:type="FridaProcessMatchOptions*" />
           </instance-parameter>
           <parameter name="value" transfer-ownership="none">
             <type name="FridaBase.Scope" c:type="FridaScope" />
@@ -2438,7 +2425,7 @@
     <class name="SpawnOptions" c:type="FridaSpawnOptions" c:symbol-prefix="spawn_options" glib:type-name="FridaSpawnOptions" glib:get-type="frida_spawn_options_get_type" glib:type-struct="SpawnOptionsClass" parent="GObject.Object">
       <constructor name="new" c:identifier="frida_spawn_options_new">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.SpawnOptions" c:type="FridaSpawnOptions*" />
+          <type name="Frida.SpawnOptions" c:type="FridaSpawnOptions*" />
         </return-value>
       </constructor>
       <property name="argv" writable="1">
@@ -2454,7 +2441,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.SpawnOptions" c:type="FridaSpawnOptions*" />
+            <type name="Frida.SpawnOptions" c:type="FridaSpawnOptions*" />
           </instance-parameter>
           <parameter name="result_length1" direction="out" transfer-ownership="none">
             <type name="gint" c:type="gint*" />
@@ -2467,7 +2454,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.SpawnOptions" c:type="FridaSpawnOptions*" />
+            <type name="Frida.SpawnOptions" c:type="FridaSpawnOptions*" />
           </instance-parameter>
           <parameter name="value" transfer-ownership="none" nullable="1">
             <array length="1" c:type="gchar**">
@@ -2492,7 +2479,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.SpawnOptions" c:type="FridaSpawnOptions*" />
+            <type name="Frida.SpawnOptions" c:type="FridaSpawnOptions*" />
           </instance-parameter>
           <parameter name="result_length1" direction="out" transfer-ownership="none">
             <type name="gint" c:type="gint*" />
@@ -2505,7 +2492,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.SpawnOptions" c:type="FridaSpawnOptions*" />
+            <type name="Frida.SpawnOptions" c:type="FridaSpawnOptions*" />
           </instance-parameter>
           <parameter name="value" transfer-ownership="none" nullable="1">
             <array length="1" c:type="gchar**">
@@ -2530,7 +2517,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.SpawnOptions" c:type="FridaSpawnOptions*" />
+            <type name="Frida.SpawnOptions" c:type="FridaSpawnOptions*" />
           </instance-parameter>
           <parameter name="result_length1" direction="out" transfer-ownership="none">
             <type name="gint" c:type="gint*" />
@@ -2543,7 +2530,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.SpawnOptions" c:type="FridaSpawnOptions*" />
+            <type name="Frida.SpawnOptions" c:type="FridaSpawnOptions*" />
           </instance-parameter>
           <parameter name="value" transfer-ownership="none" nullable="1">
             <array length="1" c:type="gchar**">
@@ -2564,7 +2551,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.SpawnOptions" c:type="FridaSpawnOptions*" />
+            <type name="Frida.SpawnOptions" c:type="FridaSpawnOptions*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2574,7 +2561,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.SpawnOptions" c:type="FridaSpawnOptions*" />
+            <type name="Frida.SpawnOptions" c:type="FridaSpawnOptions*" />
           </instance-parameter>
           <parameter name="value" transfer-ownership="none" nullable="1">
             <type name="utf8" c:type="const gchar*" />
@@ -2590,7 +2577,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.SpawnOptions" c:type="FridaSpawnOptions*" />
+            <type name="Frida.SpawnOptions" c:type="FridaSpawnOptions*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2600,7 +2587,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.SpawnOptions" c:type="FridaSpawnOptions*" />
+            <type name="Frida.SpawnOptions" c:type="FridaSpawnOptions*" />
           </instance-parameter>
           <parameter name="value" transfer-ownership="none">
             <type name="FridaBase.Stdio" c:type="FridaStdio" />
@@ -2622,7 +2609,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.SpawnOptions" c:type="FridaSpawnOptions*" />
+            <type name="Frida.SpawnOptions" c:type="FridaSpawnOptions*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2632,7 +2619,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.SpawnOptions" c:type="FridaSpawnOptions*" />
+            <type name="Frida.SpawnOptions" c:type="FridaSpawnOptions*" />
           </instance-parameter>
           <parameter name="value" transfer-ownership="none">
             <type name="GLib.HashTable" c:type="GHashTable*">
@@ -2650,17 +2637,17 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.SpawnList" c:type="FridaSpawnList*" />
+            <type name="Frida.SpawnList" c:type="FridaSpawnList*" />
           </instance-parameter>
         </parameters>
       </method>
       <method name="get" c:identifier="frida_spawn_list_get">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Spawn" c:type="FridaSpawn*" />
+          <type name="Frida.Spawn" c:type="FridaSpawn*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.SpawnList" c:type="FridaSpawnList*" />
+            <type name="Frida.SpawnList" c:type="FridaSpawnList*" />
           </instance-parameter>
           <parameter name="index" transfer-ownership="none">
             <type name="gint" c:type="gint" />
@@ -2678,7 +2665,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Spawn" c:type="FridaSpawn*" />
+            <type name="Frida.Spawn" c:type="FridaSpawn*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2691,7 +2678,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Spawn" c:type="FridaSpawn*" />
+            <type name="Frida.Spawn" c:type="FridaSpawn*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2703,17 +2690,17 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.ChildList" c:type="FridaChildList*" />
+            <type name="Frida.ChildList" c:type="FridaChildList*" />
           </instance-parameter>
         </parameters>
       </method>
       <method name="get" c:identifier="frida_child_list_get">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Child" c:type="FridaChild*" />
+          <type name="Frida.Child" c:type="FridaChild*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.ChildList" c:type="FridaChildList*" />
+            <type name="Frida.ChildList" c:type="FridaChildList*" />
           </instance-parameter>
           <parameter name="index" transfer-ownership="none">
             <type name="gint" c:type="gint" />
@@ -2731,7 +2718,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Child" c:type="FridaChild*" />
+            <type name="Frida.Child" c:type="FridaChild*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2744,7 +2731,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Child" c:type="FridaChild*" />
+            <type name="Frida.Child" c:type="FridaChild*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2757,7 +2744,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Child" c:type="FridaChild*" />
+            <type name="Frida.Child" c:type="FridaChild*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2770,7 +2757,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Child" c:type="FridaChild*" />
+            <type name="Frida.Child" c:type="FridaChild*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2783,7 +2770,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Child" c:type="FridaChild*" />
+            <type name="Frida.Child" c:type="FridaChild*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2800,7 +2787,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Child" c:type="FridaChild*" />
+            <type name="Frida.Child" c:type="FridaChild*" />
           </instance-parameter>
           <parameter name="result_length1" direction="out" transfer-ownership="none">
             <type name="gint" c:type="gint*" />
@@ -2820,7 +2807,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Child" c:type="FridaChild*" />
+            <type name="Frida.Child" c:type="FridaChild*" />
           </instance-parameter>
           <parameter name="result_length1" direction="out" transfer-ownership="none">
             <type name="gint" c:type="gint*" />
@@ -2838,7 +2825,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Crash" c:type="FridaCrash*" />
+            <type name="Frida.Crash" c:type="FridaCrash*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2851,7 +2838,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Crash" c:type="FridaCrash*" />
+            <type name="Frida.Crash" c:type="FridaCrash*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2864,7 +2851,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Crash" c:type="FridaCrash*" />
+            <type name="Frida.Crash" c:type="FridaCrash*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2877,7 +2864,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Crash" c:type="FridaCrash*" />
+            <type name="Frida.Crash" c:type="FridaCrash*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2896,7 +2883,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Crash" c:type="FridaCrash*" />
+            <type name="Frida.Crash" c:type="FridaCrash*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2908,7 +2895,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Bus" c:type="FridaBus*" />
+            <type name="Frida.Bus" c:type="FridaBus*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -2918,7 +2905,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Bus" c:type="FridaBus*" />
+            <type name="Frida.Bus" c:type="FridaBus*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -2937,7 +2924,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Bus" c:type="FridaBus*" />
+            <type name="Frida.Bus" c:type="FridaBus*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -2950,7 +2937,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Bus" c:type="FridaBus*" />
+            <type name="Frida.Bus" c:type="FridaBus*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -2963,7 +2950,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Bus" c:type="FridaBus*" />
+            <type name="Frida.Bus" c:type="FridaBus*" />
           </instance-parameter>
           <parameter name="json" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -2974,15 +2961,15 @@
         </parameters>
       </method>
       <property name="device" writable="1" construct-only="1">
-        <type name="FridaBase.Device" c:type="FridaDevice*" />
+        <type name="Frida.Device" c:type="FridaDevice*" />
       </property>
       <method name="get_device" c:identifier="frida_bus_get_device">
         <return-value transfer-ownership="none">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Bus" c:type="FridaBus*" />
+            <type name="Frida.Bus" c:type="FridaBus*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -3013,7 +3000,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -3023,7 +3010,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3042,7 +3029,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3055,7 +3042,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3068,7 +3055,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3087,7 +3074,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3100,7 +3087,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3113,7 +3100,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3132,7 +3119,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3145,7 +3132,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3158,7 +3145,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3177,7 +3164,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3190,7 +3177,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3203,7 +3190,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="source" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -3224,11 +3211,11 @@
       </method>
       <method name="create_script_finish" c:identifier="frida_session_create_script_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Script" c:type="FridaScript*" />
+          <type name="Frida.Script" c:type="FridaScript*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3237,11 +3224,11 @@
       </method>
       <method name="create_script_sync" c:identifier="frida_session_create_script_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Script" c:type="FridaScript*" />
+          <type name="Frida.Script" c:type="FridaScript*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="source" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -3260,7 +3247,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="bytes" transfer-ownership="none">
             <type name="GLib.Bytes" c:type="GBytes*" />
@@ -3281,11 +3268,11 @@
       </method>
       <method name="create_script_from_bytes_finish" c:identifier="frida_session_create_script_from_bytes_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Script" c:type="FridaScript*" />
+          <type name="Frida.Script" c:type="FridaScript*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3294,11 +3281,11 @@
       </method>
       <method name="create_script_from_bytes_sync" c:identifier="frida_session_create_script_from_bytes_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Script" c:type="FridaScript*" />
+          <type name="Frida.Script" c:type="FridaScript*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="bytes" transfer-ownership="none">
             <type name="GLib.Bytes" c:type="GBytes*" />
@@ -3317,7 +3304,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="source" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -3342,7 +3329,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3355,7 +3342,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="source" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -3374,7 +3361,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="embed_script" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -3399,7 +3386,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3412,7 +3399,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="embed_script" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -3431,7 +3418,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
             <type name="FridaBase.PeerOptions" c:type="FridaPeerOptions*" />
@@ -3453,7 +3440,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3466,7 +3453,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
             <type name="FridaBase.PeerOptions" c:type="FridaPeerOptions*" />
@@ -3482,7 +3469,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="address" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -3503,11 +3490,11 @@
       </method>
       <method name="join_portal_finish" c:identifier="frida_session_join_portal_finish" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.PortalMembership" c:type="FridaPortalMembership*" />
+          <type name="Frida.PortalMembership" c:type="FridaPortalMembership*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3516,11 +3503,11 @@
       </method>
       <method name="join_portal_sync" c:identifier="frida_session_join_portal_sync" throws="1">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.PortalMembership" c:type="FridaPortalMembership*" />
+          <type name="Frida.PortalMembership" c:type="FridaPortalMembership*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
           <parameter name="address" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -3542,20 +3529,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
-          </instance-parameter>
-        </parameters>
-      </method>
-      <property name="session">
-        <type name="FridaBase.AgentSession" c:type="FridaAgentSession*" />
-      </property>
-      <method name="get_session" c:identifier="frida_session_get_session">
-        <return-value transfer-ownership="none">
-          <type name="FridaBase.AgentSession" c:type="FridaAgentSession*" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -3568,20 +3542,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
-          </instance-parameter>
-        </parameters>
-      </method>
-      <property name="device" writable="1" construct-only="1">
-        <type name="FridaBase.Device" c:type="FridaDevice*" />
-      </property>
-      <method name="get_device" c:identifier="frida_session_get_device">
-        <return-value transfer-ownership="none">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Session" c:type="FridaSession*" />
+            <type name="Frida.Session" c:type="FridaSession*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -3594,7 +3555,7 @@
             <type name="FridaBase.SessionDetachReason" c:type="FridaSessionDetachReason" />
           </parameter>
           <parameter name="crash" transfer-ownership="none" nullable="1">
-            <type name="FridaBase.Crash" c:type="FridaCrash*" />
+            <type name="Frida.Crash" c:type="FridaCrash*" />
           </parameter>
         </parameters>
       </glib:signal>
@@ -3606,7 +3567,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -3616,7 +3577,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3635,7 +3596,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3648,7 +3609,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3661,7 +3622,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3680,7 +3641,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3693,7 +3654,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3706,7 +3667,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3725,7 +3686,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3738,7 +3699,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3751,7 +3712,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="json" transfer-ownership="none">
             <type name="utf8" c:type="const gchar*" />
@@ -3767,7 +3728,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="port" transfer-ownership="none">
             <type name="guint16" c:type="guint16" />
@@ -3789,7 +3750,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3802,7 +3763,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="port" transfer-ownership="none">
             <type name="guint16" c:type="guint16" />
@@ -3818,7 +3779,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3837,7 +3798,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3850,40 +3811,11 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
+            <type name="Frida.Script" c:type="FridaScript*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
           </parameter>
-        </parameters>
-      </method>
-      <property name="id" writable="1" construct-only="1">
-        <type name="FridaBase.AgentScriptId" c:type="FridaAgentScriptId" />
-      </property>
-      <method name="get_id" c:identifier="frida_script_get_id">
-        <return-value transfer-ownership="none">
-          <type name="none" c:type="void" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
-          </instance-parameter>
-          <parameter name="result" direction="out" transfer-ownership="none" caller-allocates="1">
-            <type name="FridaBase.AgentScriptId" c:type="FridaAgentScriptId*" />
-          </parameter>
-        </parameters>
-      </method>
-      <property name="session" writable="1" construct-only="1">
-        <type name="FridaBase.Session" c:type="FridaSession*" />
-      </property>
-      <method name="get_session" c:identifier="frida_script_get_session">
-        <return-value transfer-ownership="none">
-          <type name="FridaBase.Session" c:type="FridaSession*" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Script" c:type="FridaScript*" />
-          </instance-parameter>
         </parameters>
       </method>
       <glib:signal name="destroyed">
@@ -3912,7 +3844,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.PortalMembership" c:type="FridaPortalMembership*" />
+            <type name="Frida.PortalMembership" c:type="FridaPortalMembership*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3931,7 +3863,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.PortalMembership" c:type="FridaPortalMembership*" />
+            <type name="Frida.PortalMembership" c:type="FridaPortalMembership*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -3944,7 +3876,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.PortalMembership" c:type="FridaPortalMembership*" />
+            <type name="Frida.PortalMembership" c:type="FridaPortalMembership*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -3960,20 +3892,20 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.PortalMembership" c:type="FridaPortalMembership*" />
+            <type name="Frida.PortalMembership" c:type="FridaPortalMembership*" />
           </instance-parameter>
         </parameters>
       </method>
       <property name="session" writable="1" construct-only="1">
-        <type name="FridaBase.Session" c:type="FridaSession*" />
+        <type name="Frida.Session" c:type="FridaSession*" />
       </property>
       <method name="get_session" c:identifier="frida_portal_membership_get_session">
         <return-value transfer-ownership="none">
-          <type name="FridaBase.Session" c:type="FridaSession*" />
+          <type name="Frida.Session" c:type="FridaSession*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.PortalMembership" c:type="FridaPortalMembership*" />
+            <type name="Frida.PortalMembership" c:type="FridaPortalMembership*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -4416,11 +4348,11 @@
         </parameters>
       </method>
       <property name="device">
-        <type name="FridaBase.Device" c:type="FridaDevice*" />
+        <type name="Frida.Device" c:type="FridaDevice*" />
       </property>
       <method name="get_device" c:identifier="frida_portal_service_get_device">
         <return-value transfer-ownership="none">
-          <type name="FridaBase.Device" c:type="FridaDevice*" />
+          <type name="Frida.Device" c:type="FridaDevice*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
@@ -4476,7 +4408,7 @@
             <type name="guint" c:type="guint" />
           </parameter>
           <parameter name="application" transfer-ownership="none">
-            <type name="FridaBase.Application" c:type="FridaApplication*" />
+            <type name="Frida.Application" c:type="FridaApplication*" />
           </parameter>
         </parameters>
       </glib:signal>
@@ -4489,7 +4421,7 @@
             <type name="guint" c:type="guint" />
           </parameter>
           <parameter name="application" transfer-ownership="none">
-            <type name="FridaBase.Application" c:type="FridaApplication*" />
+            <type name="Frida.Application" c:type="FridaApplication*" />
           </parameter>
         </parameters>
       </glib:signal>
@@ -4710,7 +4642,7 @@
         </return-value>
         <parameters>
           <parameter name="manager" transfer-ownership="none">
-            <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+            <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
           </parameter>
         </parameters>
       </constructor>
@@ -4829,11 +4761,11 @@
         </parameters>
       </method>
       <property name="manager" writable="1" construct-only="1">
-        <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+        <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
       </property>
       <method name="get_manager" c:identifier="frida_compiler_get_manager">
         <return-value transfer-ownership="none">
-          <type name="FridaBase.DeviceManager" c:type="FridaDeviceManager*" />
+          <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
@@ -5881,7 +5813,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
         </parameters>
       </method>
@@ -5891,7 +5823,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
         </parameters>
       </virtual-method>
@@ -5901,7 +5833,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -5920,7 +5852,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -5933,7 +5865,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -5952,7 +5884,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -5965,7 +5897,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -5978,7 +5910,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -5997,7 +5929,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6010,7 +5942,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -6029,7 +5961,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6042,7 +5974,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -6055,7 +5987,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
           <parameter name="parameters" transfer-ownership="none">
             <type name="GLib.Variant" c:type="GVariant*" />
@@ -6077,7 +6009,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6090,7 +6022,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
           <parameter name="parameters" transfer-ownership="none">
             <type name="GLib.Variant" c:type="GVariant*" />
@@ -6112,7 +6044,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6125,7 +6057,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Service" c:type="FridaService*" />
+            <type name="Frida.Service" c:type="FridaService*" />
           </instance-parameter>
           <parameter name="parameters" transfer-ownership="none">
             <type name="GLib.Variant" c:type="GVariant*" />
@@ -6155,12 +6087,12 @@
       <prerequisite name="GObject.Object" />
       <function name="new" c:identifier="frida_injector_new">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Injector" c:type="FridaInjector*" />
+          <type name="Frida.Injector" c:type="FridaInjector*" />
         </return-value>
       </function>
       <function name="new_inprocess" c:identifier="frida_injector_new_inprocess">
         <return-value transfer-ownership="full">
-          <type name="FridaBase.Injector" c:type="FridaInjector*" />
+          <type name="Frida.Injector" c:type="FridaInjector*" />
         </return-value>
       </function>
       <method name="close" c:identifier="frida_injector_close">
@@ -6169,7 +6101,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -6188,7 +6120,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6201,7 +6133,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -6220,7 +6152,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6233,7 +6165,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="cancellable" transfer-ownership="none" nullable="1">
             <type name="Gio.Cancellable" c:type="GCancellable*" />
@@ -6246,7 +6178,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -6277,7 +6209,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6290,7 +6222,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -6321,7 +6253,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6334,7 +6266,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -6359,7 +6291,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -6390,7 +6322,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6403,7 +6335,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -6434,7 +6366,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6447,7 +6379,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -6472,7 +6404,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="id" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -6494,7 +6426,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6507,7 +6439,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="id" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -6529,7 +6461,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6542,7 +6474,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="id" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -6558,7 +6490,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="id" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -6580,7 +6512,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6593,7 +6525,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="id" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -6615,7 +6547,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6628,7 +6560,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="id" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -6644,7 +6576,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -6669,7 +6601,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6682,7 +6614,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
@@ -6707,7 +6639,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="_res_" transfer-ownership="none">
             <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
@@ -6720,7 +6652,7 @@
         </return-value>
         <parameters>
           <instance-parameter name="self" transfer-ownership="none">
-            <type name="FridaBase.Injector" c:type="FridaInjector*" />
+            <type name="Frida.Injector" c:type="FridaInjector*" />
           </instance-parameter>
           <parameter name="pid" transfer-ownership="none">
             <type name="guint" c:type="guint" />
