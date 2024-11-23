@@ -122,6 +122,7 @@ class Type:
     name: str
     nick: str
     c: str
+    default_value: Optional[str]
 
 @dataclass
 class Enumeration:
@@ -164,7 +165,7 @@ def extract_type_from_entity(parent_element: ET.Element) -> Optional[Type]:
         assert child is not None
         element_type = extract_type_from_entity(child)
         assert element_type.name == "utf8", "only string arrays are supported for now"
-        return Type("utf8[]", "strv", "gchar **")
+        return Type("utf8[]", "strv", "gchar **", "NULL")
     return parse_type(child)
 
 def parse_type(element: ET.Element) -> Optional[Type]:
@@ -173,7 +174,7 @@ def parse_type(element: ET.Element) -> Optional[Type]:
         return None
     nick = type_nick_from_name(name, element)
     c = element.get(f"{{{C_NAMESPACE}}}type").replace("const ", "").replace("*", " *")
-    return Type(name, nick, c)
+    return Type(name, nick, c, "NULL" if "*" in c else None)
 
 def type_nick_from_name(name: str, element: ET.Element) -> str:
     if name == "GLib.PollFD":
@@ -505,7 +506,8 @@ def generate_method_code(klass: Class, method: Method) -> str:
     operation_type_name = method.operation_type_name
     class_cprefix = klass.c_symbol_prefix
 
-    param_conversions = [generate_parameter_conversion_code(param, i) for i, param in enumerate(method.parameters)]
+    invalid_arg_label = "invalid_argument" if method.is_async else "beach"
+    param_conversions = [generate_parameter_conversion_code(param, i, invalid_arg_label) for i, param in enumerate(method.parameters)]
     param_frees = [f"g_free (operation->{param.name});" for param in method.parameters if param.type.name == "utf8"]
     param_frees_str = "\n  " + "\n  ".join(param_frees) if param_frees else ""
 
@@ -637,7 +639,8 @@ static void
 {operation_free_function}
 """
     else:
-        param_declarations = [f"{param.type.c} {param.name};" for param in method.parameters]
+        param_declarations = [f"{param.type.c} {param.name}{" = " + param.type.default_value if param.type.default_value is not None else ""};"
+                              for param in method.parameters]
         if method.throws:
             param_declarations.append("GError * error = NULL;")
         param_declarations_str = "\n  " + "\n  ".join(param_declarations) if param_declarations else ""
@@ -650,20 +653,12 @@ static void
         else:
             param_conversions_str_sync = ""
 
+        param_frees_str = param_frees_str.replace("operation->", "")
+
         param_call_names = [param.name for param in method.parameters]
         if method.throws:
             param_call_names.append("&error")
         param_call_str = ", " + ", ".join(param_call_names) if param_call_names else ""
-
-        if method.parameters:
-            invalid_argument_label = f"""
-
-invalid_argument:
-  {{
-    {param_frees_str}return NULL;
-  }}"""
-        else:
-            invalid_argument_label = ""
 
         if method.throws:
             error_check = """if (error != NULL)
@@ -686,7 +681,7 @@ static napi_value
 {class_cprefix}_{method.name} (napi_env env,
 {calculate_indent('')}napi_callback_info info)
 {{
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = {len(method.parameters)};
   napi_value args[{len(method.parameters)}];
   napi_status status;
@@ -695,27 +690,28 @@ static napi_value
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;{param_conversions_str_sync}
+    goto beach;{param_conversions_str_sync}
 
   {return_assignment}{method.c_identifier} (handle{param_call_str});
 
-  {param_frees_str}{error_check}{return_conversion}
+  {error_check}{return_conversion}
 
-  return result;{invalid_argument_label}
+beach:{param_frees_str}
+  return result;
 }}
 """
     return code
 
-def generate_parameter_conversion_code(param: Parameter, index: int) -> str:
+def generate_parameter_conversion_code(param: Parameter, index: int, invalid_arg_label: str) -> str:
     code = f"""\
   if (argc > {index})
   {{
     if (!fdn_{param.type.nick}_from_value (env, args[{index}], &operation->{param.name}))
-      goto invalid_argument;
+      goto {invalid_arg_label};
   }}
   else
   {{
@@ -725,8 +721,8 @@ def generate_parameter_conversion_code(param: Parameter, index: int) -> str:
         code += f"    operation->{param.name} = NULL;"
     else:
         code += f"""    napi_throw_type_error (env, NULL, "missing argument: {to_camel_case(param.name)}");
-    goto invalid_argument;"""
-        
+    goto {invalid_arg_label};"""
+
     code += "\n  }"
 
     return code
