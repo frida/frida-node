@@ -1411,44 +1411,44 @@ static napi_value fdn_vardict_to_value (napi_env env, GHashTable * vardict);
 static gboolean fdn_variant_from_value (napi_env env, napi_value value, GVariant ** result);
 static napi_value fdn_variant_to_value (napi_env env, GVariant * variant);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0xff3cc288b70344d4, 0xae6aa7783c94fd0b };
-static napi_type_tag fdn_device_list_type_tag = { 0x9d2a7647fec14d17, 0x81946adc0983f4a0 };
-static napi_type_tag fdn_device_type_tag = { 0x3fd04ef80b3a419f, 0xa5993c118eba1768 };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0xb27afffa30e9478f, 0xa6cdde65f47a3618 };
-static napi_type_tag fdn_application_list_type_tag = { 0x5027546b612a446d, 0xae4be1a2125cb9f8 };
-static napi_type_tag fdn_application_type_tag = { 0x3b140e7f38b041d2, 0xa2ad06b61c6faeda };
-static napi_type_tag fdn_process_list_type_tag = { 0xcb1c8b519b2942f4, 0xbe5fe0bf01c0c857 };
-static napi_type_tag fdn_process_type_tag = { 0x1bac06239b794c30, 0x8316aa250edfe2fd };
-static napi_type_tag fdn_process_match_options_type_tag = { 0x6fef83215ea74df0, 0xb271ad333b1427cf };
-static napi_type_tag fdn_spawn_options_type_tag = { 0xbf5cea121a9844e7, 0x921da80cc12fbbce };
-static napi_type_tag fdn_spawn_list_type_tag = { 0x082e3dd9f42249a4, 0xbf725fe83df2f711 };
-static napi_type_tag fdn_spawn_type_tag = { 0x7e4889b782454bed, 0x8c8c7f2663144887 };
-static napi_type_tag fdn_child_list_type_tag = { 0x2f83448762e04753, 0xb8e263a1b87706e0 };
-static napi_type_tag fdn_child_type_tag = { 0xa37dcf19674c4998, 0xa9b64a1c47c60a62 };
-static napi_type_tag fdn_crash_type_tag = { 0xc75925321fa94e98, 0x8f857c73aca4a20a };
-static napi_type_tag fdn_bus_type_tag = { 0x99df957ce74d4cc6, 0x9d81069276e7af3b };
-static napi_type_tag fdn_session_type_tag = { 0x7d7d0da28a234ac6, 0xb8c5fb19af56055c };
-static napi_type_tag fdn_script_type_tag = { 0x986ccaf11a8447b0, 0xa95456d3a23739cd };
-static napi_type_tag fdn_portal_membership_type_tag = { 0x892b56c6005a4c86, 0x984a96b9280b0b4e };
-static napi_type_tag fdn_control_service_options_type_tag = { 0x4e1b57ad9add42bb, 0x9d769df2fbec37c3 };
-static napi_type_tag fdn_portal_service_type_tag = { 0xcf20c9c416c048f4, 0x98cd2180b3465fed };
-static napi_type_tag fdn_file_monitor_type_tag = { 0x0fc152ba45224b2e, 0xb36b1d2206c2d762 };
-static napi_type_tag fdn_compiler_type_tag = { 0x3f38318351bf40b1, 0x92d2ca2add14fe05 };
-static napi_type_tag fdn_compiler_options_type_tag = { 0x61d717a50fab47d1, 0x8dc5bf33ee59184e };
-static napi_type_tag fdn_build_options_type_tag = { 0x3f4f0c65bf564dac, 0x8616eb5808e20b12 };
-static napi_type_tag fdn_watch_options_type_tag = { 0x19943bbef89c49a4, 0x91f6daeded281b3d };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0x12cb9cf762654a76, 0xa984bb02148e6cdb };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0xb8d0635e845346ae, 0xbb9a5f084c30b799 };
-static napi_type_tag fdn_application_query_options_type_tag = { 0xc6fe345102db4d56, 0xbd54ef13e6198887 };
-static napi_type_tag fdn_process_query_options_type_tag = { 0xc7ee69a3d54a4f10, 0xb0d51e6d391bb545 };
-static napi_type_tag fdn_session_options_type_tag = { 0xf616ba24433c4d94, 0xa93d93f1b0396911 };
-static napi_type_tag fdn_script_options_type_tag = { 0x58220ee2c91d420b, 0x9b611b3836342305 };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0xea11e1abf79e45b4, 0xb137c209a64a7b40 };
-static napi_type_tag fdn_portal_options_type_tag = { 0x80492bc380904d5c, 0x83994dbde9ebacad };
-static napi_type_tag fdn_peer_options_type_tag = { 0x4105247197e34c29, 0x890d45237fc1b667 };
-static napi_type_tag fdn_relay_type_tag = { 0x1542df8a704c49e7, 0x8ded51ab654d2dec };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x66fa252c09294883, 0xbb6e9a3271258c76 };
-static napi_type_tag fdn_cancellable_type_tag = { 0x40b8a6f578c44663, 0xac4fc010d918850c };
+static napi_type_tag fdn_device_manager_type_tag = { 0x333dc8d419f944e7, 0xa7efecdea8f7d7bf };
+static napi_type_tag fdn_device_list_type_tag = { 0x9eb91d4b423f4629, 0xbd230b9e8b25dde5 };
+static napi_type_tag fdn_device_type_tag = { 0x06ad0dd2e46d4a97, 0x903cf549527b3dc1 };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0x6b0cb8c7f4f24878, 0x8cd3a430647e69ac };
+static napi_type_tag fdn_application_list_type_tag = { 0x493ecda1f4744b0e, 0xa1744ad55265fbdf };
+static napi_type_tag fdn_application_type_tag = { 0x749f53d8ff7c4450, 0xaf2607e009e54d70 };
+static napi_type_tag fdn_process_list_type_tag = { 0x3bd896ffba394323, 0xa37840f011a30dc0 };
+static napi_type_tag fdn_process_type_tag = { 0xb993c33c097c4b30, 0xa05615db4b67d26b };
+static napi_type_tag fdn_process_match_options_type_tag = { 0xb297c8dd139d45e2, 0xb41cba9396888165 };
+static napi_type_tag fdn_spawn_options_type_tag = { 0x5ef22f1b74134522, 0x828f9274191d87bb };
+static napi_type_tag fdn_spawn_list_type_tag = { 0x1cff14a25ac94dc0, 0x9a93923eb865599e };
+static napi_type_tag fdn_spawn_type_tag = { 0x3fb1d45afa2b4ddb, 0xa243c9356c8f1943 };
+static napi_type_tag fdn_child_list_type_tag = { 0x4414c81eea1343e7, 0xb0e853ba9898e7bc };
+static napi_type_tag fdn_child_type_tag = { 0x6b982f098a1847fe, 0xa661c62ab23eb88b };
+static napi_type_tag fdn_crash_type_tag = { 0x07fb60a425eb4e0e, 0x9e1b32db5da24f8f };
+static napi_type_tag fdn_bus_type_tag = { 0xaf290139dc7c40ce, 0xa495b5aef5b80422 };
+static napi_type_tag fdn_session_type_tag = { 0x638d23827cee41a3, 0x95b064b51079d1d4 };
+static napi_type_tag fdn_script_type_tag = { 0xb52aaec5307c4bea, 0x91ca498b49f59800 };
+static napi_type_tag fdn_portal_membership_type_tag = { 0x7cf5fce8d1c34144, 0x84733bfa074c119d };
+static napi_type_tag fdn_control_service_options_type_tag = { 0x2d424b677f69484d, 0x8abb6f0017b4ebb6 };
+static napi_type_tag fdn_portal_service_type_tag = { 0xee59e09e175f4e88, 0x8acfe9e683a3ccad };
+static napi_type_tag fdn_file_monitor_type_tag = { 0x9d32d50d284d4871, 0x8129705ec0e3ca02 };
+static napi_type_tag fdn_compiler_type_tag = { 0x4e34166044ca491d, 0xbb79748bc674cba5 };
+static napi_type_tag fdn_compiler_options_type_tag = { 0x0e514c7241844937, 0x96c2ebf53322b72b };
+static napi_type_tag fdn_build_options_type_tag = { 0x50cb752cc22f436b, 0xbd4c5d71f3c4765b };
+static napi_type_tag fdn_watch_options_type_tag = { 0xefde7a53cc124916, 0xa248f57b4e2c35f7 };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0x1adbc0cedb11453b, 0x8fdf942486a3be44 };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0xf70a91a368e64298, 0xa5fc724808750461 };
+static napi_type_tag fdn_application_query_options_type_tag = { 0x5b2231cf63aa4e29, 0xa154d0e60075cddc };
+static napi_type_tag fdn_process_query_options_type_tag = { 0xff926d55193f4aab, 0xae5159d0fe26e37b };
+static napi_type_tag fdn_session_options_type_tag = { 0xba7061c82a024353, 0xaf29a50dce48818b };
+static napi_type_tag fdn_script_options_type_tag = { 0xfb4d910981884b22, 0xad49b27035a99266 };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0x7ead872fed6c40b3, 0xa94ee11b395bf764 };
+static napi_type_tag fdn_portal_options_type_tag = { 0xdbabb27265fa41f8, 0x9c502de191fafca3 };
+static napi_type_tag fdn_peer_options_type_tag = { 0x9b7b39e16a4240f4, 0x89cd9ff12cbaa2e8 };
+static napi_type_tag fdn_relay_type_tag = { 0x8a34ca23e2eb43f6, 0x9c17147c016d1acc };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0xf00527361aad4213, 0xb1bc65d37ebbfce1 };
+static napi_type_tag fdn_cancellable_type_tag = { 0x1f439ed953ef42bc, 0xbd91fb17059507c9 };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_list_constructor;
@@ -2884,7 +2884,7 @@ static napi_value
 fdn_device_list_size (napi_env env,
                       napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -2894,16 +2894,17 @@ fdn_device_list_size (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_device_list_size (handle);
 
   result = fdn_int_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -2911,7 +2912,7 @@ static napi_value
 fdn_device_list_get (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -2922,33 +2923,29 @@ fdn_device_list_get (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_int_from_value (env, args[0], &index))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: index");
-    goto invalid_argument;
+    goto beach;
   }
 
   return_value = frida_device_list_get (handle, index);
 
   result = fdn_device_to_value (env, return_value);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -3114,7 +3111,7 @@ static napi_value
 fdn_device_is_lost (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -3124,16 +3121,17 @@ fdn_device_is_lost (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_device_is_lost (handle);
 
   result = fdn_boolean_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -6155,7 +6153,7 @@ static napi_value
 fdn_device_get_id (napi_env env,
                    napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -6165,16 +6163,17 @@ fdn_device_get_id (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_device_get_id (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -6182,7 +6181,7 @@ static napi_value
 fdn_device_get_name (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -6192,16 +6191,17 @@ fdn_device_get_name (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_device_get_name (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -6209,7 +6209,7 @@ static napi_value
 fdn_device_get_icon (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -6219,16 +6219,17 @@ fdn_device_get_icon (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_device_get_icon (handle);
 
   result = fdn_variant_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -6236,7 +6237,7 @@ static napi_value
 fdn_device_get_dtype (napi_env env,
                       napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -6246,16 +6247,17 @@ fdn_device_get_dtype (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_device_get_dtype (handle);
 
   result = fdn_device_type_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -6263,7 +6265,7 @@ static napi_value
 fdn_device_get_bus (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -6273,16 +6275,17 @@ fdn_device_get_bus (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_device_get_bus (handle);
 
   result = fdn_bus_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -6290,7 +6293,7 @@ static napi_value
 fdn_device_get_manager (napi_env env,
                         napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -6300,16 +6303,17 @@ fdn_device_get_manager (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_device_get_manager (handle);
 
   result = fdn_device_manager_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -6405,7 +6409,7 @@ static napi_value
 fdn_remote_device_options_get_certificate (napi_env env,
                                            napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -6415,16 +6419,17 @@ fdn_remote_device_options_get_certificate (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_remote_device_options_get_certificate (handle);
 
   result = fdn_tls_certificate_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -6432,26 +6437,26 @@ static napi_value
 fdn_remote_device_options_set_certificate (napi_env env,
                                            napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaRemoteDeviceOptions * handle;
-  GTlsCertificate * value;
+  GTlsCertificate * value = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_tls_certificate_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -6462,19 +6467,15 @@ fdn_remote_device_options_set_certificate (napi_env env,
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_remote_device_options_get_origin (napi_env env,
                                       napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -6484,16 +6485,17 @@ fdn_remote_device_options_get_origin (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_remote_device_options_get_origin (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -6501,26 +6503,26 @@ static napi_value
 fdn_remote_device_options_set_origin (napi_env env,
                                       napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaRemoteDeviceOptions * handle;
-  gchar * value;
+  gchar * value = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -6529,23 +6531,18 @@ fdn_remote_device_options_set_origin (napi_env env,
 
   frida_remote_device_options_set_origin (handle, value);
 
-  
-  g_free (operation->value);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (value);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->value);return NULL;
-  }
 }
 
 static napi_value
 fdn_remote_device_options_get_token (napi_env env,
                                      napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -6555,16 +6552,17 @@ fdn_remote_device_options_get_token (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_remote_device_options_get_token (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -6572,26 +6570,26 @@ static napi_value
 fdn_remote_device_options_set_token (napi_env env,
                                      napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaRemoteDeviceOptions * handle;
-  gchar * value;
+  gchar * value = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -6600,23 +6598,18 @@ fdn_remote_device_options_set_token (napi_env env,
 
   frida_remote_device_options_set_token (handle, value);
 
-  
-  g_free (operation->value);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (value);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->value);return NULL;
-  }
 }
 
 static napi_value
 fdn_remote_device_options_get_keepalive_interval (napi_env env,
                                                   napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -6626,16 +6619,17 @@ fdn_remote_device_options_get_keepalive_interval (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_remote_device_options_get_keepalive_interval (handle);
 
   result = fdn_int_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -6643,7 +6637,7 @@ static napi_value
 fdn_remote_device_options_set_keepalive_interval (napi_env env,
                                                   napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -6653,33 +6647,29 @@ fdn_remote_device_options_set_keepalive_interval (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_int_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_remote_device_options_set_keepalive_interval (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -6750,7 +6740,7 @@ static napi_value
 fdn_application_list_size (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -6760,16 +6750,17 @@ fdn_application_list_size (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_application_list_size (handle);
 
   result = fdn_int_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -6777,7 +6768,7 @@ static napi_value
 fdn_application_list_get (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -6788,33 +6779,29 @@ fdn_application_list_get (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_int_from_value (env, args[0], &index))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: index");
-    goto invalid_argument;
+    goto beach;
   }
 
   return_value = frida_application_list_get (handle, index);
 
   result = fdn_application_to_value (env, return_value);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -6887,7 +6874,7 @@ static napi_value
 fdn_application_get_identifier (napi_env env,
                                 napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -6897,16 +6884,17 @@ fdn_application_get_identifier (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_application_get_identifier (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -6914,7 +6902,7 @@ static napi_value
 fdn_application_get_name (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -6924,16 +6912,17 @@ fdn_application_get_name (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_application_get_name (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -6941,7 +6930,7 @@ static napi_value
 fdn_application_get_pid (napi_env env,
                          napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -6951,16 +6940,17 @@ fdn_application_get_pid (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_application_get_pid (handle);
 
   result = fdn_uint_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -6968,7 +6958,7 @@ static napi_value
 fdn_application_get_parameters (napi_env env,
                                 napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -6978,16 +6968,17 @@ fdn_application_get_parameters (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_application_get_parameters (handle);
 
   result = fdn_vardict_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -7059,7 +7050,7 @@ static napi_value
 fdn_process_list_size (napi_env env,
                        napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -7069,16 +7060,17 @@ fdn_process_list_size (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_process_list_size (handle);
 
   result = fdn_int_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -7086,7 +7078,7 @@ static napi_value
 fdn_process_list_get (napi_env env,
                       napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -7097,33 +7089,29 @@ fdn_process_list_get (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_int_from_value (env, args[0], &index))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: index");
-    goto invalid_argument;
+    goto beach;
   }
 
   return_value = frida_process_list_get (handle, index);
 
   result = fdn_process_to_value (env, return_value);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -7195,7 +7183,7 @@ static napi_value
 fdn_process_get_pid (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -7205,16 +7193,17 @@ fdn_process_get_pid (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_process_get_pid (handle);
 
   result = fdn_uint_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -7222,7 +7211,7 @@ static napi_value
 fdn_process_get_name (napi_env env,
                       napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -7232,16 +7221,17 @@ fdn_process_get_name (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_process_get_name (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -7249,7 +7239,7 @@ static napi_value
 fdn_process_get_parameters (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -7259,16 +7249,17 @@ fdn_process_get_parameters (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_process_get_parameters (handle);
 
   result = fdn_vardict_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -7360,7 +7351,7 @@ static napi_value
 fdn_process_match_options_get_timeout (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -7370,16 +7361,17 @@ fdn_process_match_options_get_timeout (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_process_match_options_get_timeout (handle);
 
   result = fdn_int_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -7387,7 +7379,7 @@ static napi_value
 fdn_process_match_options_set_timeout (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -7397,40 +7389,36 @@ fdn_process_match_options_set_timeout (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_int_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_process_match_options_set_timeout (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_process_match_options_get_scope (napi_env env,
                                      napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -7440,16 +7428,17 @@ fdn_process_match_options_get_scope (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_process_match_options_get_scope (handle);
 
   result = fdn_scope_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -7457,7 +7446,7 @@ static napi_value
 fdn_process_match_options_set_scope (napi_env env,
                                      napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -7467,33 +7456,29 @@ fdn_process_match_options_set_scope (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_scope_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_process_match_options_set_scope (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -7592,71 +7577,67 @@ static napi_value
 fdn_spawn_options_get_argv (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaSpawnOptions * handle;
-  gint * result_length1;
+  gint * result_length1 = NULL;
   gchar ** return_value;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_int_from_value (env, args[0], &result_length1))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: resultLength1");
-    goto invalid_argument;
+    goto beach;
   }
 
   return_value = frida_spawn_options_get_argv (handle, result_length1);
 
   result = fdn_strv_to_value (env, return_value);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_spawn_options_set_argv (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
   napi_value jsthis;
   FridaSpawnOptions * handle;
-  gchar ** value;
+  gchar ** value = NULL;
   gint value_length1;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_strv_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -7665,95 +7646,87 @@ fdn_spawn_options_set_argv (napi_env env,
   if (argc > 1)
   {
     if (!fdn_int_from_value (env, args[1], &value_length1))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: valueLength1");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_spawn_options_set_argv (handle, value, value_length1);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_spawn_options_get_envp (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaSpawnOptions * handle;
-  gint * result_length1;
+  gint * result_length1 = NULL;
   gchar ** return_value;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_int_from_value (env, args[0], &result_length1))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: resultLength1");
-    goto invalid_argument;
+    goto beach;
   }
 
   return_value = frida_spawn_options_get_envp (handle, result_length1);
 
   result = fdn_strv_to_value (env, return_value);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_spawn_options_set_envp (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
   napi_value jsthis;
   FridaSpawnOptions * handle;
-  gchar ** value;
+  gchar ** value = NULL;
   gint value_length1;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_strv_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -7762,95 +7735,87 @@ fdn_spawn_options_set_envp (napi_env env,
   if (argc > 1)
   {
     if (!fdn_int_from_value (env, args[1], &value_length1))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: valueLength1");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_spawn_options_set_envp (handle, value, value_length1);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_spawn_options_get_env (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaSpawnOptions * handle;
-  gint * result_length1;
+  gint * result_length1 = NULL;
   gchar ** return_value;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_int_from_value (env, args[0], &result_length1))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: resultLength1");
-    goto invalid_argument;
+    goto beach;
   }
 
   return_value = frida_spawn_options_get_env (handle, result_length1);
 
   result = fdn_strv_to_value (env, return_value);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_spawn_options_set_env (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
   napi_value jsthis;
   FridaSpawnOptions * handle;
-  gchar ** value;
+  gchar ** value = NULL;
   gint value_length1;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_strv_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -7859,31 +7824,27 @@ fdn_spawn_options_set_env (napi_env env,
   if (argc > 1)
   {
     if (!fdn_int_from_value (env, args[1], &value_length1))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: valueLength1");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_spawn_options_set_env (handle, value, value_length1);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_spawn_options_get_cwd (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -7893,16 +7854,17 @@ fdn_spawn_options_get_cwd (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_spawn_options_get_cwd (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -7910,26 +7872,26 @@ static napi_value
 fdn_spawn_options_set_cwd (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaSpawnOptions * handle;
-  gchar * value;
+  gchar * value = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -7938,23 +7900,18 @@ fdn_spawn_options_set_cwd (napi_env env,
 
   frida_spawn_options_set_cwd (handle, value);
 
-  
-  g_free (operation->value);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (value);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->value);return NULL;
-  }
 }
 
 static napi_value
 fdn_spawn_options_get_stdio (napi_env env,
                              napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -7964,16 +7921,17 @@ fdn_spawn_options_get_stdio (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_spawn_options_get_stdio (handle);
 
   result = fdn_stdio_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -7981,7 +7939,7 @@ static napi_value
 fdn_spawn_options_set_stdio (napi_env env,
                              napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -7991,40 +7949,36 @@ fdn_spawn_options_set_stdio (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_stdio_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_spawn_options_set_stdio (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_spawn_options_get_aux (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -8034,16 +7988,17 @@ fdn_spawn_options_get_aux (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_spawn_options_get_aux (handle);
 
   result = fdn_vardict_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -8051,43 +8006,39 @@ static napi_value
 fdn_spawn_options_set_aux (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaSpawnOptions * handle;
-  GHashTable * value;
+  GHashTable * value = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_vardict_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_spawn_options_set_aux (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -8158,7 +8109,7 @@ static napi_value
 fdn_spawn_list_size (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -8168,16 +8119,17 @@ fdn_spawn_list_size (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_spawn_list_size (handle);
 
   result = fdn_int_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -8185,7 +8137,7 @@ static napi_value
 fdn_spawn_list_get (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -8196,33 +8148,29 @@ fdn_spawn_list_get (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_int_from_value (env, args[0], &index))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: index");
-    goto invalid_argument;
+    goto beach;
   }
 
   return_value = frida_spawn_list_get (handle, index);
 
   result = fdn_spawn_to_value (env, return_value);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -8293,7 +8241,7 @@ static napi_value
 fdn_spawn_get_pid (napi_env env,
                    napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -8303,16 +8251,17 @@ fdn_spawn_get_pid (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_spawn_get_pid (handle);
 
   result = fdn_uint_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -8320,7 +8269,7 @@ static napi_value
 fdn_spawn_get_identifier (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -8330,16 +8279,17 @@ fdn_spawn_get_identifier (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_spawn_get_identifier (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -8411,7 +8361,7 @@ static napi_value
 fdn_child_list_size (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -8421,16 +8371,17 @@ fdn_child_list_size (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_child_list_size (handle);
 
   result = fdn_int_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -8438,7 +8389,7 @@ static napi_value
 fdn_child_list_get (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -8449,33 +8400,29 @@ fdn_child_list_get (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_int_from_value (env, args[0], &index))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: index");
-    goto invalid_argument;
+    goto beach;
   }
 
   return_value = frida_child_list_get (handle, index);
 
   result = fdn_child_to_value (env, return_value);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -8551,7 +8498,7 @@ static napi_value
 fdn_child_get_pid (napi_env env,
                    napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -8561,16 +8508,17 @@ fdn_child_get_pid (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_child_get_pid (handle);
 
   result = fdn_uint_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -8578,7 +8526,7 @@ static napi_value
 fdn_child_get_parent_pid (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -8588,16 +8536,17 @@ fdn_child_get_parent_pid (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_child_get_parent_pid (handle);
 
   result = fdn_uint_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -8605,7 +8554,7 @@ static napi_value
 fdn_child_get_origin (napi_env env,
                       napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -8615,16 +8564,17 @@ fdn_child_get_origin (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_child_get_origin (handle);
 
   result = fdn_child_origin_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -8632,7 +8582,7 @@ static napi_value
 fdn_child_get_identifier (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -8642,16 +8592,17 @@ fdn_child_get_identifier (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_child_get_identifier (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -8659,7 +8610,7 @@ static napi_value
 fdn_child_get_path (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -8669,16 +8620,17 @@ fdn_child_get_path (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_child_get_path (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -8686,88 +8638,80 @@ static napi_value
 fdn_child_get_argv (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaChild * handle;
-  gint * result_length1;
+  gint * result_length1 = NULL;
   gchar ** return_value;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_int_from_value (env, args[0], &result_length1))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: resultLength1");
-    goto invalid_argument;
+    goto beach;
   }
 
   return_value = frida_child_get_argv (handle, result_length1);
 
   result = fdn_strv_to_value (env, return_value);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_child_get_envp (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaChild * handle;
-  gint * result_length1;
+  gint * result_length1 = NULL;
   gchar ** return_value;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_int_from_value (env, args[0], &result_length1))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: resultLength1");
-    goto invalid_argument;
+    goto beach;
   }
 
   return_value = frida_child_get_envp (handle, result_length1);
 
   result = fdn_strv_to_value (env, return_value);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -8841,7 +8785,7 @@ static napi_value
 fdn_crash_get_pid (napi_env env,
                    napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -8851,16 +8795,17 @@ fdn_crash_get_pid (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_crash_get_pid (handle);
 
   result = fdn_uint_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -8868,7 +8813,7 @@ static napi_value
 fdn_crash_get_process_name (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -8878,16 +8823,17 @@ fdn_crash_get_process_name (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_crash_get_process_name (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -8895,7 +8841,7 @@ static napi_value
 fdn_crash_get_summary (napi_env env,
                        napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -8905,16 +8851,17 @@ fdn_crash_get_summary (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_crash_get_summary (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -8922,7 +8869,7 @@ static napi_value
 fdn_crash_get_report (napi_env env,
                       napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -8932,16 +8879,17 @@ fdn_crash_get_report (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_crash_get_report (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -8949,7 +8897,7 @@ static napi_value
 fdn_crash_get_parameters (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -8959,16 +8907,17 @@ fdn_crash_get_parameters (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_crash_get_parameters (handle);
 
   result = fdn_vardict_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -9047,7 +8996,7 @@ static napi_value
 fdn_bus_is_detached (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -9057,16 +9006,17 @@ fdn_bus_is_detached (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_bus_is_detached (handle);
 
   result = fdn_boolean_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -9195,37 +9145,37 @@ static napi_value
 fdn_bus_post (napi_env env,
               napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
   napi_value jsthis;
   FridaBus * handle;
-  gchar * json;
-  GBytes * data;
+  gchar * json = NULL;
+  GBytes * data = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &json))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: json");
-    goto invalid_argument;
+    goto beach;
   }
   if (argc > 1)
   {
     if (!fdn_bytes_from_value (env, args[1], &data))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -9234,23 +9184,18 @@ fdn_bus_post (napi_env env,
 
   frida_bus_post (handle, json, data);
 
-  
-  g_free (operation->json);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (json);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->json);return NULL;
-  }
 }
 
 static napi_value
 fdn_bus_get_device (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -9260,16 +9205,17 @@ fdn_bus_get_device (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_bus_get_device (handle);
 
   result = fdn_device_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -9386,7 +9332,7 @@ static napi_value
 fdn_session_is_detached (napi_env env,
                          napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -9396,16 +9342,17 @@ fdn_session_is_detached (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_session_is_detached (handle);
 
   result = fdn_boolean_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -10752,7 +10699,7 @@ static napi_value
 fdn_session_get_pid (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -10762,16 +10709,17 @@ fdn_session_get_pid (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_session_get_pid (handle);
 
   result = fdn_uint_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -10779,7 +10727,7 @@ static napi_value
 fdn_session_get_session (napi_env env,
                          napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -10789,16 +10737,17 @@ fdn_session_get_session (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_session_get_session (handle);
 
   result = fdn_agent_session_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -10806,7 +10755,7 @@ static napi_value
 fdn_session_get_persist_timeout (napi_env env,
                                  napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -10816,16 +10765,17 @@ fdn_session_get_persist_timeout (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_session_get_persist_timeout (handle);
 
   result = fdn_uint_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -10833,7 +10783,7 @@ static napi_value
 fdn_session_get_device (napi_env env,
                         napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -10843,16 +10793,17 @@ fdn_session_get_device (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_session_get_device (handle);
 
   result = fdn_device_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -10948,7 +10899,7 @@ static napi_value
 fdn_script_is_destroyed (napi_env env,
                          napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -10958,16 +10909,17 @@ fdn_script_is_destroyed (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_script_is_destroyed (handle);
 
   result = fdn_boolean_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -11338,37 +11290,37 @@ static napi_value
 fdn_script_post (napi_env env,
                  napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
   napi_value jsthis;
   FridaScript * handle;
-  gchar * json;
-  GBytes * data;
+  gchar * json = NULL;
+  GBytes * data = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &json))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: json");
-    goto invalid_argument;
+    goto beach;
   }
   if (argc > 1)
   {
     if (!fdn_bytes_from_value (env, args[1], &data))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -11377,16 +11329,11 @@ fdn_script_post (napi_env env,
 
   frida_script_post (handle, json, data);
 
-  
-  g_free (operation->json);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (json);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->json);return NULL;
-  }
 }
 
 static napi_value
@@ -11646,50 +11593,46 @@ static napi_value
 fdn_script_get_id (napi_env env,
                    napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaScript * handle;
-  FridaAgentScriptId * result;
+  FridaAgentScriptId * result = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_agent_script_id_from_value (env, args[0], &result))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: result");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_script_get_id (handle, result);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_script_get_session (napi_env env,
                         napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -11699,16 +11642,17 @@ fdn_script_get_session (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_script_get_session (handle);
 
   result = fdn_session_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -11907,7 +11851,7 @@ static napi_value
 fdn_portal_membership_get_id (napi_env env,
                               napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -11917,16 +11861,17 @@ fdn_portal_membership_get_id (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_portal_membership_get_id (handle);
 
   result = fdn_uint_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -11934,7 +11879,7 @@ static napi_value
 fdn_portal_membership_get_session (napi_env env,
                                    napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -11944,16 +11889,17 @@ fdn_portal_membership_get_session (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_portal_membership_get_session (handle);
 
   result = fdn_session_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -12047,7 +11993,7 @@ static napi_value
 fdn_control_service_options_get_sysroot (napi_env env,
                                          napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -12057,16 +12003,17 @@ fdn_control_service_options_get_sysroot (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_control_service_options_get_sysroot (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -12074,26 +12021,26 @@ static napi_value
 fdn_control_service_options_set_sysroot (napi_env env,
                                          napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaControlServiceOptions * handle;
-  gchar * value;
+  gchar * value = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -12102,23 +12049,18 @@ fdn_control_service_options_set_sysroot (napi_env env,
 
   frida_control_service_options_set_sysroot (handle, value);
 
-  
-  g_free (operation->value);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (value);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->value);return NULL;
-  }
 }
 
 static napi_value
 fdn_control_service_options_get_enable_preload (napi_env env,
                                                 napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -12128,16 +12070,17 @@ fdn_control_service_options_get_enable_preload (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_control_service_options_get_enable_preload (handle);
 
   result = fdn_boolean_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -12145,7 +12088,7 @@ static napi_value
 fdn_control_service_options_set_enable_preload (napi_env env,
                                                 napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -12155,40 +12098,36 @@ fdn_control_service_options_set_enable_preload (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_boolean_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_control_service_options_set_enable_preload (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_control_service_options_get_report_crashes (napi_env env,
                                                 napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -12198,16 +12137,17 @@ fdn_control_service_options_get_report_crashes (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_control_service_options_get_report_crashes (handle);
 
   result = fdn_boolean_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -12215,7 +12155,7 @@ static napi_value
 fdn_control_service_options_set_report_crashes (napi_env env,
                                                 napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -12225,33 +12165,29 @@ fdn_control_service_options_set_report_crashes (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_boolean_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_control_service_options_set_report_crashes (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -12582,7 +12518,7 @@ static napi_value
 fdn_portal_service_kick (napi_env env,
                          napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -12592,81 +12528,77 @@ fdn_portal_service_kick (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_uint_from_value (env, args[0], &connection_id))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: connectionId");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_portal_service_kick (handle, connection_id);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_portal_service_post (napi_env env,
                          napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 3;
   napi_value args[3];
   napi_status status;
   napi_value jsthis;
   FridaPortalService * handle;
   guint connection_id;
-  gchar * json;
-  GBytes * data;
+  gchar * json = NULL;
+  GBytes * data = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_uint_from_value (env, args[0], &connection_id))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: connectionId");
-    goto invalid_argument;
+    goto beach;
   }
   if (argc > 1)
   {
     if (!fdn_utf8_from_value (env, args[1], &json))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: json");
-    goto invalid_argument;
+    goto beach;
   }
   if (argc > 2)
   {
     if (!fdn_bytes_from_value (env, args[2], &data))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -12675,64 +12607,59 @@ fdn_portal_service_post (napi_env env,
 
   frida_portal_service_post (handle, connection_id, json, data);
 
-  
-  g_free (operation->json);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (json);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->json);return NULL;
-  }
 }
 
 static napi_value
 fdn_portal_service_narrowcast (napi_env env,
                                napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 3;
   napi_value args[3];
   napi_status status;
   napi_value jsthis;
   FridaPortalService * handle;
-  gchar * tag;
-  gchar * json;
-  GBytes * data;
+  gchar * tag = NULL;
+  gchar * json = NULL;
+  GBytes * data = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &tag))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: tag");
-    goto invalid_argument;
+    goto beach;
   }
   if (argc > 1)
   {
     if (!fdn_utf8_from_value (env, args[1], &json))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: json");
-    goto invalid_argument;
+    goto beach;
   }
   if (argc > 2)
   {
     if (!fdn_bytes_from_value (env, args[2], &data))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -12741,55 +12668,49 @@ fdn_portal_service_narrowcast (napi_env env,
 
   frida_portal_service_narrowcast (handle, tag, json, data);
 
-  
-  g_free (operation->tag);
-  g_free (operation->json);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (tag);
+  g_free (json);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->tag);
-  g_free (operation->json);return NULL;
-  }
 }
 
 static napi_value
 fdn_portal_service_broadcast (napi_env env,
                               napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
   napi_value jsthis;
   FridaPortalService * handle;
-  gchar * json;
-  GBytes * data;
+  gchar * json = NULL;
+  GBytes * data = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &json))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: json");
-    goto invalid_argument;
+    goto beach;
   }
   if (argc > 1)
   {
     if (!fdn_bytes_from_value (env, args[1], &data))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -12798,190 +12719,171 @@ fdn_portal_service_broadcast (napi_env env,
 
   frida_portal_service_broadcast (handle, json, data);
 
-  
-  g_free (operation->json);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (json);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->json);return NULL;
-  }
 }
 
 static napi_value
 fdn_portal_service_enumerate_tags (napi_env env,
                                    napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
   napi_value jsthis;
   FridaPortalService * handle;
   guint connection_id;
-  gint * result_length1;
+  gint * result_length1 = NULL;
   gchar ** return_value;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_uint_from_value (env, args[0], &connection_id))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: connectionId");
-    goto invalid_argument;
+    goto beach;
   }
   if (argc > 1)
   {
     if (!fdn_int_from_value (env, args[1], &result_length1))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: resultLength1");
-    goto invalid_argument;
+    goto beach;
   }
 
   return_value = frida_portal_service_enumerate_tags (handle, connection_id, result_length1);
 
   result = fdn_strv_to_value (env, return_value);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_portal_service_tag (napi_env env,
                         napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
   napi_value jsthis;
   FridaPortalService * handle;
   guint connection_id;
-  gchar * tag;
+  gchar * tag = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_uint_from_value (env, args[0], &connection_id))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: connectionId");
-    goto invalid_argument;
+    goto beach;
   }
   if (argc > 1)
   {
     if (!fdn_utf8_from_value (env, args[1], &tag))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: tag");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_portal_service_tag (handle, connection_id, tag);
 
-  
-  g_free (operation->tag);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (tag);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->tag);return NULL;
-  }
 }
 
 static napi_value
 fdn_portal_service_untag (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
   napi_value jsthis;
   FridaPortalService * handle;
   guint connection_id;
-  gchar * tag;
+  gchar * tag = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_uint_from_value (env, args[0], &connection_id))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: connectionId");
-    goto invalid_argument;
+    goto beach;
   }
   if (argc > 1)
   {
     if (!fdn_utf8_from_value (env, args[1], &tag))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: tag");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_portal_service_untag (handle, connection_id, tag);
 
-  
-  g_free (operation->tag);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (tag);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->tag);return NULL;
-  }
 }
 
 static napi_value
 fdn_portal_service_get_device (napi_env env,
                                napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -12991,16 +12893,17 @@ fdn_portal_service_get_device (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_portal_service_get_device (handle);
 
   result = fdn_device_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -13008,7 +12911,7 @@ static napi_value
 fdn_portal_service_get_cluster_params (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -13018,16 +12921,17 @@ fdn_portal_service_get_cluster_params (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_portal_service_get_cluster_params (handle);
 
   result = fdn_endpoint_parameters_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -13035,7 +12939,7 @@ static napi_value
 fdn_portal_service_get_control_params (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -13045,16 +12949,17 @@ fdn_portal_service_get_control_params (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_portal_service_get_control_params (handle);
 
   result = fdn_endpoint_parameters_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -13377,7 +13282,7 @@ static napi_value
 fdn_file_monitor_get_path (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -13387,16 +13292,17 @@ fdn_file_monitor_get_path (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_file_monitor_get_path (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -13766,7 +13672,7 @@ static napi_value
 fdn_compiler_get_manager (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -13776,16 +13682,17 @@ fdn_compiler_get_manager (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_compiler_get_manager (handle);
 
   result = fdn_device_manager_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -13879,7 +13786,7 @@ static napi_value
 fdn_compiler_options_get_project_root (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -13889,16 +13796,17 @@ fdn_compiler_options_get_project_root (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_compiler_options_get_project_root (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -13906,26 +13814,26 @@ static napi_value
 fdn_compiler_options_set_project_root (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaCompilerOptions * handle;
-  gchar * value;
+  gchar * value = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -13934,23 +13842,18 @@ fdn_compiler_options_set_project_root (napi_env env,
 
   frida_compiler_options_set_project_root (handle, value);
 
-  
-  g_free (operation->value);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (value);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->value);return NULL;
-  }
 }
 
 static napi_value
 fdn_compiler_options_get_source_maps (napi_env env,
                                       napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -13960,16 +13863,17 @@ fdn_compiler_options_get_source_maps (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_compiler_options_get_source_maps (handle);
 
   result = fdn_source_maps_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -13977,7 +13881,7 @@ static napi_value
 fdn_compiler_options_set_source_maps (napi_env env,
                                       napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -13987,40 +13891,36 @@ fdn_compiler_options_set_source_maps (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_source_maps_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_compiler_options_set_source_maps (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_compiler_options_get_compression (napi_env env,
                                       napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -14030,16 +13930,17 @@ fdn_compiler_options_get_compression (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_compiler_options_get_compression (handle);
 
   result = fdn_js_compression_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -14047,7 +13948,7 @@ static napi_value
 fdn_compiler_options_set_compression (napi_env env,
                                       napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -14057,33 +13958,29 @@ fdn_compiler_options_set_compression (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_js_compression_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_compiler_options_set_compression (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -14315,7 +14212,7 @@ static napi_value
 fdn_static_authentication_service_get_token_hash (napi_env env,
                                                   napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -14325,16 +14222,17 @@ fdn_static_authentication_service_get_token_hash (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_static_authentication_service_get_token_hash (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -14424,7 +14322,7 @@ static napi_value
 fdn_frontmost_query_options_get_scope (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -14434,16 +14332,17 @@ fdn_frontmost_query_options_get_scope (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_frontmost_query_options_get_scope (handle);
 
   result = fdn_scope_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -14451,7 +14350,7 @@ static napi_value
 fdn_frontmost_query_options_set_scope (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -14461,33 +14360,29 @@ fdn_frontmost_query_options_set_scope (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_scope_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_frontmost_query_options_set_scope (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -14578,52 +14473,47 @@ static napi_value
 fdn_application_query_options_select_identifier (napi_env env,
                                                  napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaApplicationQueryOptions * handle;
-  gchar * identifier;
+  gchar * identifier = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &identifier))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: identifier");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_application_query_options_select_identifier (handle, identifier);
 
-  
-  g_free (operation->identifier);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (identifier);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->identifier);return NULL;
-  }
 }
 
 static napi_value
 fdn_application_query_options_has_selected_identifiers (napi_env env,
                                                         napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -14633,16 +14523,17 @@ fdn_application_query_options_has_selected_identifiers (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_application_query_options_has_selected_identifiers (handle);
 
   result = fdn_boolean_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -14650,7 +14541,7 @@ static napi_value
 fdn_application_query_options_get_scope (napi_env env,
                                          napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -14660,16 +14551,17 @@ fdn_application_query_options_get_scope (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_application_query_options_get_scope (handle);
 
   result = fdn_scope_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -14677,7 +14569,7 @@ static napi_value
 fdn_application_query_options_set_scope (napi_env env,
                                          napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -14687,33 +14579,29 @@ fdn_application_query_options_set_scope (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_scope_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_application_query_options_set_scope (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -14804,7 +14692,7 @@ static napi_value
 fdn_process_query_options_select_pid (napi_env env,
                                       napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -14814,40 +14702,36 @@ fdn_process_query_options_select_pid (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_uint_from_value (env, args[0], &pid))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: pid");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_process_query_options_select_pid (handle, pid);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_process_query_options_has_selected_pids (napi_env env,
                                              napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -14857,16 +14741,17 @@ fdn_process_query_options_has_selected_pids (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_process_query_options_has_selected_pids (handle);
 
   result = fdn_boolean_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -14874,7 +14759,7 @@ static napi_value
 fdn_process_query_options_get_scope (napi_env env,
                                      napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -14884,16 +14769,17 @@ fdn_process_query_options_get_scope (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_process_query_options_get_scope (handle);
 
   result = fdn_scope_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -14901,7 +14787,7 @@ static napi_value
 fdn_process_query_options_set_scope (napi_env env,
                                      napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -14911,33 +14797,29 @@ fdn_process_query_options_set_scope (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_scope_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_process_query_options_set_scope (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -15030,7 +14912,7 @@ static napi_value
 fdn_session_options_get_realm (napi_env env,
                                napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -15040,16 +14922,17 @@ fdn_session_options_get_realm (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_session_options_get_realm (handle);
 
   result = fdn_realm_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -15057,7 +14940,7 @@ static napi_value
 fdn_session_options_set_realm (napi_env env,
                                napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -15067,40 +14950,36 @@ fdn_session_options_set_realm (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_realm_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_session_options_set_realm (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_session_options_get_persist_timeout (napi_env env,
                                          napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -15110,16 +14989,17 @@ fdn_session_options_get_persist_timeout (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_session_options_get_persist_timeout (handle);
 
   result = fdn_uint_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -15127,7 +15007,7 @@ static napi_value
 fdn_session_options_set_persist_timeout (napi_env env,
                                          napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -15137,40 +15017,36 @@ fdn_session_options_set_persist_timeout (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_uint_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_session_options_set_persist_timeout (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_session_options_get_emulated_agent_path (napi_env env,
                                              napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -15180,16 +15056,17 @@ fdn_session_options_get_emulated_agent_path (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_session_options_get_emulated_agent_path (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -15197,26 +15074,26 @@ static napi_value
 fdn_session_options_set_emulated_agent_path (napi_env env,
                                              napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaSessionOptions * handle;
-  gchar * value;
+  gchar * value = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -15225,16 +15102,11 @@ fdn_session_options_set_emulated_agent_path (napi_env env,
 
   frida_session_options_set_emulated_agent_path (handle, value);
 
-  
-  g_free (operation->value);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (value);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->value);return NULL;
-  }
 }
 
 static void
@@ -15329,7 +15201,7 @@ static napi_value
 fdn_script_options_get_name (napi_env env,
                              napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -15339,16 +15211,17 @@ fdn_script_options_get_name (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_script_options_get_name (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -15356,26 +15229,26 @@ static napi_value
 fdn_script_options_set_name (napi_env env,
                              napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaScriptOptions * handle;
-  gchar * value;
+  gchar * value = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -15384,23 +15257,18 @@ fdn_script_options_set_name (napi_env env,
 
   frida_script_options_set_name (handle, value);
 
-  
-  g_free (operation->value);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (value);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->value);return NULL;
-  }
 }
 
 static napi_value
 fdn_script_options_get_snapshot (napi_env env,
                                  napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -15410,16 +15278,17 @@ fdn_script_options_get_snapshot (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_script_options_get_snapshot (handle);
 
   result = fdn_bytes_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -15427,26 +15296,26 @@ static napi_value
 fdn_script_options_set_snapshot (napi_env env,
                                  napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaScriptOptions * handle;
-  GBytes * value;
+  GBytes * value = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_bytes_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -15457,19 +15326,15 @@ fdn_script_options_set_snapshot (napi_env env,
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_script_options_get_snapshot_transport (napi_env env,
                                            napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -15479,16 +15344,17 @@ fdn_script_options_get_snapshot_transport (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_script_options_get_snapshot_transport (handle);
 
   result = fdn_snapshot_transport_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -15496,7 +15362,7 @@ static napi_value
 fdn_script_options_set_snapshot_transport (napi_env env,
                                            napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -15506,40 +15372,36 @@ fdn_script_options_set_snapshot_transport (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_snapshot_transport_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_script_options_set_snapshot_transport (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_script_options_get_runtime (napi_env env,
                                 napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -15549,16 +15411,17 @@ fdn_script_options_get_runtime (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_script_options_get_runtime (handle);
 
   result = fdn_script_runtime_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -15566,7 +15429,7 @@ static napi_value
 fdn_script_options_set_runtime (napi_env env,
                                 napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -15576,33 +15439,29 @@ fdn_script_options_set_runtime (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_script_runtime_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_script_options_set_runtime (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -15693,7 +15552,7 @@ static napi_value
 fdn_snapshot_options_get_warmup_script (napi_env env,
                                         napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -15703,16 +15562,17 @@ fdn_snapshot_options_get_warmup_script (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_snapshot_options_get_warmup_script (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -15720,26 +15580,26 @@ static napi_value
 fdn_snapshot_options_set_warmup_script (napi_env env,
                                         napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaSnapshotOptions * handle;
-  gchar * value;
+  gchar * value = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -15748,23 +15608,18 @@ fdn_snapshot_options_set_warmup_script (napi_env env,
 
   frida_snapshot_options_set_warmup_script (handle, value);
 
-  
-  g_free (operation->value);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (value);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->value);return NULL;
-  }
 }
 
 static napi_value
 fdn_snapshot_options_get_runtime (napi_env env,
                                   napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -15774,16 +15629,17 @@ fdn_snapshot_options_get_runtime (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_snapshot_options_get_runtime (handle);
 
   result = fdn_script_runtime_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -15791,7 +15647,7 @@ static napi_value
 fdn_snapshot_options_set_runtime (napi_env env,
                                   napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -15801,33 +15657,29 @@ fdn_snapshot_options_set_runtime (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_script_runtime_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: value");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_snapshot_options_set_runtime (handle, value);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -15920,7 +15772,7 @@ static napi_value
 fdn_portal_options_get_certificate (napi_env env,
                                     napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -15930,16 +15782,17 @@ fdn_portal_options_get_certificate (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_portal_options_get_certificate (handle);
 
   result = fdn_tls_certificate_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -15947,26 +15800,26 @@ static napi_value
 fdn_portal_options_set_certificate (napi_env env,
                                     napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaPortalOptions * handle;
-  GTlsCertificate * value;
+  GTlsCertificate * value = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_tls_certificate_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -15977,19 +15830,15 @@ fdn_portal_options_set_certificate (napi_env env,
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_portal_options_get_token (napi_env env,
                               napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -15999,16 +15848,17 @@ fdn_portal_options_get_token (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_portal_options_get_token (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -16016,26 +15866,26 @@ static napi_value
 fdn_portal_options_set_token (napi_env env,
                               napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaPortalOptions * handle;
-  gchar * value;
+  gchar * value = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -16044,87 +15894,78 @@ fdn_portal_options_set_token (napi_env env,
 
   frida_portal_options_set_token (handle, value);
 
-  
-  g_free (operation->value);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (value);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->value);return NULL;
-  }
 }
 
 static napi_value
 fdn_portal_options_get_acl (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaPortalOptions * handle;
-  gint * result_length1;
+  gint * result_length1 = NULL;
   gchar ** return_value;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_int_from_value (env, args[0], &result_length1))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: resultLength1");
-    goto invalid_argument;
+    goto beach;
   }
 
   return_value = frida_portal_options_get_acl (handle, result_length1);
 
   result = fdn_strv_to_value (env, return_value);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_portal_options_set_acl (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
   napi_value jsthis;
   FridaPortalOptions * handle;
-  gchar ** value;
+  gchar ** value = NULL;
   gint value_length1;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_strv_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -16133,24 +15974,20 @@ fdn_portal_options_set_acl (napi_env env,
   if (argc > 1)
   {
     if (!fdn_int_from_value (env, args[1], &value_length1))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: valueLength1");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_portal_options_set_acl (handle, value, value_length1);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -16241,7 +16078,7 @@ static napi_value
 fdn_peer_options_clear_relays (napi_env env,
                                napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16250,16 +16087,17 @@ fdn_peer_options_clear_relays (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   frida_peer_options_clear_relays (handle);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
 }
 
@@ -16267,50 +16105,46 @@ static napi_value
 fdn_peer_options_add_relay (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaPeerOptions * handle;
-  FridaRelay * relay;
+  FridaRelay * relay = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_relay_from_value (env, args[0], &relay))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: relay");
-    goto invalid_argument;
+    goto beach;
   }
 
   frida_peer_options_add_relay (handle, relay);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_peer_options_get_stun_server (napi_env env,
                                   napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16320,16 +16154,17 @@ fdn_peer_options_get_stun_server (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_peer_options_get_stun_server (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -16337,26 +16172,26 @@ static napi_value
 fdn_peer_options_set_stun_server (napi_env env,
                                   napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaPeerOptions * handle;
-  gchar * value;
+  gchar * value = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -16365,16 +16200,11 @@ fdn_peer_options_set_stun_server (napi_env env,
 
   frida_peer_options_set_stun_server (handle, value);
 
-  
-  g_free (operation->value);napi_get_undefined (env, &result);
+  napi_get_undefined (env, &result);
 
+beach:
+  g_free (value);
   return result;
-
-invalid_argument:
-  {
-    
-  g_free (operation->value);return NULL;
-  }
 }
 
 static void
@@ -16447,7 +16277,7 @@ static napi_value
 fdn_relay_get_address (napi_env env,
                        napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16457,16 +16287,17 @@ fdn_relay_get_address (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_relay_get_address (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -16474,7 +16305,7 @@ static napi_value
 fdn_relay_get_username (napi_env env,
                         napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16484,16 +16315,17 @@ fdn_relay_get_username (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_relay_get_username (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -16501,7 +16333,7 @@ static napi_value
 fdn_relay_get_password (napi_env env,
                         napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16511,16 +16343,17 @@ fdn_relay_get_password (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_relay_get_password (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -16528,7 +16361,7 @@ static napi_value
 fdn_relay_get_kind (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16538,16 +16371,17 @@ fdn_relay_get_kind (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_relay_get_kind (handle);
 
   result = fdn_relay_kind_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -16624,7 +16458,7 @@ static napi_value
 fdn_endpoint_parameters_get_address (napi_env env,
                                      napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16634,16 +16468,17 @@ fdn_endpoint_parameters_get_address (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_endpoint_parameters_get_address (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -16651,7 +16486,7 @@ static napi_value
 fdn_endpoint_parameters_get_port (napi_env env,
                                   napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16661,16 +16496,17 @@ fdn_endpoint_parameters_get_port (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_endpoint_parameters_get_port (handle);
 
   result = fdn_uint16_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -16678,7 +16514,7 @@ static napi_value
 fdn_endpoint_parameters_get_certificate (napi_env env,
                                          napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16688,16 +16524,17 @@ fdn_endpoint_parameters_get_certificate (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_endpoint_parameters_get_certificate (handle);
 
   result = fdn_tls_certificate_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -16705,7 +16542,7 @@ static napi_value
 fdn_endpoint_parameters_get_origin (napi_env env,
                                     napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16715,16 +16552,17 @@ fdn_endpoint_parameters_get_origin (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_endpoint_parameters_get_origin (handle);
 
   result = fdn_utf8_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -16732,7 +16570,7 @@ static napi_value
 fdn_endpoint_parameters_get_auth_service (napi_env env,
                                           napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16742,16 +16580,17 @@ fdn_endpoint_parameters_get_auth_service (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_endpoint_parameters_get_auth_service (handle);
 
   result = fdn_authentication_service_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -16759,7 +16598,7 @@ static napi_value
 fdn_endpoint_parameters_get_asset_root (napi_env env,
                                         napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16769,16 +16608,17 @@ fdn_endpoint_parameters_get_asset_root (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = frida_endpoint_parameters_get_asset_root (handle);
 
   result = fdn_file_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -16786,26 +16626,26 @@ static napi_value
 fdn_endpoint_parameters_set_asset_root (napi_env env,
                                         napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaEndpointParameters * handle;
-  GFile * value;
+  GFile * value = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_file_from_value (env, args[0], &value))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
@@ -16816,12 +16656,8 @@ fdn_endpoint_parameters_set_asset_root (napi_env env,
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static void
@@ -16916,7 +16752,7 @@ static napi_value
 fdn_cancellable_cancel (napi_env env,
                         napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16925,16 +16761,17 @@ fdn_cancellable_cancel (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   g_cancellable_cancel (handle);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
 }
 
@@ -16942,7 +16779,7 @@ static napi_value
 fdn_cancellable_disconnect (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -16952,40 +16789,36 @@ fdn_cancellable_disconnect (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   if (argc > 0)
   {
     if (!fdn_ulong_from_value (env, args[0], &handler_id))
-      goto invalid_argument;
+      goto beach;
   }
   else
   {
     napi_throw_type_error (env, NULL, "missing argument: handlerId");
-    goto invalid_argument;
+    goto beach;
   }
 
   g_cancellable_disconnect (handle, handler_id);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
-
-invalid_argument:
-  {
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_cancellable_get_fd (napi_env env,
                         napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16995,16 +16828,17 @@ fdn_cancellable_get_fd (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = g_cancellable_get_fd (handle);
 
   result = fdn_int_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -17012,7 +16846,7 @@ static napi_value
 fdn_cancellable_is_cancelled (napi_env env,
                               napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -17022,16 +16856,17 @@ fdn_cancellable_is_cancelled (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = g_cancellable_is_cancelled (handle);
 
   result = fdn_boolean_to_value (env, return_value);
 
+beach:
   return result;
 }
 
@@ -17039,7 +16874,7 @@ static napi_value
 fdn_cancellable_pop_current (napi_env env,
                              napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -17048,16 +16883,17 @@ fdn_cancellable_pop_current (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   g_cancellable_pop_current (handle);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
 }
 
@@ -17065,7 +16901,7 @@ static napi_value
 fdn_cancellable_push_current (napi_env env,
                               napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -17074,16 +16910,17 @@ fdn_cancellable_push_current (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   g_cancellable_push_current (handle);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
 }
 
@@ -17091,7 +16928,7 @@ static napi_value
 fdn_cancellable_reset (napi_env env,
                        napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -17100,16 +16937,17 @@ fdn_cancellable_reset (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   g_cancellable_reset (handle);
 
   napi_get_undefined (env, &result);
 
+beach:
   return result;
 }
 
@@ -17117,7 +16955,7 @@ static napi_value
 fdn_cancellable_throw_if_cancelled (napi_env env,
                                     napi_callback_info info)
 {
-  napi_value result;
+  napi_value result = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -17128,11 +16966,11 @@ fdn_cancellable_throw_if_cancelled (napi_env env,
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   status = napi_unwrap (env, jsthis, (void **) &handle);
   if (status != napi_ok)
-    return NULL;
+    goto beach;
 
   return_value = g_cancellable_set_error_if_cancelled (handle, &error);
 
@@ -17145,6 +16983,7 @@ fdn_cancellable_throw_if_cancelled (napi_env env,
 
   result = fdn_boolean_to_value (env, return_value);
 
+beach:
   return result;
 }
 
