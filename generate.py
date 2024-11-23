@@ -296,8 +296,10 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
         "static gboolean fdn_int_from_value (napi_env env, napi_value value, gint * result);",
         "static napi_value fdn_int_to_value (napi_env env, gint value);",
         "static gboolean fdn_uint_from_value (napi_env env, napi_value value, guint * result);",
+        "static napi_value fdn_uint_to_value (napi_env env, guint value);",
         "static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * result);",
         "static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);",
+        "static napi_value fdn_utf8_to_value (napi_env env, const gchar * str);",
         "static gboolean fdn_enum_from_value (napi_env env, GType enum_type, napi_value value, gint * result);",
         "static napi_value fdn_enum_to_value (napi_env env, GType enum_type, gint value);",
     ]
@@ -791,6 +793,15 @@ invalid_argument:
   }
 }
 
+static napi_value
+fdn_uint_to_value (napi_env env,
+                   guint value)
+{
+  napi_value result;
+  napi_create_uint32 (env, value, &result);
+  return result;
+}
+
 static gboolean
 fdn_ulong_from_value (napi_env env,
                       napi_value value,
@@ -838,6 +849,15 @@ invalid_argument:
     g_free (result);
     return FALSE;
   }
+}
+
+static napi_value
+fdn_utf8_to_value (napi_env env,
+                   const gchar * str)
+{
+  napi_value result;
+  napi_create_string_utf8 (env, str, NAPI_AUTO_LENGTH, &result);
+  return result;
 }
 
 static gboolean
