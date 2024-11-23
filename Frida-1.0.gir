@@ -3883,32 +3883,6 @@
           </parameter>
         </parameters>
       </method>
-      <property name="id" writable="1" construct-only="1">
-        <type name="guint" c:type="guint" />
-      </property>
-      <method name="get_id" c:identifier="frida_portal_membership_get_id">
-        <return-value transfer-ownership="none">
-          <type name="guint" c:type="guint" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.PortalMembership" c:type="FridaPortalMembership*" />
-          </instance-parameter>
-        </parameters>
-      </method>
-      <property name="session" writable="1" construct-only="1">
-        <type name="Frida.Session" c:type="FridaSession*" />
-      </property>
-      <method name="get_session" c:identifier="frida_portal_membership_get_session">
-        <return-value transfer-ownership="none">
-          <type name="Frida.Session" c:type="FridaSession*" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.PortalMembership" c:type="FridaPortalMembership*" />
-          </instance-parameter>
-        </parameters>
-      </method>
     </class>
     <class name="ControlService" c:type="FridaControlService" c:symbol-prefix="control_service" glib:type-name="FridaControlService" glib:get-type="frida_control_service_get_type" glib:type-struct="ControlServiceClass" parent="GObject.Object">
       <constructor name="new" c:identifier="frida_control_service_new">
