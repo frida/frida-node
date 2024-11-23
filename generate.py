@@ -323,6 +323,8 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
         "static napi_value fdn_enum_to_value (napi_env env, GType enum_type, gint value);",
         "static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);",
         "static napi_value fdn_utf8_to_value (napi_env env, const gchar * str);",
+        "static gboolean fdn_strv_from_value (napi_env env, napi_value value, gchar *** strv);",
+        "static napi_value fdn_strv_to_value (napi_env env, gchar ** strv);",
         "static napi_value fdn_buffer_to_value (napi_env env, const guint8 * data, gsize size);",
         "static gboolean fdn_bytes_from_value (napi_env env, napi_value value, GBytes ** result);",
         "static napi_value fdn_bytes_to_value (napi_env env, GBytes * bytes);",
@@ -1038,6 +1040,58 @@ fdn_utf8_to_value (napi_env env,
 {
   napi_value result;
   napi_create_string_utf8 (env, str, NAPI_AUTO_LENGTH, &result);
+  return result;
+}
+
+static gboolean
+fdn_strv_from_value (napi_env env,
+                     napi_value value,
+                     gchar *** strv)
+{
+  uint32_t length, i;
+  gchar ** vector = NULL;
+
+  if (napi_get_array_length (env, value, &length) != napi_ok)
+    goto invalid_argument;
+
+  vector = g_new0 (gchar *, length + 1);
+
+  for (i = 0; i != length; i++)
+  {
+    napi_value js_str;
+
+    if (napi_get_element (env, value, i, &js_str) != napi_ok)
+      goto invalid_argument;
+
+    if (!fdn_utf8_from_value (env, js_str, &vector[i]))
+      goto invalid_argument;
+  }
+
+  *strv = vector;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected an array of strings");
+    g_strfreev (vector);
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_strv_to_value (napi_env env,
+                   gchar ** strv)
+{
+  napi_value result;
+  uint32_t length, i;
+
+  length = g_strv_length (strv);
+
+  napi_create_array_with_length (env, length, &result);
+
+  for (i = 0; i != length; i++)
+    napi_set_element (env, result, i, fdn_utf8_to_value (env, strv[i]));
+
   return result;
 }
 

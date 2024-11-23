@@ -1026,10 +1026,6 @@ static void fdn_portal_membership_terminate_end (GObject * source_object, GAsync
 static void fdn_portal_membership_terminate_deliver (napi_env env, napi_value js_cb, void * context, void * data);
 static void fdn_portal_membership_terminate_operation_free (FdnPortalMembershipTerminateOperation * operation);
 
-static napi_value fdn_portal_membership_get_id (napi_env env, napi_callback_info info);
-
-static napi_value fdn_portal_membership_get_session (napi_env env, napi_callback_info info);
-
 static void fdn_control_service_options_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_control_service_options_from_value (napi_env env, napi_value value, FridaControlServiceOptions ** result);
 G_GNUC_UNUSED static napi_value fdn_control_service_options_to_value (napi_env env, FridaControlServiceOptions * handle);
@@ -1399,6 +1395,8 @@ static gboolean fdn_enum_from_value (napi_env env, GType enum_type, napi_value v
 static napi_value fdn_enum_to_value (napi_env env, GType enum_type, gint value);
 static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);
 static napi_value fdn_utf8_to_value (napi_env env, const gchar * str);
+static gboolean fdn_strv_from_value (napi_env env, napi_value value, gchar *** strv);
+static napi_value fdn_strv_to_value (napi_env env, gchar ** strv);
 static napi_value fdn_buffer_to_value (napi_env env, const guint8 * data, gsize size);
 static gboolean fdn_bytes_from_value (napi_env env, napi_value value, GBytes ** result);
 static napi_value fdn_bytes_to_value (napi_env env, GBytes * bytes);
@@ -1411,44 +1409,44 @@ static napi_value fdn_file_to_value (napi_env env, GFile * file);
 static gboolean fdn_tls_certificate_from_value (napi_env env, napi_value value, GTlsCertificate ** result);
 static napi_value fdn_tls_certificate_to_value (napi_env env, GTlsCertificate * certificate);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0xba8ad620983d496b, 0xa0229201c43bfee9 };
-static napi_type_tag fdn_device_list_type_tag = { 0x8fb41995f5914c6a, 0x9604ee99feaf0e06 };
-static napi_type_tag fdn_device_type_tag = { 0x9f9d04bc360a4ea3, 0xadfe5d692c96d058 };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0x21ea8e952d384221, 0xb7f9ec80fbd27079 };
-static napi_type_tag fdn_application_list_type_tag = { 0x37188580b1e140a6, 0xbc751abaa2b5d8b5 };
-static napi_type_tag fdn_application_type_tag = { 0xdd932a2d88af42bf, 0x871c48e81a2ddeaf };
-static napi_type_tag fdn_process_list_type_tag = { 0xef0ab633c0614345, 0xabcf7e1a8c8012a3 };
-static napi_type_tag fdn_process_type_tag = { 0xa6de6fcf522043ef, 0x848c397bb1cdc8de };
-static napi_type_tag fdn_process_match_options_type_tag = { 0xa217c5c40bb3480c, 0x9c252d1375b6f9b4 };
-static napi_type_tag fdn_spawn_options_type_tag = { 0xcb0d8f17af144a9b, 0xa5979dca7c0d81c1 };
-static napi_type_tag fdn_spawn_list_type_tag = { 0xc9b3d0233a6f441e, 0xbd1c8c72ec9e4efd };
-static napi_type_tag fdn_spawn_type_tag = { 0xdeadce92bb564e2b, 0xa0317e28e7ba62b6 };
-static napi_type_tag fdn_child_list_type_tag = { 0x6fb48ecb40684310, 0x9a6370ccb7758a85 };
-static napi_type_tag fdn_child_type_tag = { 0xf624583a39f74aa1, 0x8fdf047af82c2838 };
-static napi_type_tag fdn_crash_type_tag = { 0x49265bdb340b4759, 0xa466fbd32dfb626d };
-static napi_type_tag fdn_bus_type_tag = { 0xf478ac669f7741a8, 0x8627dea68967cd61 };
-static napi_type_tag fdn_session_type_tag = { 0xa94dfac8194e4e03, 0x90bfc6160c2c7677 };
-static napi_type_tag fdn_script_type_tag = { 0x1c4aac2d5c0748ff, 0xae55f631c01ceb7a };
-static napi_type_tag fdn_portal_membership_type_tag = { 0xa86cf891af294e89, 0x842fb723fc6cd353 };
-static napi_type_tag fdn_control_service_options_type_tag = { 0x280a006412f34d1e, 0x8c4c5f87c98e8880 };
-static napi_type_tag fdn_portal_service_type_tag = { 0x7092025e78304975, 0xa27628d4b029aaf1 };
-static napi_type_tag fdn_file_monitor_type_tag = { 0x2084a247fd594981, 0x803e1a879df4e1ae };
-static napi_type_tag fdn_compiler_type_tag = { 0x120eb32f4cd04705, 0xb1ae4859e43dad3a };
-static napi_type_tag fdn_compiler_options_type_tag = { 0x7f09378f4eb2459b, 0xb8fce9fbf2a80873 };
-static napi_type_tag fdn_build_options_type_tag = { 0xc1be665f5610447e, 0x880157027b041dc1 };
-static napi_type_tag fdn_watch_options_type_tag = { 0x7dbd35a148f2475b, 0x8b288d7a6e0de48a };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0x9d5f52f625444346, 0xb5565573f5c8667f };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x181d32ba7ee443a3, 0x995e9e3d70e19332 };
-static napi_type_tag fdn_application_query_options_type_tag = { 0xaaace4bf38a2426f, 0x9e510cc67e74a0cc };
-static napi_type_tag fdn_process_query_options_type_tag = { 0x84c505db23e44395, 0xb1940928d9aa92de };
-static napi_type_tag fdn_session_options_type_tag = { 0xbf06a58e23e54f1d, 0xbb8c6b94652d18c4 };
-static napi_type_tag fdn_script_options_type_tag = { 0x34569dd28b6546eb, 0xb05799712f4e32bb };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0xc6eea07d8bb941cb, 0xb52d48c7e005928a };
-static napi_type_tag fdn_portal_options_type_tag = { 0x39862da049564930, 0xb5b4ff045e6de9d1 };
-static napi_type_tag fdn_peer_options_type_tag = { 0xe3ec932578334a1b, 0x9b63bf9143d2a461 };
-static napi_type_tag fdn_relay_type_tag = { 0x46d256da21c240e0, 0xb3aa253618c853db };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x1b636efa58bc48f7, 0xb3c884c1cb3db71e };
-static napi_type_tag fdn_cancellable_type_tag = { 0x123e7a5e5a1d431b, 0xbe88f08761e842a7 };
+static napi_type_tag fdn_device_manager_type_tag = { 0x7ba4688fb9574f5e, 0x9455e806ad81af1c };
+static napi_type_tag fdn_device_list_type_tag = { 0x1d59a6c48db14938, 0xb883dc5de4705601 };
+static napi_type_tag fdn_device_type_tag = { 0x1374f81ccab54a88, 0x8ea863eff797664e };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0x21d5bc95c9084348, 0x9b6bcaf7844ab364 };
+static napi_type_tag fdn_application_list_type_tag = { 0xc42b87413a484454, 0x82f31c7ef068044f };
+static napi_type_tag fdn_application_type_tag = { 0xeada41fd839446e1, 0xbfceaf5f0988a66b };
+static napi_type_tag fdn_process_list_type_tag = { 0x54288f7514a44da9, 0x9d7201e087147e24 };
+static napi_type_tag fdn_process_type_tag = { 0x59909b561f654260, 0xa50f39fac4dd7455 };
+static napi_type_tag fdn_process_match_options_type_tag = { 0x5dfeb78f8b1c4157, 0x880c869dcc42cc5e };
+static napi_type_tag fdn_spawn_options_type_tag = { 0x0cdeff399d4d4bb1, 0x9f59a373f3c7bd0c };
+static napi_type_tag fdn_spawn_list_type_tag = { 0x6ca2674fbb7d4b9a, 0xbf258b7bacb3ce5d };
+static napi_type_tag fdn_spawn_type_tag = { 0xc34395ad7ece4f3a, 0xa78fe1e8258e4ce3 };
+static napi_type_tag fdn_child_list_type_tag = { 0x30ba9bbdfa094ef2, 0xb5440a43c7a5cd3f };
+static napi_type_tag fdn_child_type_tag = { 0x1792cf3cad054680, 0xb222256d6a0baa85 };
+static napi_type_tag fdn_crash_type_tag = { 0x7ebb19bd971b4cb9, 0x9e0f73d4333d159f };
+static napi_type_tag fdn_bus_type_tag = { 0xd582ffcf19ac4a19, 0xb1956c112e8b46aa };
+static napi_type_tag fdn_session_type_tag = { 0x1afc9f3c665d41c4, 0x89dca3f5ea4c33e3 };
+static napi_type_tag fdn_script_type_tag = { 0x67e1969cecf04bf9, 0xa8b30333882c228b };
+static napi_type_tag fdn_portal_membership_type_tag = { 0xe1d0bbf7d4fc4f44, 0xb008fc02f3ed4a06 };
+static napi_type_tag fdn_control_service_options_type_tag = { 0x14be1a2faeb04f4d, 0x82906f0eed6595d9 };
+static napi_type_tag fdn_portal_service_type_tag = { 0xd189431e997b43c8, 0xa3e820e7b26981c3 };
+static napi_type_tag fdn_file_monitor_type_tag = { 0x8d3d726f821a48e6, 0xa71fe38b28d0ea27 };
+static napi_type_tag fdn_compiler_type_tag = { 0x235a7dcfe515499d, 0xb24505ff348b384e };
+static napi_type_tag fdn_compiler_options_type_tag = { 0x5d8625b332344474, 0xbf5b6baadae3f5de };
+static napi_type_tag fdn_build_options_type_tag = { 0x95ddca9376d24fe4, 0x8d09e312be65da49 };
+static napi_type_tag fdn_watch_options_type_tag = { 0x2458e00f374b4703, 0xb97e7de25317fe2a };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0xd2ca0928d50740fa, 0x81f348ae2d54e280 };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x10eca51830f54746, 0xa3e3b27a7d1d01fa };
+static napi_type_tag fdn_application_query_options_type_tag = { 0xfa692d1f4aa34cf8, 0x8a053566888a0501 };
+static napi_type_tag fdn_process_query_options_type_tag = { 0x2b651e16268f4fba, 0xa06da36e2a304ae3 };
+static napi_type_tag fdn_session_options_type_tag = { 0x530fa385892d49e3, 0x9d9eede7c4f90cbe };
+static napi_type_tag fdn_script_options_type_tag = { 0x24fa66a66c414d90, 0x9dfb2ec8350e0727 };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0xdd6a2c05e205417d, 0xa9bad42782d0ae0e };
+static napi_type_tag fdn_portal_options_type_tag = { 0x317ea8d4c607408a, 0xb1a44d6d941c46d8 };
+static napi_type_tag fdn_peer_options_type_tag = { 0xde3bc909eefe4f3f, 0x9ed1b25507c313dd };
+static napi_type_tag fdn_relay_type_tag = { 0x5a67bd5a14da4d5b, 0xa70e2cd4a76ccb5e };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0xd7134ae53bbb4e0c, 0xb6ce48575b0c48c4 };
+static napi_type_tag fdn_cancellable_type_tag = { 0x81767d882bdd4f34, 0x86fdff6fa855bbf7 };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_list_constructor;
@@ -11507,8 +11505,6 @@ fdn_portal_membership_register (napi_env env,
   napi_property_descriptor properties[] =
   {
     { "terminate", NULL, fdn_portal_membership_terminate, NULL, NULL, NULL, napi_default, NULL },
-    { "getId", NULL, fdn_portal_membership_get_id, NULL, NULL, NULL, napi_default, NULL },
-    { "getSession", NULL, fdn_portal_membership_get_session, NULL, NULL, NULL, napi_default, NULL },
   };
 
   napi_value constructor;
@@ -11689,62 +11685,6 @@ static void
 fdn_portal_membership_terminate_operation_free (FdnPortalMembershipTerminateOperation * operation)
 {
   g_slice_free (FdnPortalMembershipTerminateOperation, operation);
-}
-
-static napi_value
-fdn_portal_membership_get_id (napi_env env,
-                              napi_callback_info info)
-{
-  napi_value result = NULL;
-  size_t argc = 0;
-  napi_value args[0];
-  napi_status status;
-  napi_value jsthis;
-  FridaPortalMembership * handle;
-  guint return_value;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    goto beach;
-
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
-    goto beach;
-
-  return_value = frida_portal_membership_get_id (handle);
-
-  result = fdn_uint_to_value (env, return_value);
-
-beach:
-  return result;
-}
-
-static napi_value
-fdn_portal_membership_get_session (napi_env env,
-                                   napi_callback_info info)
-{
-  napi_value result = NULL;
-  size_t argc = 0;
-  napi_value args[0];
-  napi_status status;
-  napi_value jsthis;
-  FridaPortalMembership * handle;
-  FridaSession * return_value;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    goto beach;
-
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
-    goto beach;
-
-  return_value = frida_portal_membership_get_session (handle);
-
-  result = fdn_session_to_value (env, return_value);
-
-beach:
-  return result;
 }
 
 static void
@@ -17392,6 +17332,58 @@ fdn_utf8_to_value (napi_env env,
 {
   napi_value result;
   napi_create_string_utf8 (env, str, NAPI_AUTO_LENGTH, &result);
+  return result;
+}
+
+static gboolean
+fdn_strv_from_value (napi_env env,
+                     napi_value value,
+                     gchar *** strv)
+{
+  uint32_t length, i;
+  gchar ** vector = NULL;
+
+  if (napi_get_array_length (env, value, &length) != napi_ok)
+    goto invalid_argument;
+
+  vector = g_new0 (gchar *, length + 1);
+
+  for (i = 0; i != length; i++)
+  {
+    napi_value js_str;
+
+    if (napi_get_element (env, value, i, &js_str) != napi_ok)
+      goto invalid_argument;
+
+    if (!fdn_utf8_from_value (env, js_str, &vector[i]))
+      goto invalid_argument;
+  }
+
+  *strv = vector;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected an array of strings");
+    g_strfreev (vector);
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_strv_to_value (napi_env env,
+                   gchar ** strv)
+{
+  napi_value result;
+  uint32_t length, i;
+
+  length = g_strv_length (strv);
+
+  napi_create_array_with_length (env, length, &result);
+
+  for (i = 0; i != length; i++)
+    napi_set_element (env, result, i, fdn_utf8_to_value (env, strv[i]));
+
   return result;
 }
 
