@@ -47,7 +47,7 @@ class Class:
             param_list = []
             for param in parameters:
                 param_name = param.get("name")
-                type = parse_type(param)
+                type = extract_type_from_entity(param)
                 nullable = param.get("nullable") == "1"
                 param_list.append(Parameter(param_name, type, nullable))
 
@@ -75,14 +75,14 @@ class Class:
             is_async = any(param[0].get("name") == "Gio.AsyncReadyCallback" for param in parameters)
 
             result_element = next((m for m in self._methods if m.get("name") == f"{method_name}_finish")) if is_async else method_element
-            return_type = parse_type(result_element.find(".//return-value", GIR_NAMESPACES))
+            return_type = extract_type_from_entity(result_element.find(".//return-value", GIR_NAMESPACES))
 
             param_list = []
             for param in parameters:
                 param_name = param.get("name")
                 if param_name.startswith("_"):
                     continue
-                type = parse_type(param)
+                type = extract_type_from_entity(param)
                 nullable = param.get("nullable") == "1"
                 param_list.append(Parameter(param_name, type, nullable))
 
@@ -157,31 +157,43 @@ def parse_gir(file_path: str,
 
     return Model(classes, enumerations)
 
-def parse_type(parent_element: ET.Element) -> Optional[Type]:
+def extract_type_from_entity(parent_element: ET.Element) -> Optional[Type]:
     child = parent_element.find("type", GIR_NAMESPACES)
     if child is None:
         child = parent_element.find("array", GIR_NAMESPACES)
         assert child is not None
-        element_type = parse_type(child)
+        element_type = extract_type_from_entity(child)
         assert element_type.name == "utf8", "only string arrays are supported for now"
         return Type("utf8[]", "strv", "gchar **")
-    name = child.get("name")
+    return parse_type(child)
+
+def parse_type(element: ET.Element) -> Optional[Type]:
+    name = element.get("name")
     if name == "none":
         return None
-    nick = type_nick_from_name(name)
-    c = child.get(f"{{{C_NAMESPACE}}}type").replace("const ", "").replace("*", " *")
+    nick = type_nick_from_name(name, element)
+    c = element.get(f"{{{C_NAMESPACE}}}type").replace("const ", "").replace("*", " *")
     return Type(name, nick, c)
 
-def type_nick_from_name(name: str) -> str:
+def type_nick_from_name(name: str, element: ET.Element) -> str:
     if name == "GLib.PollFD":
         return "pollfd"
+
     tokens = name.split(".", maxsplit=1)
     if len(tokens) == 1:
         result = tokens[0]
         if result.startswith("g"):
             result = result[1:]
-        return result
-    return to_snake_case(tokens[1])
+    else:
+        result = to_snake_case(tokens[1])
+
+    if result == "hash_table":
+        key_type = parse_type(element[0])
+        value_type = parse_type(element[1])
+        assert key_type.name == "utf8" and value_type.name == "GLib.Variant", "only GHashTable<string, Variant> is supported for now"
+        result = "vardict"
+
+    return result
 
 def generate_code() -> str:
     srcroot = Path(__file__).parent
@@ -297,11 +309,20 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
         "static napi_value fdn_int_to_value (napi_env env, gint value);",
         "static gboolean fdn_uint_from_value (napi_env env, napi_value value, guint * result);",
         "static napi_value fdn_uint_to_value (napi_env env, guint value);",
+        "static gboolean fdn_int64_from_value (napi_env env, napi_value value, gint64 * result);",
+        "static napi_value fdn_int64_to_value (napi_env env, gint64 value);",
+        "static gboolean fdn_uint64_from_value (napi_env env, napi_value value, guint64 * result);",
+        "static napi_value fdn_uint64_to_value (napi_env env, guint64 value);",
         "static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * result);",
+        "static napi_value fdn_double_to_value (napi_env env, gdouble value);",
         "static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);",
         "static napi_value fdn_utf8_to_value (napi_env env, const gchar * str);",
         "static gboolean fdn_enum_from_value (napi_env env, GType enum_type, napi_value value, gint * result);",
         "static napi_value fdn_enum_to_value (napi_env env, GType enum_type, gint value);",
+        "static gboolean fdn_vardict_from_value (napi_env env, napi_value value, GHashTable ** result);",
+        "static napi_value fdn_vardict_to_value (napi_env env, GHashTable * vardict);",
+        "static gboolean fdn_variant_from_value (napi_env env, napi_value value, GVariant ** result);",
+        "static napi_value fdn_variant_to_value (napi_env env, GVariant * variant);",
     ]
 
     return "\n".join(prototypes) + "\n\n"
@@ -803,6 +824,64 @@ fdn_uint_to_value (napi_env env,
 }
 
 static gboolean
+fdn_int64_from_value (napi_env env,
+                      napi_value value,
+                      gint64 * result)
+{
+  int64_t number;
+
+  if (napi_get_value_int64 (env, value, &number) != napi_ok)
+    goto invalid_argument;
+
+  *result = number;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected an integer");
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_int64_to_value (napi_env env,
+                    gint64 value)
+{
+  napi_value result;
+  napi_create_int64 (env, value, &result);
+  return result;
+}
+
+static gboolean
+fdn_uint64_from_value (napi_env env,
+                       napi_value value,
+                       guint64 * result)
+{
+  uint64_t number;
+
+  if (napi_get_value_uint64 (env, value, &number) != napi_ok)
+    goto invalid_argument;
+
+  *result = number;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected an unsigned integer");
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_uint64_to_value (napi_env env,
+                     guint64 value)
+{
+  napi_value result;
+  napi_create_uint64 (env, value, &result);
+  return result;
+}
+
+static gboolean
 fdn_ulong_from_value (napi_env env,
                       napi_value value,
                       gulong * result)
@@ -823,6 +902,15 @@ invalid_argument:
     napi_throw_error (env, NULL, "expected an unsigned integer");
     return FALSE;
   }
+}
+
+static napi_value
+fdn_double_to_value (napi_env env,
+                     gdouble value)
+{
+  napi_value result;
+  napi_create_double (env, value, &result);
+  return result;
 }
 
 static gboolean
@@ -916,10 +1004,370 @@ fdn_enum_to_value (napi_env env,
   g_type_class_unref (enum_class);
 
   return result;
-}"""
+}
+
+static gboolean
+fdn_vardict_from_value (napi_env env,
+                        napi_value value,
+                        GHashTable ** result)
+{
+  napi_value keys;
+  uint32_t length, i;
+  GHashTable * vardict = NULL;
+  gchar * key = NULL;
+
+  if (napi_get_property_names (env, value, &keys) != napi_ok)
+    goto invalid_argument;
+  if (napi_get_array_length (env, keys, &length) != napi_ok)
+    goto propagate_error;
+
+  vardict = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_variant_unref);
+
+  for (i = 0; i != length; i++)
+  {
+    napi_value js_key, js_value;
+    GVariant * value;
+
+    if (napi_get_element (env, keys, i, &js_key) != napi_ok)
+      goto propagate_error;
+    if (!fdn_utf8_from_value (env, js_key, &key))
+      goto invalid_argument;
+
+    if (napi_get_property (env, value, key, &js_value) != napi_ok)
+      goto propagate_error;
+    if (!fdn_variant_from_value (env, js_value, &value))
+      goto propagate_error;
+
+    g_hash_table_insert (vardict, g_steal_pointer (&key), value);
+  }
+
+  *result = vardict;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected a vardict");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_free (key);
+    g_clear_pointer (&vardict, g_hash_table_unref);
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_vardict_to_value (napi_env env,
+                      GHashTable * vardict)
+{
+  napi_value result;
+  GHashTableIter iter;
+  gpointer key, value;
+
+  napi_create_object (env, &result);
+
+  g_hash_table_iter_init (&iter, vardict);
+  while (g_hash_table_iter_next (&iter, &key, &value))
+  {
+    napi_value js_key, js_value;
+
+    js_key = fdn_utf8_to_value (env, key);
+    js_value = fdn_variant_to_value (env, value);
+
+    napi_set_property (env, result, js_key, js_value);
+  }
+
+  return result;
+}
+
+static gboolean
+fdn_variant_from_value (napi_env env,
+                        napi_value value,
+                        GVariant ** result)
+{
+  if (napi_value_is_string (env, value))
+  {
+    gchar * str;
+
+    if (!fdn_utf8_from_value (env, value, &str))
+      return FALSE;
+
+    *result = g_variant_new_take_string (str);
+    return TRUE;
+  }
+
+  if (napi_value_is_number (env, value))
+  {
+    gint64 i;
+
+    if (!fdn_int64_from_value (env, value, &i))
+      return FALSE;
+
+    *result = g_variant_new_int64 (i);
+    return TRUE;
+  }
+
+  if (napi_value_is_boolean (env, value))
+  {
+    gboolean b;
+
+    if (!fdn_boolean_from_value (env, value, &b))
+      return FALSE;
+
+    *result = g_variant_new_boolean (b);
+    return TRUE;
+  }
+
+  if (napi_is_buffer (env, value))
+  {
+    void * data;
+    size_t size;
+    gpointer copy;
+
+    if (napi_get_buffer_info (env, value, &data, &size) != napi_ok)
+      return FALSE;
+
+    copy = g_memdup2 (data, size);
+    *result = g_variant_new_from_data (G_VARIANT_TYPE_BYTESTRING, copy, size, TRUE, g_free, copy);
+    return TRUE;
+  }
+
+  if (napi_is_array (env, value))
+  {
+    GVariantBuilder builder;
+    uint32_t i;
+
+    uint32_t length;
+    if (napi_get_array_length (env, value, &length) != napi_ok)
+      return FALSE;
+
+    if (length == 2)
+    {
+      napi_value first;
+      if (napi_get_element (env, value, 0, &first) != napi_ok)
+        return FALSE;
+
+      if (napi_is_symbol (env, first))
+      {
+        napi_value desc;
+        gchar * type;
+        napi_value second;
+        GVariant * val;
+        GVariant * t[2];
+
+        if (napi_get_symbol_description (env, first, &desc) != napi_ok)
+          return FALSE;
+
+        if (!fdn_utf8_from_value (env, desc, &type))
+          return FALSE;
+
+        if (napi_get_element (env, value, 1, &second) != napi_ok)
+          return FALSE;
+
+        if (!fdn_variant_from_value (env, second, &val))
+        {
+          g_free (type);
+          return FALSE;
+        }
+
+        t[0] = g_variant_new_take_string (type);
+        t[1] = val;
+
+        *result = g_variant_new_tuple (t, G_N_ELEMENTS (t));
+        return TRUE;
+      }
+    }
+
+    g_variant_builder_init (&builder, G_VARIANT_TYPE ("av"));
+
+    for (i = 0; i != length; i++)
+    {
+      napi_value element;
+      GVariant * v;
+
+      if (napi_get_element (env, value, i, &element) != napi_ok)
+      {
+        g_variant_builder_clear (&builder);
+        return FALSE;
+      }
+
+      if (!fdn_variant_from_value (env, element, &v))
+      {
+        g_variant_builder_clear (&builder);
+        return FALSE;
+      }
+
+      g_variant_builder_add (&builder, "v", v);
+    }
+
+    *result = g_variant_builder_end (&builder);
+    return TRUE;
+  }
+
+  if (napi_is_object (env, value))
+  {
+    GVariantBuilder builder;
+    napi_value keys;
+    uint32_t length;
+    uint32_t i;
+
+    g_variant_builder_init (&builder, G_VARIANT_TYPE_VARDICT);
+
+    if (napi_get_property_names (env, value, &keys) != napi_ok)
+      return FALSE;
+
+    if (napi_get_array_length (env, keys, &length) != napi_ok)
+      return FALSE;
+
+    for (i = 0; i != length; i++)
+    {
+      napi_value key;
+      gchar * key_str;
+      napi_value val;
+      GVariant * v;
+
+      if (napi_get_element (env, keys, i, &key) != napi_ok)
+        return FALSE;
+
+      if (!fdn_utf8_from_value (env, key, &key_str))
+        return FALSE;
+
+      if (napi_get_property (env, value, key, &val) != napi_ok)
+      {
+        g_free (key_str);
+        return FALSE;
+      }
+
+      if (!fdn_variant_from_value (env, val, &v))
+      {
+        g_free (key_str);
+        return FALSE;
+      }
+
+      g_variant_builder_add (&builder, "{sv}", key_str, v);
+      g_free (key_str);
+    }
+
+    *result = g_variant_builder_end (&builder);
+    return TRUE;
+  }
+
+  napi_throw_type_error (env, NULL, "expected value serializable to GVariant");
+  return FALSE;
+}
+
+static napi_value
+fdn_variant_to_value (napi_env env,
+                      GVariant * variant)
+{
+  napi_value result;
+
+  switch (g_variant_classify (variant))
+  {
+    case G_VARIANT_CLASS_STRING:
+    {
+      const gchar * str = g_variant_get_string (variant, NULL);
+      return fdn_utf8_to_value (env, str);
+    }
+    case G_VARIANT_CLASS_INT64:
+      return fdn_int64_to_value (env, g_variant_get_int64 (variant));
+    case G_VARIANT_CLASS_UINT64:
+      return fdn_uint64_to_value (env, g_variant_get_uint64 (variant));
+    case G_VARIANT_CLASS_DOUBLE:
+      return fdn_double_to_value (env, g_variant_get_double (variant));
+    case G_VARIANT_CLASS_BOOLEAN:
+      return fdn_boolean_to_value (env, g_variant_get_boolean (variant));
+    case G_VARIANT_CLASS_ARRAY:
+      if (g_variant_is_of_type (variant, G_VARIANT_TYPE ("ay")))
+      {
+        gsize size;
+        g_variant_get_fixed_array (variant, &size, sizeof (guint8));
+        return fdn_buffer_to_value (env, g_variant_get_data (variant), size);
+      }
+
+      if (g_variant_is_of_type (variant, G_VARIANT_TYPE_VARDICT))
+      {
+        napi_value dict;
+        GVariantIter iter;
+        gchar * key;
+        GVariant * value;
+
+        napi_create_object (env, &dict);
+
+        g_variant_iter_init (&iter, variant);
+        while (g_variant_iter_next (&iter, "{sv}", &key, &value))
+        {
+          napi_value js_key, js_value;
+
+          js_key = fdn_utf8_to_value (env, key);
+          js_value = fdn_variant_to_value (env, value);
+
+          napi_set_property (env, dict, js_key, js_value);
+
+          g_variant_unref (value);
+          g_free (key);
+        }
+
+        return dict;
+      }
+
+      if (g_variant_is_of_type (variant, G_VARIANT_TYPE_ARRAY))
+      {
+        napi_value array;
+        GVariantIter iter;
+        uint32_t i;
+        GVariant * child;
+
+        napi_create_array (env, &array);
+
+        g_variant_iter_init (&iter, variant);
+        i = 0;
+        while ((child = g_variant_iter_next_value (&iter)) != NULL)
+        {
+          napi_value element = fdn_variant_to_value (env, child);
+          napi_set_element (env, array, i++, element);
+          g_variant_unref (child);
+        }
+
+        return array;
+      }
+
+      break;
+    case G_VARIANT_CLASS_TUPLE:
+      napi_get_undefined (env, &result);
+      return result;
+    default:
+      break;
+  }
+
+  napi_get_null (env, &result);
+  return result;
+}
+"""
 
 def to_snake_case(name: str) -> str:
-    return "".join(["_" + c.lower() if c.isupper() else c for c in name]).lstrip("_")
+    result = []
+    i = 0
+    n = len(name)
+    while i < n:
+        if name[i].isupper():
+            if i > 0:
+                result.append('_')
+            start = i
+            if i + 1 < n and name[i + 1].islower():
+                while i + 1 < n and name[i + 1].islower():
+                    i += 1
+            else:
+                while i + 1 < n and name[i + 1].isupper():
+                    i += 1
+                if i + 1 < n:
+                    i -= 1
+            result.append(name[start:i + 1].lower())
+        else:
+            result.append(name[i])
+        i += 1
+    return "".join(result)
 
 def to_pascal_case(name: str) -> str:
     return "".join(word.capitalize() for word in name.split("_"))
