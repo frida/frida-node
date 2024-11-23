@@ -853,9 +853,9 @@ fdn_uint64_from_value (napi_env env,
                        napi_value value,
                        guint64 * result)
 {
-  uint64_t number;
+  double number;
 
-  if (napi_get_value_uint64 (env, value, &number) != napi_ok)
+  if (napi_get_value_double (env, value, &number) != napi_ok)
     goto invalid_argument;
 
   *result = number;
@@ -873,7 +873,7 @@ fdn_uint64_to_value (napi_env env,
                      guint64 value)
 {
   napi_value result;
-  napi_create_uint64 (env, value, &result);
+  napi_create_double (env, value, &result);
   return result;
 }
 
@@ -1017,24 +1017,24 @@ fdn_vardict_from_value (napi_env env,
   if (napi_get_array_length (env, keys, &length) != napi_ok)
     goto propagate_error;
 
-  vardict = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_variant_unref);
+  vardict = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_variant_unref);
 
   for (i = 0; i != length; i++)
   {
-    napi_value js_key, js_value;
-    GVariant * value;
+    napi_value js_key, js_val;
+    GVariant * val;
 
     if (napi_get_element (env, keys, i, &js_key) != napi_ok)
       goto propagate_error;
     if (!fdn_utf8_from_value (env, js_key, &key))
       goto invalid_argument;
 
-    if (napi_get_property (env, value, key, &js_value) != napi_ok)
+    if (napi_get_property (env, value, js_key, &js_val) != napi_ok)
       goto propagate_error;
-    if (!fdn_variant_from_value (env, js_value, &value))
+    if (!fdn_variant_from_value (env, js_val, &val))
       goto propagate_error;
 
-    g_hash_table_insert (vardict, g_steal_pointer (&key), value);
+    g_hash_table_insert (vardict, g_steal_pointer (&key), val);
   }
 
   *result = vardict;
@@ -1082,171 +1082,177 @@ fdn_variant_from_value (napi_env env,
                         napi_value value,
                         GVariant ** result)
 {
-  if (napi_value_is_string (env, value))
+  napi_valuetype type;
+
+  napi_typeof (env, value, &type);
+
+  switch (type)
   {
-    gchar * str;
-
-    if (!fdn_utf8_from_value (env, value, &str))
-      return FALSE;
-
-    *result = g_variant_new_take_string (str);
-    return TRUE;
-  }
-
-  if (napi_value_is_number (env, value))
-  {
-    gint64 i;
-
-    if (!fdn_int64_from_value (env, value, &i))
-      return FALSE;
-
-    *result = g_variant_new_int64 (i);
-    return TRUE;
-  }
-
-  if (napi_value_is_boolean (env, value))
-  {
-    gboolean b;
-
-    if (!fdn_boolean_from_value (env, value, &b))
-      return FALSE;
-
-    *result = g_variant_new_boolean (b);
-    return TRUE;
-  }
-
-  if (napi_is_buffer (env, value))
-  {
-    void * data;
-    size_t size;
-    gpointer copy;
-
-    if (napi_get_buffer_info (env, value, &data, &size) != napi_ok)
-      return FALSE;
-
-    copy = g_memdup2 (data, size);
-    *result = g_variant_new_from_data (G_VARIANT_TYPE_BYTESTRING, copy, size, TRUE, g_free, copy);
-    return TRUE;
-  }
-
-  if (napi_is_array (env, value))
-  {
-    GVariantBuilder builder;
-    uint32_t i;
-
-    uint32_t length;
-    if (napi_get_array_length (env, value, &length) != napi_ok)
-      return FALSE;
-
-    if (length == 2)
+    case napi_boolean:
     {
-      napi_value first;
-      if (napi_get_element (env, value, 0, &first) != napi_ok)
+      gboolean b;
+
+      if (!fdn_boolean_from_value (env, value, &b))
         return FALSE;
 
-      if (napi_is_symbol (env, first))
+      *result = g_variant_new_boolean (b);
+      return TRUE;
+    }
+    case napi_number:
+    {
+      gint64 i;
+
+      if (!fdn_int64_from_value (env, value, &i))
+        return FALSE;
+
+      *result = g_variant_new_int64 (i);
+      return TRUE;
+    }
+    case napi_string:
+    {
+      gchar * str;
+
+      if (!fdn_utf8_from_value (env, value, &str))
+        return FALSE;
+
+      *result = g_variant_new_take_string (str);
+      return TRUE;
+    }
+    case napi_object:
+    {
+      bool is_buffer, is_array;
+      GVariantBuilder builder;
+      napi_value keys;
+      uint32_t length, i;
+
+      if (napi_is_buffer (env, value, &is_buffer) != napi_ok)
+        return FALSE;
+      if (is_buffer)
       {
-        napi_value desc;
-        gchar * type;
-        napi_value second;
-        GVariant * val;
-        GVariant * t[2];
+        void * data;
+        size_t size;
+        gpointer copy;
 
-        if (napi_get_symbol_description (env, first, &desc) != napi_ok)
+        if (napi_get_buffer_info (env, value, &data, &size) != napi_ok)
           return FALSE;
 
-        if (!fdn_utf8_from_value (env, desc, &type))
+        copy = g_memdup2 (data, size);
+        *result = g_variant_new_from_data (G_VARIANT_TYPE_BYTESTRING, copy, size, TRUE, g_free, copy);
+        return TRUE;
+      }
+
+      if (napi_is_array (env, value, &is_array) != napi_ok)
+        return FALSE;
+      if (is_array)
+      {
+        uint32_t length;
+
+        if (napi_get_array_length (env, value, &length) != napi_ok)
           return FALSE;
 
-        if (napi_get_element (env, value, 1, &second) != napi_ok)
-          return FALSE;
-
-        if (!fdn_variant_from_value (env, second, &val))
+        if (length == 2)
         {
-          g_free (type);
+          napi_value first;
+          napi_valuetype first_type;
+
+          if (napi_get_element (env, value, 0, &first) != napi_ok)
+            return FALSE;
+
+          napi_typeof (env, first, &first_type);
+
+          if (first_type == napi_symbol)
+          {
+            napi_value second;
+            GVariant * val;
+            napi_value desc;
+            gchar * type;
+            GVariant * t[2];
+
+            if (napi_get_element (env, value, 1, &second) != napi_ok)
+              return FALSE;
+
+            if (!fdn_variant_from_value (env, second, &val))
+              return FALSE;
+
+            napi_coerce_to_string (env, first, &desc);
+            fdn_utf8_from_value (env, desc, &type);
+
+            t[0] = g_variant_new_take_string (type);
+            t[1] = val;
+
+            *result = g_variant_new_tuple (t, G_N_ELEMENTS (t));
+            return TRUE;
+          }
+        }
+
+        g_variant_builder_init (&builder, G_VARIANT_TYPE ("av"));
+
+        for (i = 0; i != length; i++)
+        {
+          napi_value element;
+          GVariant * v;
+
+          if (napi_get_element (env, value, i, &element) != napi_ok)
+          {
+            g_variant_builder_clear (&builder);
+            return FALSE;
+          }
+
+          if (!fdn_variant_from_value (env, element, &v))
+          {
+            g_variant_builder_clear (&builder);
+            return FALSE;
+          }
+
+          g_variant_builder_add (&builder, "v", v);
+        }
+
+        *result = g_variant_builder_end (&builder);
+        return TRUE;
+      }
+
+      g_variant_builder_init (&builder, G_VARIANT_TYPE_VARDICT);
+
+      if (napi_get_property_names (env, value, &keys) != napi_ok)
+        return FALSE;
+
+      if (napi_get_array_length (env, keys, &length) != napi_ok)
+        return FALSE;
+
+      for (i = 0; i != length; i++)
+      {
+        napi_value key;
+        gchar * key_str;
+        napi_value val;
+        GVariant * v;
+
+        if (napi_get_element (env, keys, i, &key) != napi_ok)
+          return FALSE;
+
+        if (!fdn_utf8_from_value (env, key, &key_str))
+          return FALSE;
+
+        if (napi_get_property (env, value, key, &val) != napi_ok)
+        {
+          g_free (key_str);
           return FALSE;
         }
 
-        t[0] = g_variant_new_take_string (type);
-        t[1] = val;
+        if (!fdn_variant_from_value (env, val, &v))
+        {
+          g_free (key_str);
+          return FALSE;
+        }
 
-        *result = g_variant_new_tuple (t, G_N_ELEMENTS (t));
-        return TRUE;
-      }
-    }
-
-    g_variant_builder_init (&builder, G_VARIANT_TYPE ("av"));
-
-    for (i = 0; i != length; i++)
-    {
-      napi_value element;
-      GVariant * v;
-
-      if (napi_get_element (env, value, i, &element) != napi_ok)
-      {
-        g_variant_builder_clear (&builder);
-        return FALSE;
-      }
-
-      if (!fdn_variant_from_value (env, element, &v))
-      {
-        g_variant_builder_clear (&builder);
-        return FALSE;
-      }
-
-      g_variant_builder_add (&builder, "v", v);
-    }
-
-    *result = g_variant_builder_end (&builder);
-    return TRUE;
-  }
-
-  if (napi_is_object (env, value))
-  {
-    GVariantBuilder builder;
-    napi_value keys;
-    uint32_t length;
-    uint32_t i;
-
-    g_variant_builder_init (&builder, G_VARIANT_TYPE_VARDICT);
-
-    if (napi_get_property_names (env, value, &keys) != napi_ok)
-      return FALSE;
-
-    if (napi_get_array_length (env, keys, &length) != napi_ok)
-      return FALSE;
-
-    for (i = 0; i != length; i++)
-    {
-      napi_value key;
-      gchar * key_str;
-      napi_value val;
-      GVariant * v;
-
-      if (napi_get_element (env, keys, i, &key) != napi_ok)
-        return FALSE;
-
-      if (!fdn_utf8_from_value (env, key, &key_str))
-        return FALSE;
-
-      if (napi_get_property (env, value, key, &val) != napi_ok)
-      {
+        g_variant_builder_add (&builder, "{sv}", key_str, v);
         g_free (key_str);
-        return FALSE;
       }
 
-      if (!fdn_variant_from_value (env, val, &v))
-      {
-        g_free (key_str);
-        return FALSE;
-      }
-
-      g_variant_builder_add (&builder, "{sv}", key_str, v);
-      g_free (key_str);
+      *result = g_variant_builder_end (&builder);
+      return TRUE;
     }
-
-    *result = g_variant_builder_end (&builder);
-    return TRUE;
+    default:
+      break;
   }
 
   napi_throw_type_error (env, NULL, "expected value serializable to GVariant");
