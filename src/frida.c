@@ -1411,44 +1411,44 @@ static napi_value fdn_vardict_to_value (napi_env env, GHashTable * vardict);
 static gboolean fdn_variant_from_value (napi_env env, napi_value value, GVariant ** result);
 static napi_value fdn_variant_to_value (napi_env env, GVariant * variant);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0x333dc8d419f944e7, 0xa7efecdea8f7d7bf };
-static napi_type_tag fdn_device_list_type_tag = { 0x9eb91d4b423f4629, 0xbd230b9e8b25dde5 };
-static napi_type_tag fdn_device_type_tag = { 0x06ad0dd2e46d4a97, 0x903cf549527b3dc1 };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0x6b0cb8c7f4f24878, 0x8cd3a430647e69ac };
-static napi_type_tag fdn_application_list_type_tag = { 0x493ecda1f4744b0e, 0xa1744ad55265fbdf };
-static napi_type_tag fdn_application_type_tag = { 0x749f53d8ff7c4450, 0xaf2607e009e54d70 };
-static napi_type_tag fdn_process_list_type_tag = { 0x3bd896ffba394323, 0xa37840f011a30dc0 };
-static napi_type_tag fdn_process_type_tag = { 0xb993c33c097c4b30, 0xa05615db4b67d26b };
-static napi_type_tag fdn_process_match_options_type_tag = { 0xb297c8dd139d45e2, 0xb41cba9396888165 };
-static napi_type_tag fdn_spawn_options_type_tag = { 0x5ef22f1b74134522, 0x828f9274191d87bb };
-static napi_type_tag fdn_spawn_list_type_tag = { 0x1cff14a25ac94dc0, 0x9a93923eb865599e };
-static napi_type_tag fdn_spawn_type_tag = { 0x3fb1d45afa2b4ddb, 0xa243c9356c8f1943 };
-static napi_type_tag fdn_child_list_type_tag = { 0x4414c81eea1343e7, 0xb0e853ba9898e7bc };
-static napi_type_tag fdn_child_type_tag = { 0x6b982f098a1847fe, 0xa661c62ab23eb88b };
-static napi_type_tag fdn_crash_type_tag = { 0x07fb60a425eb4e0e, 0x9e1b32db5da24f8f };
-static napi_type_tag fdn_bus_type_tag = { 0xaf290139dc7c40ce, 0xa495b5aef5b80422 };
-static napi_type_tag fdn_session_type_tag = { 0x638d23827cee41a3, 0x95b064b51079d1d4 };
-static napi_type_tag fdn_script_type_tag = { 0xb52aaec5307c4bea, 0x91ca498b49f59800 };
-static napi_type_tag fdn_portal_membership_type_tag = { 0x7cf5fce8d1c34144, 0x84733bfa074c119d };
-static napi_type_tag fdn_control_service_options_type_tag = { 0x2d424b677f69484d, 0x8abb6f0017b4ebb6 };
-static napi_type_tag fdn_portal_service_type_tag = { 0xee59e09e175f4e88, 0x8acfe9e683a3ccad };
-static napi_type_tag fdn_file_monitor_type_tag = { 0x9d32d50d284d4871, 0x8129705ec0e3ca02 };
-static napi_type_tag fdn_compiler_type_tag = { 0x4e34166044ca491d, 0xbb79748bc674cba5 };
-static napi_type_tag fdn_compiler_options_type_tag = { 0x0e514c7241844937, 0x96c2ebf53322b72b };
-static napi_type_tag fdn_build_options_type_tag = { 0x50cb752cc22f436b, 0xbd4c5d71f3c4765b };
-static napi_type_tag fdn_watch_options_type_tag = { 0xefde7a53cc124916, 0xa248f57b4e2c35f7 };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0x1adbc0cedb11453b, 0x8fdf942486a3be44 };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0xf70a91a368e64298, 0xa5fc724808750461 };
-static napi_type_tag fdn_application_query_options_type_tag = { 0x5b2231cf63aa4e29, 0xa154d0e60075cddc };
-static napi_type_tag fdn_process_query_options_type_tag = { 0xff926d55193f4aab, 0xae5159d0fe26e37b };
-static napi_type_tag fdn_session_options_type_tag = { 0xba7061c82a024353, 0xaf29a50dce48818b };
-static napi_type_tag fdn_script_options_type_tag = { 0xfb4d910981884b22, 0xad49b27035a99266 };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0x7ead872fed6c40b3, 0xa94ee11b395bf764 };
-static napi_type_tag fdn_portal_options_type_tag = { 0xdbabb27265fa41f8, 0x9c502de191fafca3 };
-static napi_type_tag fdn_peer_options_type_tag = { 0x9b7b39e16a4240f4, 0x89cd9ff12cbaa2e8 };
-static napi_type_tag fdn_relay_type_tag = { 0x8a34ca23e2eb43f6, 0x9c17147c016d1acc };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0xf00527361aad4213, 0xb1bc65d37ebbfce1 };
-static napi_type_tag fdn_cancellable_type_tag = { 0x1f439ed953ef42bc, 0xbd91fb17059507c9 };
+static napi_type_tag fdn_device_manager_type_tag = { 0xb6e55dcc9e25459e, 0x8d86e42df4ab3263 };
+static napi_type_tag fdn_device_list_type_tag = { 0x73f520e5a22b4b25, 0x8128e62deef061fb };
+static napi_type_tag fdn_device_type_tag = { 0x883e0cc74ee34dab, 0x84164c7cd54852f1 };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0xc57cfb1eb4b7402d, 0x9f89a373d44beb9a };
+static napi_type_tag fdn_application_list_type_tag = { 0xb668c9a5508949be, 0xa745703e63f093d7 };
+static napi_type_tag fdn_application_type_tag = { 0x42547210ecd84ac5, 0xa25205326a160b88 };
+static napi_type_tag fdn_process_list_type_tag = { 0x2d5f7d4664a54021, 0xafbbea11b1048d07 };
+static napi_type_tag fdn_process_type_tag = { 0x9df73524be3a4a3a, 0x938c7690a5366957 };
+static napi_type_tag fdn_process_match_options_type_tag = { 0xa320e6e6d078429b, 0x8a1a854081d47f45 };
+static napi_type_tag fdn_spawn_options_type_tag = { 0x7e5cbb3d547841ef, 0xb32f6a57cc45150e };
+static napi_type_tag fdn_spawn_list_type_tag = { 0x59353a6dad4d441c, 0x871c54c6eba8234a };
+static napi_type_tag fdn_spawn_type_tag = { 0x24678025bcca4cce, 0xb598e8e2de6b3bff };
+static napi_type_tag fdn_child_list_type_tag = { 0xccfb1779a0554932, 0xb058c94af046ca50 };
+static napi_type_tag fdn_child_type_tag = { 0xabd68bc9423d441e, 0x8e8d81ea5fc44f88 };
+static napi_type_tag fdn_crash_type_tag = { 0x2357bc09a56244c8, 0xad9e6f9fd09fd8bf };
+static napi_type_tag fdn_bus_type_tag = { 0xd627517923a144cd, 0x9668fa9190c0f697 };
+static napi_type_tag fdn_session_type_tag = { 0x88014d1e8e984dfd, 0xa464c3b477d5dd10 };
+static napi_type_tag fdn_script_type_tag = { 0xddc0b21acff74b26, 0xb13306fe17393e07 };
+static napi_type_tag fdn_portal_membership_type_tag = { 0x9ac7ede2defe411c, 0x9dff6d1e1ccd5441 };
+static napi_type_tag fdn_control_service_options_type_tag = { 0x9f300a80a1b74f2a, 0xbe7ffb878804d114 };
+static napi_type_tag fdn_portal_service_type_tag = { 0xd4cea065a5274388, 0x94065eea85e6cf7b };
+static napi_type_tag fdn_file_monitor_type_tag = { 0x388179c55b544aee, 0x8b835c8d197ab6a5 };
+static napi_type_tag fdn_compiler_type_tag = { 0x75731d933e0849f5, 0x98aa30e45ad8b466 };
+static napi_type_tag fdn_compiler_options_type_tag = { 0x865fef9c688d424a, 0xae5d4dcfb6a38dfc };
+static napi_type_tag fdn_build_options_type_tag = { 0x127ad7d0c81b44c1, 0x8aea385a52b71cb1 };
+static napi_type_tag fdn_watch_options_type_tag = { 0xed14aeeebb454105, 0xbccb684d5ee3aada };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0xdcdcc0085021417c, 0x970dd3d6c2566289 };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0xe516db0468cb481f, 0x8c929345d5ca3f09 };
+static napi_type_tag fdn_application_query_options_type_tag = { 0xe9ddfe8457164c76, 0xb4d562403fde3611 };
+static napi_type_tag fdn_process_query_options_type_tag = { 0xaee2a594bdd44184, 0x8a8072f4f475379f };
+static napi_type_tag fdn_session_options_type_tag = { 0x9a41680dbc054102, 0x9b175da4e34e74c7 };
+static napi_type_tag fdn_script_options_type_tag = { 0x652f40c92a8f4d2c, 0xad7b8d3aedee28c1 };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0x2f1ed4399561430e, 0x83d4ddd751c0304e };
+static napi_type_tag fdn_portal_options_type_tag = { 0xf899cfcf57a54f36, 0xa85ecd3bb1db351a };
+static napi_type_tag fdn_peer_options_type_tag = { 0x17b84524fd904a7d, 0x982d95db51ea2847 };
+static napi_type_tag fdn_relay_type_tag = { 0x0cbaad77b6dd4d9f, 0xb74b258c8492e13f };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0xb7857e8f5e114059, 0x95f570f3eea076c1 };
+static napi_type_tag fdn_cancellable_type_tag = { 0xa05a04826f984159, 0xad70bb25d3595d85 };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_list_constructor;
@@ -17373,9 +17373,9 @@ fdn_uint64_from_value (napi_env env,
                        napi_value value,
                        guint64 * result)
 {
-  uint64_t number;
+  double number;
 
-  if (napi_get_value_uint64 (env, value, &number) != napi_ok)
+  if (napi_get_value_double (env, value, &number) != napi_ok)
     goto invalid_argument;
 
   *result = number;
@@ -17393,7 +17393,7 @@ fdn_uint64_to_value (napi_env env,
                      guint64 value)
 {
   napi_value result;
-  napi_create_uint64 (env, value, &result);
+  napi_create_double (env, value, &result);
   return result;
 }
 
@@ -17537,24 +17537,24 @@ fdn_vardict_from_value (napi_env env,
   if (napi_get_array_length (env, keys, &length) != napi_ok)
     goto propagate_error;
 
-  vardict = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_variant_unref);
+  vardict = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_variant_unref);
 
   for (i = 0; i != length; i++)
   {
-    napi_value js_key, js_value;
-    GVariant * value;
+    napi_value js_key, js_val;
+    GVariant * val;
 
     if (napi_get_element (env, keys, i, &js_key) != napi_ok)
       goto propagate_error;
     if (!fdn_utf8_from_value (env, js_key, &key))
       goto invalid_argument;
 
-    if (napi_get_property (env, value, key, &js_value) != napi_ok)
+    if (napi_get_property (env, value, js_key, &js_val) != napi_ok)
       goto propagate_error;
-    if (!fdn_variant_from_value (env, js_value, &value))
+    if (!fdn_variant_from_value (env, js_val, &val))
       goto propagate_error;
 
-    g_hash_table_insert (vardict, g_steal_pointer (&key), value);
+    g_hash_table_insert (vardict, g_steal_pointer (&key), val);
   }
 
   *result = vardict;
@@ -17602,171 +17602,177 @@ fdn_variant_from_value (napi_env env,
                         napi_value value,
                         GVariant ** result)
 {
-  if (napi_value_is_string (env, value))
+  napi_valuetype type;
+
+  napi_typeof (env, value, &type);
+
+  switch (type)
   {
-    gchar * str;
-
-    if (!fdn_utf8_from_value (env, value, &str))
-      return FALSE;
-
-    *result = g_variant_new_take_string (str);
-    return TRUE;
-  }
-
-  if (napi_value_is_number (env, value))
-  {
-    gint64 i;
-
-    if (!fdn_int64_from_value (env, value, &i))
-      return FALSE;
-
-    *result = g_variant_new_int64 (i);
-    return TRUE;
-  }
-
-  if (napi_value_is_boolean (env, value))
-  {
-    gboolean b;
-
-    if (!fdn_boolean_from_value (env, value, &b))
-      return FALSE;
-
-    *result = g_variant_new_boolean (b);
-    return TRUE;
-  }
-
-  if (napi_is_buffer (env, value))
-  {
-    void * data;
-    size_t size;
-    gpointer copy;
-
-    if (napi_get_buffer_info (env, value, &data, &size) != napi_ok)
-      return FALSE;
-
-    copy = g_memdup2 (data, size);
-    *result = g_variant_new_from_data (G_VARIANT_TYPE_BYTESTRING, copy, size, TRUE, g_free, copy);
-    return TRUE;
-  }
-
-  if (napi_is_array (env, value))
-  {
-    GVariantBuilder builder;
-    uint32_t i;
-
-    uint32_t length;
-    if (napi_get_array_length (env, value, &length) != napi_ok)
-      return FALSE;
-
-    if (length == 2)
+    case napi_boolean:
     {
-      napi_value first;
-      if (napi_get_element (env, value, 0, &first) != napi_ok)
+      gboolean b;
+
+      if (!fdn_boolean_from_value (env, value, &b))
         return FALSE;
 
-      if (napi_is_symbol (env, first))
+      *result = g_variant_new_boolean (b);
+      return TRUE;
+    }
+    case napi_number:
+    {
+      gint64 i;
+
+      if (!fdn_int64_from_value (env, value, &i))
+        return FALSE;
+
+      *result = g_variant_new_int64 (i);
+      return TRUE;
+    }
+    case napi_string:
+    {
+      gchar * str;
+
+      if (!fdn_utf8_from_value (env, value, &str))
+        return FALSE;
+
+      *result = g_variant_new_take_string (str);
+      return TRUE;
+    }
+    case napi_object:
+    {
+      bool is_buffer, is_array;
+      GVariantBuilder builder;
+      napi_value keys;
+      uint32_t length, i;
+
+      if (napi_is_buffer (env, value, &is_buffer) != napi_ok)
+        return FALSE;
+      if (is_buffer)
       {
-        napi_value desc;
-        gchar * type;
-        napi_value second;
-        GVariant * val;
-        GVariant * t[2];
+        void * data;
+        size_t size;
+        gpointer copy;
 
-        if (napi_get_symbol_description (env, first, &desc) != napi_ok)
+        if (napi_get_buffer_info (env, value, &data, &size) != napi_ok)
           return FALSE;
 
-        if (!fdn_utf8_from_value (env, desc, &type))
+        copy = g_memdup2 (data, size);
+        *result = g_variant_new_from_data (G_VARIANT_TYPE_BYTESTRING, copy, size, TRUE, g_free, copy);
+        return TRUE;
+      }
+
+      if (napi_is_array (env, value, &is_array) != napi_ok)
+        return FALSE;
+      if (is_array)
+      {
+        uint32_t length;
+
+        if (napi_get_array_length (env, value, &length) != napi_ok)
           return FALSE;
 
-        if (napi_get_element (env, value, 1, &second) != napi_ok)
-          return FALSE;
-
-        if (!fdn_variant_from_value (env, second, &val))
+        if (length == 2)
         {
-          g_free (type);
+          napi_value first;
+          napi_valuetype first_type;
+
+          if (napi_get_element (env, value, 0, &first) != napi_ok)
+            return FALSE;
+
+          napi_typeof (env, first, &first_type);
+
+          if (first_type == napi_symbol)
+          {
+            napi_value second;
+            GVariant * val;
+            napi_value desc;
+            gchar * type;
+            GVariant * t[2];
+
+            if (napi_get_element (env, value, 1, &second) != napi_ok)
+              return FALSE;
+
+            if (!fdn_variant_from_value (env, second, &val))
+              return FALSE;
+
+            napi_coerce_to_string (env, first, &desc);
+            fdn_utf8_from_value (env, desc, &type);
+
+            t[0] = g_variant_new_take_string (type);
+            t[1] = val;
+
+            *result = g_variant_new_tuple (t, G_N_ELEMENTS (t));
+            return TRUE;
+          }
+        }
+
+        g_variant_builder_init (&builder, G_VARIANT_TYPE ("av"));
+
+        for (i = 0; i != length; i++)
+        {
+          napi_value element;
+          GVariant * v;
+
+          if (napi_get_element (env, value, i, &element) != napi_ok)
+          {
+            g_variant_builder_clear (&builder);
+            return FALSE;
+          }
+
+          if (!fdn_variant_from_value (env, element, &v))
+          {
+            g_variant_builder_clear (&builder);
+            return FALSE;
+          }
+
+          g_variant_builder_add (&builder, "v", v);
+        }
+
+        *result = g_variant_builder_end (&builder);
+        return TRUE;
+      }
+
+      g_variant_builder_init (&builder, G_VARIANT_TYPE_VARDICT);
+
+      if (napi_get_property_names (env, value, &keys) != napi_ok)
+        return FALSE;
+
+      if (napi_get_array_length (env, keys, &length) != napi_ok)
+        return FALSE;
+
+      for (i = 0; i != length; i++)
+      {
+        napi_value key;
+        gchar * key_str;
+        napi_value val;
+        GVariant * v;
+
+        if (napi_get_element (env, keys, i, &key) != napi_ok)
+          return FALSE;
+
+        if (!fdn_utf8_from_value (env, key, &key_str))
+          return FALSE;
+
+        if (napi_get_property (env, value, key, &val) != napi_ok)
+        {
+          g_free (key_str);
           return FALSE;
         }
 
-        t[0] = g_variant_new_take_string (type);
-        t[1] = val;
+        if (!fdn_variant_from_value (env, val, &v))
+        {
+          g_free (key_str);
+          return FALSE;
+        }
 
-        *result = g_variant_new_tuple (t, G_N_ELEMENTS (t));
-        return TRUE;
-      }
-    }
-
-    g_variant_builder_init (&builder, G_VARIANT_TYPE ("av"));
-
-    for (i = 0; i != length; i++)
-    {
-      napi_value element;
-      GVariant * v;
-
-      if (napi_get_element (env, value, i, &element) != napi_ok)
-      {
-        g_variant_builder_clear (&builder);
-        return FALSE;
-      }
-
-      if (!fdn_variant_from_value (env, element, &v))
-      {
-        g_variant_builder_clear (&builder);
-        return FALSE;
-      }
-
-      g_variant_builder_add (&builder, "v", v);
-    }
-
-    *result = g_variant_builder_end (&builder);
-    return TRUE;
-  }
-
-  if (napi_is_object (env, value))
-  {
-    GVariantBuilder builder;
-    napi_value keys;
-    uint32_t length;
-    uint32_t i;
-
-    g_variant_builder_init (&builder, G_VARIANT_TYPE_VARDICT);
-
-    if (napi_get_property_names (env, value, &keys) != napi_ok)
-      return FALSE;
-
-    if (napi_get_array_length (env, keys, &length) != napi_ok)
-      return FALSE;
-
-    for (i = 0; i != length; i++)
-    {
-      napi_value key;
-      gchar * key_str;
-      napi_value val;
-      GVariant * v;
-
-      if (napi_get_element (env, keys, i, &key) != napi_ok)
-        return FALSE;
-
-      if (!fdn_utf8_from_value (env, key, &key_str))
-        return FALSE;
-
-      if (napi_get_property (env, value, key, &val) != napi_ok)
-      {
+        g_variant_builder_add (&builder, "{sv}", key_str, v);
         g_free (key_str);
-        return FALSE;
       }
 
-      if (!fdn_variant_from_value (env, val, &v))
-      {
-        g_free (key_str);
-        return FALSE;
-      }
-
-      g_variant_builder_add (&builder, "{sv}", key_str, v);
-      g_free (key_str);
+      *result = g_variant_builder_end (&builder);
+      return TRUE;
     }
-
-    *result = g_variant_builder_end (&builder);
-    return TRUE;
+    default:
+      break;
   }
 
   napi_throw_type_error (env, NULL, "expected value serializable to GVariant");
