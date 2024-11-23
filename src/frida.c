@@ -1395,49 +1395,51 @@ static napi_value fdn_boolean_to_value (napi_env env, gboolean value);
 static gboolean fdn_int_from_value (napi_env env, napi_value value, gint * result);
 static napi_value fdn_int_to_value (napi_env env, gint value);
 static gboolean fdn_uint_from_value (napi_env env, napi_value value, guint * result);
+static napi_value fdn_uint_to_value (napi_env env, guint value);
 static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * result);
 static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);
+static napi_value fdn_utf8_to_value (napi_env env, const gchar * str);
 static gboolean fdn_enum_from_value (napi_env env, GType enum_type, napi_value value, gint * result);
 static napi_value fdn_enum_to_value (napi_env env, GType enum_type, gint value);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0xbec51fd35ac940d1, 0x9b44ba5689aab894 };
-static napi_type_tag fdn_device_list_type_tag = { 0x765d28366b1a468e, 0x9aaa06333813fb97 };
-static napi_type_tag fdn_device_type_tag = { 0x3f97234ae3c94758, 0xae78bb8f2a3a322a };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0xd46e84467363495d, 0xabf1344b53037ac3 };
-static napi_type_tag fdn_application_list_type_tag = { 0x455ed8b5f37a47c3, 0x9aa5ea37c43f8067 };
-static napi_type_tag fdn_application_type_tag = { 0x9c3b6f260fe54914, 0xa54f7913a82ea695 };
-static napi_type_tag fdn_process_list_type_tag = { 0x3531d95811864962, 0x8a66a0a18a30fa44 };
-static napi_type_tag fdn_process_type_tag = { 0x8b19ce8854d14e23, 0xa92b00a05f6fdb20 };
-static napi_type_tag fdn_process_match_options_type_tag = { 0xf8eb5b04d5854a63, 0xa384cfed0c6ee5bb };
-static napi_type_tag fdn_spawn_options_type_tag = { 0x0d07a41ff43f49a1, 0x80865ea0877584d3 };
-static napi_type_tag fdn_spawn_list_type_tag = { 0x8166e28811af4139, 0x9b09a40a6475f206 };
-static napi_type_tag fdn_spawn_type_tag = { 0xfd0fbe52ca934136, 0x99721c46a0277123 };
-static napi_type_tag fdn_child_list_type_tag = { 0x0deb13efcb034539, 0xbd2624fa66486275 };
-static napi_type_tag fdn_child_type_tag = { 0x8ed2a481ab5f43e1, 0xa4c32ea89f6e4e91 };
-static napi_type_tag fdn_crash_type_tag = { 0x4e2cc72c56b34c95, 0x8c698929a2fcb3d0 };
-static napi_type_tag fdn_bus_type_tag = { 0x79ba06c30ee3489d, 0x9db2f4c95910f898 };
-static napi_type_tag fdn_session_type_tag = { 0xd7df996f07334026, 0xa6d20441b1d27d70 };
-static napi_type_tag fdn_script_type_tag = { 0xed50cb3b3d874211, 0xb717d31b3db9f009 };
-static napi_type_tag fdn_portal_membership_type_tag = { 0xbd7da2985a374c74, 0xa022c9bf385124ea };
-static napi_type_tag fdn_control_service_options_type_tag = { 0xaf84cae37b804a33, 0x8fa3e78b73f1407c };
-static napi_type_tag fdn_portal_service_type_tag = { 0x4838e299d53a4b37, 0x8381f147e2577102 };
-static napi_type_tag fdn_file_monitor_type_tag = { 0x71ed420374da40f8, 0x974cba314a53b10c };
-static napi_type_tag fdn_compiler_type_tag = { 0x2374b4c92ee24841, 0xa6adacf58391b870 };
-static napi_type_tag fdn_compiler_options_type_tag = { 0x15415b31013340c2, 0x9f3eca1ae004a47c };
-static napi_type_tag fdn_build_options_type_tag = { 0x075534e2ad2e4f71, 0xb99a282059860939 };
-static napi_type_tag fdn_watch_options_type_tag = { 0xbca256f866234d88, 0x9610230bf29b97c6 };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0xf29a32a8b66d44f3, 0x9f2c42fca850df07 };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x27b1c6b9bb2142e0, 0xa77db1a51d2550c7 };
-static napi_type_tag fdn_application_query_options_type_tag = { 0xac56ac5c2a5945f1, 0xa9e35ac941184271 };
-static napi_type_tag fdn_process_query_options_type_tag = { 0xdf0e40543a104ed0, 0x9520407d19f68995 };
-static napi_type_tag fdn_session_options_type_tag = { 0xed30d51ec26b4ed9, 0xa333ab94f26bf298 };
-static napi_type_tag fdn_script_options_type_tag = { 0x96ce7fed997d4b7b, 0xa2ed0ff519c75a70 };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0x0a9fac8a389c41ae, 0xb1e174b21612f17b };
-static napi_type_tag fdn_portal_options_type_tag = { 0x361f651ecb2c4672, 0x9c517427d198a2c2 };
-static napi_type_tag fdn_peer_options_type_tag = { 0x7c39af9b107f4928, 0x8925ca10560998dc };
-static napi_type_tag fdn_relay_type_tag = { 0xae099fefc97c4d14, 0x906bc7ec827c96b4 };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x0e95fe46d33e4049, 0x94c18975e178beb0 };
-static napi_type_tag fdn_cancellable_type_tag = { 0x1295a4bef5ab4761, 0x9e8e9898819bf2ee };
+static napi_type_tag fdn_device_manager_type_tag = { 0x05f6bfbbd4aa4537, 0x8d1583d2acbdaef8 };
+static napi_type_tag fdn_device_list_type_tag = { 0x27f15837384944ec, 0x84a128e5d77ab93c };
+static napi_type_tag fdn_device_type_tag = { 0xe58dd9a80d3e4ce1, 0x8a8beeb08528ae31 };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0xf8557922de3d4ccf, 0x9ad91b41dd0af865 };
+static napi_type_tag fdn_application_list_type_tag = { 0x18411c8353ac470e, 0x8e1f4b297c317dd0 };
+static napi_type_tag fdn_application_type_tag = { 0x919f44a5bc7c47f4, 0x90d839ccfbc8b8fb };
+static napi_type_tag fdn_process_list_type_tag = { 0x49fee2ad1ff04c0a, 0xbdc1b35727c60733 };
+static napi_type_tag fdn_process_type_tag = { 0x511ce7eb1dbd4fe8, 0xb04a5b211a9b4ff5 };
+static napi_type_tag fdn_process_match_options_type_tag = { 0x7f42da2851d34fd6, 0x81d69bb61bd17e77 };
+static napi_type_tag fdn_spawn_options_type_tag = { 0x3d07276db4244f38, 0xadd92c428c0266c9 };
+static napi_type_tag fdn_spawn_list_type_tag = { 0xaefff959485a4ae2, 0xad98a0774eb347a4 };
+static napi_type_tag fdn_spawn_type_tag = { 0xcf2a6d4a365d4e5a, 0x82df59cc4453b387 };
+static napi_type_tag fdn_child_list_type_tag = { 0xb50a4a24f87d4c5f, 0xbcb5700430da0d91 };
+static napi_type_tag fdn_child_type_tag = { 0xe858cbb88ba84cdb, 0xae0ab388ccc4a72d };
+static napi_type_tag fdn_crash_type_tag = { 0x6265dac6465e4725, 0x817cc5d4acac4ce0 };
+static napi_type_tag fdn_bus_type_tag = { 0x8d86c6b59024422b, 0x9c01cdbf16449dda };
+static napi_type_tag fdn_session_type_tag = { 0x0fb915770e4945a4, 0xbe2c47191a1aa633 };
+static napi_type_tag fdn_script_type_tag = { 0xd6fcfe99dbd6421e, 0xa9fdf80461132675 };
+static napi_type_tag fdn_portal_membership_type_tag = { 0x44f104191fd74966, 0x9714a3a01bda89a3 };
+static napi_type_tag fdn_control_service_options_type_tag = { 0x3b4fdc31b14c409b, 0xa7b73e1c68a3ee82 };
+static napi_type_tag fdn_portal_service_type_tag = { 0xd5ef2bb845214aad, 0xa3b5b633d818cd23 };
+static napi_type_tag fdn_file_monitor_type_tag = { 0x4ede99185b1f48e0, 0xad1a768c1fe0a0f3 };
+static napi_type_tag fdn_compiler_type_tag = { 0x956c552fd9fd47ff, 0x82f7acbc316380f1 };
+static napi_type_tag fdn_compiler_options_type_tag = { 0x428592c3b5ef4c5f, 0xb68a1e1d530ab28a };
+static napi_type_tag fdn_build_options_type_tag = { 0xbb188399e6b54400, 0x90ccac36d4c282eb };
+static napi_type_tag fdn_watch_options_type_tag = { 0xcf6b0f704f2347de, 0x86d777fadc7612fb };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0x465f3df715e54b6e, 0xa6e6df2a25eb9766 };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x7089cb96cf2b412c, 0xae3478e64ea9d0a5 };
+static napi_type_tag fdn_application_query_options_type_tag = { 0xe99971ae56fa40f2, 0x828dc4dba4e49c5f };
+static napi_type_tag fdn_process_query_options_type_tag = { 0x6f0c31f85021491c, 0x9f5a953864fc2d48 };
+static napi_type_tag fdn_session_options_type_tag = { 0xe5abf2819cf040dd, 0x9451e8082d9f9426 };
+static napi_type_tag fdn_script_options_type_tag = { 0x8ab470a6828745ca, 0x9947b401e2f429af };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0xf29cc1e3abdb48a6, 0xb45377d26ae79c92 };
+static napi_type_tag fdn_portal_options_type_tag = { 0xccca43cce0ba4850, 0x95be8669d3c23539 };
+static napi_type_tag fdn_peer_options_type_tag = { 0x0588fb6688c64a6b, 0x9117979325c56c76 };
+static napi_type_tag fdn_relay_type_tag = { 0x192f0d235c2847a8, 0x8af9a4448a0f03e8 };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0xa17f4922e21e4b4d, 0x9478e0edad32d40e };
+static napi_type_tag fdn_cancellable_type_tag = { 0xbe112c9314654150, 0xb8adb254b31808e1 };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_list_constructor;
@@ -17480,6 +17482,15 @@ invalid_argument:
   }
 }
 
+static napi_value
+fdn_uint_to_value (napi_env env,
+                   guint value)
+{
+  napi_value result;
+  napi_create_uint32 (env, value, &result);
+  return result;
+}
+
 static gboolean
 fdn_ulong_from_value (napi_env env,
                       napi_value value,
@@ -17527,6 +17538,15 @@ invalid_argument:
     g_free (result);
     return FALSE;
   }
+}
+
+static napi_value
+fdn_utf8_to_value (napi_env env,
+                   const gchar * str)
+{
+  napi_value result;
+  napi_create_string_utf8 (env, str, NAPI_AUTO_LENGTH, &result);
+  return result;
 }
 
 static gboolean
