@@ -1396,50 +1396,59 @@ static gboolean fdn_int_from_value (napi_env env, napi_value value, gint * resul
 static napi_value fdn_int_to_value (napi_env env, gint value);
 static gboolean fdn_uint_from_value (napi_env env, napi_value value, guint * result);
 static napi_value fdn_uint_to_value (napi_env env, guint value);
+static gboolean fdn_int64_from_value (napi_env env, napi_value value, gint64 * result);
+static napi_value fdn_int64_to_value (napi_env env, gint64 value);
+static gboolean fdn_uint64_from_value (napi_env env, napi_value value, guint64 * result);
+static napi_value fdn_uint64_to_value (napi_env env, guint64 value);
 static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * result);
+static napi_value fdn_double_to_value (napi_env env, gdouble value);
 static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);
 static napi_value fdn_utf8_to_value (napi_env env, const gchar * str);
 static gboolean fdn_enum_from_value (napi_env env, GType enum_type, napi_value value, gint * result);
 static napi_value fdn_enum_to_value (napi_env env, GType enum_type, gint value);
+static gboolean fdn_vardict_from_value (napi_env env, napi_value value, GHashTable ** result);
+static napi_value fdn_vardict_to_value (napi_env env, GHashTable * vardict);
+static gboolean fdn_variant_from_value (napi_env env, napi_value value, GVariant ** result);
+static napi_value fdn_variant_to_value (napi_env env, GVariant * variant);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0x05f6bfbbd4aa4537, 0x8d1583d2acbdaef8 };
-static napi_type_tag fdn_device_list_type_tag = { 0x27f15837384944ec, 0x84a128e5d77ab93c };
-static napi_type_tag fdn_device_type_tag = { 0xe58dd9a80d3e4ce1, 0x8a8beeb08528ae31 };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0xf8557922de3d4ccf, 0x9ad91b41dd0af865 };
-static napi_type_tag fdn_application_list_type_tag = { 0x18411c8353ac470e, 0x8e1f4b297c317dd0 };
-static napi_type_tag fdn_application_type_tag = { 0x919f44a5bc7c47f4, 0x90d839ccfbc8b8fb };
-static napi_type_tag fdn_process_list_type_tag = { 0x49fee2ad1ff04c0a, 0xbdc1b35727c60733 };
-static napi_type_tag fdn_process_type_tag = { 0x511ce7eb1dbd4fe8, 0xb04a5b211a9b4ff5 };
-static napi_type_tag fdn_process_match_options_type_tag = { 0x7f42da2851d34fd6, 0x81d69bb61bd17e77 };
-static napi_type_tag fdn_spawn_options_type_tag = { 0x3d07276db4244f38, 0xadd92c428c0266c9 };
-static napi_type_tag fdn_spawn_list_type_tag = { 0xaefff959485a4ae2, 0xad98a0774eb347a4 };
-static napi_type_tag fdn_spawn_type_tag = { 0xcf2a6d4a365d4e5a, 0x82df59cc4453b387 };
-static napi_type_tag fdn_child_list_type_tag = { 0xb50a4a24f87d4c5f, 0xbcb5700430da0d91 };
-static napi_type_tag fdn_child_type_tag = { 0xe858cbb88ba84cdb, 0xae0ab388ccc4a72d };
-static napi_type_tag fdn_crash_type_tag = { 0x6265dac6465e4725, 0x817cc5d4acac4ce0 };
-static napi_type_tag fdn_bus_type_tag = { 0x8d86c6b59024422b, 0x9c01cdbf16449dda };
-static napi_type_tag fdn_session_type_tag = { 0x0fb915770e4945a4, 0xbe2c47191a1aa633 };
-static napi_type_tag fdn_script_type_tag = { 0xd6fcfe99dbd6421e, 0xa9fdf80461132675 };
-static napi_type_tag fdn_portal_membership_type_tag = { 0x44f104191fd74966, 0x9714a3a01bda89a3 };
-static napi_type_tag fdn_control_service_options_type_tag = { 0x3b4fdc31b14c409b, 0xa7b73e1c68a3ee82 };
-static napi_type_tag fdn_portal_service_type_tag = { 0xd5ef2bb845214aad, 0xa3b5b633d818cd23 };
-static napi_type_tag fdn_file_monitor_type_tag = { 0x4ede99185b1f48e0, 0xad1a768c1fe0a0f3 };
-static napi_type_tag fdn_compiler_type_tag = { 0x956c552fd9fd47ff, 0x82f7acbc316380f1 };
-static napi_type_tag fdn_compiler_options_type_tag = { 0x428592c3b5ef4c5f, 0xb68a1e1d530ab28a };
-static napi_type_tag fdn_build_options_type_tag = { 0xbb188399e6b54400, 0x90ccac36d4c282eb };
-static napi_type_tag fdn_watch_options_type_tag = { 0xcf6b0f704f2347de, 0x86d777fadc7612fb };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0x465f3df715e54b6e, 0xa6e6df2a25eb9766 };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x7089cb96cf2b412c, 0xae3478e64ea9d0a5 };
-static napi_type_tag fdn_application_query_options_type_tag = { 0xe99971ae56fa40f2, 0x828dc4dba4e49c5f };
-static napi_type_tag fdn_process_query_options_type_tag = { 0x6f0c31f85021491c, 0x9f5a953864fc2d48 };
-static napi_type_tag fdn_session_options_type_tag = { 0xe5abf2819cf040dd, 0x9451e8082d9f9426 };
-static napi_type_tag fdn_script_options_type_tag = { 0x8ab470a6828745ca, 0x9947b401e2f429af };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0xf29cc1e3abdb48a6, 0xb45377d26ae79c92 };
-static napi_type_tag fdn_portal_options_type_tag = { 0xccca43cce0ba4850, 0x95be8669d3c23539 };
-static napi_type_tag fdn_peer_options_type_tag = { 0x0588fb6688c64a6b, 0x9117979325c56c76 };
-static napi_type_tag fdn_relay_type_tag = { 0x192f0d235c2847a8, 0x8af9a4448a0f03e8 };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0xa17f4922e21e4b4d, 0x9478e0edad32d40e };
-static napi_type_tag fdn_cancellable_type_tag = { 0xbe112c9314654150, 0xb8adb254b31808e1 };
+static napi_type_tag fdn_device_manager_type_tag = { 0xff3cc288b70344d4, 0xae6aa7783c94fd0b };
+static napi_type_tag fdn_device_list_type_tag = { 0x9d2a7647fec14d17, 0x81946adc0983f4a0 };
+static napi_type_tag fdn_device_type_tag = { 0x3fd04ef80b3a419f, 0xa5993c118eba1768 };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0xb27afffa30e9478f, 0xa6cdde65f47a3618 };
+static napi_type_tag fdn_application_list_type_tag = { 0x5027546b612a446d, 0xae4be1a2125cb9f8 };
+static napi_type_tag fdn_application_type_tag = { 0x3b140e7f38b041d2, 0xa2ad06b61c6faeda };
+static napi_type_tag fdn_process_list_type_tag = { 0xcb1c8b519b2942f4, 0xbe5fe0bf01c0c857 };
+static napi_type_tag fdn_process_type_tag = { 0x1bac06239b794c30, 0x8316aa250edfe2fd };
+static napi_type_tag fdn_process_match_options_type_tag = { 0x6fef83215ea74df0, 0xb271ad333b1427cf };
+static napi_type_tag fdn_spawn_options_type_tag = { 0xbf5cea121a9844e7, 0x921da80cc12fbbce };
+static napi_type_tag fdn_spawn_list_type_tag = { 0x082e3dd9f42249a4, 0xbf725fe83df2f711 };
+static napi_type_tag fdn_spawn_type_tag = { 0x7e4889b782454bed, 0x8c8c7f2663144887 };
+static napi_type_tag fdn_child_list_type_tag = { 0x2f83448762e04753, 0xb8e263a1b87706e0 };
+static napi_type_tag fdn_child_type_tag = { 0xa37dcf19674c4998, 0xa9b64a1c47c60a62 };
+static napi_type_tag fdn_crash_type_tag = { 0xc75925321fa94e98, 0x8f857c73aca4a20a };
+static napi_type_tag fdn_bus_type_tag = { 0x99df957ce74d4cc6, 0x9d81069276e7af3b };
+static napi_type_tag fdn_session_type_tag = { 0x7d7d0da28a234ac6, 0xb8c5fb19af56055c };
+static napi_type_tag fdn_script_type_tag = { 0x986ccaf11a8447b0, 0xa95456d3a23739cd };
+static napi_type_tag fdn_portal_membership_type_tag = { 0x892b56c6005a4c86, 0x984a96b9280b0b4e };
+static napi_type_tag fdn_control_service_options_type_tag = { 0x4e1b57ad9add42bb, 0x9d769df2fbec37c3 };
+static napi_type_tag fdn_portal_service_type_tag = { 0xcf20c9c416c048f4, 0x98cd2180b3465fed };
+static napi_type_tag fdn_file_monitor_type_tag = { 0x0fc152ba45224b2e, 0xb36b1d2206c2d762 };
+static napi_type_tag fdn_compiler_type_tag = { 0x3f38318351bf40b1, 0x92d2ca2add14fe05 };
+static napi_type_tag fdn_compiler_options_type_tag = { 0x61d717a50fab47d1, 0x8dc5bf33ee59184e };
+static napi_type_tag fdn_build_options_type_tag = { 0x3f4f0c65bf564dac, 0x8616eb5808e20b12 };
+static napi_type_tag fdn_watch_options_type_tag = { 0x19943bbef89c49a4, 0x91f6daeded281b3d };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0x12cb9cf762654a76, 0xa984bb02148e6cdb };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0xb8d0635e845346ae, 0xbb9a5f084c30b799 };
+static napi_type_tag fdn_application_query_options_type_tag = { 0xc6fe345102db4d56, 0xbd54ef13e6198887 };
+static napi_type_tag fdn_process_query_options_type_tag = { 0xc7ee69a3d54a4f10, 0xb0d51e6d391bb545 };
+static napi_type_tag fdn_session_options_type_tag = { 0xf616ba24433c4d94, 0xa93d93f1b0396911 };
+static napi_type_tag fdn_script_options_type_tag = { 0x58220ee2c91d420b, 0x9b611b3836342305 };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0xea11e1abf79e45b4, 0xb137c209a64a7b40 };
+static napi_type_tag fdn_portal_options_type_tag = { 0x80492bc380904d5c, 0x83994dbde9ebacad };
+static napi_type_tag fdn_peer_options_type_tag = { 0x4105247197e34c29, 0x890d45237fc1b667 };
+static napi_type_tag fdn_relay_type_tag = { 0x1542df8a704c49e7, 0x8ded51ab654d2dec };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x66fa252c09294883, 0xbb6e9a3271258c76 };
+static napi_type_tag fdn_cancellable_type_tag = { 0x40b8a6f578c44663, 0xac4fc010d918850c };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_list_constructor;
@@ -3236,7 +3245,7 @@ fdn_device_query_system_parameters_deliver (napi_env env,
   else
   {
     napi_value result;
-    result = fdn_hash_table_to_value (env, operation->return_value);
+    result = fdn_vardict_to_value (env, operation->return_value);
     napi_resolve_deferred (env, operation->deferred, result);
   }
 
@@ -5870,7 +5879,7 @@ fdn_device_open_channel_deliver (napi_env env,
   else
   {
     napi_value result;
-    result = fdn_i_o_stream_to_value (env, operation->return_value);
+    result = fdn_io_stream_to_value (env, operation->return_value);
     napi_resolve_deferred (env, operation->deferred, result);
   }
 
@@ -6977,7 +6986,7 @@ fdn_application_get_parameters (napi_env env,
 
   return_value = frida_application_get_parameters (handle);
 
-  result = fdn_hash_table_to_value (env, return_value);
+  result = fdn_vardict_to_value (env, return_value);
 
   return result;
 }
@@ -7258,7 +7267,7 @@ fdn_process_get_parameters (napi_env env,
 
   return_value = frida_process_get_parameters (handle);
 
-  result = fdn_hash_table_to_value (env, return_value);
+  result = fdn_vardict_to_value (env, return_value);
 
   return result;
 }
@@ -8033,7 +8042,7 @@ fdn_spawn_options_get_aux (napi_env env,
 
   return_value = frida_spawn_options_get_aux (handle);
 
-  result = fdn_hash_table_to_value (env, return_value);
+  result = fdn_vardict_to_value (env, return_value);
 
   return result;
 }
@@ -8060,7 +8069,7 @@ fdn_spawn_options_set_aux (napi_env env,
 
   if (argc > 0)
   {
-    if (!fdn_hash_table_from_value (env, args[0], &value))
+    if (!fdn_vardict_from_value (env, args[0], &value))
       goto invalid_argument;
   }
   else
@@ -8958,7 +8967,7 @@ fdn_crash_get_parameters (napi_env env,
 
   return_value = frida_crash_get_parameters (handle);
 
-  result = fdn_hash_table_to_value (env, return_value);
+  result = fdn_vardict_to_value (env, return_value);
 
   return result;
 }
@@ -17492,6 +17501,64 @@ fdn_uint_to_value (napi_env env,
 }
 
 static gboolean
+fdn_int64_from_value (napi_env env,
+                      napi_value value,
+                      gint64 * result)
+{
+  int64_t number;
+
+  if (napi_get_value_int64 (env, value, &number) != napi_ok)
+    goto invalid_argument;
+
+  *result = number;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected an integer");
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_int64_to_value (napi_env env,
+                    gint64 value)
+{
+  napi_value result;
+  napi_create_int64 (env, value, &result);
+  return result;
+}
+
+static gboolean
+fdn_uint64_from_value (napi_env env,
+                       napi_value value,
+                       guint64 * result)
+{
+  uint64_t number;
+
+  if (napi_get_value_uint64 (env, value, &number) != napi_ok)
+    goto invalid_argument;
+
+  *result = number;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected an unsigned integer");
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_uint64_to_value (napi_env env,
+                     guint64 value)
+{
+  napi_value result;
+  napi_create_uint64 (env, value, &result);
+  return result;
+}
+
+static gboolean
 fdn_ulong_from_value (napi_env env,
                       napi_value value,
                       gulong * result)
@@ -17512,6 +17579,15 @@ invalid_argument:
     napi_throw_error (env, NULL, "expected an unsigned integer");
     return FALSE;
   }
+}
+
+static napi_value
+fdn_double_to_value (napi_env env,
+                     gdouble value)
+{
+  napi_value result;
+  napi_create_double (env, value, &result);
+  return result;
 }
 
 static gboolean
@@ -17606,3 +17682,343 @@ fdn_enum_to_value (napi_env env,
 
   return result;
 }
+
+static gboolean
+fdn_vardict_from_value (napi_env env,
+                        napi_value value,
+                        GHashTable ** result)
+{
+  napi_value keys;
+  uint32_t length, i;
+  GHashTable * vardict = NULL;
+  gchar * key = NULL;
+
+  if (napi_get_property_names (env, value, &keys) != napi_ok)
+    goto invalid_argument;
+  if (napi_get_array_length (env, keys, &length) != napi_ok)
+    goto propagate_error;
+
+  vardict = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, g_variant_unref);
+
+  for (i = 0; i != length; i++)
+  {
+    napi_value js_key, js_value;
+    GVariant * value;
+
+    if (napi_get_element (env, keys, i, &js_key) != napi_ok)
+      goto propagate_error;
+    if (!fdn_utf8_from_value (env, js_key, &key))
+      goto invalid_argument;
+
+    if (napi_get_property (env, value, key, &js_value) != napi_ok)
+      goto propagate_error;
+    if (!fdn_variant_from_value (env, js_value, &value))
+      goto propagate_error;
+
+    g_hash_table_insert (vardict, g_steal_pointer (&key), value);
+  }
+
+  *result = vardict;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected a vardict");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_free (key);
+    g_clear_pointer (&vardict, g_hash_table_unref);
+    return FALSE;
+  }
+}
+
+static napi_value
+fdn_vardict_to_value (napi_env env,
+                      GHashTable * vardict)
+{
+  napi_value result;
+  GHashTableIter iter;
+  gpointer key, value;
+
+  napi_create_object (env, &result);
+
+  g_hash_table_iter_init (&iter, vardict);
+  while (g_hash_table_iter_next (&iter, &key, &value))
+  {
+    napi_value js_key, js_value;
+
+    js_key = fdn_utf8_to_value (env, key);
+    js_value = fdn_variant_to_value (env, value);
+
+    napi_set_property (env, result, js_key, js_value);
+  }
+
+  return result;
+}
+
+static gboolean
+fdn_variant_from_value (napi_env env,
+                        napi_value value,
+                        GVariant ** result)
+{
+  if (napi_value_is_string (env, value))
+  {
+    gchar * str;
+
+    if (!fdn_utf8_from_value (env, value, &str))
+      return FALSE;
+
+    *result = g_variant_new_take_string (str);
+    return TRUE;
+  }
+
+  if (napi_value_is_number (env, value))
+  {
+    gint64 i;
+
+    if (!fdn_int64_from_value (env, value, &i))
+      return FALSE;
+
+    *result = g_variant_new_int64 (i);
+    return TRUE;
+  }
+
+  if (napi_value_is_boolean (env, value))
+  {
+    gboolean b;
+
+    if (!fdn_boolean_from_value (env, value, &b))
+      return FALSE;
+
+    *result = g_variant_new_boolean (b);
+    return TRUE;
+  }
+
+  if (napi_is_buffer (env, value))
+  {
+    void * data;
+    size_t size;
+    gpointer copy;
+
+    if (napi_get_buffer_info (env, value, &data, &size) != napi_ok)
+      return FALSE;
+
+    copy = g_memdup2 (data, size);
+    *result = g_variant_new_from_data (G_VARIANT_TYPE_BYTESTRING, copy, size, TRUE, g_free, copy);
+    return TRUE;
+  }
+
+  if (napi_is_array (env, value))
+  {
+    GVariantBuilder builder;
+    uint32_t i;
+
+    uint32_t length;
+    if (napi_get_array_length (env, value, &length) != napi_ok)
+      return FALSE;
+
+    if (length == 2)
+    {
+      napi_value first;
+      if (napi_get_element (env, value, 0, &first) != napi_ok)
+        return FALSE;
+
+      if (napi_is_symbol (env, first))
+      {
+        napi_value desc;
+        gchar * type;
+        napi_value second;
+        GVariant * val;
+        GVariant * t[2];
+
+        if (napi_get_symbol_description (env, first, &desc) != napi_ok)
+          return FALSE;
+
+        if (!fdn_utf8_from_value (env, desc, &type))
+          return FALSE;
+
+        if (napi_get_element (env, value, 1, &second) != napi_ok)
+          return FALSE;
+
+        if (!fdn_variant_from_value (env, second, &val))
+        {
+          g_free (type);
+          return FALSE;
+        }
+
+        t[0] = g_variant_new_take_string (type);
+        t[1] = val;
+
+        *result = g_variant_new_tuple (t, G_N_ELEMENTS (t));
+        return TRUE;
+      }
+    }
+
+    g_variant_builder_init (&builder, G_VARIANT_TYPE ("av"));
+
+    for (i = 0; i != length; i++)
+    {
+      napi_value element;
+      GVariant * v;
+
+      if (napi_get_element (env, value, i, &element) != napi_ok)
+      {
+        g_variant_builder_clear (&builder);
+        return FALSE;
+      }
+
+      if (!fdn_variant_from_value (env, element, &v))
+      {
+        g_variant_builder_clear (&builder);
+        return FALSE;
+      }
+
+      g_variant_builder_add (&builder, "v", v);
+    }
+
+    *result = g_variant_builder_end (&builder);
+    return TRUE;
+  }
+
+  if (napi_is_object (env, value))
+  {
+    GVariantBuilder builder;
+    napi_value keys;
+    uint32_t length;
+    uint32_t i;
+
+    g_variant_builder_init (&builder, G_VARIANT_TYPE_VARDICT);
+
+    if (napi_get_property_names (env, value, &keys) != napi_ok)
+      return FALSE;
+
+    if (napi_get_array_length (env, keys, &length) != napi_ok)
+      return FALSE;
+
+    for (i = 0; i != length; i++)
+    {
+      napi_value key;
+      gchar * key_str;
+      napi_value val;
+      GVariant * v;
+
+      if (napi_get_element (env, keys, i, &key) != napi_ok)
+        return FALSE;
+
+      if (!fdn_utf8_from_value (env, key, &key_str))
+        return FALSE;
+
+      if (napi_get_property (env, value, key, &val) != napi_ok)
+      {
+        g_free (key_str);
+        return FALSE;
+      }
+
+      if (!fdn_variant_from_value (env, val, &v))
+      {
+        g_free (key_str);
+        return FALSE;
+      }
+
+      g_variant_builder_add (&builder, "{sv}", key_str, v);
+      g_free (key_str);
+    }
+
+    *result = g_variant_builder_end (&builder);
+    return TRUE;
+  }
+
+  napi_throw_type_error (env, NULL, "expected value serializable to GVariant");
+  return FALSE;
+}
+
+static napi_value
+fdn_variant_to_value (napi_env env,
+                      GVariant * variant)
+{
+  napi_value result;
+
+  switch (g_variant_classify (variant))
+  {
+    case G_VARIANT_CLASS_STRING:
+    {
+      const gchar * str = g_variant_get_string (variant, NULL);
+      return fdn_utf8_to_value (env, str);
+    }
+    case G_VARIANT_CLASS_INT64:
+      return fdn_int64_to_value (env, g_variant_get_int64 (variant));
+    case G_VARIANT_CLASS_UINT64:
+      return fdn_uint64_to_value (env, g_variant_get_uint64 (variant));
+    case G_VARIANT_CLASS_DOUBLE:
+      return fdn_double_to_value (env, g_variant_get_double (variant));
+    case G_VARIANT_CLASS_BOOLEAN:
+      return fdn_boolean_to_value (env, g_variant_get_boolean (variant));
+    case G_VARIANT_CLASS_ARRAY:
+      if (g_variant_is_of_type (variant, G_VARIANT_TYPE ("ay")))
+      {
+        gsize size;
+        g_variant_get_fixed_array (variant, &size, sizeof (guint8));
+        return fdn_buffer_to_value (env, g_variant_get_data (variant), size);
+      }
+
+      if (g_variant_is_of_type (variant, G_VARIANT_TYPE_VARDICT))
+      {
+        napi_value dict;
+        GVariantIter iter;
+        gchar * key;
+        GVariant * value;
+
+        napi_create_object (env, &dict);
+
+        g_variant_iter_init (&iter, variant);
+        while (g_variant_iter_next (&iter, "{sv}", &key, &value))
+        {
+          napi_value js_key, js_value;
+
+          js_key = fdn_utf8_to_value (env, key);
+          js_value = fdn_variant_to_value (env, value);
+
+          napi_set_property (env, dict, js_key, js_value);
+
+          g_variant_unref (value);
+          g_free (key);
+        }
+
+        return dict;
+      }
+
+      if (g_variant_is_of_type (variant, G_VARIANT_TYPE_ARRAY))
+      {
+        napi_value array;
+        GVariantIter iter;
+        uint32_t i;
+        GVariant * child;
+
+        napi_create_array (env, &array);
+
+        g_variant_iter_init (&iter, variant);
+        i = 0;
+        while ((child = g_variant_iter_next_value (&iter)) != NULL)
+        {
+          napi_value element = fdn_variant_to_value (env, child);
+          napi_set_element (env, array, i++, element);
+          g_variant_unref (child);
+        }
+
+        return array;
+      }
+
+      break;
+    case G_VARIANT_CLASS_TUPLE:
+      napi_get_undefined (env, &result);
+      return result;
+    default:
+      break;
+  }
+
+  napi_get_null (env, &result);
+  return result;
+}
+
