@@ -306,35 +306,34 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
 
     prototypes += [
         "",
-        "static gboolean fdn_boolean_from_value (napi_env env, napi_value value, gboolean * result);",
-        "static napi_value fdn_boolean_to_value (napi_env env, gboolean value);",
-        "static gboolean fdn_int_from_value (napi_env env, napi_value value, gint * result);",
-        "static napi_value fdn_int_to_value (napi_env env, gint value);",
-        "static gboolean fdn_uint_from_value (napi_env env, napi_value value, guint * result);",
-        "static napi_value fdn_uint_to_value (napi_env env, guint value);",
-        "static napi_value fdn_uint16_to_value (napi_env env, guint16 value);",
-        "static gboolean fdn_int64_from_value (napi_env env, napi_value value, gint64 * result);",
-        "static napi_value fdn_int64_to_value (napi_env env, gint64 value);",
-        "G_GNUC_UNUSED static gboolean fdn_uint64_from_value (napi_env env, napi_value value, guint64 * result);",
-        "static napi_value fdn_uint64_to_value (napi_env env, guint64 value);",
-        "static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * result);",
-        "static napi_value fdn_double_to_value (napi_env env, gdouble value);",
-        "static gboolean fdn_enum_from_value (napi_env env, GType enum_type, napi_value value, gint * result);",
-        "static napi_value fdn_enum_to_value (napi_env env, GType enum_type, gint value);",
+        "static gboolean fdn_boolean_from_value (napi_env env, napi_value value, gboolean * b);",
+        "static napi_value fdn_boolean_to_value (napi_env env, gboolean b);",
+        "static gboolean fdn_int_from_value (napi_env env, napi_value value, gint * i);",
+        "static napi_value fdn_int_to_value (napi_env env, gint i);",
+        "static gboolean fdn_uint_from_value (napi_env env, napi_value value, guint * u);",
+        "static napi_value fdn_uint_to_value (napi_env env, guint u);",
+        "static napi_value fdn_uint16_to_value (napi_env env, guint16 u);",
+        "static gboolean fdn_int64_from_value (napi_env env, napi_value value, gint64 * i);",
+        "static napi_value fdn_int64_to_value (napi_env env, gint64 i);",
+        "static napi_value fdn_uint64_to_value (napi_env env, guint64 u);",
+        "static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * u);",
+        "static napi_value fdn_double_to_value (napi_env env, gdouble d);",
+        "static gboolean fdn_enum_from_value (napi_env env, GType enum_type, napi_value value, gint * e);",
+        "static napi_value fdn_enum_to_value (napi_env env, GType enum_type, gint e);",
         "static gboolean fdn_utf8_from_value (napi_env env, napi_value value, gchar ** str);",
         "static napi_value fdn_utf8_to_value (napi_env env, const gchar * str);",
         "static gboolean fdn_strv_from_value (napi_env env, napi_value value, gchar *** strv);",
         "static napi_value fdn_strv_to_value (napi_env env, gchar ** strv);",
         "static napi_value fdn_buffer_to_value (napi_env env, const guint8 * data, gsize size);",
-        "static gboolean fdn_bytes_from_value (napi_env env, napi_value value, GBytes ** result);",
+        "static gboolean fdn_bytes_from_value (napi_env env, napi_value value, GBytes ** bytes);",
         "static napi_value fdn_bytes_to_value (napi_env env, GBytes * bytes);",
-        "static gboolean fdn_vardict_from_value (napi_env env, napi_value value, GHashTable ** result);",
+        "static gboolean fdn_vardict_from_value (napi_env env, napi_value value, GHashTable ** vardict);",
         "static napi_value fdn_vardict_to_value (napi_env env, GHashTable * vardict);",
-        "static gboolean fdn_variant_from_value (napi_env env, napi_value value, GVariant ** result);",
+        "static gboolean fdn_variant_from_value (napi_env env, napi_value value, GVariant ** variant);",
         "static napi_value fdn_variant_to_value (napi_env env, GVariant * variant);",
-        "static gboolean fdn_file_from_value (napi_env env, napi_value value, GFile ** result);",
+        "static gboolean fdn_file_from_value (napi_env env, napi_value value, GFile ** file);",
         "static napi_value fdn_file_to_value (napi_env env, GFile * file);",
-        "static gboolean fdn_tls_certificate_from_value (napi_env env, napi_value value, GTlsCertificate ** result);",
+        "static gboolean fdn_tls_certificate_from_value (napi_env env, napi_value value, GTlsCertificate ** certificate);",
         "static napi_value fdn_tls_certificate_to_value (napi_env env, GTlsCertificate * certificate);",
     ]
 
@@ -767,14 +766,14 @@ def generate_builtin_conversion_helpers() -> str:
 static gboolean
 fdn_boolean_from_value (napi_env env,
                         napi_value value,
-                        gboolean * result)
+                        gboolean * b)
 {
-  bool b;
+  bool napi_b;
 
-  if (napi_get_value_bool (env, value, &b) != napi_ok)
+  if (napi_get_value_bool (env, value, &napi_b) != napi_ok)
     goto invalid_argument;
 
-  *result = b;
+  *b = napi_b;
   return TRUE;
 
 invalid_argument:
@@ -786,24 +785,24 @@ invalid_argument:
 
 static napi_value
 fdn_boolean_to_value (napi_env env,
-                      gboolean value)
+                      gboolean b)
 {
   napi_value result;
-  napi_get_boolean (env, value, &result);
+  napi_get_boolean (env, b, &result);
   return result;
 }
 
 static gboolean
 fdn_int_from_value (napi_env env,
                     napi_value value,
-                    gint * result)
+                    gint * i)
 {
-  int32_t number;
+  int32_t napi_i;
 
-  if (napi_get_value_int32 (env, value, &number) != napi_ok)
+  if (napi_get_value_int32 (env, value, &napi_i) != napi_ok)
     goto invalid_argument;
 
-  *result = number;
+  *i = napi_i;
   return TRUE;
 
 invalid_argument:
@@ -815,24 +814,24 @@ invalid_argument:
 
 static napi_value
 fdn_int_to_value (napi_env env,
-                  gint value)
+                  gint i)
 {
   napi_value result;
-  napi_create_int32 (env, value, &result);
+  napi_create_int32 (env, i, &result);
   return result;
 }
 
 static gboolean
 fdn_uint_from_value (napi_env env,
                      napi_value value,
-                     guint * result)
+                     guint * u)
 {
-  uint32_t number;
+  uint32_t napi_u;
 
-  if (napi_get_value_uint32 (env, value, &number) != napi_ok)
+  if (napi_get_value_uint32 (env, value, &napi_u) != napi_ok)
     goto invalid_argument;
 
-  *result = number;
+  *u = napi_u;
   return TRUE;
 
 invalid_argument:
@@ -844,19 +843,19 @@ invalid_argument:
 
 static napi_value
 fdn_uint_to_value (napi_env env,
-                   guint value)
+                   guint u)
 {
   napi_value result;
-  napi_create_uint32 (env, value, &result);
+  napi_create_uint32 (env, u, &result);
   return result;
 }
 
 static napi_value
 fdn_uint16_to_value (napi_env env,
-                     guint16 value)
+                     guint16 u)
 {
   napi_value result;
-  napi_create_uint32 (env, value, &result);
+  napi_create_uint32 (env, u, &result);
   return result;
 }
 
@@ -887,26 +886,6 @@ fdn_int64_to_value (napi_env env,
   napi_value result;
   napi_create_int64 (env, value, &result);
   return result;
-}
-
-static gboolean
-fdn_uint64_from_value (napi_env env,
-                       napi_value value,
-                       guint64 * result)
-{
-  double number;
-
-  if (napi_get_value_double (env, value, &number) != napi_ok)
-    goto invalid_argument;
-
-  *result = number;
-  return TRUE;
-
-invalid_argument:
-  {
-    napi_throw_error (env, NULL, "expected an unsigned integer");
-    return FALSE;
-  }
 }
 
 static napi_value
