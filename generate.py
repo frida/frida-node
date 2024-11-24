@@ -173,7 +173,7 @@ class Parameter:
 
     @cached_property
     def destroy_function(self) -> Optional[str]:
-        return resolve_destroy_function(self.transfer_ownership, self.type)
+        return resolve_destroy_function(self.type)
 
 @dataclass
 class ReturnValue:
@@ -183,7 +183,9 @@ class ReturnValue:
 
     @cached_property
     def destroy_function(self) -> Optional[str]:
-        return resolve_destroy_function(self.transfer_ownership, self.type)
+        if self.transfer_ownership == TransferOwnership.none:
+            return None
+        return resolve_destroy_function(self.type)
 
 @dataclass
 class Type:
@@ -660,8 +662,8 @@ def generate_method_code(klass: Class, method: Method) -> str:
     invalid_arg_label = "invalid_argument" if method.is_async else "beach"
     input_params = [param for param in method.parameters if param.direction != Direction.OUT]
     param_conversions = [generate_parameter_conversion_code(param, i, invalid_arg_label) for i, param in enumerate(input_params)]
-    param_frees = [f"{param.destroy_function} (operation->{param.name});" for param in method.parameters if param.destroy_function is not None]
-    param_frees_str = "\n  " + "\n  ".join(param_frees) if param_frees else ""
+    param_destruction = [f"g_clear_pointer (&operation->{param.name}, {param.destroy_function});" for param in method.parameters if param.destroy_function is not None]
+    param_destruction_str = "\n  " + "\n  ".join(param_destruction) if param_destruction else ""
 
     return_assignment = f"\n\n  operation->retval = " if method.return_value is not None else ""
     if method.return_value is not None:
@@ -671,7 +673,7 @@ def generate_method_code(klass: Class, method: Method) -> str:
     else:
         return_conversion = "napi_get_undefined (env, &js_retval);"
     retval = method.return_value
-    return_frees_str = f"\n  {retval.destroy_function} (operation->retval);" if retval is not None and retval.destroy_function is not None else ""
+    return_destruction_str = f"\n  g_clear_pointer (&operation->retval, {retval.destroy_function});" if retval is not None and retval.destroy_function is not None else ""
 
     def calculate_indent(suffix: str) -> str:
         return " " * (len(class_cprefix) + 1 + len(method.name) + len(suffix) + 2)
@@ -681,7 +683,7 @@ def generate_method_code(klass: Class, method: Method) -> str:
         operation_free_function = f"""\
 static void
 {class_cprefix}_{method.name}_operation_free ({operation_type_name} * operation)
-{{{param_frees_str}{return_frees_str}
+{{{param_destruction_str}{return_destruction_str}
   g_slice_free ({operation_type_name}, operation);
 }}"""
 
@@ -808,7 +810,7 @@ static void
         else:
             param_conversions_str_sync = ""
 
-        param_frees_str = param_frees_str.replace("operation->", "")
+        param_destruction_str = param_destruction_str.replace("operation->", "")
 
         param_call_names = [param.name for param in method.parameters]
         if method.throws:
@@ -855,7 +857,7 @@ static napi_value
 
   {error_check}{return_conversion}
 
-beach:{param_frees_str}
+beach:{param_destruction_str}
   return js_retval;
 }}
 """
@@ -1780,11 +1782,9 @@ fdn_authentication_service_to_value (napi_env env,
 }
 """
 
-def resolve_destroy_function(transfer_ownership: TransferOwnership, type: Type) -> Optional[str]:
-    if transfer_ownership == TransferOwnership.none:
-        return None
+def resolve_destroy_function(type: Type) -> Optional[str]:
     name = type.name
-    if name in {"gboolean", "guint"}:
+    if name in {"gboolean", "gint", "guint", "guint16", "gulong"}:
         return None
     if name == "utf8":
         return "g_free"
@@ -1794,9 +1794,11 @@ def resolve_destroy_function(transfer_ownership: TransferOwnership, type: Type) 
         return "g_bytes_unref"
     if name == "GLib.HashTable":
         return "g_hash_table_unref"
-    if name == "Gio.IOStream":
+    if name in {"Gio.Cancellable", "Gio.File", "Gio.IOStream", "Gio.TlsCertificate"}:
         return "g_object_unref"
-    if name.startswith("Frida."):
+    if name.startswith("Frida.") or name.startswith("FridaBase."):
+        if name in {"Frida.DeviceType", "Frida.JsCompression", "Frida.SourceMaps", "FridaBase.Realm", "FridaBase.Scope", "FridaBase.ScriptRuntime", "FridaBase.SnapshotTransport", "FridaBase.Stdio"}:
+            return None
         return "frida_unref"
     assert False, f"unable to determine destroy function for {name}"
 
