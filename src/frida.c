@@ -1377,6 +1377,7 @@ G_GNUC_UNUSED static napi_value fdn_port_conflict_behavior_to_value (napi_env en
 
 G_GNUC_UNUSED static gboolean fdn_string_terminator_from_value (napi_env env, napi_value value, FridaStringTerminator * e);
 G_GNUC_UNUSED static napi_value fdn_string_terminator_to_value (napi_env env, FridaStringTerminator e);
+static gboolean fdn_is_undefined_or_null (napi_env env, napi_value value);
 
 static gboolean fdn_boolean_from_value (napi_env env, napi_value value, gboolean * b);
 static napi_value fdn_boolean_to_value (napi_env env, gboolean b);
@@ -1412,44 +1413,45 @@ static napi_value fdn_io_stream_to_value (napi_env env, GIOStream * stream);
 static napi_value fdn_service_to_value (napi_env env, FridaService * service);
 static napi_value fdn_authentication_service_to_value (napi_env env, FridaAuthenticationService * service);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0xd05fbe40a8e14185, 0xa25c5a245ef29ad6 };
-static napi_type_tag fdn_device_list_type_tag = { 0x798415bd392b4387, 0x8a5daabb261d40e8 };
-static napi_type_tag fdn_device_type_tag = { 0x3736dad734f942df, 0xa475a7125d92b98b };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0xfdfe26aeb2a0483c, 0x8891faa280b7cc7d };
-static napi_type_tag fdn_application_list_type_tag = { 0x7f3e2a2b3fac44c7, 0xb884c52ed10358a3 };
-static napi_type_tag fdn_application_type_tag = { 0x30a865a9e5c24ff0, 0xb4b0c2cda323a3d3 };
-static napi_type_tag fdn_process_list_type_tag = { 0x6f552db92c594be2, 0xa4629584f95076f3 };
-static napi_type_tag fdn_process_type_tag = { 0xb67993649cdd4569, 0x977f36eee0fb82f1 };
-static napi_type_tag fdn_process_match_options_type_tag = { 0x217ede8bdb0b430b, 0xaf710dba165c9b35 };
-static napi_type_tag fdn_spawn_options_type_tag = { 0x43993d4e229e461e, 0xb7dcf30b0d15fdb5 };
-static napi_type_tag fdn_spawn_list_type_tag = { 0x4913ba6bfbea4dee, 0x889d73f48bd55589 };
-static napi_type_tag fdn_spawn_type_tag = { 0x27633e44e3db4b1f, 0x848c635bf95e621a };
-static napi_type_tag fdn_child_list_type_tag = { 0x99f6d8434f7c438d, 0xa941ad75f42a4d6a };
-static napi_type_tag fdn_child_type_tag = { 0x1b79c4519de6488a, 0xb778abb1725a0890 };
-static napi_type_tag fdn_crash_type_tag = { 0x59dd7f19c46a405f, 0x934e25f7ca0691ad };
-static napi_type_tag fdn_bus_type_tag = { 0xb652f335b9fe4bc3, 0xb20b1803d9d9b5ec };
-static napi_type_tag fdn_session_type_tag = { 0x5f210e5851194cc6, 0x96b424a8ee996e95 };
-static napi_type_tag fdn_script_type_tag = { 0x58c3dd329e64444c, 0xb53cfa6a05aa61e4 };
-static napi_type_tag fdn_portal_membership_type_tag = { 0xf295a03959234f4d, 0x8e0e3eab6928af48 };
-static napi_type_tag fdn_control_service_options_type_tag = { 0xe491f8e942004dd1, 0x8808472b3f11f25c };
-static napi_type_tag fdn_portal_service_type_tag = { 0xe5739227230249fe, 0x9b5c4dfeefa1b3e0 };
-static napi_type_tag fdn_file_monitor_type_tag = { 0x4435dc002b4e4aa4, 0xa4420ecb66bfdea6 };
-static napi_type_tag fdn_compiler_type_tag = { 0xec3560c365e4467f, 0xa562bd539c367df6 };
-static napi_type_tag fdn_compiler_options_type_tag = { 0x408fb71ba2154641, 0x9c86a3651dacd108 };
-static napi_type_tag fdn_build_options_type_tag = { 0x6101087f80714533, 0x93640938378f8fb6 };
-static napi_type_tag fdn_watch_options_type_tag = { 0xadfeb150cfcd4573, 0xa94a28df2971fe58 };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0x08ff20d6305f4c02, 0x894b1be956d0982a };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x3299f3e34cac426c, 0xb9ae147511cfc154 };
-static napi_type_tag fdn_application_query_options_type_tag = { 0x043510fe4d144d6a, 0x8262f42a6324309e };
-static napi_type_tag fdn_process_query_options_type_tag = { 0x72de010875174fa0, 0xa959d991471ac168 };
-static napi_type_tag fdn_session_options_type_tag = { 0x290f2d98d02d4a75, 0x81bd8ead1ee8d132 };
-static napi_type_tag fdn_script_options_type_tag = { 0x5644978945ac4ff9, 0xa3788b60e6196610 };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0x387a42362f0941f5, 0x8321a4bfff7171c9 };
-static napi_type_tag fdn_portal_options_type_tag = { 0xd88373c1eccb4159, 0xb1e9af983d75139a };
-static napi_type_tag fdn_peer_options_type_tag = { 0x183f30b807614ac5, 0xacf51b93d5cd7dd5 };
-static napi_type_tag fdn_relay_type_tag = { 0x576c2e0d19604fb4, 0x812cd5ac12a09c2a };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x755db337a5964dd7, 0xb36bc31802c0ea1a };
-static napi_type_tag fdn_cancellable_type_tag = { 0xe4f46ccfb4d1490f, 0x8092fec0ca5558b0 };
+static napi_type_tag fdn_handle_wrapper_type_tag = { 0xdd596d4f2dad45f9, 0x844585a48e8d05ba };
+static napi_type_tag fdn_device_manager_type_tag = { 0x1a285c516d20494e, 0x9b992cfe57b6bf8b };
+static napi_type_tag fdn_device_list_type_tag = { 0xe4083a0ac97748a6, 0x9471b7af086953e2 };
+static napi_type_tag fdn_device_type_tag = { 0x51736f4129404bd8, 0xa863592b19c720e5 };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0xd5291fc357224ab7, 0xbd82f94ae41b645f };
+static napi_type_tag fdn_application_list_type_tag = { 0xd86e4d8973134abc, 0xa0060da2e9117142 };
+static napi_type_tag fdn_application_type_tag = { 0x9b40371c97514c51, 0xa5cc33ad3f3dcf40 };
+static napi_type_tag fdn_process_list_type_tag = { 0x3d058f69cc014aa6, 0xabcc17a3e7575271 };
+static napi_type_tag fdn_process_type_tag = { 0xbbf77bb77666446b, 0xb6db6efd6121c6a4 };
+static napi_type_tag fdn_process_match_options_type_tag = { 0xb66b484029284f9c, 0x979ff6e286c0f718 };
+static napi_type_tag fdn_spawn_options_type_tag = { 0x920d2a4b86e144bc, 0xbd137b479fb26552 };
+static napi_type_tag fdn_spawn_list_type_tag = { 0x7534b8c73b8b4949, 0x824220facfdea3ab };
+static napi_type_tag fdn_spawn_type_tag = { 0xab1aea28efc749dc, 0x95c19b85838058aa };
+static napi_type_tag fdn_child_list_type_tag = { 0xcf839c9e72df41bf, 0x8370f85118d1426d };
+static napi_type_tag fdn_child_type_tag = { 0x437888850aba4598, 0x9c46bbdd55a2b5ba };
+static napi_type_tag fdn_crash_type_tag = { 0xb7cde9017543481e, 0xbe4d8f7e5cd5019e };
+static napi_type_tag fdn_bus_type_tag = { 0xcfb8f7e7e9ff47d7, 0x813975bf5afb04c7 };
+static napi_type_tag fdn_session_type_tag = { 0x5f7915bf2eb4435d, 0xa098196841c0973b };
+static napi_type_tag fdn_script_type_tag = { 0x395684f7aaa74541, 0xb41c42cae76a73de };
+static napi_type_tag fdn_portal_membership_type_tag = { 0x2b6028a289ca4fdc, 0xb961e5c62be22428 };
+static napi_type_tag fdn_control_service_options_type_tag = { 0xf5ec557ea46e441e, 0x95c644776dedde77 };
+static napi_type_tag fdn_portal_service_type_tag = { 0x6198c54a29254b38, 0xb9592b8575797942 };
+static napi_type_tag fdn_file_monitor_type_tag = { 0xa915cd94d1ff4674, 0xa23fbe12e6ac639a };
+static napi_type_tag fdn_compiler_type_tag = { 0xdbbec2db4eb14f37, 0x919d3c1d653b229e };
+static napi_type_tag fdn_compiler_options_type_tag = { 0x75772faeed834d3a, 0x9c2c4a342af1905c };
+static napi_type_tag fdn_build_options_type_tag = { 0x40a3f18a6f74425f, 0xae2e4584728c11ee };
+static napi_type_tag fdn_watch_options_type_tag = { 0x8ebaa425b8c84b0f, 0x8e2442aeb455489f };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0x28b8aebb79454fa0, 0x94dc11b91a562df9 };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0xd6d4baeeaf6f4bca, 0xa0a019f76c604784 };
+static napi_type_tag fdn_application_query_options_type_tag = { 0x993ec0023d264af2, 0x812c3d6c0725ed3f };
+static napi_type_tag fdn_process_query_options_type_tag = { 0xe687cf67750d4287, 0x92a130f658892076 };
+static napi_type_tag fdn_session_options_type_tag = { 0x15851f5bb5e440bd, 0xb32a3f53bf0a15df };
+static napi_type_tag fdn_script_options_type_tag = { 0xa618a398054f4eab, 0xbddd66dc56117d92 };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0x5b4e8b3609734684, 0xa49efa48e46ce1cc };
+static napi_type_tag fdn_portal_options_type_tag = { 0x43d11fb3c5984659, 0x8fe4d29924a8a5f3 };
+static napi_type_tag fdn_peer_options_type_tag = { 0x634f3236d3df4f56, 0xa30ec6d1117b00c8 };
+static napi_type_tag fdn_relay_type_tag = { 0x3d59dbb1db8a4f3c, 0xa7644249c0bc665d };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0xd361157ee78243e0, 0xb8d125ed71fe8bb0 };
+static napi_type_tag fdn_cancellable_type_tag = { 0x21eae3c1484344a5, 0xbc77a234f7a2b123 };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_list_constructor;
@@ -1556,6 +1558,8 @@ static napi_value
 fdn_init (napi_env env,
           napi_value exports)
 {
+  frida_init ();
+
   fdn_device_manager_register (env, exports);
   fdn_device_list_register (env, exports);
   fdn_device_register (env, exports);
@@ -1594,6 +1598,7 @@ fdn_init (napi_env env,
   fdn_relay_register (env, exports);
   fdn_endpoint_parameters_register (env, exports);
   fdn_cancellable_register (env, exports);
+
   return exports;
 }
 
@@ -1679,6 +1684,7 @@ fdn_device_manager_to_value (napi_env env,
   napi_get_reference_value (env, fdn_device_manager_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -1689,16 +1695,37 @@ static napi_value
 fdn_device_manager_construct (napi_env env,
                               napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaDeviceManager * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_device_manager_new ();
+  if (argc == 0)
+  {
+    handle = frida_device_manager_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a DeviceManager handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_device_manager_type_tag);
   if (status != napi_ok)
@@ -1743,7 +1770,7 @@ fdn_device_manager_close (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -1864,7 +1891,7 @@ fdn_device_manager_get_device_by_id (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->id))
       goto invalid_argument;
@@ -1875,7 +1902,7 @@ fdn_device_manager_get_device_by_id (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_int_from_value (env, args[1], &operation->timeout))
       goto invalid_argument;
@@ -1886,7 +1913,7 @@ fdn_device_manager_get_device_by_id (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -2010,7 +2037,7 @@ fdn_device_manager_get_device_by_type (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_device_type_from_value (env, args[0], &operation->type))
       goto invalid_argument;
@@ -2021,7 +2048,7 @@ fdn_device_manager_get_device_by_type (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_int_from_value (env, args[1], &operation->timeout))
       goto invalid_argument;
@@ -2032,7 +2059,7 @@ fdn_device_manager_get_device_by_type (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -2155,7 +2182,7 @@ fdn_device_manager_find_device_by_id (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->id))
       goto invalid_argument;
@@ -2166,7 +2193,7 @@ fdn_device_manager_find_device_by_id (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_int_from_value (env, args[1], &operation->timeout))
       goto invalid_argument;
@@ -2177,7 +2204,7 @@ fdn_device_manager_find_device_by_id (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -2301,7 +2328,7 @@ fdn_device_manager_find_device_by_type (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_device_type_from_value (env, args[0], &operation->type))
       goto invalid_argument;
@@ -2312,7 +2339,7 @@ fdn_device_manager_find_device_by_type (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_int_from_value (env, args[1], &operation->timeout))
       goto invalid_argument;
@@ -2323,7 +2350,7 @@ fdn_device_manager_find_device_by_type (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -2446,7 +2473,7 @@ fdn_device_manager_enumerate_devices (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -2569,7 +2596,7 @@ fdn_device_manager_add_remote_device (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->address))
       goto invalid_argument;
@@ -2580,7 +2607,7 @@ fdn_device_manager_add_remote_device (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_remote_device_options_from_value (env, args[1], &operation->options))
       goto invalid_argument;
@@ -2590,7 +2617,7 @@ fdn_device_manager_add_remote_device (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -2714,7 +2741,7 @@ fdn_device_manager_remove_remote_device (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->address))
       goto invalid_argument;
@@ -2725,7 +2752,7 @@ fdn_device_manager_remove_remote_device (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_cancellable_from_value (env, args[1], &operation->cancellable))
       goto invalid_argument;
@@ -2863,6 +2890,7 @@ fdn_device_list_to_value (napi_env env,
   napi_get_reference_value (env, fdn_device_list_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -2873,8 +2901,48 @@ static napi_value
 fdn_device_list_construct (napi_env env,
                            napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class DeviceList cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaDeviceList * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a DeviceList handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_device_list_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -2926,7 +2994,7 @@ fdn_device_list_get (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_int_from_value (env, args[0], &index))
       goto beach;
@@ -3087,6 +3155,7 @@ fdn_device_to_value (napi_env env,
   napi_get_reference_value (env, fdn_device_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -3097,8 +3166,48 @@ static napi_value
 fdn_device_construct (napi_env env,
                       napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class Device cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaDevice * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a Device handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_device_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -3161,7 +3270,7 @@ fdn_device_query_system_parameters (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -3284,7 +3393,7 @@ fdn_device_get_frontmost_application (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_frontmost_query_options_from_value (env, args[0], &operation->options))
       goto invalid_argument;
@@ -3294,7 +3403,7 @@ fdn_device_get_frontmost_application (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_cancellable_from_value (env, args[1], &operation->cancellable))
       goto invalid_argument;
@@ -3417,7 +3526,7 @@ fdn_device_enumerate_applications (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_application_query_options_from_value (env, args[0], &operation->options))
       goto invalid_argument;
@@ -3427,7 +3536,7 @@ fdn_device_enumerate_applications (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_cancellable_from_value (env, args[1], &operation->cancellable))
       goto invalid_argument;
@@ -3550,7 +3659,7 @@ fdn_device_get_process_by_pid (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint_from_value (env, args[0], &operation->pid))
       goto invalid_argument;
@@ -3561,7 +3670,7 @@ fdn_device_get_process_by_pid (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_process_match_options_from_value (env, args[1], &operation->options))
       goto invalid_argument;
@@ -3571,7 +3680,7 @@ fdn_device_get_process_by_pid (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -3694,7 +3803,7 @@ fdn_device_get_process_by_name (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->name))
       goto invalid_argument;
@@ -3705,7 +3814,7 @@ fdn_device_get_process_by_name (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_process_match_options_from_value (env, args[1], &operation->options))
       goto invalid_argument;
@@ -3715,7 +3824,7 @@ fdn_device_get_process_by_name (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -3839,7 +3948,7 @@ fdn_device_find_process_by_pid (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint_from_value (env, args[0], &operation->pid))
       goto invalid_argument;
@@ -3850,7 +3959,7 @@ fdn_device_find_process_by_pid (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_process_match_options_from_value (env, args[1], &operation->options))
       goto invalid_argument;
@@ -3860,7 +3969,7 @@ fdn_device_find_process_by_pid (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -3983,7 +4092,7 @@ fdn_device_find_process_by_name (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->name))
       goto invalid_argument;
@@ -3994,7 +4103,7 @@ fdn_device_find_process_by_name (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_process_match_options_from_value (env, args[1], &operation->options))
       goto invalid_argument;
@@ -4004,7 +4113,7 @@ fdn_device_find_process_by_name (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -4128,7 +4237,7 @@ fdn_device_enumerate_processes (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_process_query_options_from_value (env, args[0], &operation->options))
       goto invalid_argument;
@@ -4138,7 +4247,7 @@ fdn_device_enumerate_processes (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_cancellable_from_value (env, args[1], &operation->cancellable))
       goto invalid_argument;
@@ -4261,7 +4370,7 @@ fdn_device_enable_spawn_gating (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -4382,7 +4491,7 @@ fdn_device_disable_spawn_gating (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -4503,7 +4612,7 @@ fdn_device_enumerate_pending_spawn (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -4626,7 +4735,7 @@ fdn_device_enumerate_pending_children (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -4749,7 +4858,7 @@ fdn_device_spawn (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->program))
       goto invalid_argument;
@@ -4760,7 +4869,7 @@ fdn_device_spawn (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_spawn_options_from_value (env, args[1], &operation->options))
       goto invalid_argument;
@@ -4770,7 +4879,7 @@ fdn_device_spawn (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -4894,7 +5003,7 @@ fdn_device_input (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint_from_value (env, args[0], &operation->pid))
       goto invalid_argument;
@@ -4905,7 +5014,7 @@ fdn_device_input (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_bytes_from_value (env, args[1], &operation->data))
       goto invalid_argument;
@@ -4916,7 +5025,7 @@ fdn_device_input (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -5037,7 +5146,7 @@ fdn_device_resume (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint_from_value (env, args[0], &operation->pid))
       goto invalid_argument;
@@ -5048,7 +5157,7 @@ fdn_device_resume (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_cancellable_from_value (env, args[1], &operation->cancellable))
       goto invalid_argument;
@@ -5169,7 +5278,7 @@ fdn_device_kill (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint_from_value (env, args[0], &operation->pid))
       goto invalid_argument;
@@ -5180,7 +5289,7 @@ fdn_device_kill (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_cancellable_from_value (env, args[1], &operation->cancellable))
       goto invalid_argument;
@@ -5301,7 +5410,7 @@ fdn_device_attach (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint_from_value (env, args[0], &operation->pid))
       goto invalid_argument;
@@ -5312,7 +5421,7 @@ fdn_device_attach (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_session_options_from_value (env, args[1], &operation->options))
       goto invalid_argument;
@@ -5322,7 +5431,7 @@ fdn_device_attach (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -5445,7 +5554,7 @@ fdn_device_inject_library_file (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint_from_value (env, args[0], &operation->pid))
       goto invalid_argument;
@@ -5456,7 +5565,7 @@ fdn_device_inject_library_file (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_utf8_from_value (env, args[1], &operation->path))
       goto invalid_argument;
@@ -5467,7 +5576,7 @@ fdn_device_inject_library_file (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_utf8_from_value (env, args[2], &operation->entrypoint))
       goto invalid_argument;
@@ -5478,7 +5587,7 @@ fdn_device_inject_library_file (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 3)
+  if (argc > 3 && !fdn_is_undefined_or_null (env, args[3]))
   {
     if (!fdn_utf8_from_value (env, args[3], &operation->data))
       goto invalid_argument;
@@ -5489,7 +5598,7 @@ fdn_device_inject_library_file (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 4)
+  if (argc > 4 && !fdn_is_undefined_or_null (env, args[4]))
   {
     if (!fdn_cancellable_from_value (env, args[4], &operation->cancellable))
       goto invalid_argument;
@@ -5615,7 +5724,7 @@ fdn_device_inject_library_blob (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint_from_value (env, args[0], &operation->pid))
       goto invalid_argument;
@@ -5626,7 +5735,7 @@ fdn_device_inject_library_blob (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_bytes_from_value (env, args[1], &operation->blob))
       goto invalid_argument;
@@ -5637,7 +5746,7 @@ fdn_device_inject_library_blob (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_utf8_from_value (env, args[2], &operation->entrypoint))
       goto invalid_argument;
@@ -5648,7 +5757,7 @@ fdn_device_inject_library_blob (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 3)
+  if (argc > 3 && !fdn_is_undefined_or_null (env, args[3]))
   {
     if (!fdn_utf8_from_value (env, args[3], &operation->data))
       goto invalid_argument;
@@ -5659,7 +5768,7 @@ fdn_device_inject_library_blob (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 4)
+  if (argc > 4 && !fdn_is_undefined_or_null (env, args[4]))
   {
     if (!fdn_cancellable_from_value (env, args[4], &operation->cancellable))
       goto invalid_argument;
@@ -5784,7 +5893,7 @@ fdn_device_open_channel (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->address))
       goto invalid_argument;
@@ -5795,7 +5904,7 @@ fdn_device_open_channel (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_cancellable_from_value (env, args[1], &operation->cancellable))
       goto invalid_argument;
@@ -5919,7 +6028,7 @@ fdn_device_open_service (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->address))
       goto invalid_argument;
@@ -5930,7 +6039,7 @@ fdn_device_open_service (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_cancellable_from_value (env, args[1], &operation->cancellable))
       goto invalid_argument;
@@ -6054,7 +6163,7 @@ fdn_device_unpair (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -6337,6 +6446,7 @@ fdn_remote_device_options_to_value (napi_env env,
   napi_get_reference_value (env, fdn_remote_device_options_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -6347,16 +6457,37 @@ static napi_value
 fdn_remote_device_options_construct (napi_env env,
                                      napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaRemoteDeviceOptions * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_remote_device_options_new ();
+  if (argc == 0)
+  {
+    handle = frida_remote_device_options_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a RemoteDeviceOptions handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_remote_device_options_type_tag);
   if (status != napi_ok)
@@ -6417,7 +6548,7 @@ fdn_remote_device_options_set_certificate (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_tls_certificate_from_value (env, args[0], &value))
       goto beach;
@@ -6483,7 +6614,7 @@ fdn_remote_device_options_set_origin (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
       goto beach;
@@ -6550,7 +6681,7 @@ fdn_remote_device_options_set_token (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
       goto beach;
@@ -6617,7 +6748,7 @@ fdn_remote_device_options_set_keepalive_interval (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_int_from_value (env, args[0], &value))
       goto beach;
@@ -6684,6 +6815,7 @@ fdn_application_list_to_value (napi_env env,
   napi_get_reference_value (env, fdn_application_list_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -6694,8 +6826,48 @@ static napi_value
 fdn_application_list_construct (napi_env env,
                                 napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class ApplicationList cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaApplicationList * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a ApplicationList handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_application_list_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -6747,7 +6919,7 @@ fdn_application_list_get (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_int_from_value (env, args[0], &index))
       goto beach;
@@ -6816,6 +6988,7 @@ fdn_application_to_value (napi_env env,
   napi_get_reference_value (env, fdn_application_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -6826,8 +6999,48 @@ static napi_value
 fdn_application_construct (napi_env env,
                            napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class Application cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaApplication * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a Application handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_application_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -6990,6 +7203,7 @@ fdn_process_list_to_value (napi_env env,
   napi_get_reference_value (env, fdn_process_list_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -7000,8 +7214,48 @@ static napi_value
 fdn_process_list_construct (napi_env env,
                             napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class ProcessList cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaProcessList * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a ProcessList handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_process_list_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -7053,7 +7307,7 @@ fdn_process_list_get (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_int_from_value (env, args[0], &index))
       goto beach;
@@ -7121,6 +7375,7 @@ fdn_process_to_value (napi_env env,
   napi_get_reference_value (env, fdn_process_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -7131,8 +7386,48 @@ static napi_value
 fdn_process_construct (napi_env env,
                        napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class Process cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaProcess * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a Process handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_process_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -7269,6 +7564,7 @@ fdn_process_match_options_to_value (napi_env env,
   napi_get_reference_value (env, fdn_process_match_options_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -7279,16 +7575,37 @@ static napi_value
 fdn_process_match_options_construct (napi_env env,
                                      napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaProcessMatchOptions * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_process_match_options_new ();
+  if (argc == 0)
+  {
+    handle = frida_process_match_options_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a ProcessMatchOptions handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_process_match_options_type_tag);
   if (status != napi_ok)
@@ -7349,7 +7666,7 @@ fdn_process_match_options_set_timeout (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_int_from_value (env, args[0], &value))
       goto beach;
@@ -7416,7 +7733,7 @@ fdn_process_match_options_set_scope (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_scope_from_value (env, args[0], &value))
       goto beach;
@@ -7493,6 +7810,7 @@ fdn_spawn_options_to_value (napi_env env,
   napi_get_reference_value (env, fdn_spawn_options_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -7503,16 +7821,37 @@ static napi_value
 fdn_spawn_options_construct (napi_env env,
                              napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaSpawnOptions * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_spawn_options_new ();
+  if (argc == 0)
+  {
+    handle = frida_spawn_options_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a SpawnOptions handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_spawn_options_type_tag);
   if (status != napi_ok)
@@ -7575,7 +7914,7 @@ fdn_spawn_options_set_argv (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_strv_from_value (env, args[0], &value))
       goto beach;
@@ -7584,7 +7923,7 @@ fdn_spawn_options_set_argv (napi_env env,
   {
     value = NULL;
   }
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_int_from_value (env, args[1], &value_length1))
       goto beach;
@@ -7653,7 +7992,7 @@ fdn_spawn_options_set_envp (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_strv_from_value (env, args[0], &value))
       goto beach;
@@ -7662,7 +8001,7 @@ fdn_spawn_options_set_envp (napi_env env,
   {
     value = NULL;
   }
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_int_from_value (env, args[1], &value_length1))
       goto beach;
@@ -7731,7 +8070,7 @@ fdn_spawn_options_set_env (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_strv_from_value (env, args[0], &value))
       goto beach;
@@ -7740,7 +8079,7 @@ fdn_spawn_options_set_env (napi_env env,
   {
     value = NULL;
   }
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_int_from_value (env, args[1], &value_length1))
       goto beach;
@@ -7807,7 +8146,7 @@ fdn_spawn_options_set_cwd (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
       goto beach;
@@ -7874,7 +8213,7 @@ fdn_spawn_options_set_stdio (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_stdio_from_value (env, args[0], &value))
       goto beach;
@@ -7941,7 +8280,7 @@ fdn_spawn_options_set_aux (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_vardict_from_value (env, args[0], &value))
       goto beach;
@@ -8008,6 +8347,7 @@ fdn_spawn_list_to_value (napi_env env,
   napi_get_reference_value (env, fdn_spawn_list_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -8018,8 +8358,48 @@ static napi_value
 fdn_spawn_list_construct (napi_env env,
                           napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class SpawnList cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaSpawnList * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a SpawnList handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_spawn_list_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -8071,7 +8451,7 @@ fdn_spawn_list_get (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_int_from_value (env, args[0], &index))
       goto beach;
@@ -8138,6 +8518,7 @@ fdn_spawn_to_value (napi_env env,
   napi_get_reference_value (env, fdn_spawn_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -8148,8 +8529,48 @@ static napi_value
 fdn_spawn_construct (napi_env env,
                      napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class Spawn cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaSpawn * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a Spawn handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_spawn_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -8256,6 +8677,7 @@ fdn_child_list_to_value (napi_env env,
   napi_get_reference_value (env, fdn_child_list_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -8266,8 +8688,48 @@ static napi_value
 fdn_child_list_construct (napi_env env,
                           napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class ChildList cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaChildList * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a ChildList handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_child_list_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -8319,7 +8781,7 @@ fdn_child_list_get (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_int_from_value (env, args[0], &index))
       goto beach;
@@ -8391,6 +8853,7 @@ fdn_child_to_value (napi_env env,
   napi_get_reference_value (env, fdn_child_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -8401,8 +8864,48 @@ static napi_value
 fdn_child_construct (napi_env env,
                      napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class Child cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaChild * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a Child handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_child_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -8654,6 +9157,7 @@ fdn_crash_to_value (napi_env env,
   napi_get_reference_value (env, fdn_crash_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -8664,8 +9168,48 @@ static napi_value
 fdn_crash_construct (napi_env env,
                      napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class Crash cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaCrash * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a Crash handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_crash_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -8863,6 +9407,7 @@ fdn_bus_to_value (napi_env env,
   napi_get_reference_value (env, fdn_bus_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -8873,8 +9418,48 @@ static napi_value
 fdn_bus_construct (napi_env env,
                    napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class Bus cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaBus * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a Bus handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_bus_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -8937,7 +9522,7 @@ fdn_bus_attach (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -9047,7 +9632,7 @@ fdn_bus_post (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &json))
       goto beach;
@@ -9057,7 +9642,7 @@ fdn_bus_post (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: json");
     goto beach;
   }
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_bytes_from_value (env, args[1], &data))
       goto beach;
@@ -9195,6 +9780,7 @@ fdn_session_to_value (napi_env env,
   napi_get_reference_value (env, fdn_session_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -9205,8 +9791,48 @@ static napi_value
 fdn_session_construct (napi_env env,
                        napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class Session cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaSession * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a Session handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_session_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -9269,7 +9895,7 @@ fdn_session_detach (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -9390,7 +10016,7 @@ fdn_session_resume (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -9511,7 +10137,7 @@ fdn_session_enable_child_gating (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -9632,7 +10258,7 @@ fdn_session_disable_child_gating (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -9753,7 +10379,7 @@ fdn_session_create_script (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->source))
       goto invalid_argument;
@@ -9764,7 +10390,7 @@ fdn_session_create_script (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_script_options_from_value (env, args[1], &operation->options))
       goto invalid_argument;
@@ -9774,7 +10400,7 @@ fdn_session_create_script (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -9898,7 +10524,7 @@ fdn_session_create_script_from_bytes (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_bytes_from_value (env, args[0], &operation->bytes))
       goto invalid_argument;
@@ -9909,7 +10535,7 @@ fdn_session_create_script_from_bytes (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_script_options_from_value (env, args[1], &operation->options))
       goto invalid_argument;
@@ -9919,7 +10545,7 @@ fdn_session_create_script_from_bytes (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -10042,7 +10668,7 @@ fdn_session_compile_script (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->source))
       goto invalid_argument;
@@ -10053,7 +10679,7 @@ fdn_session_compile_script (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_script_options_from_value (env, args[1], &operation->options))
       goto invalid_argument;
@@ -10063,7 +10689,7 @@ fdn_session_compile_script (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -10187,7 +10813,7 @@ fdn_session_snapshot_script (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->embed_script))
       goto invalid_argument;
@@ -10198,7 +10824,7 @@ fdn_session_snapshot_script (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_snapshot_options_from_value (env, args[1], &operation->options))
       goto invalid_argument;
@@ -10208,7 +10834,7 @@ fdn_session_snapshot_script (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -10332,7 +10958,7 @@ fdn_session_setup_peer_connection (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_peer_options_from_value (env, args[0], &operation->options))
       goto invalid_argument;
@@ -10342,7 +10968,7 @@ fdn_session_setup_peer_connection (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_cancellable_from_value (env, args[1], &operation->cancellable))
       goto invalid_argument;
@@ -10463,7 +11089,7 @@ fdn_session_join_portal (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->address))
       goto invalid_argument;
@@ -10474,7 +11100,7 @@ fdn_session_join_portal (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_portal_options_from_value (env, args[1], &operation->options))
       goto invalid_argument;
@@ -10484,7 +11110,7 @@ fdn_session_join_portal (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -10702,6 +11328,7 @@ fdn_script_to_value (napi_env env,
   napi_get_reference_value (env, fdn_script_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -10712,8 +11339,48 @@ static napi_value
 fdn_script_construct (napi_env env,
                       napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class Script cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaScript * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a Script handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_script_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -10776,7 +11443,7 @@ fdn_script_load (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -10897,7 +11564,7 @@ fdn_script_unload (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -11018,7 +11685,7 @@ fdn_script_eternalize (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -11128,7 +11795,7 @@ fdn_script_post (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &json))
       goto beach;
@@ -11138,7 +11805,7 @@ fdn_script_post (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: json");
     goto beach;
   }
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_bytes_from_value (env, args[1], &data))
       goto beach;
@@ -11189,7 +11856,7 @@ fdn_script_enable_debugger (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint16_from_value (env, args[0], &operation->port))
       goto invalid_argument;
@@ -11200,7 +11867,7 @@ fdn_script_enable_debugger (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_cancellable_from_value (env, args[1], &operation->cancellable))
       goto invalid_argument;
@@ -11321,7 +11988,7 @@ fdn_script_disable_debugger (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -11462,6 +12129,7 @@ fdn_portal_membership_to_value (napi_env env,
   napi_get_reference_value (env, fdn_portal_membership_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -11472,8 +12140,48 @@ static napi_value
 fdn_portal_membership_construct (napi_env env,
                                  napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class PortalMembership cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaPortalMembership * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a PortalMembership handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_portal_membership_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -11508,7 +12216,7 @@ fdn_portal_membership_terminate (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -11649,6 +12357,7 @@ fdn_control_service_options_to_value (napi_env env,
   napi_get_reference_value (env, fdn_control_service_options_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -11659,16 +12368,37 @@ static napi_value
 fdn_control_service_options_construct (napi_env env,
                                        napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaControlServiceOptions * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_control_service_options_new ();
+  if (argc == 0)
+  {
+    handle = frida_control_service_options_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a ControlServiceOptions handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_control_service_options_type_tag);
   if (status != napi_ok)
@@ -11729,7 +12459,7 @@ fdn_control_service_options_set_sysroot (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
       goto beach;
@@ -11796,7 +12526,7 @@ fdn_control_service_options_set_enable_preload (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_boolean_from_value (env, args[0], &value))
       goto beach;
@@ -11863,7 +12593,7 @@ fdn_control_service_options_set_report_crashes (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_boolean_from_value (env, args[0], &value))
       goto beach;
@@ -11948,6 +12678,7 @@ fdn_portal_service_to_value (napi_env env,
   napi_get_reference_value (env, fdn_portal_service_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -11958,8 +12689,48 @@ static napi_value
 fdn_portal_service_construct (napi_env env,
                               napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class PortalService cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaPortalService * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a PortalService handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_portal_service_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -11994,7 +12765,7 @@ fdn_portal_service_start (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -12115,7 +12886,7 @@ fdn_portal_service_stop (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -12224,7 +12995,7 @@ fdn_portal_service_kick (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint_from_value (env, args[0], &connection_id))
       goto beach;
@@ -12265,7 +13036,7 @@ fdn_portal_service_post (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint_from_value (env, args[0], &connection_id))
       goto beach;
@@ -12275,7 +13046,7 @@ fdn_portal_service_post (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: connectionId");
     goto beach;
   }
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_utf8_from_value (env, args[1], &json))
       goto beach;
@@ -12285,7 +13056,7 @@ fdn_portal_service_post (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: json");
     goto beach;
   }
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_bytes_from_value (env, args[2], &data))
       goto beach;
@@ -12326,7 +13097,7 @@ fdn_portal_service_narrowcast (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &tag))
       goto beach;
@@ -12336,7 +13107,7 @@ fdn_portal_service_narrowcast (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: tag");
     goto beach;
   }
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_utf8_from_value (env, args[1], &json))
       goto beach;
@@ -12346,7 +13117,7 @@ fdn_portal_service_narrowcast (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: json");
     goto beach;
   }
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_bytes_from_value (env, args[2], &data))
       goto beach;
@@ -12387,7 +13158,7 @@ fdn_portal_service_broadcast (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &json))
       goto beach;
@@ -12397,7 +13168,7 @@ fdn_portal_service_broadcast (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: json");
     goto beach;
   }
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_bytes_from_value (env, args[1], &data))
       goto beach;
@@ -12438,7 +13209,7 @@ fdn_portal_service_enumerate_tags (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint_from_value (env, args[0], &connection_id))
       goto beach;
@@ -12478,7 +13249,7 @@ fdn_portal_service_tag (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint_from_value (env, args[0], &connection_id))
       goto beach;
@@ -12488,7 +13259,7 @@ fdn_portal_service_tag (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: connectionId");
     goto beach;
   }
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_utf8_from_value (env, args[1], &tag))
       goto beach;
@@ -12529,7 +13300,7 @@ fdn_portal_service_untag (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint_from_value (env, args[0], &connection_id))
       goto beach;
@@ -12539,7 +13310,7 @@ fdn_portal_service_untag (napi_env env,
     napi_throw_type_error (env, NULL, "missing argument: connectionId");
     goto beach;
   }
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_utf8_from_value (env, args[1], &tag))
       goto beach;
@@ -12700,6 +13471,7 @@ fdn_file_monitor_to_value (napi_env env,
   napi_get_reference_value (env, fdn_file_monitor_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -12710,8 +13482,48 @@ static napi_value
 fdn_file_monitor_construct (napi_env env,
                             napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class FileMonitor cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaFileMonitor * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a FileMonitor handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_file_monitor_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -12746,7 +13558,7 @@ fdn_file_monitor_enable (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -12867,7 +13679,7 @@ fdn_file_monitor_disable (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
       goto invalid_argument;
@@ -13041,6 +13853,7 @@ fdn_compiler_to_value (napi_env env,
   napi_get_reference_value (env, fdn_compiler_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -13051,8 +13864,48 @@ static napi_value
 fdn_compiler_construct (napi_env env,
                         napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class Compiler cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaCompiler * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a Compiler handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_compiler_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -13087,7 +13940,7 @@ fdn_compiler_build (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->entrypoint))
       goto invalid_argument;
@@ -13098,7 +13951,7 @@ fdn_compiler_build (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_build_options_from_value (env, args[1], &operation->options))
       goto invalid_argument;
@@ -13108,7 +13961,7 @@ fdn_compiler_build (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -13233,7 +14086,7 @@ fdn_compiler_watch (napi_env env,
   operation->handle = handle;
   operation->error = NULL;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &operation->entrypoint))
       goto invalid_argument;
@@ -13244,7 +14097,7 @@ fdn_compiler_watch (napi_env env,
     goto invalid_argument;
   }
 
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_watch_options_from_value (env, args[1], &operation->options))
       goto invalid_argument;
@@ -13254,7 +14107,7 @@ fdn_compiler_watch (napi_env env,
     operation->options = NULL;
   }
 
-  if (argc > 2)
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
   {
     if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
       goto invalid_argument;
@@ -13424,6 +14277,7 @@ fdn_compiler_options_to_value (napi_env env,
   napi_get_reference_value (env, fdn_compiler_options_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -13434,16 +14288,37 @@ static napi_value
 fdn_compiler_options_construct (napi_env env,
                                 napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaCompilerOptions * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_compiler_options_new ();
+  if (argc == 0)
+  {
+    handle = frida_compiler_options_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a CompilerOptions handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_compiler_options_type_tag);
   if (status != napi_ok)
@@ -13504,7 +14379,7 @@ fdn_compiler_options_set_project_root (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
       goto beach;
@@ -13571,7 +14446,7 @@ fdn_compiler_options_set_source_maps (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_source_maps_from_value (env, args[0], &value))
       goto beach;
@@ -13638,7 +14513,7 @@ fdn_compiler_options_set_compression (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_js_compression_from_value (env, args[0], &value))
       goto beach;
@@ -13704,6 +14579,7 @@ fdn_build_options_to_value (napi_env env,
   napi_get_reference_value (env, fdn_build_options_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -13714,16 +14590,37 @@ static napi_value
 fdn_build_options_construct (napi_env env,
                              napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaBuildOptions * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_build_options_new ();
+  if (argc == 0)
+  {
+    handle = frida_build_options_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a BuildOptions handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_build_options_type_tag);
   if (status != napi_ok)
@@ -13783,6 +14680,7 @@ fdn_watch_options_to_value (napi_env env,
   napi_get_reference_value (env, fdn_watch_options_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -13793,16 +14691,37 @@ static napi_value
 fdn_watch_options_construct (napi_env env,
                              napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaWatchOptions * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_watch_options_new ();
+  if (argc == 0)
+  {
+    handle = frida_watch_options_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a WatchOptions handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_watch_options_type_tag);
   if (status != napi_ok)
@@ -13862,6 +14781,7 @@ fdn_static_authentication_service_to_value (napi_env env,
   napi_get_reference_value (env, fdn_static_authentication_service_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -13872,8 +14792,48 @@ static napi_value
 fdn_static_authentication_service_construct (napi_env env,
                                              napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class StaticAuthenticationService cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaStaticAuthenticationService * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a StaticAuthenticationService handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_static_authentication_service_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -13952,6 +14912,7 @@ fdn_frontmost_query_options_to_value (napi_env env,
   napi_get_reference_value (env, fdn_frontmost_query_options_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -13962,16 +14923,37 @@ static napi_value
 fdn_frontmost_query_options_construct (napi_env env,
                                        napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaFrontmostQueryOptions * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_frontmost_query_options_new ();
+  if (argc == 0)
+  {
+    handle = frida_frontmost_query_options_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a FrontmostQueryOptions handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_frontmost_query_options_type_tag);
   if (status != napi_ok)
@@ -14032,7 +15014,7 @@ fdn_frontmost_query_options_set_scope (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_scope_from_value (env, args[0], &value))
       goto beach;
@@ -14101,6 +15083,7 @@ fdn_application_query_options_to_value (napi_env env,
   napi_get_reference_value (env, fdn_application_query_options_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -14111,16 +15094,37 @@ static napi_value
 fdn_application_query_options_construct (napi_env env,
                                          napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaApplicationQueryOptions * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_application_query_options_new ();
+  if (argc == 0)
+  {
+    handle = frida_application_query_options_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a ApplicationQueryOptions handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_application_query_options_type_tag);
   if (status != napi_ok)
@@ -14153,7 +15157,7 @@ fdn_application_query_options_select_identifier (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &identifier))
       goto beach;
@@ -14249,7 +15253,7 @@ fdn_application_query_options_set_scope (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_scope_from_value (env, args[0], &value))
       goto beach;
@@ -14318,6 +15322,7 @@ fdn_process_query_options_to_value (napi_env env,
   napi_get_reference_value (env, fdn_process_query_options_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -14328,16 +15333,37 @@ static napi_value
 fdn_process_query_options_construct (napi_env env,
                                      napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaProcessQueryOptions * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_process_query_options_new ();
+  if (argc == 0)
+  {
+    handle = frida_process_query_options_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a ProcessQueryOptions handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_process_query_options_type_tag);
   if (status != napi_ok)
@@ -14370,7 +15396,7 @@ fdn_process_query_options_select_pid (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint_from_value (env, args[0], &pid))
       goto beach;
@@ -14465,7 +15491,7 @@ fdn_process_query_options_set_scope (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_scope_from_value (env, args[0], &value))
       goto beach;
@@ -14536,6 +15562,7 @@ fdn_session_options_to_value (napi_env env,
   napi_get_reference_value (env, fdn_session_options_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -14546,16 +15573,37 @@ static napi_value
 fdn_session_options_construct (napi_env env,
                                napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaSessionOptions * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_session_options_new ();
+  if (argc == 0)
+  {
+    handle = frida_session_options_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a SessionOptions handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_session_options_type_tag);
   if (status != napi_ok)
@@ -14616,7 +15664,7 @@ fdn_session_options_set_realm (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_realm_from_value (env, args[0], &value))
       goto beach;
@@ -14683,7 +15731,7 @@ fdn_session_options_set_persist_timeout (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_uint_from_value (env, args[0], &value))
       goto beach;
@@ -14750,7 +15798,7 @@ fdn_session_options_set_emulated_agent_path (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
       goto beach;
@@ -14823,6 +15871,7 @@ fdn_script_options_to_value (napi_env env,
   napi_get_reference_value (env, fdn_script_options_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -14833,16 +15882,37 @@ static napi_value
 fdn_script_options_construct (napi_env env,
                               napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaScriptOptions * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_script_options_new ();
+  if (argc == 0)
+  {
+    handle = frida_script_options_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a ScriptOptions handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_script_options_type_tag);
   if (status != napi_ok)
@@ -14903,7 +15973,7 @@ fdn_script_options_set_name (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
       goto beach;
@@ -14970,7 +16040,7 @@ fdn_script_options_set_snapshot (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_bytes_from_value (env, args[0], &value))
       goto beach;
@@ -15036,7 +16106,7 @@ fdn_script_options_set_snapshot_transport (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_snapshot_transport_from_value (env, args[0], &value))
       goto beach;
@@ -15103,7 +16173,7 @@ fdn_script_options_set_runtime (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_script_runtime_from_value (env, args[0], &value))
       goto beach;
@@ -15172,6 +16242,7 @@ fdn_snapshot_options_to_value (napi_env env,
   napi_get_reference_value (env, fdn_snapshot_options_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -15182,16 +16253,37 @@ static napi_value
 fdn_snapshot_options_construct (napi_env env,
                                 napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaSnapshotOptions * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_snapshot_options_new ();
+  if (argc == 0)
+  {
+    handle = frida_snapshot_options_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a SnapshotOptions handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_snapshot_options_type_tag);
   if (status != napi_ok)
@@ -15252,7 +16344,7 @@ fdn_snapshot_options_set_warmup_script (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
       goto beach;
@@ -15319,7 +16411,7 @@ fdn_snapshot_options_set_runtime (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_script_runtime_from_value (env, args[0], &value))
       goto beach;
@@ -15390,6 +16482,7 @@ fdn_portal_options_to_value (napi_env env,
   napi_get_reference_value (env, fdn_portal_options_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -15400,16 +16493,37 @@ static napi_value
 fdn_portal_options_construct (napi_env env,
                               napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaPortalOptions * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_portal_options_new ();
+  if (argc == 0)
+  {
+    handle = frida_portal_options_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a PortalOptions handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_portal_options_type_tag);
   if (status != napi_ok)
@@ -15470,7 +16584,7 @@ fdn_portal_options_set_certificate (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_tls_certificate_from_value (env, args[0], &value))
       goto beach;
@@ -15536,7 +16650,7 @@ fdn_portal_options_set_token (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
       goto beach;
@@ -15605,7 +16719,7 @@ fdn_portal_options_set_acl (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_strv_from_value (env, args[0], &value))
       goto beach;
@@ -15614,7 +16728,7 @@ fdn_portal_options_set_acl (napi_env env,
   {
     value = NULL;
   }
-  if (argc > 1)
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
   {
     if (!fdn_int_from_value (env, args[1], &value_length1))
       goto beach;
@@ -15683,6 +16797,7 @@ fdn_peer_options_to_value (napi_env env,
   napi_get_reference_value (env, fdn_peer_options_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -15693,16 +16808,37 @@ static napi_value
 fdn_peer_options_construct (napi_env env,
                             napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   FridaPeerOptions * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = frida_peer_options_new ();
+  if (argc == 0)
+  {
+    handle = frida_peer_options_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a PeerOptions handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_peer_options_type_tag);
   if (status != napi_ok)
@@ -15762,7 +16898,7 @@ fdn_peer_options_add_relay (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_relay_from_value (env, args[0], &relay))
       goto beach;
@@ -15829,7 +16965,7 @@ fdn_peer_options_set_stun_server (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_utf8_from_value (env, args[0], &value))
       goto beach;
@@ -15898,6 +17034,7 @@ fdn_relay_to_value (napi_env env,
   napi_get_reference_value (env, fdn_relay_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -15908,8 +17045,48 @@ static napi_value
 fdn_relay_construct (napi_env env,
                      napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class Relay cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaRelay * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a Relay handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_relay_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -16077,6 +17254,7 @@ fdn_endpoint_parameters_to_value (napi_env env,
   napi_get_reference_value (env, fdn_endpoint_parameters_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -16087,8 +17265,48 @@ static napi_value
 fdn_endpoint_parameters_construct (napi_env env,
                                    napi_callback_info info)
 {
-  napi_throw_error (env, NULL, "class EndpointParameters cannot be constructed because it lacks a default constructor");
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaEndpointParameters * handle;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
   return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a EndpointParameters handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_endpoint_parameters_type_tag);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  return jsthis;
 }
 
 static napi_value
@@ -16279,7 +17497,7 @@ fdn_endpoint_parameters_set_asset_root (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_file_from_value (env, args[0], &value))
       goto beach;
@@ -16351,6 +17569,7 @@ fdn_cancellable_to_value (napi_env env,
   napi_get_reference_value (env, fdn_cancellable_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -16361,16 +17580,37 @@ static napi_value
 fdn_cancellable_construct (napi_env env,
                            napi_callback_info info)
 {
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   GCancellable * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = g_cancellable_new ();
+  if (argc == 0)
+  {
+    handle = g_cancellable_new ();
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {
+      napi_throw_type_error (env, NULL, "expected a Cancellable handle");
+      return FALSE;
+    }
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {
+      return NULL;
+    }
+
+    g_object_ref (handle);
+  }
 
   status = napi_type_tag_object (env, jsthis, &fdn_cancellable_type_tag);
   if (status != napi_ok)
@@ -16430,7 +17670,7 @@ fdn_cancellable_disconnect (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  if (argc > 0)
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
   {
     if (!fdn_ulong_from_value (env, args[0], &handler_id))
       goto beach;
@@ -16905,6 +18145,17 @@ fdn_string_terminator_to_value (napi_env env,
                                 FridaStringTerminator e)
 {
   return fdn_enum_to_value (env, frida_string_terminator_get_type (), e);
+}
+
+static gboolean
+fdn_is_undefined_or_null (napi_env env,
+                          napi_value value)
+{
+  napi_valuetype type;
+
+  napi_typeof (env, value, &type);
+
+  return type == napi_undefined || type == napi_null;
 }
 
 static gboolean
