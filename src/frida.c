@@ -18,7 +18,7 @@ typedef struct {
   gchar * id;
   gint timeout;
   GCancellable * cancellable;
-  FridaDevice * return_value;
+  FridaDevice * retval;
 } FdnDeviceManagerGetDeviceByIdOperation;
 
 typedef struct {
@@ -29,7 +29,7 @@ typedef struct {
   FridaDeviceType type;
   gint timeout;
   GCancellable * cancellable;
-  FridaDevice * return_value;
+  FridaDevice * retval;
 } FdnDeviceManagerGetDeviceByTypeOperation;
 
 typedef struct {
@@ -40,7 +40,7 @@ typedef struct {
   gchar * id;
   gint timeout;
   GCancellable * cancellable;
-  FridaDevice * return_value;
+  FridaDevice * retval;
 } FdnDeviceManagerFindDeviceByIdOperation;
 
 typedef struct {
@@ -51,7 +51,7 @@ typedef struct {
   FridaDeviceType type;
   gint timeout;
   GCancellable * cancellable;
-  FridaDevice * return_value;
+  FridaDevice * retval;
 } FdnDeviceManagerFindDeviceByTypeOperation;
 
 typedef struct {
@@ -60,7 +60,7 @@ typedef struct {
   FridaDeviceManager * handle;
   GError * error;
   GCancellable * cancellable;
-  FridaDeviceList * return_value;
+  FridaDeviceList * retval;
 } FdnDeviceManagerEnumerateDevicesOperation;
 
 typedef struct {
@@ -71,7 +71,7 @@ typedef struct {
   gchar * address;
   FridaRemoteDeviceOptions * options;
   GCancellable * cancellable;
-  FridaDevice * return_value;
+  FridaDevice * retval;
 } FdnDeviceManagerAddRemoteDeviceOperation;
 
 typedef struct {
@@ -89,7 +89,7 @@ typedef struct {
   FridaDevice * handle;
   GError * error;
   GCancellable * cancellable;
-  GHashTable * return_value;
+  GHashTable * retval;
 } FdnDeviceQuerySystemParametersOperation;
 
 typedef struct {
@@ -99,7 +99,7 @@ typedef struct {
   GError * error;
   FridaFrontmostQueryOptions * options;
   GCancellable * cancellable;
-  FridaApplication * return_value;
+  FridaApplication * retval;
 } FdnDeviceGetFrontmostApplicationOperation;
 
 typedef struct {
@@ -109,7 +109,7 @@ typedef struct {
   GError * error;
   FridaApplicationQueryOptions * options;
   GCancellable * cancellable;
-  FridaApplicationList * return_value;
+  FridaApplicationList * retval;
 } FdnDeviceEnumerateApplicationsOperation;
 
 typedef struct {
@@ -120,7 +120,7 @@ typedef struct {
   guint pid;
   FridaProcessMatchOptions * options;
   GCancellable * cancellable;
-  FridaProcess * return_value;
+  FridaProcess * retval;
 } FdnDeviceGetProcessByPidOperation;
 
 typedef struct {
@@ -131,7 +131,7 @@ typedef struct {
   gchar * name;
   FridaProcessMatchOptions * options;
   GCancellable * cancellable;
-  FridaProcess * return_value;
+  FridaProcess * retval;
 } FdnDeviceGetProcessByNameOperation;
 
 typedef struct {
@@ -142,7 +142,7 @@ typedef struct {
   guint pid;
   FridaProcessMatchOptions * options;
   GCancellable * cancellable;
-  FridaProcess * return_value;
+  FridaProcess * retval;
 } FdnDeviceFindProcessByPidOperation;
 
 typedef struct {
@@ -153,7 +153,7 @@ typedef struct {
   gchar * name;
   FridaProcessMatchOptions * options;
   GCancellable * cancellable;
-  FridaProcess * return_value;
+  FridaProcess * retval;
 } FdnDeviceFindProcessByNameOperation;
 
 typedef struct {
@@ -163,7 +163,7 @@ typedef struct {
   GError * error;
   FridaProcessQueryOptions * options;
   GCancellable * cancellable;
-  FridaProcessList * return_value;
+  FridaProcessList * retval;
 } FdnDeviceEnumerateProcessesOperation;
 
 typedef struct {
@@ -188,7 +188,7 @@ typedef struct {
   FridaDevice * handle;
   GError * error;
   GCancellable * cancellable;
-  FridaSpawnList * return_value;
+  FridaSpawnList * retval;
 } FdnDeviceEnumeratePendingSpawnOperation;
 
 typedef struct {
@@ -197,7 +197,7 @@ typedef struct {
   FridaDevice * handle;
   GError * error;
   GCancellable * cancellable;
-  FridaChildList * return_value;
+  FridaChildList * retval;
 } FdnDeviceEnumeratePendingChildrenOperation;
 
 typedef struct {
@@ -208,7 +208,7 @@ typedef struct {
   gchar * program;
   FridaSpawnOptions * options;
   GCancellable * cancellable;
-  guint return_value;
+  guint retval;
 } FdnDeviceSpawnOperation;
 
 typedef struct {
@@ -247,7 +247,7 @@ typedef struct {
   guint pid;
   FridaSessionOptions * options;
   GCancellable * cancellable;
-  FridaSession * return_value;
+  FridaSession * retval;
 } FdnDeviceAttachOperation;
 
 typedef struct {
@@ -260,7 +260,7 @@ typedef struct {
   gchar * entrypoint;
   gchar * data;
   GCancellable * cancellable;
-  guint return_value;
+  guint retval;
 } FdnDeviceInjectLibraryFileOperation;
 
 typedef struct {
@@ -273,7 +273,7 @@ typedef struct {
   gchar * entrypoint;
   gchar * data;
   GCancellable * cancellable;
-  guint return_value;
+  guint retval;
 } FdnDeviceInjectLibraryBlobOperation;
 
 typedef struct {
@@ -283,7 +283,7 @@ typedef struct {
   GError * error;
   gchar * address;
   GCancellable * cancellable;
-  GIOStream * return_value;
+  GIOStream * retval;
 } FdnDeviceOpenChannelOperation;
 
 typedef struct {
@@ -293,7 +293,7 @@ typedef struct {
   GError * error;
   gchar * address;
   GCancellable * cancellable;
-  FridaService * return_value;
+  FridaService * retval;
 } FdnDeviceOpenServiceOperation;
 
 typedef struct {
@@ -352,7 +352,7 @@ typedef struct {
   gchar * source;
   FridaScriptOptions * options;
   GCancellable * cancellable;
-  FridaScript * return_value;
+  FridaScript * retval;
 } FdnSessionCreateScriptOperation;
 
 typedef struct {
@@ -363,7 +363,7 @@ typedef struct {
   GBytes * bytes;
   FridaScriptOptions * options;
   GCancellable * cancellable;
-  FridaScript * return_value;
+  FridaScript * retval;
 } FdnSessionCreateScriptFromBytesOperation;
 
 typedef struct {
@@ -374,7 +374,7 @@ typedef struct {
   gchar * source;
   FridaScriptOptions * options;
   GCancellable * cancellable;
-  GBytes * return_value;
+  GBytes * retval;
 } FdnSessionCompileScriptOperation;
 
 typedef struct {
@@ -385,7 +385,7 @@ typedef struct {
   gchar * embed_script;
   FridaSnapshotOptions * options;
   GCancellable * cancellable;
-  GBytes * return_value;
+  GBytes * retval;
 } FdnSessionSnapshotScriptOperation;
 
 typedef struct {
@@ -405,7 +405,7 @@ typedef struct {
   gchar * address;
   FridaPortalOptions * options;
   GCancellable * cancellable;
-  FridaPortalMembership * return_value;
+  FridaPortalMembership * retval;
 } FdnSessionJoinPortalOperation;
 
 typedef struct {
@@ -497,7 +497,7 @@ typedef struct {
   gchar * entrypoint;
   FridaBuildOptions * options;
   GCancellable * cancellable;
-  gchar * return_value;
+  gchar * retval;
 } FdnCompilerBuildOperation;
 
 typedef struct {
@@ -1387,7 +1387,7 @@ static napi_value fdn_uint_to_value (napi_env env, guint value);
 static napi_value fdn_uint16_to_value (napi_env env, guint16 value);
 static gboolean fdn_int64_from_value (napi_env env, napi_value value, gint64 * result);
 static napi_value fdn_int64_to_value (napi_env env, gint64 value);
-static gboolean fdn_uint64_from_value (napi_env env, napi_value value, guint64 * result);
+G_GNUC_UNUSED static gboolean fdn_uint64_from_value (napi_env env, napi_value value, guint64 * result);
 static napi_value fdn_uint64_to_value (napi_env env, guint64 value);
 static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * result);
 static napi_value fdn_double_to_value (napi_env env, gdouble value);
@@ -1409,44 +1409,44 @@ static napi_value fdn_file_to_value (napi_env env, GFile * file);
 static gboolean fdn_tls_certificate_from_value (napi_env env, napi_value value, GTlsCertificate ** result);
 static napi_value fdn_tls_certificate_to_value (napi_env env, GTlsCertificate * certificate);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0x7ba4688fb9574f5e, 0x9455e806ad81af1c };
-static napi_type_tag fdn_device_list_type_tag = { 0x1d59a6c48db14938, 0xb883dc5de4705601 };
-static napi_type_tag fdn_device_type_tag = { 0x1374f81ccab54a88, 0x8ea863eff797664e };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0x21d5bc95c9084348, 0x9b6bcaf7844ab364 };
-static napi_type_tag fdn_application_list_type_tag = { 0xc42b87413a484454, 0x82f31c7ef068044f };
-static napi_type_tag fdn_application_type_tag = { 0xeada41fd839446e1, 0xbfceaf5f0988a66b };
-static napi_type_tag fdn_process_list_type_tag = { 0x54288f7514a44da9, 0x9d7201e087147e24 };
-static napi_type_tag fdn_process_type_tag = { 0x59909b561f654260, 0xa50f39fac4dd7455 };
-static napi_type_tag fdn_process_match_options_type_tag = { 0x5dfeb78f8b1c4157, 0x880c869dcc42cc5e };
-static napi_type_tag fdn_spawn_options_type_tag = { 0x0cdeff399d4d4bb1, 0x9f59a373f3c7bd0c };
-static napi_type_tag fdn_spawn_list_type_tag = { 0x6ca2674fbb7d4b9a, 0xbf258b7bacb3ce5d };
-static napi_type_tag fdn_spawn_type_tag = { 0xc34395ad7ece4f3a, 0xa78fe1e8258e4ce3 };
-static napi_type_tag fdn_child_list_type_tag = { 0x30ba9bbdfa094ef2, 0xb5440a43c7a5cd3f };
-static napi_type_tag fdn_child_type_tag = { 0x1792cf3cad054680, 0xb222256d6a0baa85 };
-static napi_type_tag fdn_crash_type_tag = { 0x7ebb19bd971b4cb9, 0x9e0f73d4333d159f };
-static napi_type_tag fdn_bus_type_tag = { 0xd582ffcf19ac4a19, 0xb1956c112e8b46aa };
-static napi_type_tag fdn_session_type_tag = { 0x1afc9f3c665d41c4, 0x89dca3f5ea4c33e3 };
-static napi_type_tag fdn_script_type_tag = { 0x67e1969cecf04bf9, 0xa8b30333882c228b };
-static napi_type_tag fdn_portal_membership_type_tag = { 0xe1d0bbf7d4fc4f44, 0xb008fc02f3ed4a06 };
-static napi_type_tag fdn_control_service_options_type_tag = { 0x14be1a2faeb04f4d, 0x82906f0eed6595d9 };
-static napi_type_tag fdn_portal_service_type_tag = { 0xd189431e997b43c8, 0xa3e820e7b26981c3 };
-static napi_type_tag fdn_file_monitor_type_tag = { 0x8d3d726f821a48e6, 0xa71fe38b28d0ea27 };
-static napi_type_tag fdn_compiler_type_tag = { 0x235a7dcfe515499d, 0xb24505ff348b384e };
-static napi_type_tag fdn_compiler_options_type_tag = { 0x5d8625b332344474, 0xbf5b6baadae3f5de };
-static napi_type_tag fdn_build_options_type_tag = { 0x95ddca9376d24fe4, 0x8d09e312be65da49 };
-static napi_type_tag fdn_watch_options_type_tag = { 0x2458e00f374b4703, 0xb97e7de25317fe2a };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0xd2ca0928d50740fa, 0x81f348ae2d54e280 };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x10eca51830f54746, 0xa3e3b27a7d1d01fa };
-static napi_type_tag fdn_application_query_options_type_tag = { 0xfa692d1f4aa34cf8, 0x8a053566888a0501 };
-static napi_type_tag fdn_process_query_options_type_tag = { 0x2b651e16268f4fba, 0xa06da36e2a304ae3 };
-static napi_type_tag fdn_session_options_type_tag = { 0x530fa385892d49e3, 0x9d9eede7c4f90cbe };
-static napi_type_tag fdn_script_options_type_tag = { 0x24fa66a66c414d90, 0x9dfb2ec8350e0727 };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0xdd6a2c05e205417d, 0xa9bad42782d0ae0e };
-static napi_type_tag fdn_portal_options_type_tag = { 0x317ea8d4c607408a, 0xb1a44d6d941c46d8 };
-static napi_type_tag fdn_peer_options_type_tag = { 0xde3bc909eefe4f3f, 0x9ed1b25507c313dd };
-static napi_type_tag fdn_relay_type_tag = { 0x5a67bd5a14da4d5b, 0xa70e2cd4a76ccb5e };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0xd7134ae53bbb4e0c, 0xb6ce48575b0c48c4 };
-static napi_type_tag fdn_cancellable_type_tag = { 0x81767d882bdd4f34, 0x86fdff6fa855bbf7 };
+static napi_type_tag fdn_device_manager_type_tag = { 0x0ce42c49e8de4623, 0x857e7f6398758cc7 };
+static napi_type_tag fdn_device_list_type_tag = { 0x810f7fa1d0f54a24, 0xbcda8e630c054fc3 };
+static napi_type_tag fdn_device_type_tag = { 0x2474ea97c5544f9e, 0x8f8828da9db46767 };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0x656849bdaa784ea4, 0x8c22d94bf6463800 };
+static napi_type_tag fdn_application_list_type_tag = { 0x92ba3a1304534738, 0xa38f322526d21250 };
+static napi_type_tag fdn_application_type_tag = { 0x4ca0c19241b7440d, 0xa260c9b9a9c0abc5 };
+static napi_type_tag fdn_process_list_type_tag = { 0x591d0084dfe84819, 0x8ec52549534d5bd7 };
+static napi_type_tag fdn_process_type_tag = { 0x059bd10ea5f74c74, 0x81a2d01a05fe3e03 };
+static napi_type_tag fdn_process_match_options_type_tag = { 0x5521e9429e2640f4, 0x968b6d0c31cb9f5f };
+static napi_type_tag fdn_spawn_options_type_tag = { 0x87e33641e86f4aaa, 0x8a6a2c9e38701d32 };
+static napi_type_tag fdn_spawn_list_type_tag = { 0x4e7e825ab2704dcd, 0x9a433a149b407d02 };
+static napi_type_tag fdn_spawn_type_tag = { 0x57a7cb739f1e4f93, 0x81fe82ca8b2c499a };
+static napi_type_tag fdn_child_list_type_tag = { 0x8792175727014446, 0xa209403e00343138 };
+static napi_type_tag fdn_child_type_tag = { 0x292c3ea91cd847e1, 0x87f00e7b47991ae6 };
+static napi_type_tag fdn_crash_type_tag = { 0x091aaddc3bdb4402, 0x893c08b2f49e8170 };
+static napi_type_tag fdn_bus_type_tag = { 0x617697faf37c41fe, 0x85d801a22cfc66cb };
+static napi_type_tag fdn_session_type_tag = { 0x2fa902ac72c540ce, 0x8c09af97d57bb10a };
+static napi_type_tag fdn_script_type_tag = { 0x192e45d4fb724899, 0xb218b5dfdf1b1f5d };
+static napi_type_tag fdn_portal_membership_type_tag = { 0x5d32be0d4b974a32, 0x99b93c2cf58cc0f7 };
+static napi_type_tag fdn_control_service_options_type_tag = { 0x061126a631b0439f, 0x8b473fb85b787eb6 };
+static napi_type_tag fdn_portal_service_type_tag = { 0x4e525242213b444d, 0x85cc538c62a796ff };
+static napi_type_tag fdn_file_monitor_type_tag = { 0xf7be036f7fad4624, 0x862c9a329e9b7e46 };
+static napi_type_tag fdn_compiler_type_tag = { 0x8cc4ec6661744570, 0x91e477a975033de8 };
+static napi_type_tag fdn_compiler_options_type_tag = { 0x1fc11129ee574e36, 0xa137c193b42d5ae0 };
+static napi_type_tag fdn_build_options_type_tag = { 0x48b7dbbb3ec84575, 0x829d6e3d02f2bb37 };
+static napi_type_tag fdn_watch_options_type_tag = { 0xaf247d4d94344e63, 0x9054dfcf0f4a1d70 };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0x1668847b94c14c0b, 0xa154400c97b83ae3 };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x4b04d05d0d924b34, 0x8d3012ed5957e6b1 };
+static napi_type_tag fdn_application_query_options_type_tag = { 0xdfedacab64f44602, 0x93de7b992e84cb39 };
+static napi_type_tag fdn_process_query_options_type_tag = { 0x0cd85421bd4840a1, 0xa644b2e0e6ecf460 };
+static napi_type_tag fdn_session_options_type_tag = { 0x358e6af03c00484c, 0x82a0bbb97b1555fb };
+static napi_type_tag fdn_script_options_type_tag = { 0x4225a9de311f4f55, 0xa34da52901b36f15 };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0x5c1670c8b60c411f, 0x9a1760bb23c0c2cc };
+static napi_type_tag fdn_portal_options_type_tag = { 0x9b2ae6af8ba44dba, 0xa3ab13eff0c0b091 };
+static napi_type_tag fdn_peer_options_type_tag = { 0xf5f8bb17d01d426f, 0xbda535753d8ce87d };
+static napi_type_tag fdn_relay_type_tag = { 0xae180b6bee8542be, 0xa01ab18cd20e023c };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x071b182c657f4efe, 0xaa1d85e6dcad5410 };
+static napi_type_tag fdn_cancellable_type_tag = { 0x2122cf2088f54b20, 0x829aac4c275f4fb8 };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_list_constructor;
@@ -1815,9 +1815,9 @@ fdn_device_manager_close_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_manager_close_operation_free (operation);
@@ -1934,7 +1934,7 @@ fdn_device_manager_get_device_by_id_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_manager_get_device_by_id_finish (operation->handle, res,
+  operation->retval = frida_device_manager_get_device_by_id_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_manager_get_device_by_id_tsfn, operation, napi_tsfn_blocking);
@@ -1960,9 +1960,9 @@ fdn_device_manager_get_device_by_id_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_device_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_device_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_manager_get_device_by_id_operation_free (operation);
@@ -2080,7 +2080,7 @@ fdn_device_manager_get_device_by_type_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_manager_get_device_by_type_finish (operation->handle, res,
+  operation->retval = frida_device_manager_get_device_by_type_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_manager_get_device_by_type_tsfn, operation, napi_tsfn_blocking);
@@ -2106,9 +2106,9 @@ fdn_device_manager_get_device_by_type_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_device_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_device_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_manager_get_device_by_type_operation_free (operation);
@@ -2225,7 +2225,7 @@ fdn_device_manager_find_device_by_id_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_manager_find_device_by_id_finish (operation->handle, res,
+  operation->retval = frida_device_manager_find_device_by_id_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_manager_find_device_by_id_tsfn, operation, napi_tsfn_blocking);
@@ -2251,9 +2251,9 @@ fdn_device_manager_find_device_by_id_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_device_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_device_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_manager_find_device_by_id_operation_free (operation);
@@ -2371,7 +2371,7 @@ fdn_device_manager_find_device_by_type_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_manager_find_device_by_type_finish (operation->handle, res,
+  operation->retval = frida_device_manager_find_device_by_type_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_manager_find_device_by_type_tsfn, operation, napi_tsfn_blocking);
@@ -2397,9 +2397,9 @@ fdn_device_manager_find_device_by_type_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_device_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_device_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_manager_find_device_by_type_operation_free (operation);
@@ -2494,7 +2494,7 @@ fdn_device_manager_enumerate_devices_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_manager_enumerate_devices_finish (operation->handle, res,
+  operation->retval = frida_device_manager_enumerate_devices_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_manager_enumerate_devices_tsfn, operation, napi_tsfn_blocking);
@@ -2520,9 +2520,9 @@ fdn_device_manager_enumerate_devices_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_device_list_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_device_list_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_manager_enumerate_devices_operation_free (operation);
@@ -2638,7 +2638,7 @@ fdn_device_manager_add_remote_device_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_manager_add_remote_device_finish (operation->handle, res,
+  operation->retval = frida_device_manager_add_remote_device_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_manager_add_remote_device_tsfn, operation, napi_tsfn_blocking);
@@ -2664,9 +2664,9 @@ fdn_device_manager_add_remote_device_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_device_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_device_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_manager_add_remote_device_operation_free (operation);
@@ -2797,9 +2797,9 @@ fdn_device_manager_remove_remote_device_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_manager_remove_remote_device_operation_free (operation);
@@ -2882,13 +2882,13 @@ static napi_value
 fdn_device_list_size (napi_env env,
                       napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaDeviceList * handle;
-  gint return_value;
+  gint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -2898,26 +2898,26 @@ fdn_device_list_size (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_device_list_size (handle);
+  retval = frida_device_list_size (handle);
 
-  result = fdn_int_to_value (env, return_value);
+  js_retval = fdn_int_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_device_list_get (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaDeviceList * handle;
   gint index;
-  FridaDevice * return_value;
+  FridaDevice * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -2938,12 +2938,12 @@ fdn_device_list_get (napi_env env,
     goto beach;
   }
 
-  return_value = frida_device_list_get (handle, index);
+  retval = frida_device_list_get (handle, index);
 
-  result = fdn_device_to_value (env, return_value);
+  js_retval = fdn_device_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -3108,13 +3108,13 @@ static napi_value
 fdn_device_is_lost (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaDevice * handle;
-  gboolean return_value;
+  gboolean retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -3124,12 +3124,12 @@ fdn_device_is_lost (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_device_is_lost (handle);
+  retval = frida_device_is_lost (handle);
 
-  result = fdn_boolean_to_value (env, return_value);
+  js_retval = fdn_boolean_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
@@ -3213,7 +3213,7 @@ fdn_device_query_system_parameters_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_query_system_parameters_finish (operation->handle, res,
+  operation->retval = frida_device_query_system_parameters_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_query_system_parameters_tsfn, operation, napi_tsfn_blocking);
@@ -3239,9 +3239,9 @@ fdn_device_query_system_parameters_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_vardict_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_vardict_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_query_system_parameters_operation_free (operation);
@@ -3346,7 +3346,7 @@ fdn_device_get_frontmost_application_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_get_frontmost_application_finish (operation->handle, res,
+  operation->retval = frida_device_get_frontmost_application_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_get_frontmost_application_tsfn, operation, napi_tsfn_blocking);
@@ -3372,9 +3372,9 @@ fdn_device_get_frontmost_application_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_application_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_application_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_get_frontmost_application_operation_free (operation);
@@ -3479,7 +3479,7 @@ fdn_device_enumerate_applications_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_enumerate_applications_finish (operation->handle, res,
+  operation->retval = frida_device_enumerate_applications_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_enumerate_applications_tsfn, operation, napi_tsfn_blocking);
@@ -3505,9 +3505,9 @@ fdn_device_enumerate_applications_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_application_list_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_application_list_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_enumerate_applications_operation_free (operation);
@@ -3623,7 +3623,7 @@ fdn_device_get_process_by_pid_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_get_process_by_pid_finish (operation->handle, res,
+  operation->retval = frida_device_get_process_by_pid_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_get_process_by_pid_tsfn, operation, napi_tsfn_blocking);
@@ -3649,9 +3649,9 @@ fdn_device_get_process_by_pid_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_process_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_process_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_get_process_by_pid_operation_free (operation);
@@ -3767,7 +3767,7 @@ fdn_device_get_process_by_name_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_get_process_by_name_finish (operation->handle, res,
+  operation->retval = frida_device_get_process_by_name_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_get_process_by_name_tsfn, operation, napi_tsfn_blocking);
@@ -3793,9 +3793,9 @@ fdn_device_get_process_by_name_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_process_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_process_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_get_process_by_name_operation_free (operation);
@@ -3912,7 +3912,7 @@ fdn_device_find_process_by_pid_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_find_process_by_pid_finish (operation->handle, res,
+  operation->retval = frida_device_find_process_by_pid_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_find_process_by_pid_tsfn, operation, napi_tsfn_blocking);
@@ -3938,9 +3938,9 @@ fdn_device_find_process_by_pid_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_process_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_process_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_find_process_by_pid_operation_free (operation);
@@ -4056,7 +4056,7 @@ fdn_device_find_process_by_name_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_find_process_by_name_finish (operation->handle, res,
+  operation->retval = frida_device_find_process_by_name_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_find_process_by_name_tsfn, operation, napi_tsfn_blocking);
@@ -4082,9 +4082,9 @@ fdn_device_find_process_by_name_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_process_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_process_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_find_process_by_name_operation_free (operation);
@@ -4190,7 +4190,7 @@ fdn_device_enumerate_processes_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_enumerate_processes_finish (operation->handle, res,
+  operation->retval = frida_device_enumerate_processes_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_enumerate_processes_tsfn, operation, napi_tsfn_blocking);
@@ -4216,9 +4216,9 @@ fdn_device_enumerate_processes_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_process_list_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_process_list_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_enumerate_processes_operation_free (operation);
@@ -4337,9 +4337,9 @@ fdn_device_enable_spawn_gating_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_enable_spawn_gating_operation_free (operation);
@@ -4458,9 +4458,9 @@ fdn_device_disable_spawn_gating_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_disable_spawn_gating_operation_free (operation);
@@ -4555,7 +4555,7 @@ fdn_device_enumerate_pending_spawn_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_enumerate_pending_spawn_finish (operation->handle, res,
+  operation->retval = frida_device_enumerate_pending_spawn_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_enumerate_pending_spawn_tsfn, operation, napi_tsfn_blocking);
@@ -4581,9 +4581,9 @@ fdn_device_enumerate_pending_spawn_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_spawn_list_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_spawn_list_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_enumerate_pending_spawn_operation_free (operation);
@@ -4678,7 +4678,7 @@ fdn_device_enumerate_pending_children_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_enumerate_pending_children_finish (operation->handle, res,
+  operation->retval = frida_device_enumerate_pending_children_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_enumerate_pending_children_tsfn, operation, napi_tsfn_blocking);
@@ -4704,9 +4704,9 @@ fdn_device_enumerate_pending_children_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_child_list_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_child_list_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_enumerate_pending_children_operation_free (operation);
@@ -4822,7 +4822,7 @@ fdn_device_spawn_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_spawn_finish (operation->handle, res,
+  operation->retval = frida_device_spawn_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_spawn_tsfn, operation, napi_tsfn_blocking);
@@ -4848,9 +4848,9 @@ fdn_device_spawn_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_uint_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_uint_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_spawn_operation_free (operation);
@@ -4992,9 +4992,9 @@ fdn_device_input_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_input_operation_free (operation);
@@ -5124,9 +5124,9 @@ fdn_device_resume_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_resume_operation_free (operation);
@@ -5256,9 +5256,9 @@ fdn_device_kill_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_kill_operation_free (operation);
@@ -5374,7 +5374,7 @@ fdn_device_attach_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_attach_finish (operation->handle, res,
+  operation->retval = frida_device_attach_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_attach_tsfn, operation, napi_tsfn_blocking);
@@ -5400,9 +5400,9 @@ fdn_device_attach_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_session_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_session_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_attach_operation_free (operation);
@@ -5541,7 +5541,7 @@ fdn_device_inject_library_file_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_inject_library_file_finish (operation->handle, res,
+  operation->retval = frida_device_inject_library_file_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_inject_library_file_tsfn, operation, napi_tsfn_blocking);
@@ -5567,9 +5567,9 @@ fdn_device_inject_library_file_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_uint_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_uint_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_inject_library_file_operation_free (operation);
@@ -5711,7 +5711,7 @@ fdn_device_inject_library_blob_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_inject_library_blob_finish (operation->handle, res,
+  operation->retval = frida_device_inject_library_blob_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_inject_library_blob_tsfn, operation, napi_tsfn_blocking);
@@ -5737,9 +5737,9 @@ fdn_device_inject_library_blob_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_uint_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_uint_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_inject_library_blob_operation_free (operation);
@@ -5847,7 +5847,7 @@ fdn_device_open_channel_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_open_channel_finish (operation->handle, res,
+  operation->retval = frida_device_open_channel_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_open_channel_tsfn, operation, napi_tsfn_blocking);
@@ -5873,9 +5873,9 @@ fdn_device_open_channel_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_io_stream_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_io_stream_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_open_channel_operation_free (operation);
@@ -5982,7 +5982,7 @@ fdn_device_open_service_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_device_open_service_finish (operation->handle, res,
+  operation->retval = frida_device_open_service_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_device_open_service_tsfn, operation, napi_tsfn_blocking);
@@ -6008,9 +6008,9 @@ fdn_device_open_service_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_service_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_service_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_open_service_operation_free (operation);
@@ -6130,9 +6130,9 @@ fdn_device_unpair_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_device_unpair_operation_free (operation);
@@ -6150,13 +6150,13 @@ static napi_value
 fdn_device_get_id (napi_env env,
                    napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaDevice * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -6166,25 +6166,25 @@ fdn_device_get_id (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_device_get_id (handle);
+  retval = frida_device_get_id (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_device_get_name (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaDevice * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -6194,25 +6194,25 @@ fdn_device_get_name (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_device_get_name (handle);
+  retval = frida_device_get_name (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_device_get_icon (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaDevice * handle;
-  GVariant * return_value;
+  GVariant * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -6222,25 +6222,25 @@ fdn_device_get_icon (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_device_get_icon (handle);
+  retval = frida_device_get_icon (handle);
 
-  result = fdn_variant_to_value (env, return_value);
+  js_retval = fdn_variant_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_device_get_dtype (napi_env env,
                       napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaDevice * handle;
-  FridaDeviceType return_value;
+  FridaDeviceType retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -6250,25 +6250,25 @@ fdn_device_get_dtype (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_device_get_dtype (handle);
+  retval = frida_device_get_dtype (handle);
 
-  result = fdn_device_type_to_value (env, return_value);
+  js_retval = fdn_device_type_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_device_get_bus (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaDevice * handle;
-  FridaBus * return_value;
+  FridaBus * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -6278,12 +6278,12 @@ fdn_device_get_bus (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_device_get_bus (handle);
+  retval = frida_device_get_bus (handle);
 
-  result = fdn_bus_to_value (env, return_value);
+  js_retval = fdn_bus_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -6378,13 +6378,13 @@ static napi_value
 fdn_remote_device_options_get_certificate (napi_env env,
                                            napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaRemoteDeviceOptions * handle;
-  GTlsCertificate * return_value;
+  GTlsCertificate * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -6394,19 +6394,19 @@ fdn_remote_device_options_get_certificate (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_remote_device_options_get_certificate (handle);
+  retval = frida_remote_device_options_get_certificate (handle);
 
-  result = fdn_tls_certificate_to_value (env, return_value);
+  js_retval = fdn_tls_certificate_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_remote_device_options_set_certificate (napi_env env,
                                            napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -6434,23 +6434,23 @@ fdn_remote_device_options_set_certificate (napi_env env,
 
   frida_remote_device_options_set_certificate (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_remote_device_options_get_origin (napi_env env,
                                       napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaRemoteDeviceOptions * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -6460,19 +6460,19 @@ fdn_remote_device_options_get_origin (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_remote_device_options_get_origin (handle);
+  retval = frida_remote_device_options_get_origin (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_remote_device_options_set_origin (napi_env env,
                                       napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -6500,24 +6500,24 @@ fdn_remote_device_options_set_origin (napi_env env,
 
   frida_remote_device_options_set_origin (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (value);
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_remote_device_options_get_token (napi_env env,
                                      napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaRemoteDeviceOptions * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -6527,19 +6527,19 @@ fdn_remote_device_options_get_token (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_remote_device_options_get_token (handle);
+  retval = frida_remote_device_options_get_token (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_remote_device_options_set_token (napi_env env,
                                      napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -6567,24 +6567,24 @@ fdn_remote_device_options_set_token (napi_env env,
 
   frida_remote_device_options_set_token (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (value);
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_remote_device_options_get_keepalive_interval (napi_env env,
                                                   napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaRemoteDeviceOptions * handle;
-  gint return_value;
+  gint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -6594,19 +6594,19 @@ fdn_remote_device_options_get_keepalive_interval (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_remote_device_options_get_keepalive_interval (handle);
+  retval = frida_remote_device_options_get_keepalive_interval (handle);
 
-  result = fdn_int_to_value (env, return_value);
+  js_retval = fdn_int_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_remote_device_options_set_keepalive_interval (napi_env env,
                                                   napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -6635,10 +6635,10 @@ fdn_remote_device_options_set_keepalive_interval (napi_env env,
 
   frida_remote_device_options_set_keepalive_interval (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -6709,13 +6709,13 @@ static napi_value
 fdn_application_list_size (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaApplicationList * handle;
-  gint return_value;
+  gint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -6725,26 +6725,26 @@ fdn_application_list_size (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_application_list_size (handle);
+  retval = frida_application_list_size (handle);
 
-  result = fdn_int_to_value (env, return_value);
+  js_retval = fdn_int_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_application_list_get (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaApplicationList * handle;
   gint index;
-  FridaApplication * return_value;
+  FridaApplication * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -6765,12 +6765,12 @@ fdn_application_list_get (napi_env env,
     goto beach;
   }
 
-  return_value = frida_application_list_get (handle, index);
+  retval = frida_application_list_get (handle, index);
 
-  result = fdn_application_to_value (env, return_value);
+  js_retval = fdn_application_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -6843,13 +6843,13 @@ static napi_value
 fdn_application_get_identifier (napi_env env,
                                 napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaApplication * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -6859,25 +6859,25 @@ fdn_application_get_identifier (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_application_get_identifier (handle);
+  retval = frida_application_get_identifier (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_application_get_name (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaApplication * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -6887,25 +6887,25 @@ fdn_application_get_name (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_application_get_name (handle);
+  retval = frida_application_get_name (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_application_get_pid (napi_env env,
                          napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaApplication * handle;
-  guint return_value;
+  guint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -6915,25 +6915,25 @@ fdn_application_get_pid (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_application_get_pid (handle);
+  retval = frida_application_get_pid (handle);
 
-  result = fdn_uint_to_value (env, return_value);
+  js_retval = fdn_uint_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_application_get_parameters (napi_env env,
                                 napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaApplication * handle;
-  GHashTable * return_value;
+  GHashTable * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -6943,12 +6943,12 @@ fdn_application_get_parameters (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_application_get_parameters (handle);
+  retval = frida_application_get_parameters (handle);
 
-  result = fdn_vardict_to_value (env, return_value);
+  js_retval = fdn_vardict_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -7019,13 +7019,13 @@ static napi_value
 fdn_process_list_size (napi_env env,
                        napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaProcessList * handle;
-  gint return_value;
+  gint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -7035,26 +7035,26 @@ fdn_process_list_size (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_process_list_size (handle);
+  retval = frida_process_list_size (handle);
 
-  result = fdn_int_to_value (env, return_value);
+  js_retval = fdn_int_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_process_list_get (napi_env env,
                       napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaProcessList * handle;
   gint index;
-  FridaProcess * return_value;
+  FridaProcess * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -7075,12 +7075,12 @@ fdn_process_list_get (napi_env env,
     goto beach;
   }
 
-  return_value = frida_process_list_get (handle, index);
+  retval = frida_process_list_get (handle, index);
 
-  result = fdn_process_to_value (env, return_value);
+  js_retval = fdn_process_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -7152,13 +7152,13 @@ static napi_value
 fdn_process_get_pid (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaProcess * handle;
-  guint return_value;
+  guint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -7168,25 +7168,25 @@ fdn_process_get_pid (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_process_get_pid (handle);
+  retval = frida_process_get_pid (handle);
 
-  result = fdn_uint_to_value (env, return_value);
+  js_retval = fdn_uint_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_process_get_name (napi_env env,
                       napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaProcess * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -7196,25 +7196,25 @@ fdn_process_get_name (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_process_get_name (handle);
+  retval = frida_process_get_name (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_process_get_parameters (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaProcess * handle;
-  GHashTable * return_value;
+  GHashTable * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -7224,12 +7224,12 @@ fdn_process_get_parameters (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_process_get_parameters (handle);
+  retval = frida_process_get_parameters (handle);
 
-  result = fdn_vardict_to_value (env, return_value);
+  js_retval = fdn_vardict_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -7320,13 +7320,13 @@ static napi_value
 fdn_process_match_options_get_timeout (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaProcessMatchOptions * handle;
-  gint return_value;
+  gint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -7336,19 +7336,19 @@ fdn_process_match_options_get_timeout (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_process_match_options_get_timeout (handle);
+  retval = frida_process_match_options_get_timeout (handle);
 
-  result = fdn_int_to_value (env, return_value);
+  js_retval = fdn_int_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_process_match_options_set_timeout (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -7377,23 +7377,23 @@ fdn_process_match_options_set_timeout (napi_env env,
 
   frida_process_match_options_set_timeout (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_process_match_options_get_scope (napi_env env,
                                      napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaProcessMatchOptions * handle;
-  FridaScope return_value;
+  FridaScope retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -7403,19 +7403,19 @@ fdn_process_match_options_get_scope (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_process_match_options_get_scope (handle);
+  retval = frida_process_match_options_get_scope (handle);
 
-  result = fdn_scope_to_value (env, return_value);
+  js_retval = fdn_scope_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_process_match_options_set_scope (napi_env env,
                                      napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -7444,10 +7444,10 @@ fdn_process_match_options_set_scope (napi_env env,
 
   frida_process_match_options_set_scope (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -7546,14 +7546,14 @@ static napi_value
 fdn_spawn_options_get_argv (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaSpawnOptions * handle;
   gint * result_length1 = NULL;
-  gchar ** return_value;
+  gchar ** retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -7574,19 +7574,19 @@ fdn_spawn_options_get_argv (napi_env env,
     goto beach;
   }
 
-  return_value = frida_spawn_options_get_argv (handle, result_length1);
+  retval = frida_spawn_options_get_argv (handle, result_length1);
 
-  result = fdn_strv_to_value (env, return_value);
+  js_retval = fdn_strv_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_spawn_options_set_argv (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
@@ -7625,24 +7625,24 @@ fdn_spawn_options_set_argv (napi_env env,
 
   frida_spawn_options_set_argv (handle, value, value_length1);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_spawn_options_get_envp (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaSpawnOptions * handle;
   gint * result_length1 = NULL;
-  gchar ** return_value;
+  gchar ** retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -7663,19 +7663,19 @@ fdn_spawn_options_get_envp (napi_env env,
     goto beach;
   }
 
-  return_value = frida_spawn_options_get_envp (handle, result_length1);
+  retval = frida_spawn_options_get_envp (handle, result_length1);
 
-  result = fdn_strv_to_value (env, return_value);
+  js_retval = fdn_strv_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_spawn_options_set_envp (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
@@ -7714,24 +7714,24 @@ fdn_spawn_options_set_envp (napi_env env,
 
   frida_spawn_options_set_envp (handle, value, value_length1);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_spawn_options_get_env (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaSpawnOptions * handle;
   gint * result_length1 = NULL;
-  gchar ** return_value;
+  gchar ** retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -7752,19 +7752,19 @@ fdn_spawn_options_get_env (napi_env env,
     goto beach;
   }
 
-  return_value = frida_spawn_options_get_env (handle, result_length1);
+  retval = frida_spawn_options_get_env (handle, result_length1);
 
-  result = fdn_strv_to_value (env, return_value);
+  js_retval = fdn_strv_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_spawn_options_set_env (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
@@ -7803,23 +7803,23 @@ fdn_spawn_options_set_env (napi_env env,
 
   frida_spawn_options_set_env (handle, value, value_length1);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_spawn_options_get_cwd (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaSpawnOptions * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -7829,19 +7829,19 @@ fdn_spawn_options_get_cwd (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_spawn_options_get_cwd (handle);
+  retval = frida_spawn_options_get_cwd (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_spawn_options_set_cwd (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -7869,24 +7869,24 @@ fdn_spawn_options_set_cwd (napi_env env,
 
   frida_spawn_options_set_cwd (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (value);
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_spawn_options_get_stdio (napi_env env,
                              napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaSpawnOptions * handle;
-  FridaStdio return_value;
+  FridaStdio retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -7896,19 +7896,19 @@ fdn_spawn_options_get_stdio (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_spawn_options_get_stdio (handle);
+  retval = frida_spawn_options_get_stdio (handle);
 
-  result = fdn_stdio_to_value (env, return_value);
+  js_retval = fdn_stdio_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_spawn_options_set_stdio (napi_env env,
                              napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -7937,23 +7937,23 @@ fdn_spawn_options_set_stdio (napi_env env,
 
   frida_spawn_options_set_stdio (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_spawn_options_get_aux (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaSpawnOptions * handle;
-  GHashTable * return_value;
+  GHashTable * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -7963,19 +7963,19 @@ fdn_spawn_options_get_aux (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_spawn_options_get_aux (handle);
+  retval = frida_spawn_options_get_aux (handle);
 
-  result = fdn_vardict_to_value (env, return_value);
+  js_retval = fdn_vardict_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_spawn_options_set_aux (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -8004,10 +8004,10 @@ fdn_spawn_options_set_aux (napi_env env,
 
   frida_spawn_options_set_aux (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -8078,13 +8078,13 @@ static napi_value
 fdn_spawn_list_size (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaSpawnList * handle;
-  gint return_value;
+  gint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8094,26 +8094,26 @@ fdn_spawn_list_size (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_spawn_list_size (handle);
+  retval = frida_spawn_list_size (handle);
 
-  result = fdn_int_to_value (env, return_value);
+  js_retval = fdn_int_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_spawn_list_get (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaSpawnList * handle;
   gint index;
-  FridaSpawn * return_value;
+  FridaSpawn * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8134,12 +8134,12 @@ fdn_spawn_list_get (napi_env env,
     goto beach;
   }
 
-  return_value = frida_spawn_list_get (handle, index);
+  retval = frida_spawn_list_get (handle, index);
 
-  result = fdn_spawn_to_value (env, return_value);
+  js_retval = fdn_spawn_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -8210,13 +8210,13 @@ static napi_value
 fdn_spawn_get_pid (napi_env env,
                    napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaSpawn * handle;
-  guint return_value;
+  guint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8226,25 +8226,25 @@ fdn_spawn_get_pid (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_spawn_get_pid (handle);
+  retval = frida_spawn_get_pid (handle);
 
-  result = fdn_uint_to_value (env, return_value);
+  js_retval = fdn_uint_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_spawn_get_identifier (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaSpawn * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8254,12 +8254,12 @@ fdn_spawn_get_identifier (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_spawn_get_identifier (handle);
+  retval = frida_spawn_get_identifier (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -8330,13 +8330,13 @@ static napi_value
 fdn_child_list_size (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaChildList * handle;
-  gint return_value;
+  gint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8346,26 +8346,26 @@ fdn_child_list_size (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_child_list_size (handle);
+  retval = frida_child_list_size (handle);
 
-  result = fdn_int_to_value (env, return_value);
+  js_retval = fdn_int_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_child_list_get (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaChildList * handle;
   gint index;
-  FridaChild * return_value;
+  FridaChild * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8386,12 +8386,12 @@ fdn_child_list_get (napi_env env,
     goto beach;
   }
 
-  return_value = frida_child_list_get (handle, index);
+  retval = frida_child_list_get (handle, index);
 
-  result = fdn_child_to_value (env, return_value);
+  js_retval = fdn_child_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -8467,13 +8467,13 @@ static napi_value
 fdn_child_get_pid (napi_env env,
                    napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaChild * handle;
-  guint return_value;
+  guint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8483,25 +8483,25 @@ fdn_child_get_pid (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_child_get_pid (handle);
+  retval = frida_child_get_pid (handle);
 
-  result = fdn_uint_to_value (env, return_value);
+  js_retval = fdn_uint_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_child_get_parent_pid (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaChild * handle;
-  guint return_value;
+  guint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8511,25 +8511,25 @@ fdn_child_get_parent_pid (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_child_get_parent_pid (handle);
+  retval = frida_child_get_parent_pid (handle);
 
-  result = fdn_uint_to_value (env, return_value);
+  js_retval = fdn_uint_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_child_get_origin (napi_env env,
                       napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaChild * handle;
-  FridaChildOrigin return_value;
+  FridaChildOrigin retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8539,25 +8539,25 @@ fdn_child_get_origin (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_child_get_origin (handle);
+  retval = frida_child_get_origin (handle);
 
-  result = fdn_child_origin_to_value (env, return_value);
+  js_retval = fdn_child_origin_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_child_get_identifier (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaChild * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8567,25 +8567,25 @@ fdn_child_get_identifier (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_child_get_identifier (handle);
+  retval = frida_child_get_identifier (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_child_get_path (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaChild * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8595,26 +8595,26 @@ fdn_child_get_path (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_child_get_path (handle);
+  retval = frida_child_get_path (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_child_get_argv (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaChild * handle;
   gint * result_length1 = NULL;
-  gchar ** return_value;
+  gchar ** retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8635,26 +8635,26 @@ fdn_child_get_argv (napi_env env,
     goto beach;
   }
 
-  return_value = frida_child_get_argv (handle, result_length1);
+  retval = frida_child_get_argv (handle, result_length1);
 
-  result = fdn_strv_to_value (env, return_value);
+  js_retval = fdn_strv_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_child_get_envp (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaChild * handle;
   gint * result_length1 = NULL;
-  gchar ** return_value;
+  gchar ** retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8675,12 +8675,12 @@ fdn_child_get_envp (napi_env env,
     goto beach;
   }
 
-  return_value = frida_child_get_envp (handle, result_length1);
+  retval = frida_child_get_envp (handle, result_length1);
 
-  result = fdn_strv_to_value (env, return_value);
+  js_retval = fdn_strv_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -8754,13 +8754,13 @@ static napi_value
 fdn_crash_get_pid (napi_env env,
                    napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaCrash * handle;
-  guint return_value;
+  guint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8770,25 +8770,25 @@ fdn_crash_get_pid (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_crash_get_pid (handle);
+  retval = frida_crash_get_pid (handle);
 
-  result = fdn_uint_to_value (env, return_value);
+  js_retval = fdn_uint_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_crash_get_process_name (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaCrash * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8798,25 +8798,25 @@ fdn_crash_get_process_name (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_crash_get_process_name (handle);
+  retval = frida_crash_get_process_name (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_crash_get_summary (napi_env env,
                        napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaCrash * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8826,25 +8826,25 @@ fdn_crash_get_summary (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_crash_get_summary (handle);
+  retval = frida_crash_get_summary (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_crash_get_report (napi_env env,
                       napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaCrash * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8854,25 +8854,25 @@ fdn_crash_get_report (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_crash_get_report (handle);
+  retval = frida_crash_get_report (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_crash_get_parameters (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaCrash * handle;
-  GHashTable * return_value;
+  GHashTable * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8882,12 +8882,12 @@ fdn_crash_get_parameters (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_crash_get_parameters (handle);
+  retval = frida_crash_get_parameters (handle);
 
-  result = fdn_vardict_to_value (env, return_value);
+  js_retval = fdn_vardict_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -8965,13 +8965,13 @@ static napi_value
 fdn_bus_is_detached (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaBus * handle;
-  gboolean return_value;
+  gboolean retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -8981,12 +8981,12 @@ fdn_bus_is_detached (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_bus_is_detached (handle);
+  retval = frida_bus_is_detached (handle);
 
-  result = fdn_boolean_to_value (env, return_value);
+  js_retval = fdn_boolean_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
@@ -9094,9 +9094,9 @@ fdn_bus_attach_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_bus_attach_operation_free (operation);
@@ -9114,7 +9114,7 @@ static napi_value
 fdn_bus_post (napi_env env,
               napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
@@ -9153,24 +9153,24 @@ fdn_bus_post (napi_env env,
 
   frida_bus_post (handle, json, data);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (json);
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_bus_get_device (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaBus * handle;
-  FridaDevice * return_value;
+  FridaDevice * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -9180,12 +9180,12 @@ fdn_bus_get_device (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_bus_get_device (handle);
+  retval = frida_bus_get_device (handle);
 
-  result = fdn_device_to_value (env, return_value);
+  js_retval = fdn_device_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -9299,13 +9299,13 @@ static napi_value
 fdn_session_is_detached (napi_env env,
                          napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaSession * handle;
-  gboolean return_value;
+  gboolean retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -9315,12 +9315,12 @@ fdn_session_is_detached (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_session_is_detached (handle);
+  retval = frida_session_is_detached (handle);
 
-  result = fdn_boolean_to_value (env, return_value);
+  js_retval = fdn_boolean_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
@@ -9428,9 +9428,9 @@ fdn_session_detach_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_session_detach_operation_free (operation);
@@ -9549,9 +9549,9 @@ fdn_session_resume_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_session_resume_operation_free (operation);
@@ -9670,9 +9670,9 @@ fdn_session_enable_child_gating_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_session_enable_child_gating_operation_free (operation);
@@ -9791,9 +9791,9 @@ fdn_session_disable_child_gating_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_session_disable_child_gating_operation_free (operation);
@@ -9909,7 +9909,7 @@ fdn_session_create_script_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_session_create_script_finish (operation->handle, res,
+  operation->retval = frida_session_create_script_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_session_create_script_tsfn, operation, napi_tsfn_blocking);
@@ -9935,9 +9935,9 @@ fdn_session_create_script_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_script_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_script_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_session_create_script_operation_free (operation);
@@ -10054,7 +10054,7 @@ fdn_session_create_script_from_bytes_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_session_create_script_from_bytes_finish (operation->handle, res,
+  operation->retval = frida_session_create_script_from_bytes_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_session_create_script_from_bytes_tsfn, operation, napi_tsfn_blocking);
@@ -10080,9 +10080,9 @@ fdn_session_create_script_from_bytes_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_script_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_script_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_session_create_script_from_bytes_operation_free (operation);
@@ -10198,7 +10198,7 @@ fdn_session_compile_script_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_session_compile_script_finish (operation->handle, res,
+  operation->retval = frida_session_compile_script_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_session_compile_script_tsfn, operation, napi_tsfn_blocking);
@@ -10224,9 +10224,9 @@ fdn_session_compile_script_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_bytes_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_bytes_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_session_compile_script_operation_free (operation);
@@ -10343,7 +10343,7 @@ fdn_session_snapshot_script_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_session_snapshot_script_finish (operation->handle, res,
+  operation->retval = frida_session_snapshot_script_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_session_snapshot_script_tsfn, operation, napi_tsfn_blocking);
@@ -10369,9 +10369,9 @@ fdn_session_snapshot_script_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_bytes_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_bytes_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_session_snapshot_script_operation_free (operation);
@@ -10501,9 +10501,9 @@ fdn_session_setup_peer_connection_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_session_setup_peer_connection_operation_free (operation);
@@ -10619,7 +10619,7 @@ fdn_session_join_portal_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_session_join_portal_finish (operation->handle, res,
+  operation->retval = frida_session_join_portal_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_session_join_portal_tsfn, operation, napi_tsfn_blocking);
@@ -10645,9 +10645,9 @@ fdn_session_join_portal_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_portal_membership_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_portal_membership_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_session_join_portal_operation_free (operation);
@@ -10666,13 +10666,13 @@ static napi_value
 fdn_session_get_pid (napi_env env,
                      napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaSession * handle;
-  guint return_value;
+  guint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -10682,25 +10682,25 @@ fdn_session_get_pid (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_session_get_pid (handle);
+  retval = frida_session_get_pid (handle);
 
-  result = fdn_uint_to_value (env, return_value);
+  js_retval = fdn_uint_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_session_get_persist_timeout (napi_env env,
                                  napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaSession * handle;
-  guint return_value;
+  guint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -10710,12 +10710,12 @@ fdn_session_get_persist_timeout (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_session_get_persist_timeout (handle);
+  retval = frida_session_get_persist_timeout (handle);
 
-  result = fdn_uint_to_value (env, return_value);
+  js_retval = fdn_uint_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -10808,13 +10808,13 @@ static napi_value
 fdn_script_is_destroyed (napi_env env,
                          napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaScript * handle;
-  gboolean return_value;
+  gboolean retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -10824,12 +10824,12 @@ fdn_script_is_destroyed (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_script_is_destroyed (handle);
+  retval = frida_script_is_destroyed (handle);
 
-  result = fdn_boolean_to_value (env, return_value);
+  js_retval = fdn_boolean_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
@@ -10937,9 +10937,9 @@ fdn_script_load_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_script_load_operation_free (operation);
@@ -11058,9 +11058,9 @@ fdn_script_unload_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_script_unload_operation_free (operation);
@@ -11179,9 +11179,9 @@ fdn_script_eternalize_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_script_eternalize_operation_free (operation);
@@ -11199,7 +11199,7 @@ static napi_value
 fdn_script_post (napi_env env,
                  napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
@@ -11238,11 +11238,11 @@ fdn_script_post (napi_env env,
 
   frida_script_post (handle, json, data);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (json);
-  return result;
+  return js_retval;
 }
 
 static napi_value
@@ -11361,9 +11361,9 @@ fdn_script_enable_debugger_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_script_enable_debugger_operation_free (operation);
@@ -11482,9 +11482,9 @@ fdn_script_disable_debugger_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_script_disable_debugger_operation_free (operation);
@@ -11671,9 +11671,9 @@ fdn_portal_membership_terminate_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_portal_membership_terminate_operation_free (operation);
@@ -11777,13 +11777,13 @@ static napi_value
 fdn_control_service_options_get_sysroot (napi_env env,
                                          napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaControlServiceOptions * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -11793,19 +11793,19 @@ fdn_control_service_options_get_sysroot (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_control_service_options_get_sysroot (handle);
+  retval = frida_control_service_options_get_sysroot (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_control_service_options_set_sysroot (napi_env env,
                                          napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -11833,24 +11833,24 @@ fdn_control_service_options_set_sysroot (napi_env env,
 
   frida_control_service_options_set_sysroot (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (value);
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_control_service_options_get_enable_preload (napi_env env,
                                                 napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaControlServiceOptions * handle;
-  gboolean return_value;
+  gboolean retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -11860,19 +11860,19 @@ fdn_control_service_options_get_enable_preload (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_control_service_options_get_enable_preload (handle);
+  retval = frida_control_service_options_get_enable_preload (handle);
 
-  result = fdn_boolean_to_value (env, return_value);
+  js_retval = fdn_boolean_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_control_service_options_set_enable_preload (napi_env env,
                                                 napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -11901,23 +11901,23 @@ fdn_control_service_options_set_enable_preload (napi_env env,
 
   frida_control_service_options_set_enable_preload (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_control_service_options_get_report_crashes (napi_env env,
                                                 napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaControlServiceOptions * handle;
-  gboolean return_value;
+  gboolean retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -11927,19 +11927,19 @@ fdn_control_service_options_get_report_crashes (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_control_service_options_get_report_crashes (handle);
+  retval = frida_control_service_options_get_report_crashes (handle);
 
-  result = fdn_boolean_to_value (env, return_value);
+  js_retval = fdn_boolean_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_control_service_options_set_report_crashes (napi_env env,
                                                 napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -11968,10 +11968,10 @@ fdn_control_service_options_set_report_crashes (napi_env env,
 
   frida_control_service_options_set_report_crashes (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -12161,9 +12161,9 @@ fdn_portal_service_start_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_portal_service_start_operation_free (operation);
@@ -12282,9 +12282,9 @@ fdn_portal_service_stop_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_portal_service_stop_operation_free (operation);
@@ -12302,7 +12302,7 @@ static napi_value
 fdn_portal_service_kick (napi_env env,
                          napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -12331,17 +12331,17 @@ fdn_portal_service_kick (napi_env env,
 
   frida_portal_service_kick (handle, connection_id);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_portal_service_post (napi_env env,
                          napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 3;
   napi_value args[3];
   napi_status status;
@@ -12391,18 +12391,18 @@ fdn_portal_service_post (napi_env env,
 
   frida_portal_service_post (handle, connection_id, json, data);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (json);
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_portal_service_narrowcast (napi_env env,
                                napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 3;
   napi_value args[3];
   napi_status status;
@@ -12452,19 +12452,19 @@ fdn_portal_service_narrowcast (napi_env env,
 
   frida_portal_service_narrowcast (handle, tag, json, data);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (tag);
   g_free (json);
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_portal_service_broadcast (napi_env env,
                               napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
@@ -12503,18 +12503,18 @@ fdn_portal_service_broadcast (napi_env env,
 
   frida_portal_service_broadcast (handle, json, data);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (json);
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_portal_service_enumerate_tags (napi_env env,
                                    napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
@@ -12522,7 +12522,7 @@ fdn_portal_service_enumerate_tags (napi_env env,
   FridaPortalService * handle;
   guint connection_id;
   gint * result_length1 = NULL;
-  gchar ** return_value;
+  gchar ** retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -12553,19 +12553,19 @@ fdn_portal_service_enumerate_tags (napi_env env,
     goto beach;
   }
 
-  return_value = frida_portal_service_enumerate_tags (handle, connection_id, result_length1);
+  retval = frida_portal_service_enumerate_tags (handle, connection_id, result_length1);
 
-  result = fdn_strv_to_value (env, return_value);
+  js_retval = fdn_strv_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_portal_service_tag (napi_env env,
                         napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
@@ -12605,18 +12605,18 @@ fdn_portal_service_tag (napi_env env,
 
   frida_portal_service_tag (handle, connection_id, tag);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (tag);
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_portal_service_untag (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
@@ -12656,24 +12656,24 @@ fdn_portal_service_untag (napi_env env,
 
   frida_portal_service_untag (handle, connection_id, tag);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (tag);
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_portal_service_get_device (napi_env env,
                                napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaPortalService * handle;
-  FridaDevice * return_value;
+  FridaDevice * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -12683,25 +12683,25 @@ fdn_portal_service_get_device (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_portal_service_get_device (handle);
+  retval = frida_portal_service_get_device (handle);
 
-  result = fdn_device_to_value (env, return_value);
+  js_retval = fdn_device_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_portal_service_get_cluster_params (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaPortalService * handle;
-  FridaEndpointParameters * return_value;
+  FridaEndpointParameters * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -12711,25 +12711,25 @@ fdn_portal_service_get_cluster_params (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_portal_service_get_cluster_params (handle);
+  retval = frida_portal_service_get_cluster_params (handle);
 
-  result = fdn_endpoint_parameters_to_value (env, return_value);
+  js_retval = fdn_endpoint_parameters_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_portal_service_get_control_params (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaPortalService * handle;
-  FridaEndpointParameters * return_value;
+  FridaEndpointParameters * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -12739,12 +12739,12 @@ fdn_portal_service_get_control_params (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_portal_service_get_control_params (handle);
+  retval = frida_portal_service_get_control_params (handle);
 
-  result = fdn_endpoint_parameters_to_value (env, return_value);
+  js_retval = fdn_endpoint_parameters_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -12925,9 +12925,9 @@ fdn_file_monitor_enable_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_file_monitor_enable_operation_free (operation);
@@ -13046,9 +13046,9 @@ fdn_file_monitor_disable_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_file_monitor_disable_operation_free (operation);
@@ -13066,13 +13066,13 @@ static napi_value
 fdn_file_monitor_get_path (napi_env env,
                            napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaFileMonitor * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -13082,12 +13082,12 @@ fdn_file_monitor_get_path (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_file_monitor_get_path (handle);
+  retval = frida_file_monitor_get_path (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -13265,7 +13265,7 @@ fdn_compiler_build_end (GObject * source_object,
 
   
 
-  operation->return_value = frida_compiler_build_finish (operation->handle, res,
+  operation->retval = frida_compiler_build_finish (operation->handle, res,
       &operation->error);
 
   napi_call_threadsafe_function (fdn_compiler_build_tsfn, operation, napi_tsfn_blocking);
@@ -13291,9 +13291,9 @@ fdn_compiler_build_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    result = fdn_utf8_to_value (env, operation->return_value);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    js_retval = fdn_utf8_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_compiler_build_operation_free (operation);
@@ -13305,7 +13305,7 @@ static void
 fdn_compiler_build_operation_free (FdnCompilerBuildOperation * operation)
 {
   g_free (operation->entrypoint);
-  g_free (operation->return_value);
+  g_free (operation->retval);
   g_slice_free (FdnCompilerBuildOperation, operation);
 }
 
@@ -13435,9 +13435,9 @@ fdn_compiler_watch_deliver (napi_env env,
   }
   else
   {
-    napi_value result;
-    napi_get_undefined (env, &result);
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
   fdn_compiler_watch_operation_free (operation);
@@ -13456,13 +13456,13 @@ static napi_value
 fdn_compiler_get_manager (napi_env env,
                           napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaCompiler * handle;
-  FridaDeviceManager * return_value;
+  FridaDeviceManager * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -13472,12 +13472,12 @@ fdn_compiler_get_manager (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_compiler_get_manager (handle);
+  retval = frida_compiler_get_manager (handle);
 
-  result = fdn_device_manager_to_value (env, return_value);
+  js_retval = fdn_device_manager_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -13570,13 +13570,13 @@ static napi_value
 fdn_compiler_options_get_project_root (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaCompilerOptions * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -13586,19 +13586,19 @@ fdn_compiler_options_get_project_root (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_compiler_options_get_project_root (handle);
+  retval = frida_compiler_options_get_project_root (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_compiler_options_set_project_root (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -13626,24 +13626,24 @@ fdn_compiler_options_set_project_root (napi_env env,
 
   frida_compiler_options_set_project_root (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (value);
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_compiler_options_get_source_maps (napi_env env,
                                       napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaCompilerOptions * handle;
-  FridaSourceMaps return_value;
+  FridaSourceMaps retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -13653,19 +13653,19 @@ fdn_compiler_options_get_source_maps (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_compiler_options_get_source_maps (handle);
+  retval = frida_compiler_options_get_source_maps (handle);
 
-  result = fdn_source_maps_to_value (env, return_value);
+  js_retval = fdn_source_maps_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_compiler_options_set_source_maps (napi_env env,
                                       napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -13694,23 +13694,23 @@ fdn_compiler_options_set_source_maps (napi_env env,
 
   frida_compiler_options_set_source_maps (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_compiler_options_get_compression (napi_env env,
                                       napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaCompilerOptions * handle;
-  FridaJsCompression return_value;
+  FridaJsCompression retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -13720,19 +13720,19 @@ fdn_compiler_options_get_compression (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_compiler_options_get_compression (handle);
+  retval = frida_compiler_options_get_compression (handle);
 
-  result = fdn_js_compression_to_value (env, return_value);
+  js_retval = fdn_js_compression_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_compiler_options_set_compression (napi_env env,
                                       napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -13761,10 +13761,10 @@ fdn_compiler_options_set_compression (napi_env env,
 
   frida_compiler_options_set_compression (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -13996,13 +13996,13 @@ static napi_value
 fdn_static_authentication_service_get_token_hash (napi_env env,
                                                   napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaStaticAuthenticationService * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -14012,12 +14012,12 @@ fdn_static_authentication_service_get_token_hash (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_static_authentication_service_get_token_hash (handle);
+  retval = frida_static_authentication_service_get_token_hash (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -14106,13 +14106,13 @@ static napi_value
 fdn_frontmost_query_options_get_scope (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaFrontmostQueryOptions * handle;
-  FridaScope return_value;
+  FridaScope retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -14122,19 +14122,19 @@ fdn_frontmost_query_options_get_scope (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_frontmost_query_options_get_scope (handle);
+  retval = frida_frontmost_query_options_get_scope (handle);
 
-  result = fdn_scope_to_value (env, return_value);
+  js_retval = fdn_scope_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_frontmost_query_options_set_scope (napi_env env,
                                        napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -14163,10 +14163,10 @@ fdn_frontmost_query_options_set_scope (napi_env env,
 
   frida_frontmost_query_options_set_scope (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -14257,7 +14257,7 @@ static napi_value
 fdn_application_query_options_select_identifier (napi_env env,
                                                  napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -14286,24 +14286,24 @@ fdn_application_query_options_select_identifier (napi_env env,
 
   frida_application_query_options_select_identifier (handle, identifier);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (identifier);
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_application_query_options_has_selected_identifiers (napi_env env,
                                                         napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaApplicationQueryOptions * handle;
-  gboolean return_value;
+  gboolean retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -14313,25 +14313,25 @@ fdn_application_query_options_has_selected_identifiers (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_application_query_options_has_selected_identifiers (handle);
+  retval = frida_application_query_options_has_selected_identifiers (handle);
 
-  result = fdn_boolean_to_value (env, return_value);
+  js_retval = fdn_boolean_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_application_query_options_get_scope (napi_env env,
                                          napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaApplicationQueryOptions * handle;
-  FridaScope return_value;
+  FridaScope retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -14341,19 +14341,19 @@ fdn_application_query_options_get_scope (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_application_query_options_get_scope (handle);
+  retval = frida_application_query_options_get_scope (handle);
 
-  result = fdn_scope_to_value (env, return_value);
+  js_retval = fdn_scope_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_application_query_options_set_scope (napi_env env,
                                          napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -14382,10 +14382,10 @@ fdn_application_query_options_set_scope (napi_env env,
 
   frida_application_query_options_set_scope (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -14476,7 +14476,7 @@ static napi_value
 fdn_process_query_options_select_pid (napi_env env,
                                       napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -14505,23 +14505,23 @@ fdn_process_query_options_select_pid (napi_env env,
 
   frida_process_query_options_select_pid (handle, pid);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_process_query_options_has_selected_pids (napi_env env,
                                              napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaProcessQueryOptions * handle;
-  gboolean return_value;
+  gboolean retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -14531,25 +14531,25 @@ fdn_process_query_options_has_selected_pids (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_process_query_options_has_selected_pids (handle);
+  retval = frida_process_query_options_has_selected_pids (handle);
 
-  result = fdn_boolean_to_value (env, return_value);
+  js_retval = fdn_boolean_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_process_query_options_get_scope (napi_env env,
                                      napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaProcessQueryOptions * handle;
-  FridaScope return_value;
+  FridaScope retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -14559,19 +14559,19 @@ fdn_process_query_options_get_scope (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_process_query_options_get_scope (handle);
+  retval = frida_process_query_options_get_scope (handle);
 
-  result = fdn_scope_to_value (env, return_value);
+  js_retval = fdn_scope_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_process_query_options_set_scope (napi_env env,
                                      napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -14600,10 +14600,10 @@ fdn_process_query_options_set_scope (napi_env env,
 
   frida_process_query_options_set_scope (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -14696,13 +14696,13 @@ static napi_value
 fdn_session_options_get_realm (napi_env env,
                                napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaSessionOptions * handle;
-  FridaRealm return_value;
+  FridaRealm retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -14712,19 +14712,19 @@ fdn_session_options_get_realm (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_session_options_get_realm (handle);
+  retval = frida_session_options_get_realm (handle);
 
-  result = fdn_realm_to_value (env, return_value);
+  js_retval = fdn_realm_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_session_options_set_realm (napi_env env,
                                napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -14753,23 +14753,23 @@ fdn_session_options_set_realm (napi_env env,
 
   frida_session_options_set_realm (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_session_options_get_persist_timeout (napi_env env,
                                          napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaSessionOptions * handle;
-  guint return_value;
+  guint retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -14779,19 +14779,19 @@ fdn_session_options_get_persist_timeout (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_session_options_get_persist_timeout (handle);
+  retval = frida_session_options_get_persist_timeout (handle);
 
-  result = fdn_uint_to_value (env, return_value);
+  js_retval = fdn_uint_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_session_options_set_persist_timeout (napi_env env,
                                          napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -14820,23 +14820,23 @@ fdn_session_options_set_persist_timeout (napi_env env,
 
   frida_session_options_set_persist_timeout (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_session_options_get_emulated_agent_path (napi_env env,
                                              napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaSessionOptions * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -14846,19 +14846,19 @@ fdn_session_options_get_emulated_agent_path (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_session_options_get_emulated_agent_path (handle);
+  retval = frida_session_options_get_emulated_agent_path (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_session_options_set_emulated_agent_path (napi_env env,
                                              napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -14886,11 +14886,11 @@ fdn_session_options_set_emulated_agent_path (napi_env env,
 
   frida_session_options_set_emulated_agent_path (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (value);
-  return result;
+  return js_retval;
 }
 
 static void
@@ -14985,13 +14985,13 @@ static napi_value
 fdn_script_options_get_name (napi_env env,
                              napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaScriptOptions * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -15001,19 +15001,19 @@ fdn_script_options_get_name (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_script_options_get_name (handle);
+  retval = frida_script_options_get_name (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_script_options_set_name (napi_env env,
                              napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -15041,24 +15041,24 @@ fdn_script_options_set_name (napi_env env,
 
   frida_script_options_set_name (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (value);
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_script_options_get_snapshot (napi_env env,
                                  napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaScriptOptions * handle;
-  GBytes * return_value;
+  GBytes * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -15068,19 +15068,19 @@ fdn_script_options_get_snapshot (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_script_options_get_snapshot (handle);
+  retval = frida_script_options_get_snapshot (handle);
 
-  result = fdn_bytes_to_value (env, return_value);
+  js_retval = fdn_bytes_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_script_options_set_snapshot (napi_env env,
                                  napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -15108,23 +15108,23 @@ fdn_script_options_set_snapshot (napi_env env,
 
   frida_script_options_set_snapshot (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_script_options_get_snapshot_transport (napi_env env,
                                            napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaScriptOptions * handle;
-  FridaSnapshotTransport return_value;
+  FridaSnapshotTransport retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -15134,19 +15134,19 @@ fdn_script_options_get_snapshot_transport (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_script_options_get_snapshot_transport (handle);
+  retval = frida_script_options_get_snapshot_transport (handle);
 
-  result = fdn_snapshot_transport_to_value (env, return_value);
+  js_retval = fdn_snapshot_transport_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_script_options_set_snapshot_transport (napi_env env,
                                            napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -15175,23 +15175,23 @@ fdn_script_options_set_snapshot_transport (napi_env env,
 
   frida_script_options_set_snapshot_transport (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_script_options_get_runtime (napi_env env,
                                 napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaScriptOptions * handle;
-  FridaScriptRuntime return_value;
+  FridaScriptRuntime retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -15201,19 +15201,19 @@ fdn_script_options_get_runtime (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_script_options_get_runtime (handle);
+  retval = frida_script_options_get_runtime (handle);
 
-  result = fdn_script_runtime_to_value (env, return_value);
+  js_retval = fdn_script_runtime_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_script_options_set_runtime (napi_env env,
                                 napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -15242,10 +15242,10 @@ fdn_script_options_set_runtime (napi_env env,
 
   frida_script_options_set_runtime (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -15336,13 +15336,13 @@ static napi_value
 fdn_snapshot_options_get_warmup_script (napi_env env,
                                         napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaSnapshotOptions * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -15352,19 +15352,19 @@ fdn_snapshot_options_get_warmup_script (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_snapshot_options_get_warmup_script (handle);
+  retval = frida_snapshot_options_get_warmup_script (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_snapshot_options_set_warmup_script (napi_env env,
                                         napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -15392,24 +15392,24 @@ fdn_snapshot_options_set_warmup_script (napi_env env,
 
   frida_snapshot_options_set_warmup_script (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (value);
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_snapshot_options_get_runtime (napi_env env,
                                   napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaSnapshotOptions * handle;
-  FridaScriptRuntime return_value;
+  FridaScriptRuntime retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -15419,19 +15419,19 @@ fdn_snapshot_options_get_runtime (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_snapshot_options_get_runtime (handle);
+  retval = frida_snapshot_options_get_runtime (handle);
 
-  result = fdn_script_runtime_to_value (env, return_value);
+  js_retval = fdn_script_runtime_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_snapshot_options_set_runtime (napi_env env,
                                   napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -15460,10 +15460,10 @@ fdn_snapshot_options_set_runtime (napi_env env,
 
   frida_snapshot_options_set_runtime (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -15556,13 +15556,13 @@ static napi_value
 fdn_portal_options_get_certificate (napi_env env,
                                     napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaPortalOptions * handle;
-  GTlsCertificate * return_value;
+  GTlsCertificate * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -15572,19 +15572,19 @@ fdn_portal_options_get_certificate (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_portal_options_get_certificate (handle);
+  retval = frida_portal_options_get_certificate (handle);
 
-  result = fdn_tls_certificate_to_value (env, return_value);
+  js_retval = fdn_tls_certificate_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_portal_options_set_certificate (napi_env env,
                                     napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -15612,23 +15612,23 @@ fdn_portal_options_set_certificate (napi_env env,
 
   frida_portal_options_set_certificate (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_portal_options_get_token (napi_env env,
                               napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaPortalOptions * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -15638,19 +15638,19 @@ fdn_portal_options_get_token (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_portal_options_get_token (handle);
+  retval = frida_portal_options_get_token (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_portal_options_set_token (napi_env env,
                               napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -15678,25 +15678,25 @@ fdn_portal_options_set_token (napi_env env,
 
   frida_portal_options_set_token (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (value);
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_portal_options_get_acl (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
   napi_value jsthis;
   FridaPortalOptions * handle;
   gint * result_length1 = NULL;
-  gchar ** return_value;
+  gchar ** retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -15717,19 +15717,19 @@ fdn_portal_options_get_acl (napi_env env,
     goto beach;
   }
 
-  return_value = frida_portal_options_get_acl (handle, result_length1);
+  retval = frida_portal_options_get_acl (handle, result_length1);
 
-  result = fdn_strv_to_value (env, return_value);
+  js_retval = fdn_strv_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_portal_options_set_acl (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 2;
   napi_value args[2];
   napi_status status;
@@ -15768,10 +15768,10 @@ fdn_portal_options_set_acl (napi_env env,
 
   frida_portal_options_set_acl (handle, value, value_length1);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -15862,7 +15862,7 @@ static napi_value
 fdn_peer_options_clear_relays (napi_env env,
                                napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -15879,17 +15879,17 @@ fdn_peer_options_clear_relays (napi_env env,
 
   frida_peer_options_clear_relays (handle);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_peer_options_add_relay (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -15918,23 +15918,23 @@ fdn_peer_options_add_relay (napi_env env,
 
   frida_peer_options_add_relay (handle, relay);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_peer_options_get_stun_server (napi_env env,
                                   napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaPeerOptions * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -15944,19 +15944,19 @@ fdn_peer_options_get_stun_server (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_peer_options_get_stun_server (handle);
+  retval = frida_peer_options_get_stun_server (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_peer_options_set_stun_server (napi_env env,
                                   napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -15984,11 +15984,11 @@ fdn_peer_options_set_stun_server (napi_env env,
 
   frida_peer_options_set_stun_server (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
   g_free (value);
-  return result;
+  return js_retval;
 }
 
 static void
@@ -16061,13 +16061,13 @@ static napi_value
 fdn_relay_get_address (napi_env env,
                        napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaRelay * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -16077,25 +16077,25 @@ fdn_relay_get_address (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_relay_get_address (handle);
+  retval = frida_relay_get_address (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_relay_get_username (napi_env env,
                         napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaRelay * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -16105,25 +16105,25 @@ fdn_relay_get_username (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_relay_get_username (handle);
+  retval = frida_relay_get_username (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_relay_get_password (napi_env env,
                         napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaRelay * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -16133,25 +16133,25 @@ fdn_relay_get_password (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_relay_get_password (handle);
+  retval = frida_relay_get_password (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_relay_get_kind (napi_env env,
                     napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaRelay * handle;
-  FridaRelayKind return_value;
+  FridaRelayKind retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -16161,12 +16161,12 @@ fdn_relay_get_kind (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_relay_get_kind (handle);
+  retval = frida_relay_get_kind (handle);
 
-  result = fdn_relay_kind_to_value (env, return_value);
+  js_retval = fdn_relay_kind_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -16242,13 +16242,13 @@ static napi_value
 fdn_endpoint_parameters_get_address (napi_env env,
                                      napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaEndpointParameters * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -16258,25 +16258,25 @@ fdn_endpoint_parameters_get_address (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_endpoint_parameters_get_address (handle);
+  retval = frida_endpoint_parameters_get_address (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_endpoint_parameters_get_port (napi_env env,
                                   napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaEndpointParameters * handle;
-  guint16 return_value;
+  guint16 retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -16286,25 +16286,25 @@ fdn_endpoint_parameters_get_port (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_endpoint_parameters_get_port (handle);
+  retval = frida_endpoint_parameters_get_port (handle);
 
-  result = fdn_uint16_to_value (env, return_value);
+  js_retval = fdn_uint16_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_endpoint_parameters_get_certificate (napi_env env,
                                          napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaEndpointParameters * handle;
-  GTlsCertificate * return_value;
+  GTlsCertificate * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -16314,25 +16314,25 @@ fdn_endpoint_parameters_get_certificate (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_endpoint_parameters_get_certificate (handle);
+  retval = frida_endpoint_parameters_get_certificate (handle);
 
-  result = fdn_tls_certificate_to_value (env, return_value);
+  js_retval = fdn_tls_certificate_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_endpoint_parameters_get_origin (napi_env env,
                                     napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaEndpointParameters * handle;
-  gchar * return_value;
+  const gchar * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -16342,25 +16342,25 @@ fdn_endpoint_parameters_get_origin (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_endpoint_parameters_get_origin (handle);
+  retval = frida_endpoint_parameters_get_origin (handle);
 
-  result = fdn_utf8_to_value (env, return_value);
+  js_retval = fdn_utf8_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_endpoint_parameters_get_auth_service (napi_env env,
                                           napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaEndpointParameters * handle;
-  FridaAuthenticationService * return_value;
+  FridaAuthenticationService * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -16370,25 +16370,25 @@ fdn_endpoint_parameters_get_auth_service (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_endpoint_parameters_get_auth_service (handle);
+  retval = frida_endpoint_parameters_get_auth_service (handle);
 
-  result = fdn_authentication_service_to_value (env, return_value);
+  js_retval = fdn_authentication_service_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_endpoint_parameters_get_asset_root (napi_env env,
                                         napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   FridaEndpointParameters * handle;
-  GFile * return_value;
+  GFile * retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -16398,19 +16398,19 @@ fdn_endpoint_parameters_get_asset_root (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = frida_endpoint_parameters_get_asset_root (handle);
+  retval = frida_endpoint_parameters_get_asset_root (handle);
 
-  result = fdn_file_to_value (env, return_value);
+  js_retval = fdn_file_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_endpoint_parameters_set_asset_root (napi_env env,
                                         napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -16438,10 +16438,10 @@ fdn_endpoint_parameters_set_asset_root (napi_env env,
 
   frida_endpoint_parameters_set_asset_root (handle, value);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static void
@@ -16536,7 +16536,7 @@ static napi_value
 fdn_cancellable_cancel (napi_env env,
                         napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16553,17 +16553,17 @@ fdn_cancellable_cancel (napi_env env,
 
   g_cancellable_cancel (handle);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_cancellable_disconnect (napi_env env,
                             napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 1;
   napi_value args[1];
   napi_status status;
@@ -16592,23 +16592,23 @@ fdn_cancellable_disconnect (napi_env env,
 
   g_cancellable_disconnect (handle, handler_id);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_cancellable_get_fd (napi_env env,
                         napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   GCancellable * handle;
-  int return_value;
+  int retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -16618,25 +16618,25 @@ fdn_cancellable_get_fd (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = g_cancellable_get_fd (handle);
+  retval = g_cancellable_get_fd (handle);
 
-  result = fdn_int_to_value (env, return_value);
+  js_retval = fdn_int_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_cancellable_is_cancelled (napi_env env,
                               napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   GCancellable * handle;
-  gboolean return_value;
+  gboolean retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -16646,19 +16646,19 @@ fdn_cancellable_is_cancelled (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = g_cancellable_is_cancelled (handle);
+  retval = g_cancellable_is_cancelled (handle);
 
-  result = fdn_boolean_to_value (env, return_value);
+  js_retval = fdn_boolean_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_cancellable_pop_current (napi_env env,
                              napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16675,17 +16675,17 @@ fdn_cancellable_pop_current (napi_env env,
 
   g_cancellable_pop_current (handle);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_cancellable_push_current (napi_env env,
                               napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16702,17 +16702,17 @@ fdn_cancellable_push_current (napi_env env,
 
   g_cancellable_push_current (handle);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_cancellable_reset (napi_env env,
                        napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
@@ -16729,24 +16729,24 @@ fdn_cancellable_reset (napi_env env,
 
   g_cancellable_reset (handle);
 
-  napi_get_undefined (env, &result);
+  napi_get_undefined (env, &js_retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static napi_value
 fdn_cancellable_throw_if_cancelled (napi_env env,
                                     napi_callback_info info)
 {
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = 0;
   napi_value args[0];
   napi_status status;
   napi_value jsthis;
   GCancellable * handle;
   GError * error = NULL;
-  gboolean return_value;
+  gboolean retval;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -16756,7 +16756,7 @@ fdn_cancellable_throw_if_cancelled (napi_env env,
   if (status != napi_ok)
     goto beach;
 
-  return_value = g_cancellable_set_error_if_cancelled (handle, &error);
+  retval = g_cancellable_set_error_if_cancelled (handle, &error);
 
   if (error != NULL)
   {
@@ -16765,10 +16765,10 @@ fdn_cancellable_throw_if_cancelled (napi_env env,
     return NULL;
   }
 
-  result = fdn_boolean_to_value (env, return_value);
+  js_retval = fdn_boolean_to_value (env, retval);
 
 beach:
-  return result;
+  return js_retval;
 }
 
 static gboolean
