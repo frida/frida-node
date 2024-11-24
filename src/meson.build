@@ -1,5 +1,6 @@
 frida_binding_sources = files(
   'frida.c',
+  'win_delay_load_hook.c',
 )
 
 if system == 'windows'
