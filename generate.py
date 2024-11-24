@@ -173,7 +173,7 @@ def parse_type(element: ET.Element) -> Optional[Type]:
     if name == "none":
         return None
     nick = type_nick_from_name(name, element)
-    c = element.get(f"{{{C_NAMESPACE}}}type").replace("const ", "").replace("*", " *")
+    c = element.get(f"{{{C_NAMESPACE}}}type").replace("*", " *")
     return Type(name, nick, c, "NULL" if "*" in c else None)
 
 def type_nick_from_name(name: str, element: ET.Element) -> str:
@@ -255,9 +255,9 @@ def generate_operation_structs(classes: List[Class]) -> str:
     for klass in classes:
         for method in klass.methods:
             if method.is_async:
-                param_declarations = [f"{param.type.c} {param.name};" for param in method.parameters]
+                param_declarations = [f"{param.type.c.replace("const ", "")} {param.name};" for param in method.parameters]
                 param_declarations_str = "\n  ".join(param_declarations)
-                return_declaration = f"\n  {method.return_type.c} return_value;" if method.return_type is not None else ""
+                return_declaration = f"\n  {method.return_type.c} retval;" if method.return_type is not None else ""
                 structs.append(f"""\
 typedef struct {{
   napi_env env;
@@ -315,7 +315,7 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
         "static napi_value fdn_uint16_to_value (napi_env env, guint16 value);",
         "static gboolean fdn_int64_from_value (napi_env env, napi_value value, gint64 * result);",
         "static napi_value fdn_int64_to_value (napi_env env, gint64 value);",
-        "static gboolean fdn_uint64_from_value (napi_env env, napi_value value, guint64 * result);",
+        "G_GNUC_UNUSED static gboolean fdn_uint64_from_value (napi_env env, napi_value value, guint64 * result);",
         "static napi_value fdn_uint64_to_value (napi_env env, guint64 value);",
         "static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * result);",
         "static napi_value fdn_double_to_value (napi_env env, gdouble value);",
@@ -523,12 +523,12 @@ def generate_method_code(klass: Class, method: Method) -> str:
     param_frees = [f"g_free (operation->{param.name});" for param in method.parameters if param.type.name == "utf8"]
     param_frees_str = "\n  " + "\n  ".join(param_frees) if param_frees else ""
 
-    return_assignment = f"\n\n  operation->return_value = " if method.return_type is not None else ""
+    return_assignment = f"\n\n  operation->retval = " if method.return_type is not None else ""
     if method.return_type is not None:
-        return_conversion = f"result = fdn_{method.return_type.nick}_to_value (env, operation->return_value);"
+        return_conversion = f"js_retval = fdn_{method.return_type.nick}_to_value (env, operation->retval);"
     else:
-        return_conversion = "napi_get_undefined (env, &result);"
-    return_frees_str = f"\n  g_free (operation->return_value);" if method.return_type is not None and method.return_type.name == "utf8" else ""
+        return_conversion = "napi_get_undefined (env, &js_retval);"
+    return_frees_str = f"\n  g_free (operation->retval);" if method.return_type is not None and method.return_type.name == "utf8" else ""
 
     def calculate_indent(suffix: str) -> str:
         return " " * (len(class_cprefix) + 1 + len(method.name) + len(suffix) + 2)
@@ -638,9 +638,9 @@ static void
   }}
   else
   {{
-    napi_value result;
+    napi_value js_retval;
     {return_conversion}
-    napi_resolve_deferred (env, operation->deferred, result);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
   }}
 
   {class_cprefix}_{method.name}_operation_free (operation);
@@ -651,7 +651,7 @@ static void
 {operation_free_function}
 """
     else:
-        param_declarations = [f"{param.type.c} {param.name}{" = " + param.type.default_value if param.type.default_value is not None else ""};"
+        param_declarations = [f"{param.type.c.replace("const ", "")} {param.name}{" = " + param.type.default_value if param.type.default_value is not None else ""};"
                               for param in method.parameters]
         if method.throws:
             param_declarations.append("GError * error = NULL;")
@@ -684,7 +684,7 @@ static void
         else:
             error_check = ""
 
-        return_variable_declaration = f"\n  {method.return_type.c} return_value;" if method.return_type is not None else ""
+        return_variable_declaration = f"\n  {method.return_type.c} retval;" if method.return_type is not None else ""
         return_assignment = return_assignment.replace("operation->", "").lstrip()
         return_conversion = return_conversion.replace("operation->", "")
 
@@ -693,7 +693,7 @@ static napi_value
 {class_cprefix}_{method.name} (napi_env env,
 {calculate_indent('')}napi_callback_info info)
 {{
-  napi_value result = NULL;
+  napi_value js_retval = NULL;
   size_t argc = {len(method.parameters)};
   napi_value args[{len(method.parameters)}];
   napi_status status;
@@ -713,7 +713,7 @@ static napi_value
   {error_check}{return_conversion}
 
 beach:{param_frees_str}
-  return result;
+  return js_retval;
 }}
 """
     return code
