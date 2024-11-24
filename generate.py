@@ -1,9 +1,10 @@
 from __future__ import annotations
 from collections import OrderedDict
 from dataclasses import dataclass
+from enum import Enum
 from functools import cached_property
 from pathlib import Path
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Tuple
 import uuid
 import xml.etree.ElementTree as ET
 
@@ -39,17 +40,10 @@ class Class:
         constructors = []
         for constructor_element in self._constructors:
             constructor_name = constructor_element.get("name")
-            c_identifier = constructor_element.get(f"{{{C_NAMESPACE}}}identifier")
-            parameters = constructor_element.findall("./parameters/parameter", GIR_NAMESPACES)
 
-            throws = constructor_element.get("throws") == "1"
-
-            param_list = []
-            for param in parameters:
-                param_name = param.get("name")
-                type = extract_type_from_entity(param)
-                nullable = param.get("nullable") == "1"
-                param_list.append(Parameter(param_name, type, nullable))
+            c_identifier, param_list, has_closure_param, throws, is_async = extract_callable_details(constructor_element)
+            if has_closure_param or throws or is_async:
+                continue
 
             constructors.append(Constructor(constructor_name, c_identifier, param_list, throws))
         return constructors
@@ -65,29 +59,45 @@ class Class:
                 continue
             transformed_method_name = self.method_name_transformer(self.name, method_name) if self.method_name_transformer is not None else method_name
 
-            c_identifier = method_element.get(f"{{{C_NAMESPACE}}}identifier")
-            parameters = method_element.findall("./parameters/parameter", GIR_NAMESPACES)
-            has_closure_param = any((param.get("closure") == "1" for param in parameters))
+            c_identifier, param_list, has_closure_param, throws, is_async = extract_callable_details(method_element)
             if has_closure_param:
                 continue
-
-            throws = method_element.get("throws") == "1"
-            is_async = any(param[0].get("name") == "Gio.AsyncReadyCallback" for param in parameters)
 
             result_element = next((m for m in self._methods if m.get("name") == f"{method_name}_finish")) if is_async else method_element
             return_type = extract_type_from_entity(result_element.find(".//return-value", GIR_NAMESPACES))
 
-            param_list = []
-            for param in parameters:
-                param_name = param.get("name")
-                if param_name.startswith("_"):
-                    continue
-                type = extract_type_from_entity(param)
-                nullable = param.get("nullable") == "1"
-                param_list.append(Parameter(param_name, type, nullable))
-
             methods.append(Method(transformed_method_name, c_identifier, return_type, param_list, throws, is_async, self))
         return methods
+
+def extract_callable_details(element: ET.Element) -> Tuple[str, List[Parameter], bool, bool, bool]:
+    c_identifier = element.get(f"{{{C_NAMESPACE}}}identifier")
+
+    parameters = element.findall("./parameters/parameter", GIR_NAMESPACES)
+    param_list = extract_parameters(parameters)
+    has_closure_param = any((param.get("closure") == "1" for param in parameters))
+
+    throws = element.get("throws") == "1"
+
+    is_async = any(param[0].get("name") == "Gio.AsyncReadyCallback" for param in parameters)
+
+    return (c_identifier, param_list, has_closure_param, throws, is_async)
+
+def extract_parameters(parameter_elements: List[ET.Element]) -> List[Parameter]:
+    param_list = []
+    for param in parameter_elements:
+        param_name = param.get("name")
+        if param_name.startswith("_"):
+            continue
+
+        type = extract_type_from_entity(param)
+
+        nullable = param.get("nullable") == "1"
+
+        raw_direction = param.get("direction")
+        direction = Direction(raw_direction) if raw_direction is not None else Direction.IN
+
+        param_list.append(Parameter(param_name, type, nullable, direction))
+    return param_list
 
 @dataclass
 class Constructor:
@@ -116,6 +126,7 @@ class Parameter:
     name: str
     type: Type
     nullable: bool
+    direction: Direction
 
 @dataclass
 class Type:
@@ -123,6 +134,11 @@ class Type:
     nick: str
     c: str
     default_value: Optional[str]
+
+class Direction(Enum):
+    IN = "in"
+    OUT = "out"
+    INOUT = "inout"
 
 @dataclass
 class Enumeration:
@@ -312,6 +328,7 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
         "static napi_value fdn_int_to_value (napi_env env, gint i);",
         "static gboolean fdn_uint_from_value (napi_env env, napi_value value, guint * u);",
         "static napi_value fdn_uint_to_value (napi_env env, guint u);",
+        "static gboolean fdn_uint16_from_value (napi_env env, napi_value value, guint16 * u);",
         "static napi_value fdn_uint16_to_value (napi_env env, guint16 u);",
         "static gboolean fdn_int64_from_value (napi_env env, napi_value value, gint64 * i);",
         "static napi_value fdn_int64_to_value (napi_env env, gint64 i);",
@@ -335,6 +352,11 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
         "static napi_value fdn_file_to_value (napi_env env, GFile * file);",
         "static gboolean fdn_tls_certificate_from_value (napi_env env, napi_value value, GTlsCertificate ** certificate);",
         "static napi_value fdn_tls_certificate_to_value (napi_env env, GTlsCertificate * certificate);",
+
+        # Temporary stubs for missing types:
+        "static napi_value fdn_io_stream_to_value (napi_env env, GIOStream * stream);",
+        "static napi_value fdn_service_to_value (napi_env env, FridaService * service);",
+        "static napi_value fdn_authentication_service_to_value (napi_env env, FridaAuthenticationService * service);",
     ]
 
     return "\n".join(prototypes) + "\n\n"
@@ -846,6 +868,29 @@ fdn_uint_to_value (napi_env env,
   napi_value result;
   napi_create_uint32 (env, u, &result);
   return result;
+}
+
+static gboolean
+fdn_uint16_from_value (napi_env env,
+                       napi_value value,
+                       guint16 * u)
+{
+  uint32_t napi_u;
+  
+  if (napi_get_value_uint32 (env, value, &napi_u) != napi_ok)
+    goto invalid_argument;
+    
+  if (napi_u > G_MAXUINT16)
+    goto invalid_argument;
+
+  *u = napi_u;
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected an unsigned 16-bit integer");
+    return FALSE;
+  }
 }
 
 static napi_value
@@ -1531,7 +1576,41 @@ fdn_tls_certificate_to_value (napi_env env,
   g_free (pem);
 
   return result;
-}"""
+}
+
+static napi_value
+fdn_io_stream_to_value (napi_env env,
+                        GIOStream * stream)
+{
+  napi_value result;
+
+  napi_create_external (env, stream, NULL, NULL, &result);
+
+  return result;
+}
+
+static napi_value
+fdn_service_to_value (napi_env env,
+                      FridaService * service)
+{
+  napi_value result;
+
+  napi_create_external (env, service, NULL, NULL, &result);
+
+  return result;
+}
+
+static napi_value
+fdn_authentication_service_to_value (napi_env env,
+                                     FridaAuthenticationService * service)
+{
+  napi_value result;
+
+  napi_create_external (env, service, NULL, NULL, &result);
+
+  return result;
+}
+"""
 
 def to_snake_case(name: str) -> str:
     result = []
