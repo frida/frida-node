@@ -28,7 +28,7 @@ export class Device {
     bus: Bus;
 
     constructor(private impl: any) {
-        this.bus = new Bus(impl.bus);
+        //this.bus = new Bus(impl.bus);
 
         const { signals } = impl;
         this.spawnAdded = new Signal<SpawnAddedHandler>(signals, "spawn-added");
