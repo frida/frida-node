@@ -29,6 +29,10 @@ class Class:
     _properties: List[ET.Element]
 
     @cached_property
+    def is_frida_list(self):
+        return self.c_type.startswith("Frida") and self.c_type.endswith("List")
+
+    @cached_property
     def c_symbol_prefix(self):
         return f"fdn_{to_snake_case(self.name)}"
 
@@ -264,6 +268,10 @@ def generate_code() -> str:
     code += generate_init_function(classes)
 
     for klass in classes:
+        if klass.is_frida_list:
+            code += generate_list_conversion_functions(klass)
+            continue
+
         code += generate_registration_code(klass)
         code += generate_class_conversion_functions(klass)
         code += generate_constructor(klass)
@@ -320,27 +328,37 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
 
     for klass in classes:
         class_cprefix = klass.c_symbol_prefix
+
+        prototypes.append("")
+
+        if not klass.is_frida_list:
+            prototypes += [
+                f"static void {class_cprefix}_register (napi_env env, napi_value exports);",
+                f"G_GNUC_UNUSED static gboolean {class_cprefix}_from_value (napi_env env, napi_value value, {klass.c_type} ** handle);",
+            ]
+
         prototypes += [
-            "",
-            f"static void {class_cprefix}_register (napi_env env, napi_value exports);",
-            f"G_GNUC_UNUSED static gboolean {class_cprefix}_from_value (napi_env env, napi_value value, {klass.c_type} ** handle);",
             f"G_GNUC_UNUSED static napi_value {class_cprefix}_to_value (napi_env env, {klass.c_type} * handle);",
-            f"static napi_value {class_cprefix}_construct (napi_env env, napi_callback_info info);",
         ]
 
-        for method in klass.methods:
-            method_cprefix = f"{class_cprefix}_{method.name}"
+        if not klass.is_frida_list:
             prototypes += [
-                "",
-                f"static napi_value {method_cprefix} (napi_env env, napi_callback_info info);",
+                f"static napi_value {class_cprefix}_construct (napi_env env, napi_callback_info info);",
             ]
-            if method.is_async:
+
+            for method in klass.methods:
+                method_cprefix = f"{class_cprefix}_{method.name}"
                 prototypes += [
-                    f"static gboolean {method_cprefix}_begin (gpointer user_data);",
-                    f"static void {method_cprefix}_end (GObject * source_object, GAsyncResult * res, gpointer user_data);",
-                    f"static void {method_cprefix}_deliver (napi_env env, napi_value js_cb, void * context, void * data);",
-                    f"static void {method_cprefix}_operation_free ({method.operation_type_name} * operation);",
+                    "",
+                    f"static napi_value {method_cprefix} (napi_env env, napi_callback_info info);",
                 ]
+                if method.is_async:
+                    prototypes += [
+                        f"static gboolean {method_cprefix}_begin (gpointer user_data);",
+                        f"static void {method_cprefix}_end (GObject * source_object, GAsyncResult * res, gpointer user_data);",
+                        f"static void {method_cprefix}_deliver (napi_env env, napi_value js_cb, void * context, void * data);",
+                        f"static void {method_cprefix}_operation_free ({method.operation_type_name} * operation);",
+                    ]
 
     for enum in enumerations:
         enum_name_snake = to_snake_case(enum.name)
@@ -398,6 +416,8 @@ def generate_type_tags(classes: List[Class]) -> str:
         "static napi_type_tag fdn_handle_wrapper_type_tag = { 0xdd596d4f2dad45f9, 0x844585a48e8d05ba };"
     ]
     for klass in classes:
+        if klass.is_frida_list:
+            continue
         uuid_str = uuid.uuid4().hex
         uuid_formatted = f"0x{uuid_str[:16]}, 0x{uuid_str[16:]}"
         type_tags.append(f"static napi_type_tag {klass.c_symbol_prefix}_type_tag = {{ {uuid_formatted} }};")
@@ -406,6 +426,8 @@ def generate_type_tags(classes: List[Class]) -> str:
 def generate_constructor_declarations(classes: List[Class]) -> str:
     declarations = []
     for klass in classes:
+        if klass.is_frida_list:
+            continue
         declarations.append(f"static napi_ref {klass.c_symbol_prefix}_constructor;")
     return "\n" + "\n".join(declarations) + "\n"
 
@@ -420,7 +442,7 @@ def generate_tsfn_declarations(classes: List[Class]) -> str:
     return "\n".join(declarations) + "\n"
 
 def generate_init_function(classes: List[Class]) -> str:
-    registration_calls = "\n  ".join([f"{klass.c_symbol_prefix}_register (env, exports);" for klass in classes])
+    registration_calls = "\n  ".join([f"{klass.c_symbol_prefix}_register (env, exports);" for klass in classes if not klass.is_frida_list])
     return f"""
 static napi_value
 fdn_init (napi_env env,
@@ -734,7 +756,7 @@ static void
   else
   {{
     napi_value js_retval;
-    {return_conversion}
+    {return_conversion.replace("\n", "\n  ")}
     napi_resolve_deferred (env, operation->deferred, js_retval);
   }}
 
@@ -854,6 +876,39 @@ fdn_{enum_name_snake}_to_value (napi_env env,
 {calculate_indent("_to_value")}{enum.c_type} e)
 {{
   return fdn_enum_to_value (env, {enum.get_type} (), e);
+}}
+"""
+
+def generate_list_conversion_functions(klass: Class) -> str:
+    class_cprefix = klass.c_symbol_prefix
+
+    size_method = next((method for method in klass.methods if method.name == "size"))
+    get_method = next((method for method in klass.methods if method.name == "get"))
+
+    element_type = get_method.return_value.type
+
+    def calculate_indent(suffix: str) -> str:
+        return " " * (len(class_cprefix) + len(suffix) + 2)
+
+    return f"""
+static napi_value
+{class_cprefix}_to_value (napi_env env,
+{calculate_indent("_to_value")}{klass.c_type} * list)
+{{
+  napi_value result;
+  gint size, i;
+
+  size = {size_method.c_identifier} (list);
+  napi_create_array_with_length (env, size, &result);
+
+  for (i = 0; i != size; i++)
+  {{
+    {element_type.c} handle = {get_method.c_identifier} (list, i);
+    napi_set_element (env, result, i, fdn_{element_type.nick}_to_value (env, handle));
+    g_object_unref (handle);
+  }}
+
+  return result;
 }}
 """
 

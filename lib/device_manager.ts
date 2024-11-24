@@ -20,13 +20,8 @@ export class DeviceManager {
     }
 
     async enumerateDevices(cancellable?: Cancellable): Promise<Device[]> {
-        const list = await this.impl.enumerateDevices(cancellable);
-        const n = list.size();
-        const devices = [];
-        for (let i = 0; i !== n; i++) {
-            devices.push(new Device(list.get(i)));
-        }
-        return devices;
+        const devices: any[] = await this.impl.enumerateDevices(cancellable);
+        return devices.map(impl => new Device(impl));
     }
 
     async addRemoteDevice(address: string, options: RemoteDeviceOptions = {}, cancellable?: Cancellable): Promise<Device> {
