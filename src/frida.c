@@ -564,14 +564,7 @@ static void fdn_device_manager_remove_remote_device_end (GObject * source_object
 static void fdn_device_manager_remove_remote_device_deliver (napi_env env, napi_value js_cb, void * context, void * data);
 static void fdn_device_manager_remove_remote_device_operation_free (FdnDeviceManagerRemoveRemoteDeviceOperation * operation);
 
-static void fdn_device_list_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_device_list_from_value (napi_env env, napi_value value, FridaDeviceList ** handle);
 G_GNUC_UNUSED static napi_value fdn_device_list_to_value (napi_env env, FridaDeviceList * handle);
-static napi_value fdn_device_list_construct (napi_env env, napi_callback_info info);
-
-static napi_value fdn_device_list_size (napi_env env, napi_callback_info info);
-
-static napi_value fdn_device_list_get (napi_env env, napi_callback_info info);
 
 static void fdn_device_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_device_from_value (napi_env env, napi_value value, FridaDevice ** handle);
@@ -743,14 +736,7 @@ static napi_value fdn_remote_device_options_get_keepalive_interval (napi_env env
 
 static napi_value fdn_remote_device_options_set_keepalive_interval (napi_env env, napi_callback_info info);
 
-static void fdn_application_list_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_application_list_from_value (napi_env env, napi_value value, FridaApplicationList ** handle);
 G_GNUC_UNUSED static napi_value fdn_application_list_to_value (napi_env env, FridaApplicationList * handle);
-static napi_value fdn_application_list_construct (napi_env env, napi_callback_info info);
-
-static napi_value fdn_application_list_size (napi_env env, napi_callback_info info);
-
-static napi_value fdn_application_list_get (napi_env env, napi_callback_info info);
 
 static void fdn_application_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_application_from_value (napi_env env, napi_value value, FridaApplication ** handle);
@@ -765,14 +751,7 @@ static napi_value fdn_application_get_pid (napi_env env, napi_callback_info info
 
 static napi_value fdn_application_get_parameters (napi_env env, napi_callback_info info);
 
-static void fdn_process_list_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_process_list_from_value (napi_env env, napi_value value, FridaProcessList ** handle);
 G_GNUC_UNUSED static napi_value fdn_process_list_to_value (napi_env env, FridaProcessList * handle);
-static napi_value fdn_process_list_construct (napi_env env, napi_callback_info info);
-
-static napi_value fdn_process_list_size (napi_env env, napi_callback_info info);
-
-static napi_value fdn_process_list_get (napi_env env, napi_callback_info info);
 
 static void fdn_process_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_process_from_value (napi_env env, napi_value value, FridaProcess ** handle);
@@ -827,14 +806,7 @@ static napi_value fdn_spawn_options_get_aux (napi_env env, napi_callback_info in
 
 static napi_value fdn_spawn_options_set_aux (napi_env env, napi_callback_info info);
 
-static void fdn_spawn_list_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_spawn_list_from_value (napi_env env, napi_value value, FridaSpawnList ** handle);
 G_GNUC_UNUSED static napi_value fdn_spawn_list_to_value (napi_env env, FridaSpawnList * handle);
-static napi_value fdn_spawn_list_construct (napi_env env, napi_callback_info info);
-
-static napi_value fdn_spawn_list_size (napi_env env, napi_callback_info info);
-
-static napi_value fdn_spawn_list_get (napi_env env, napi_callback_info info);
 
 static void fdn_spawn_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_spawn_from_value (napi_env env, napi_value value, FridaSpawn ** handle);
@@ -845,14 +817,7 @@ static napi_value fdn_spawn_get_pid (napi_env env, napi_callback_info info);
 
 static napi_value fdn_spawn_get_identifier (napi_env env, napi_callback_info info);
 
-static void fdn_child_list_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_child_list_from_value (napi_env env, napi_value value, FridaChildList ** handle);
 G_GNUC_UNUSED static napi_value fdn_child_list_to_value (napi_env env, FridaChildList * handle);
-static napi_value fdn_child_list_construct (napi_env env, napi_callback_info info);
-
-static napi_value fdn_child_list_size (napi_env env, napi_callback_info info);
-
-static napi_value fdn_child_list_get (napi_env env, napi_callback_info info);
 
 static void fdn_child_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_child_from_value (napi_env env, napi_value value, FridaChild ** handle);
@@ -1414,58 +1379,48 @@ static napi_value fdn_service_to_value (napi_env env, FridaService * service);
 static napi_value fdn_authentication_service_to_value (napi_env env, FridaAuthenticationService * service);
 
 static napi_type_tag fdn_handle_wrapper_type_tag = { 0xdd596d4f2dad45f9, 0x844585a48e8d05ba };
-static napi_type_tag fdn_device_manager_type_tag = { 0xdb2864adfec94f4d, 0x8ca24d57f3c80c3f };
-static napi_type_tag fdn_device_list_type_tag = { 0x4d2ed518ce9e4d87, 0x98c057060d99f65e };
-static napi_type_tag fdn_device_type_tag = { 0x5db130c69d3f4cea, 0xbf3e21a1845e2a9f };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0x3e3e7ace3d324830, 0xa2671e0af3d37b82 };
-static napi_type_tag fdn_application_list_type_tag = { 0x3ef320d29b164408, 0x9ac5438b804f1903 };
-static napi_type_tag fdn_application_type_tag = { 0x1be4f177053e448a, 0x8a954cbcfc37d2b3 };
-static napi_type_tag fdn_process_list_type_tag = { 0x9938502796044e33, 0xa89ae6c06fcc720c };
-static napi_type_tag fdn_process_type_tag = { 0xff0c9c6194a74d5b, 0x9fe094f14fda89aa };
-static napi_type_tag fdn_process_match_options_type_tag = { 0xe9209be9b58a422f, 0xab4d28d22c237b3e };
-static napi_type_tag fdn_spawn_options_type_tag = { 0xceb0243741754275, 0x804af17d7a1163ad };
-static napi_type_tag fdn_spawn_list_type_tag = { 0x4be6f28d9d9e47df, 0x8a4fbdf8192001e8 };
-static napi_type_tag fdn_spawn_type_tag = { 0x96991311d5ba4e1e, 0x9397ffb7f29f51ef };
-static napi_type_tag fdn_child_list_type_tag = { 0x26b07525003e4a19, 0x94e2e67232e3ee8d };
-static napi_type_tag fdn_child_type_tag = { 0xf93e81474e7c4d52, 0xaadac232b23d9525 };
-static napi_type_tag fdn_crash_type_tag = { 0x5990b60b7a354ae5, 0xb2ced8cf312620cf };
-static napi_type_tag fdn_bus_type_tag = { 0xd044a5e161c3488f, 0x978cc140566ebd18 };
-static napi_type_tag fdn_session_type_tag = { 0xeec721986a104b98, 0xa0d31571d5b0a28e };
-static napi_type_tag fdn_script_type_tag = { 0x643269f77f4740dc, 0xa62a593e3994c68d };
-static napi_type_tag fdn_portal_membership_type_tag = { 0xbaacf99255ee41b9, 0xb249fcc89414ea58 };
-static napi_type_tag fdn_control_service_options_type_tag = { 0x217418709edc448a, 0x887976b746165bfe };
-static napi_type_tag fdn_portal_service_type_tag = { 0x1fe2b7eb823241bc, 0xb2bab6c41a2df7d2 };
-static napi_type_tag fdn_file_monitor_type_tag = { 0x17805109a02340ef, 0x8ca4f0bc66e714b0 };
-static napi_type_tag fdn_compiler_type_tag = { 0x7cdbc47ec54e4696, 0x8733b99b5a7358f3 };
-static napi_type_tag fdn_compiler_options_type_tag = { 0x2976a204254844e8, 0xb318950a35a046bc };
-static napi_type_tag fdn_build_options_type_tag = { 0x2079469e94e6469e, 0xab16330177214e49 };
-static napi_type_tag fdn_watch_options_type_tag = { 0x95d3ee944a8c4ee2, 0x840d0b13e4ac4f8e };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0x9338bec364e24e73, 0x973ee49ee9049c75 };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x32838214505b4740, 0xae127f71ecdd40b6 };
-static napi_type_tag fdn_application_query_options_type_tag = { 0x595fed0021cd401d, 0xa6210b0950a8cdf5 };
-static napi_type_tag fdn_process_query_options_type_tag = { 0x60e6f795586b4cfc, 0x94dca432ebddf104 };
-static napi_type_tag fdn_session_options_type_tag = { 0xa1c6d03b5d4c4d0f, 0x88957d70c7d6470d };
-static napi_type_tag fdn_script_options_type_tag = { 0xbc768f54fe6740cd, 0x8c319f7e6f3376a1 };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0x302096819ebc4106, 0x9e70df92e5ae544f };
-static napi_type_tag fdn_portal_options_type_tag = { 0x91c9b3ac361d47a7, 0x92c81a978edeb599 };
-static napi_type_tag fdn_peer_options_type_tag = { 0x8a3dd148147c46ab, 0x84bdc3c1400c67c8 };
-static napi_type_tag fdn_relay_type_tag = { 0x74140fd86f6e4146, 0xa33f64b2b9dc9593 };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0xc917e569bc134aa0, 0x84420d310eb20729 };
-static napi_type_tag fdn_cancellable_type_tag = { 0x114e03806a30441e, 0xb2c59a296666739f };
+static napi_type_tag fdn_device_manager_type_tag = { 0x772917e8d1dd47a9, 0xb68c8cd74bbb2518 };
+static napi_type_tag fdn_device_type_tag = { 0x6d413dd9ae0c4724, 0xbc5d5d252e47c5bb };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0xb265446fcc024f2b, 0xb37e1516606caa56 };
+static napi_type_tag fdn_application_type_tag = { 0x03e539a8194048d9, 0x9020eec8fd5b20fa };
+static napi_type_tag fdn_process_type_tag = { 0x0f7e33a811b74153, 0xb55e33ed5f73ec54 };
+static napi_type_tag fdn_process_match_options_type_tag = { 0x08bbd0a7c96a44e8, 0xb32e4c8643a35bff };
+static napi_type_tag fdn_spawn_options_type_tag = { 0xde65f0311a9a409e, 0x9a59f528c198a88e };
+static napi_type_tag fdn_spawn_type_tag = { 0xadacb5dbb9e04578, 0xa290ff1071af56c1 };
+static napi_type_tag fdn_child_type_tag = { 0x65f138d16f914b83, 0xbbcc2f9790172d4c };
+static napi_type_tag fdn_crash_type_tag = { 0x303c5d657ef6475c, 0xafd10e690f02c334 };
+static napi_type_tag fdn_bus_type_tag = { 0x99db4a7594b24043, 0x924ee6fe4899b415 };
+static napi_type_tag fdn_session_type_tag = { 0x0ae1635b040b4dd1, 0x8830028c941ff1bc };
+static napi_type_tag fdn_script_type_tag = { 0xef8e8d99999f48a9, 0xab80fcadac143e4b };
+static napi_type_tag fdn_portal_membership_type_tag = { 0x27aab5f8cbe14fe3, 0xa344ecf93f7e8fe8 };
+static napi_type_tag fdn_control_service_options_type_tag = { 0xfa4f817bf43a465a, 0x95c0baf8d6564328 };
+static napi_type_tag fdn_portal_service_type_tag = { 0xdfba0edb4c3e42b8, 0xa42cfde7e428b67d };
+static napi_type_tag fdn_file_monitor_type_tag = { 0x0f3ba372c9bf41f3, 0x9485f671f2c1e0ec };
+static napi_type_tag fdn_compiler_type_tag = { 0x5448a70aa8bf478a, 0x929c303aabdfb53a };
+static napi_type_tag fdn_compiler_options_type_tag = { 0x41796bf0630846f8, 0x857134ebffce3c68 };
+static napi_type_tag fdn_build_options_type_tag = { 0xae03459274ed4ff7, 0xabc8f77ec47adb89 };
+static napi_type_tag fdn_watch_options_type_tag = { 0xe21db1b707f7406e, 0xae36efb30b984891 };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0xa2c5e54e6fd04a1d, 0x8d78311977c3a9fb };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x4cdcc58f00624f84, 0x9d023fcf71bfa65f };
+static napi_type_tag fdn_application_query_options_type_tag = { 0x1be01c62f9364558, 0x910f08fdaa89e4e1 };
+static napi_type_tag fdn_process_query_options_type_tag = { 0xb62f63890deb451a, 0x8639886d9432a090 };
+static napi_type_tag fdn_session_options_type_tag = { 0x5e946b7b8545481a, 0x9091bfddc4c840e4 };
+static napi_type_tag fdn_script_options_type_tag = { 0xffeb41856cd74248, 0xb63734e42339c55e };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0xa808deff150246f6, 0x8fa01f2163c53dd8 };
+static napi_type_tag fdn_portal_options_type_tag = { 0x5233b9d834044aff, 0x991bf01398b5ce49 };
+static napi_type_tag fdn_peer_options_type_tag = { 0xbca3fa0abc9d46e6, 0x973364301c2f2188 };
+static napi_type_tag fdn_relay_type_tag = { 0x2d4e7548c93d4dcb, 0xa431f563bb8871a3 };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x92c4608c177f461e, 0xabfded9964f06789 };
+static napi_type_tag fdn_cancellable_type_tag = { 0xdabdb1d833b64cab, 0x8db27fcdac40dd69 };
 
 static napi_ref fdn_device_manager_constructor;
-static napi_ref fdn_device_list_constructor;
 static napi_ref fdn_device_constructor;
 static napi_ref fdn_remote_device_options_constructor;
-static napi_ref fdn_application_list_constructor;
 static napi_ref fdn_application_constructor;
-static napi_ref fdn_process_list_constructor;
 static napi_ref fdn_process_constructor;
 static napi_ref fdn_process_match_options_constructor;
 static napi_ref fdn_spawn_options_constructor;
-static napi_ref fdn_spawn_list_constructor;
 static napi_ref fdn_spawn_constructor;
-static napi_ref fdn_child_list_constructor;
 static napi_ref fdn_child_constructor;
 static napi_ref fdn_crash_constructor;
 static napi_ref fdn_bus_constructor;
@@ -1561,18 +1516,13 @@ fdn_init (napi_env env,
   frida_init ();
 
   fdn_device_manager_register (env, exports);
-  fdn_device_list_register (env, exports);
   fdn_device_register (env, exports);
   fdn_remote_device_options_register (env, exports);
-  fdn_application_list_register (env, exports);
   fdn_application_register (env, exports);
-  fdn_process_list_register (env, exports);
   fdn_process_register (env, exports);
   fdn_process_match_options_register (env, exports);
   fdn_spawn_options_register (env, exports);
-  fdn_spawn_list_register (env, exports);
   fdn_spawn_register (env, exports);
-  fdn_child_list_register (env, exports);
   fdn_child_register (env, exports);
   fdn_crash_register (env, exports);
   fdn_bus_register (env, exports);
@@ -2281,9 +2231,9 @@ fdn_device_manager_find_device_by_id_deliver (napi_env env,
   {
     napi_value js_retval;
     if (operation->retval != NULL)
-    js_retval = fdn_device_to_value (env, operation->retval);
-  else
-    napi_get_null (env, &js_retval);
+      js_retval = fdn_device_to_value (env, operation->retval);
+    else
+      napi_get_null (env, &js_retval);
     napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
@@ -2430,9 +2380,9 @@ fdn_device_manager_find_device_by_type_deliver (napi_env env,
   {
     napi_value js_retval;
     if (operation->retval != NULL)
-    js_retval = fdn_device_to_value (env, operation->retval);
-  else
-    napi_get_null (env, &js_retval);
+      js_retval = fdn_device_to_value (env, operation->retval);
+    else
+      napi_get_null (env, &js_retval);
     napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
@@ -2848,175 +2798,24 @@ fdn_device_manager_remove_remote_device_operation_free (FdnDeviceManagerRemoveRe
   g_slice_free (FdnDeviceManagerRemoveRemoteDeviceOperation, operation);
 }
 
-static void
-fdn_device_list_register (napi_env env,
-                          napi_value exports)
-{
-  napi_property_descriptor properties[] =
-  {
-    { "size", NULL, fdn_device_list_size, NULL, NULL, NULL, napi_default, NULL },
-    { "get", NULL, fdn_device_list_get, NULL, NULL, NULL, napi_default, NULL },
-  };
-
-  napi_value constructor;
-  napi_define_class (env, "DeviceList", NAPI_AUTO_LENGTH, fdn_device_list_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
-  napi_create_reference (env, constructor, 1, &fdn_device_list_constructor);
-
-  napi_set_named_property (env, exports, "DeviceList", constructor);
-}
-
-static gboolean
-fdn_device_list_from_value (napi_env env,
-                            napi_value value,
-                            FridaDeviceList ** handle)
-{
-  napi_status status;
-  bool is_instance;
-
-  status = napi_check_object_type_tag (env, value, &fdn_device_list_type_tag, &is_instance);
-  if (status != napi_ok || !is_instance)
-  {
-    napi_throw_type_error (env, NULL, "expected an instance of DeviceList");
-    return FALSE;
-  }
-
-  napi_unwrap (env, value, (void **) handle);
-
-  g_object_ref (*handle);
-
-  return TRUE;
-}
-
 static napi_value
 fdn_device_list_to_value (napi_env env,
-                          FridaDeviceList * handle)
+                          FridaDeviceList * list)
 {
-  napi_value result, constructor, handle_wrapper;
+  napi_value result;
+  gint size, i;
 
-  napi_get_reference_value (env, fdn_device_list_constructor, &constructor);
+  size = frida_device_list_size (list);
+  napi_create_array_with_length (env, size, &result);
 
-  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
-  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
-
-  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+  for (i = 0; i != size; i++)
+  {
+    FridaDevice * handle = frida_device_list_get (list, i);
+    napi_set_element (env, result, i, fdn_device_to_value (env, handle));
+    g_object_unref (handle);
+  }
 
   return result;
-}
-
-static napi_value
-fdn_device_list_construct (napi_env env,
-                           napi_callback_info info)
-{
-  size_t argc = 1;
-  napi_value args[1];
-  napi_value jsthis;
-  napi_status status;
-  FridaDeviceList * handle;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    return NULL;
-
-  if (argc == 0)
-  {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
-  return NULL;
-  }
-  else
-  {
-    bool is_instance;
-
-    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a DeviceList handle");
-      return FALSE;
-    }
-
-    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
-
-    g_object_ref (handle);
-  }
-
-  status = napi_type_tag_object (env, jsthis, &fdn_device_list_type_tag);
-  if (status != napi_ok)
-    return NULL;
-
-  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
-  if (status != napi_ok)
-    return NULL;
-
-  return jsthis;
-}
-
-static napi_value
-fdn_device_list_size (napi_env env,
-                      napi_callback_info info)
-{
-  napi_value js_retval = NULL;
-  size_t argc = 0;
-  napi_value args[0];
-  napi_status status;
-  napi_value jsthis;
-  FridaDeviceList * handle;
-  gint retval;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    goto beach;
-
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
-    goto beach;
-
-  retval = frida_device_list_size (handle);
-
-  js_retval = fdn_int_to_value (env, retval);
-
-beach:
-  return js_retval;
-}
-
-static napi_value
-fdn_device_list_get (napi_env env,
-                     napi_callback_info info)
-{
-  napi_value js_retval = NULL;
-  size_t argc = 1;
-  napi_value args[1];
-  napi_status status;
-  napi_value jsthis;
-  FridaDeviceList * handle;
-  gint index;
-  FridaDevice * retval;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    goto beach;
-
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
-    goto beach;
-
-  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
-  {
-    if (!fdn_int_from_value (env, args[0], &index))
-      goto beach;
-  }
-  else
-  {
-    napi_throw_type_error (env, NULL, "missing argument: index");
-    goto beach;
-  }
-
-  retval = frida_device_list_get (handle, index);
-
-  js_retval = fdn_device_to_value (env, retval);
-
-beach:
-  return js_retval;
 }
 
 static void
@@ -3486,9 +3285,9 @@ fdn_device_get_frontmost_application_deliver (napi_env env,
   {
     napi_value js_retval;
     if (operation->retval != NULL)
-    js_retval = fdn_application_to_value (env, operation->retval);
-  else
-    napi_get_null (env, &js_retval);
+      js_retval = fdn_application_to_value (env, operation->retval);
+    else
+      napi_get_null (env, &js_retval);
     napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
@@ -4055,9 +3854,9 @@ fdn_device_find_process_by_pid_deliver (napi_env env,
   {
     napi_value js_retval;
     if (operation->retval != NULL)
-    js_retval = fdn_process_to_value (env, operation->retval);
-  else
-    napi_get_null (env, &js_retval);
+      js_retval = fdn_process_to_value (env, operation->retval);
+    else
+      napi_get_null (env, &js_retval);
     napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
@@ -4202,9 +4001,9 @@ fdn_device_find_process_by_name_deliver (napi_env env,
   {
     napi_value js_retval;
     if (operation->retval != NULL)
-    js_retval = fdn_process_to_value (env, operation->retval);
-  else
-    napi_get_null (env, &js_retval);
+      js_retval = fdn_process_to_value (env, operation->retval);
+    else
+      napi_get_null (env, &js_retval);
     napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
@@ -6790,175 +6589,24 @@ beach:
   return js_retval;
 }
 
-static void
-fdn_application_list_register (napi_env env,
-                               napi_value exports)
-{
-  napi_property_descriptor properties[] =
-  {
-    { "size", NULL, fdn_application_list_size, NULL, NULL, NULL, napi_default, NULL },
-    { "get", NULL, fdn_application_list_get, NULL, NULL, NULL, napi_default, NULL },
-  };
-
-  napi_value constructor;
-  napi_define_class (env, "ApplicationList", NAPI_AUTO_LENGTH, fdn_application_list_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
-  napi_create_reference (env, constructor, 1, &fdn_application_list_constructor);
-
-  napi_set_named_property (env, exports, "ApplicationList", constructor);
-}
-
-static gboolean
-fdn_application_list_from_value (napi_env env,
-                                 napi_value value,
-                                 FridaApplicationList ** handle)
-{
-  napi_status status;
-  bool is_instance;
-
-  status = napi_check_object_type_tag (env, value, &fdn_application_list_type_tag, &is_instance);
-  if (status != napi_ok || !is_instance)
-  {
-    napi_throw_type_error (env, NULL, "expected an instance of ApplicationList");
-    return FALSE;
-  }
-
-  napi_unwrap (env, value, (void **) handle);
-
-  g_object_ref (*handle);
-
-  return TRUE;
-}
-
 static napi_value
 fdn_application_list_to_value (napi_env env,
-                               FridaApplicationList * handle)
+                               FridaApplicationList * list)
 {
-  napi_value result, constructor, handle_wrapper;
+  napi_value result;
+  gint size, i;
 
-  napi_get_reference_value (env, fdn_application_list_constructor, &constructor);
+  size = frida_application_list_size (list);
+  napi_create_array_with_length (env, size, &result);
 
-  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
-  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
-
-  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+  for (i = 0; i != size; i++)
+  {
+    FridaApplication * handle = frida_application_list_get (list, i);
+    napi_set_element (env, result, i, fdn_application_to_value (env, handle));
+    g_object_unref (handle);
+  }
 
   return result;
-}
-
-static napi_value
-fdn_application_list_construct (napi_env env,
-                                napi_callback_info info)
-{
-  size_t argc = 1;
-  napi_value args[1];
-  napi_value jsthis;
-  napi_status status;
-  FridaApplicationList * handle;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    return NULL;
-
-  if (argc == 0)
-  {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
-  return NULL;
-  }
-  else
-  {
-    bool is_instance;
-
-    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a ApplicationList handle");
-      return FALSE;
-    }
-
-    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
-
-    g_object_ref (handle);
-  }
-
-  status = napi_type_tag_object (env, jsthis, &fdn_application_list_type_tag);
-  if (status != napi_ok)
-    return NULL;
-
-  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
-  if (status != napi_ok)
-    return NULL;
-
-  return jsthis;
-}
-
-static napi_value
-fdn_application_list_size (napi_env env,
-                           napi_callback_info info)
-{
-  napi_value js_retval = NULL;
-  size_t argc = 0;
-  napi_value args[0];
-  napi_status status;
-  napi_value jsthis;
-  FridaApplicationList * handle;
-  gint retval;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    goto beach;
-
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
-    goto beach;
-
-  retval = frida_application_list_size (handle);
-
-  js_retval = fdn_int_to_value (env, retval);
-
-beach:
-  return js_retval;
-}
-
-static napi_value
-fdn_application_list_get (napi_env env,
-                          napi_callback_info info)
-{
-  napi_value js_retval = NULL;
-  size_t argc = 1;
-  napi_value args[1];
-  napi_status status;
-  napi_value jsthis;
-  FridaApplicationList * handle;
-  gint index;
-  FridaApplication * retval;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    goto beach;
-
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
-    goto beach;
-
-  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
-  {
-    if (!fdn_int_from_value (env, args[0], &index))
-      goto beach;
-  }
-  else
-  {
-    napi_throw_type_error (env, NULL, "missing argument: index");
-    goto beach;
-  }
-
-  retval = frida_application_list_get (handle, index);
-
-  js_retval = fdn_application_to_value (env, retval);
-
-beach:
-  return js_retval;
 }
 
 static void
@@ -7178,175 +6826,24 @@ beach:
   return js_retval;
 }
 
-static void
-fdn_process_list_register (napi_env env,
-                           napi_value exports)
-{
-  napi_property_descriptor properties[] =
-  {
-    { "size", NULL, fdn_process_list_size, NULL, NULL, NULL, napi_default, NULL },
-    { "get", NULL, fdn_process_list_get, NULL, NULL, NULL, napi_default, NULL },
-  };
-
-  napi_value constructor;
-  napi_define_class (env, "ProcessList", NAPI_AUTO_LENGTH, fdn_process_list_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
-  napi_create_reference (env, constructor, 1, &fdn_process_list_constructor);
-
-  napi_set_named_property (env, exports, "ProcessList", constructor);
-}
-
-static gboolean
-fdn_process_list_from_value (napi_env env,
-                             napi_value value,
-                             FridaProcessList ** handle)
-{
-  napi_status status;
-  bool is_instance;
-
-  status = napi_check_object_type_tag (env, value, &fdn_process_list_type_tag, &is_instance);
-  if (status != napi_ok || !is_instance)
-  {
-    napi_throw_type_error (env, NULL, "expected an instance of ProcessList");
-    return FALSE;
-  }
-
-  napi_unwrap (env, value, (void **) handle);
-
-  g_object_ref (*handle);
-
-  return TRUE;
-}
-
 static napi_value
 fdn_process_list_to_value (napi_env env,
-                           FridaProcessList * handle)
+                           FridaProcessList * list)
 {
-  napi_value result, constructor, handle_wrapper;
+  napi_value result;
+  gint size, i;
 
-  napi_get_reference_value (env, fdn_process_list_constructor, &constructor);
+  size = frida_process_list_size (list);
+  napi_create_array_with_length (env, size, &result);
 
-  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
-  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
-
-  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+  for (i = 0; i != size; i++)
+  {
+    FridaProcess * handle = frida_process_list_get (list, i);
+    napi_set_element (env, result, i, fdn_process_to_value (env, handle));
+    g_object_unref (handle);
+  }
 
   return result;
-}
-
-static napi_value
-fdn_process_list_construct (napi_env env,
-                            napi_callback_info info)
-{
-  size_t argc = 1;
-  napi_value args[1];
-  napi_value jsthis;
-  napi_status status;
-  FridaProcessList * handle;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    return NULL;
-
-  if (argc == 0)
-  {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
-  return NULL;
-  }
-  else
-  {
-    bool is_instance;
-
-    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a ProcessList handle");
-      return FALSE;
-    }
-
-    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
-
-    g_object_ref (handle);
-  }
-
-  status = napi_type_tag_object (env, jsthis, &fdn_process_list_type_tag);
-  if (status != napi_ok)
-    return NULL;
-
-  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
-  if (status != napi_ok)
-    return NULL;
-
-  return jsthis;
-}
-
-static napi_value
-fdn_process_list_size (napi_env env,
-                       napi_callback_info info)
-{
-  napi_value js_retval = NULL;
-  size_t argc = 0;
-  napi_value args[0];
-  napi_status status;
-  napi_value jsthis;
-  FridaProcessList * handle;
-  gint retval;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    goto beach;
-
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
-    goto beach;
-
-  retval = frida_process_list_size (handle);
-
-  js_retval = fdn_int_to_value (env, retval);
-
-beach:
-  return js_retval;
-}
-
-static napi_value
-fdn_process_list_get (napi_env env,
-                      napi_callback_info info)
-{
-  napi_value js_retval = NULL;
-  size_t argc = 1;
-  napi_value args[1];
-  napi_status status;
-  napi_value jsthis;
-  FridaProcessList * handle;
-  gint index;
-  FridaProcess * retval;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    goto beach;
-
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
-    goto beach;
-
-  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
-  {
-    if (!fdn_int_from_value (env, args[0], &index))
-      goto beach;
-  }
-  else
-  {
-    napi_throw_type_error (env, NULL, "missing argument: index");
-    goto beach;
-  }
-
-  retval = frida_process_list_get (handle, index);
-
-  js_retval = fdn_process_to_value (env, retval);
-
-beach:
-  return js_retval;
 }
 
 static void
@@ -8326,175 +7823,24 @@ beach:
   return js_retval;
 }
 
-static void
-fdn_spawn_list_register (napi_env env,
-                         napi_value exports)
-{
-  napi_property_descriptor properties[] =
-  {
-    { "size", NULL, fdn_spawn_list_size, NULL, NULL, NULL, napi_default, NULL },
-    { "get", NULL, fdn_spawn_list_get, NULL, NULL, NULL, napi_default, NULL },
-  };
-
-  napi_value constructor;
-  napi_define_class (env, "SpawnList", NAPI_AUTO_LENGTH, fdn_spawn_list_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
-  napi_create_reference (env, constructor, 1, &fdn_spawn_list_constructor);
-
-  napi_set_named_property (env, exports, "SpawnList", constructor);
-}
-
-static gboolean
-fdn_spawn_list_from_value (napi_env env,
-                           napi_value value,
-                           FridaSpawnList ** handle)
-{
-  napi_status status;
-  bool is_instance;
-
-  status = napi_check_object_type_tag (env, value, &fdn_spawn_list_type_tag, &is_instance);
-  if (status != napi_ok || !is_instance)
-  {
-    napi_throw_type_error (env, NULL, "expected an instance of SpawnList");
-    return FALSE;
-  }
-
-  napi_unwrap (env, value, (void **) handle);
-
-  g_object_ref (*handle);
-
-  return TRUE;
-}
-
 static napi_value
 fdn_spawn_list_to_value (napi_env env,
-                         FridaSpawnList * handle)
+                         FridaSpawnList * list)
 {
-  napi_value result, constructor, handle_wrapper;
+  napi_value result;
+  gint size, i;
 
-  napi_get_reference_value (env, fdn_spawn_list_constructor, &constructor);
+  size = frida_spawn_list_size (list);
+  napi_create_array_with_length (env, size, &result);
 
-  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
-  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
-
-  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+  for (i = 0; i != size; i++)
+  {
+    FridaSpawn * handle = frida_spawn_list_get (list, i);
+    napi_set_element (env, result, i, fdn_spawn_to_value (env, handle));
+    g_object_unref (handle);
+  }
 
   return result;
-}
-
-static napi_value
-fdn_spawn_list_construct (napi_env env,
-                          napi_callback_info info)
-{
-  size_t argc = 1;
-  napi_value args[1];
-  napi_value jsthis;
-  napi_status status;
-  FridaSpawnList * handle;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    return NULL;
-
-  if (argc == 0)
-  {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
-  return NULL;
-  }
-  else
-  {
-    bool is_instance;
-
-    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a SpawnList handle");
-      return FALSE;
-    }
-
-    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
-
-    g_object_ref (handle);
-  }
-
-  status = napi_type_tag_object (env, jsthis, &fdn_spawn_list_type_tag);
-  if (status != napi_ok)
-    return NULL;
-
-  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
-  if (status != napi_ok)
-    return NULL;
-
-  return jsthis;
-}
-
-static napi_value
-fdn_spawn_list_size (napi_env env,
-                     napi_callback_info info)
-{
-  napi_value js_retval = NULL;
-  size_t argc = 0;
-  napi_value args[0];
-  napi_status status;
-  napi_value jsthis;
-  FridaSpawnList * handle;
-  gint retval;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    goto beach;
-
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
-    goto beach;
-
-  retval = frida_spawn_list_size (handle);
-
-  js_retval = fdn_int_to_value (env, retval);
-
-beach:
-  return js_retval;
-}
-
-static napi_value
-fdn_spawn_list_get (napi_env env,
-                    napi_callback_info info)
-{
-  napi_value js_retval = NULL;
-  size_t argc = 1;
-  napi_value args[1];
-  napi_status status;
-  napi_value jsthis;
-  FridaSpawnList * handle;
-  gint index;
-  FridaSpawn * retval;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    goto beach;
-
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
-    goto beach;
-
-  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
-  {
-    if (!fdn_int_from_value (env, args[0], &index))
-      goto beach;
-  }
-  else
-  {
-    napi_throw_type_error (env, NULL, "missing argument: index");
-    goto beach;
-  }
-
-  retval = frida_spawn_list_get (handle, index);
-
-  js_retval = fdn_spawn_to_value (env, retval);
-
-beach:
-  return js_retval;
 }
 
 static void
@@ -8659,175 +8005,24 @@ beach:
   return js_retval;
 }
 
-static void
-fdn_child_list_register (napi_env env,
-                         napi_value exports)
-{
-  napi_property_descriptor properties[] =
-  {
-    { "size", NULL, fdn_child_list_size, NULL, NULL, NULL, napi_default, NULL },
-    { "get", NULL, fdn_child_list_get, NULL, NULL, NULL, napi_default, NULL },
-  };
-
-  napi_value constructor;
-  napi_define_class (env, "ChildList", NAPI_AUTO_LENGTH, fdn_child_list_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
-  napi_create_reference (env, constructor, 1, &fdn_child_list_constructor);
-
-  napi_set_named_property (env, exports, "ChildList", constructor);
-}
-
-static gboolean
-fdn_child_list_from_value (napi_env env,
-                           napi_value value,
-                           FridaChildList ** handle)
-{
-  napi_status status;
-  bool is_instance;
-
-  status = napi_check_object_type_tag (env, value, &fdn_child_list_type_tag, &is_instance);
-  if (status != napi_ok || !is_instance)
-  {
-    napi_throw_type_error (env, NULL, "expected an instance of ChildList");
-    return FALSE;
-  }
-
-  napi_unwrap (env, value, (void **) handle);
-
-  g_object_ref (*handle);
-
-  return TRUE;
-}
-
 static napi_value
 fdn_child_list_to_value (napi_env env,
-                         FridaChildList * handle)
+                         FridaChildList * list)
 {
-  napi_value result, constructor, handle_wrapper;
+  napi_value result;
+  gint size, i;
 
-  napi_get_reference_value (env, fdn_child_list_constructor, &constructor);
+  size = frida_child_list_size (list);
+  napi_create_array_with_length (env, size, &result);
 
-  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
-  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
-
-  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+  for (i = 0; i != size; i++)
+  {
+    FridaChild * handle = frida_child_list_get (list, i);
+    napi_set_element (env, result, i, fdn_child_to_value (env, handle));
+    g_object_unref (handle);
+  }
 
   return result;
-}
-
-static napi_value
-fdn_child_list_construct (napi_env env,
-                          napi_callback_info info)
-{
-  size_t argc = 1;
-  napi_value args[1];
-  napi_value jsthis;
-  napi_status status;
-  FridaChildList * handle;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    return NULL;
-
-  if (argc == 0)
-  {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
-  return NULL;
-  }
-  else
-  {
-    bool is_instance;
-
-    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a ChildList handle");
-      return FALSE;
-    }
-
-    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
-
-    g_object_ref (handle);
-  }
-
-  status = napi_type_tag_object (env, jsthis, &fdn_child_list_type_tag);
-  if (status != napi_ok)
-    return NULL;
-
-  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
-  if (status != napi_ok)
-    return NULL;
-
-  return jsthis;
-}
-
-static napi_value
-fdn_child_list_size (napi_env env,
-                     napi_callback_info info)
-{
-  napi_value js_retval = NULL;
-  size_t argc = 0;
-  napi_value args[0];
-  napi_status status;
-  napi_value jsthis;
-  FridaChildList * handle;
-  gint retval;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    goto beach;
-
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
-    goto beach;
-
-  retval = frida_child_list_size (handle);
-
-  js_retval = fdn_int_to_value (env, retval);
-
-beach:
-  return js_retval;
-}
-
-static napi_value
-fdn_child_list_get (napi_env env,
-                    napi_callback_info info)
-{
-  napi_value js_retval = NULL;
-  size_t argc = 1;
-  napi_value args[1];
-  napi_status status;
-  napi_value jsthis;
-  FridaChildList * handle;
-  gint index;
-  FridaChild * retval;
-
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
-    goto beach;
-
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
-    goto beach;
-
-  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
-  {
-    if (!fdn_int_from_value (env, args[0], &index))
-      goto beach;
-  }
-  else
-  {
-    napi_throw_type_error (env, NULL, "missing argument: index");
-    goto beach;
-  }
-
-  retval = frida_child_list_get (handle, index);
-
-  js_retval = fdn_child_to_value (env, retval);
-
-beach:
-  return js_retval;
 }
 
 static void
