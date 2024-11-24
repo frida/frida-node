@@ -862,14 +862,14 @@ fdn_uint16_to_value (napi_env env,
 static gboolean
 fdn_int64_from_value (napi_env env,
                       napi_value value,
-                      gint64 * result)
+                      gint64 * i)
 {
-  int64_t number;
+  int64_t napi_i;
 
-  if (napi_get_value_int64 (env, value, &number) != napi_ok)
+  if (napi_get_value_int64 (env, value, &napi_i) != napi_ok)
     goto invalid_argument;
 
-  *result = number;
+  *i = napi_i;
   return TRUE;
 
 invalid_argument:
@@ -881,36 +881,36 @@ invalid_argument:
 
 static napi_value
 fdn_int64_to_value (napi_env env,
-                    gint64 value)
+                    gint64 i)
 {
   napi_value result;
-  napi_create_int64 (env, value, &result);
+  napi_create_int64 (env, i, &result);
   return result;
 }
 
 static napi_value
 fdn_uint64_to_value (napi_env env,
-                     guint64 value)
+                     guint64 u)
 {
   napi_value result;
-  napi_create_double (env, value, &result);
+  napi_create_double (env, u, &result);
   return result;
 }
 
 static gboolean
 fdn_ulong_from_value (napi_env env,
                       napi_value value,
-                      gulong * result)
+                      gulong * u)
 {
-  double number;
+  double d;
 
-  if (napi_get_value_double (env, value, &number) != napi_ok)
+  if (napi_get_value_double (env, value, &d) != napi_ok)
     goto invalid_argument;
 
-  if (number < 0 || number > G_MAXULONG)
+  if (d < 0 || d > G_MAXULONG)
     goto invalid_argument;
 
-  *result = number;
+  *u = d;
   return TRUE;
 
 invalid_argument:
@@ -922,10 +922,10 @@ invalid_argument:
 
 static napi_value
 fdn_double_to_value (napi_env env,
-                     gdouble value)
+                     gdouble d)
 {
   napi_value result;
-  napi_create_double (env, value, &result);
+  napi_create_double (env, d, &result);
   return result;
 }
 
@@ -933,7 +933,7 @@ static gboolean
 fdn_enum_from_value (napi_env env,
                      GType enum_type,
                      napi_value value,
-                     gint * result)
+                     gint * e)
 {
   gboolean success = FALSE;
   gchar * nick;
@@ -950,7 +950,7 @@ fdn_enum_from_value (napi_env env,
     GEnumValue * enum_value = &enum_class->values[i];
     if (strcmp (enum_value->value_nick, nick) == 0)
     {
-      *result = enum_value->value;
+      *e = enum_value->value;
       success = TRUE;
       break;
     }
@@ -969,7 +969,7 @@ fdn_enum_from_value (napi_env env,
 static napi_value
 fdn_enum_to_value (napi_env env,
                    GType enum_type,
-                   gint value)
+                   gint e)
 {
   napi_value result;
   GEnumClass * enum_class;
@@ -977,7 +977,7 @@ fdn_enum_to_value (napi_env env,
 
   enum_class = G_ENUM_CLASS (g_type_class_ref (enum_type));
 
-  enum_value = g_enum_get_value (enum_class, value);
+  enum_value = g_enum_get_value (enum_class, e);
   g_assert (enum_value != NULL);
 
   napi_create_string_utf8 (env, enum_value->value_nick, NAPI_AUTO_LENGTH, &result);
@@ -1087,7 +1087,7 @@ fdn_buffer_to_value (napi_env env,
 static gboolean
 fdn_bytes_from_value (napi_env env,
                       napi_value value,
-                      GBytes ** result)
+                      GBytes ** bytes)
 {
   void * data;
   size_t size;
@@ -1095,7 +1095,7 @@ fdn_bytes_from_value (napi_env env,
   if (napi_get_buffer_info (env, value, &data, &size) != napi_ok)
     goto invalid_argument;
 
-  *result = g_bytes_new (data, size);
+  *bytes = g_bytes_new (data, size);
   return TRUE;
 
 invalid_argument:
@@ -1120,11 +1120,11 @@ fdn_bytes_to_value (napi_env env,
 static gboolean
 fdn_vardict_from_value (napi_env env,
                         napi_value value,
-                        GHashTable ** result)
+                        GHashTable ** vardict)
 {
   napi_value keys;
   uint32_t length, i;
-  GHashTable * vardict = NULL;
+  GHashTable * dict = NULL;
   gchar * key = NULL;
 
   if (napi_get_property_names (env, value, &keys) != napi_ok)
@@ -1132,7 +1132,7 @@ fdn_vardict_from_value (napi_env env,
   if (napi_get_array_length (env, keys, &length) != napi_ok)
     goto propagate_error;
 
-  vardict = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_variant_unref);
+  dict = g_hash_table_new_full (g_str_hash, g_str_equal, g_free, (GDestroyNotify) g_variant_unref);
 
   for (i = 0; i != length; i++)
   {
@@ -1149,10 +1149,10 @@ fdn_vardict_from_value (napi_env env,
     if (!fdn_variant_from_value (env, js_val, &val))
       goto propagate_error;
 
-    g_hash_table_insert (vardict, g_steal_pointer (&key), val);
+    g_hash_table_insert (dict, g_steal_pointer (&key), val);
   }
 
-  *result = vardict;
+  *vardict = dict;
   return TRUE;
 
 invalid_argument:
@@ -1163,7 +1163,7 @@ invalid_argument:
 propagate_error:
   {
     g_free (key);
-    g_clear_pointer (&vardict, g_hash_table_unref);
+    g_clear_pointer (&dict, g_hash_table_unref);
     return FALSE;
   }
 }
@@ -1195,7 +1195,7 @@ fdn_vardict_to_value (napi_env env,
 static gboolean
 fdn_variant_from_value (napi_env env,
                         napi_value value,
-                        GVariant ** result)
+                        GVariant ** variant)
 {
   napi_valuetype type;
 
@@ -1210,7 +1210,7 @@ fdn_variant_from_value (napi_env env,
       if (!fdn_boolean_from_value (env, value, &b))
         return FALSE;
 
-      *result = g_variant_new_boolean (b);
+      *variant = g_variant_new_boolean (b);
       return TRUE;
     }
     case napi_number:
@@ -1220,7 +1220,7 @@ fdn_variant_from_value (napi_env env,
       if (!fdn_int64_from_value (env, value, &i))
         return FALSE;
 
-      *result = g_variant_new_int64 (i);
+      *variant = g_variant_new_int64 (i);
       return TRUE;
     }
     case napi_string:
@@ -1230,7 +1230,7 @@ fdn_variant_from_value (napi_env env,
       if (!fdn_utf8_from_value (env, value, &str))
         return FALSE;
 
-      *result = g_variant_new_take_string (str);
+      *variant = g_variant_new_take_string (str);
       return TRUE;
     }
     case napi_object:
@@ -1252,7 +1252,7 @@ fdn_variant_from_value (napi_env env,
           return FALSE;
 
         copy = g_memdup2 (data, size);
-        *result = g_variant_new_from_data (G_VARIANT_TYPE_BYTESTRING, copy, size, TRUE, g_free, copy);
+        *variant = g_variant_new_from_data (G_VARIANT_TYPE_BYTESTRING, copy, size, TRUE, g_free, copy);
         return TRUE;
       }
 
@@ -1295,7 +1295,7 @@ fdn_variant_from_value (napi_env env,
             t[0] = g_variant_new_take_string (type);
             t[1] = val;
 
-            *result = g_variant_new_tuple (t, G_N_ELEMENTS (t));
+            *variant = g_variant_new_tuple (t, G_N_ELEMENTS (t));
             return TRUE;
           }
         }
@@ -1322,7 +1322,7 @@ fdn_variant_from_value (napi_env env,
           g_variant_builder_add (&builder, "v", v);
         }
 
-        *result = g_variant_builder_end (&builder);
+        *variant = g_variant_builder_end (&builder);
         return TRUE;
       }
 
@@ -1363,7 +1363,7 @@ fdn_variant_from_value (napi_env env,
         g_free (key_str);
       }
 
-      *result = g_variant_builder_end (&builder);
+      *variant = g_variant_builder_end (&builder);
       return TRUE;
     }
     default:
@@ -1465,17 +1465,15 @@ fdn_variant_to_value (napi_env env,
 static gboolean
 fdn_file_from_value (napi_env env,
                      napi_value value,
-                     GFile ** result)
+                     GFile ** file)
 {
   gchar * path;
-  GFile * file;
 
   if (!fdn_utf8_from_value (env, value, &path))
     return FALSE;
-  file = g_file_new_for_path (path);
+  *file = g_file_new_for_path (path);
   g_free (path);
 
-  *result = file;
   return TRUE;
 }
 
@@ -1496,7 +1494,7 @@ fdn_file_to_value (napi_env env,
 static gboolean
 fdn_tls_certificate_from_value (napi_env env,
                                 napi_value value,
-                                GTlsCertificate ** result)
+                                GTlsCertificate ** certificate)
 {
   gchar * str;
   GError * error = NULL;
@@ -1505,9 +1503,9 @@ fdn_tls_certificate_from_value (napi_env env,
     return FALSE;
 
   if (strchr (str, '\\n') != NULL)
-    *result = g_tls_certificate_new_from_pem (str, -1, &error);
+    *certificate = g_tls_certificate_new_from_pem (str, -1, &error);
   else
-    *result = g_tls_certificate_new_from_file (str, &error);
+    *certificate = g_tls_certificate_new_from_file (str, &error);
 
   g_free (str);
 
