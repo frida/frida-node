@@ -538,7 +538,8 @@ def generate_method_code(klass: Class, method: Method) -> str:
     class_cprefix = klass.c_symbol_prefix
 
     invalid_arg_label = "invalid_argument" if method.is_async else "beach"
-    param_conversions = [generate_parameter_conversion_code(param, i, invalid_arg_label) for i, param in enumerate(method.parameters)]
+    input_params = [param for param in method.parameters if param.direction != Direction.OUT]
+    param_conversions = [generate_parameter_conversion_code(param, i, invalid_arg_label) for i, param in enumerate(input_params)]
     param_frees = [f"g_free (operation->{param.name});" for param in method.parameters if param.type.name == "utf8"]
     param_frees_str = "\n  " + "\n  ".join(param_frees) if param_frees else ""
 
