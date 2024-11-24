@@ -1414,44 +1414,44 @@ static napi_value fdn_service_to_value (napi_env env, FridaService * service);
 static napi_value fdn_authentication_service_to_value (napi_env env, FridaAuthenticationService * service);
 
 static napi_type_tag fdn_handle_wrapper_type_tag = { 0xdd596d4f2dad45f9, 0x844585a48e8d05ba };
-static napi_type_tag fdn_device_manager_type_tag = { 0x1a285c516d20494e, 0x9b992cfe57b6bf8b };
-static napi_type_tag fdn_device_list_type_tag = { 0xe4083a0ac97748a6, 0x9471b7af086953e2 };
-static napi_type_tag fdn_device_type_tag = { 0x51736f4129404bd8, 0xa863592b19c720e5 };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0xd5291fc357224ab7, 0xbd82f94ae41b645f };
-static napi_type_tag fdn_application_list_type_tag = { 0xd86e4d8973134abc, 0xa0060da2e9117142 };
-static napi_type_tag fdn_application_type_tag = { 0x9b40371c97514c51, 0xa5cc33ad3f3dcf40 };
-static napi_type_tag fdn_process_list_type_tag = { 0x3d058f69cc014aa6, 0xabcc17a3e7575271 };
-static napi_type_tag fdn_process_type_tag = { 0xbbf77bb77666446b, 0xb6db6efd6121c6a4 };
-static napi_type_tag fdn_process_match_options_type_tag = { 0xb66b484029284f9c, 0x979ff6e286c0f718 };
-static napi_type_tag fdn_spawn_options_type_tag = { 0x920d2a4b86e144bc, 0xbd137b479fb26552 };
-static napi_type_tag fdn_spawn_list_type_tag = { 0x7534b8c73b8b4949, 0x824220facfdea3ab };
-static napi_type_tag fdn_spawn_type_tag = { 0xab1aea28efc749dc, 0x95c19b85838058aa };
-static napi_type_tag fdn_child_list_type_tag = { 0xcf839c9e72df41bf, 0x8370f85118d1426d };
-static napi_type_tag fdn_child_type_tag = { 0x437888850aba4598, 0x9c46bbdd55a2b5ba };
-static napi_type_tag fdn_crash_type_tag = { 0xb7cde9017543481e, 0xbe4d8f7e5cd5019e };
-static napi_type_tag fdn_bus_type_tag = { 0xcfb8f7e7e9ff47d7, 0x813975bf5afb04c7 };
-static napi_type_tag fdn_session_type_tag = { 0x5f7915bf2eb4435d, 0xa098196841c0973b };
-static napi_type_tag fdn_script_type_tag = { 0x395684f7aaa74541, 0xb41c42cae76a73de };
-static napi_type_tag fdn_portal_membership_type_tag = { 0x2b6028a289ca4fdc, 0xb961e5c62be22428 };
-static napi_type_tag fdn_control_service_options_type_tag = { 0xf5ec557ea46e441e, 0x95c644776dedde77 };
-static napi_type_tag fdn_portal_service_type_tag = { 0x6198c54a29254b38, 0xb9592b8575797942 };
-static napi_type_tag fdn_file_monitor_type_tag = { 0xa915cd94d1ff4674, 0xa23fbe12e6ac639a };
-static napi_type_tag fdn_compiler_type_tag = { 0xdbbec2db4eb14f37, 0x919d3c1d653b229e };
-static napi_type_tag fdn_compiler_options_type_tag = { 0x75772faeed834d3a, 0x9c2c4a342af1905c };
-static napi_type_tag fdn_build_options_type_tag = { 0x40a3f18a6f74425f, 0xae2e4584728c11ee };
-static napi_type_tag fdn_watch_options_type_tag = { 0x8ebaa425b8c84b0f, 0x8e2442aeb455489f };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0x28b8aebb79454fa0, 0x94dc11b91a562df9 };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0xd6d4baeeaf6f4bca, 0xa0a019f76c604784 };
-static napi_type_tag fdn_application_query_options_type_tag = { 0x993ec0023d264af2, 0x812c3d6c0725ed3f };
-static napi_type_tag fdn_process_query_options_type_tag = { 0xe687cf67750d4287, 0x92a130f658892076 };
-static napi_type_tag fdn_session_options_type_tag = { 0x15851f5bb5e440bd, 0xb32a3f53bf0a15df };
-static napi_type_tag fdn_script_options_type_tag = { 0xa618a398054f4eab, 0xbddd66dc56117d92 };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0x5b4e8b3609734684, 0xa49efa48e46ce1cc };
-static napi_type_tag fdn_portal_options_type_tag = { 0x43d11fb3c5984659, 0x8fe4d29924a8a5f3 };
-static napi_type_tag fdn_peer_options_type_tag = { 0x634f3236d3df4f56, 0xa30ec6d1117b00c8 };
-static napi_type_tag fdn_relay_type_tag = { 0x3d59dbb1db8a4f3c, 0xa7644249c0bc665d };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0xd361157ee78243e0, 0xb8d125ed71fe8bb0 };
-static napi_type_tag fdn_cancellable_type_tag = { 0x21eae3c1484344a5, 0xbc77a234f7a2b123 };
+static napi_type_tag fdn_device_manager_type_tag = { 0xdb2864adfec94f4d, 0x8ca24d57f3c80c3f };
+static napi_type_tag fdn_device_list_type_tag = { 0x4d2ed518ce9e4d87, 0x98c057060d99f65e };
+static napi_type_tag fdn_device_type_tag = { 0x5db130c69d3f4cea, 0xbf3e21a1845e2a9f };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0x3e3e7ace3d324830, 0xa2671e0af3d37b82 };
+static napi_type_tag fdn_application_list_type_tag = { 0x3ef320d29b164408, 0x9ac5438b804f1903 };
+static napi_type_tag fdn_application_type_tag = { 0x1be4f177053e448a, 0x8a954cbcfc37d2b3 };
+static napi_type_tag fdn_process_list_type_tag = { 0x9938502796044e33, 0xa89ae6c06fcc720c };
+static napi_type_tag fdn_process_type_tag = { 0xff0c9c6194a74d5b, 0x9fe094f14fda89aa };
+static napi_type_tag fdn_process_match_options_type_tag = { 0xe9209be9b58a422f, 0xab4d28d22c237b3e };
+static napi_type_tag fdn_spawn_options_type_tag = { 0xceb0243741754275, 0x804af17d7a1163ad };
+static napi_type_tag fdn_spawn_list_type_tag = { 0x4be6f28d9d9e47df, 0x8a4fbdf8192001e8 };
+static napi_type_tag fdn_spawn_type_tag = { 0x96991311d5ba4e1e, 0x9397ffb7f29f51ef };
+static napi_type_tag fdn_child_list_type_tag = { 0x26b07525003e4a19, 0x94e2e67232e3ee8d };
+static napi_type_tag fdn_child_type_tag = { 0xf93e81474e7c4d52, 0xaadac232b23d9525 };
+static napi_type_tag fdn_crash_type_tag = { 0x5990b60b7a354ae5, 0xb2ced8cf312620cf };
+static napi_type_tag fdn_bus_type_tag = { 0xd044a5e161c3488f, 0x978cc140566ebd18 };
+static napi_type_tag fdn_session_type_tag = { 0xeec721986a104b98, 0xa0d31571d5b0a28e };
+static napi_type_tag fdn_script_type_tag = { 0x643269f77f4740dc, 0xa62a593e3994c68d };
+static napi_type_tag fdn_portal_membership_type_tag = { 0xbaacf99255ee41b9, 0xb249fcc89414ea58 };
+static napi_type_tag fdn_control_service_options_type_tag = { 0x217418709edc448a, 0x887976b746165bfe };
+static napi_type_tag fdn_portal_service_type_tag = { 0x1fe2b7eb823241bc, 0xb2bab6c41a2df7d2 };
+static napi_type_tag fdn_file_monitor_type_tag = { 0x17805109a02340ef, 0x8ca4f0bc66e714b0 };
+static napi_type_tag fdn_compiler_type_tag = { 0x7cdbc47ec54e4696, 0x8733b99b5a7358f3 };
+static napi_type_tag fdn_compiler_options_type_tag = { 0x2976a204254844e8, 0xb318950a35a046bc };
+static napi_type_tag fdn_build_options_type_tag = { 0x2079469e94e6469e, 0xab16330177214e49 };
+static napi_type_tag fdn_watch_options_type_tag = { 0x95d3ee944a8c4ee2, 0x840d0b13e4ac4f8e };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0x9338bec364e24e73, 0x973ee49ee9049c75 };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x32838214505b4740, 0xae127f71ecdd40b6 };
+static napi_type_tag fdn_application_query_options_type_tag = { 0x595fed0021cd401d, 0xa6210b0950a8cdf5 };
+static napi_type_tag fdn_process_query_options_type_tag = { 0x60e6f795586b4cfc, 0x94dca432ebddf104 };
+static napi_type_tag fdn_session_options_type_tag = { 0xa1c6d03b5d4c4d0f, 0x88957d70c7d6470d };
+static napi_type_tag fdn_script_options_type_tag = { 0xbc768f54fe6740cd, 0x8c319f7e6f3376a1 };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0x302096819ebc4106, 0x9e70df92e5ae544f };
+static napi_type_tag fdn_portal_options_type_tag = { 0x91c9b3ac361d47a7, 0x92c81a978edeb599 };
+static napi_type_tag fdn_peer_options_type_tag = { 0x8a3dd148147c46ab, 0x84bdc3c1400c67c8 };
+static napi_type_tag fdn_relay_type_tag = { 0x74140fd86f6e4146, 0xa33f64b2b9dc9593 };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0xc917e569bc134aa0, 0x84420d310eb20729 };
+static napi_type_tag fdn_cancellable_type_tag = { 0x114e03806a30441e, 0xb2c59a296666739f };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_list_constructor;
@@ -2280,7 +2280,10 @@ fdn_device_manager_find_device_by_id_deliver (napi_env env,
   else
   {
     napi_value js_retval;
+    if (operation->retval != NULL)
     js_retval = fdn_device_to_value (env, operation->retval);
+  else
+    napi_get_null (env, &js_retval);
     napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
@@ -2426,7 +2429,10 @@ fdn_device_manager_find_device_by_type_deliver (napi_env env,
   else
   {
     napi_value js_retval;
+    if (operation->retval != NULL)
     js_retval = fdn_device_to_value (env, operation->retval);
+  else
+    napi_get_null (env, &js_retval);
     napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
@@ -3042,11 +3048,11 @@ fdn_device_register (napi_env env,
     { "openChannel", NULL, fdn_device_open_channel, NULL, NULL, NULL, napi_default, NULL },
     { "openService", NULL, fdn_device_open_service, NULL, NULL, NULL, napi_default, NULL },
     { "unpair", NULL, fdn_device_unpair, NULL, NULL, NULL, napi_default, NULL },
-    { "getId", NULL, fdn_device_get_id, NULL, NULL, NULL, napi_default, NULL },
-    { "getName", NULL, fdn_device_get_name, NULL, NULL, NULL, napi_default, NULL },
-    { "getIcon", NULL, fdn_device_get_icon, NULL, NULL, NULL, napi_default, NULL },
-    { "getDtype", NULL, fdn_device_get_dtype, NULL, NULL, NULL, napi_default, NULL },
-    { "getBus", NULL, fdn_device_get_bus, NULL, NULL, NULL, napi_default, NULL },
+    { "id", NULL, NULL, fdn_device_get_id, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "name", NULL, NULL, fdn_device_get_name, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "icon", NULL, NULL, fdn_device_get_icon, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "dtype", NULL, NULL, fdn_device_get_dtype, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "bus", NULL, NULL, fdn_device_get_bus, NULL, NULL, napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -3479,7 +3485,10 @@ fdn_device_get_frontmost_application_deliver (napi_env env,
   else
   {
     napi_value js_retval;
+    if (operation->retval != NULL)
     js_retval = fdn_application_to_value (env, operation->retval);
+  else
+    napi_get_null (env, &js_retval);
     napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
@@ -4045,7 +4054,10 @@ fdn_device_find_process_by_pid_deliver (napi_env env,
   else
   {
     napi_value js_retval;
+    if (operation->retval != NULL)
     js_retval = fdn_process_to_value (env, operation->retval);
+  else
+    napi_get_null (env, &js_retval);
     napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
@@ -4189,7 +4201,10 @@ fdn_device_find_process_by_name_deliver (napi_env env,
   else
   {
     napi_value js_retval;
+    if (operation->retval != NULL)
     js_retval = fdn_process_to_value (env, operation->retval);
+  else
+    napi_get_null (env, &js_retval);
     napi_resolve_deferred (env, operation->deferred, js_retval);
   }
 
@@ -6330,7 +6345,10 @@ fdn_device_get_icon (napi_env env,
 
   retval = frida_device_get_icon (handle);
 
-  js_retval = fdn_variant_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_variant_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -6398,14 +6416,10 @@ fdn_remote_device_options_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getCertificate", NULL, fdn_remote_device_options_get_certificate, NULL, NULL, NULL, napi_default, NULL },
-    { "setCertificate", NULL, fdn_remote_device_options_set_certificate, NULL, NULL, NULL, napi_default, NULL },
-    { "getOrigin", NULL, fdn_remote_device_options_get_origin, NULL, NULL, NULL, napi_default, NULL },
-    { "setOrigin", NULL, fdn_remote_device_options_set_origin, NULL, NULL, NULL, napi_default, NULL },
-    { "getToken", NULL, fdn_remote_device_options_get_token, NULL, NULL, NULL, napi_default, NULL },
-    { "setToken", NULL, fdn_remote_device_options_set_token, NULL, NULL, NULL, napi_default, NULL },
-    { "getKeepaliveInterval", NULL, fdn_remote_device_options_get_keepalive_interval, NULL, NULL, NULL, napi_default, NULL },
-    { "setKeepaliveInterval", NULL, fdn_remote_device_options_set_keepalive_interval, NULL, NULL, NULL, napi_default, NULL },
+    { "certificate", NULL, NULL, fdn_remote_device_options_get_certificate, fdn_remote_device_options_set_certificate, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "origin", NULL, NULL, fdn_remote_device_options_get_origin, fdn_remote_device_options_set_origin, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "token", NULL, NULL, fdn_remote_device_options_get_token, fdn_remote_device_options_set_token, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "keepaliveInterval", NULL, NULL, fdn_remote_device_options_get_keepalive_interval, fdn_remote_device_options_set_keepalive_interval, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -6522,7 +6536,10 @@ fdn_remote_device_options_get_certificate (napi_env env,
 
   retval = frida_remote_device_options_get_certificate (handle);
 
-  js_retval = fdn_tls_certificate_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_tls_certificate_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -6588,7 +6605,10 @@ fdn_remote_device_options_get_origin (napi_env env,
 
   retval = frida_remote_device_options_get_origin (handle);
 
-  js_retval = fdn_utf8_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_utf8_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -6655,7 +6675,10 @@ fdn_remote_device_options_get_token (napi_env env,
 
   retval = frida_remote_device_options_get_token (handle);
 
-  js_retval = fdn_utf8_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_utf8_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -6944,10 +6967,10 @@ fdn_application_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getIdentifier", NULL, fdn_application_get_identifier, NULL, NULL, NULL, napi_default, NULL },
-    { "getName", NULL, fdn_application_get_name, NULL, NULL, NULL, napi_default, NULL },
-    { "getPid", NULL, fdn_application_get_pid, NULL, NULL, NULL, napi_default, NULL },
-    { "getParameters", NULL, fdn_application_get_parameters, NULL, NULL, NULL, napi_default, NULL },
+    { "identifier", NULL, NULL, fdn_application_get_identifier, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "name", NULL, NULL, fdn_application_get_name, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "pid", NULL, NULL, fdn_application_get_pid, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "parameters", NULL, NULL, fdn_application_get_parameters, NULL, NULL, napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -7332,9 +7355,9 @@ fdn_process_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getPid", NULL, fdn_process_get_pid, NULL, NULL, NULL, napi_default, NULL },
-    { "getName", NULL, fdn_process_get_name, NULL, NULL, NULL, napi_default, NULL },
-    { "getParameters", NULL, fdn_process_get_parameters, NULL, NULL, NULL, napi_default, NULL },
+    { "pid", NULL, NULL, fdn_process_get_pid, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "name", NULL, NULL, fdn_process_get_name, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "parameters", NULL, NULL, fdn_process_get_parameters, NULL, NULL, napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -7520,10 +7543,8 @@ fdn_process_match_options_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getTimeout", NULL, fdn_process_match_options_get_timeout, NULL, NULL, NULL, napi_default, NULL },
-    { "setTimeout", NULL, fdn_process_match_options_set_timeout, NULL, NULL, NULL, napi_default, NULL },
-    { "getScope", NULL, fdn_process_match_options_get_scope, NULL, NULL, NULL, napi_default, NULL },
-    { "setScope", NULL, fdn_process_match_options_set_scope, NULL, NULL, NULL, napi_default, NULL },
+    { "timeout", NULL, NULL, fdn_process_match_options_get_timeout, fdn_process_match_options_set_timeout, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "scope", NULL, NULL, fdn_process_match_options_get_scope, fdn_process_match_options_set_scope, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -7758,18 +7779,12 @@ fdn_spawn_options_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getArgv", NULL, fdn_spawn_options_get_argv, NULL, NULL, NULL, napi_default, NULL },
-    { "setArgv", NULL, fdn_spawn_options_set_argv, NULL, NULL, NULL, napi_default, NULL },
-    { "getEnvp", NULL, fdn_spawn_options_get_envp, NULL, NULL, NULL, napi_default, NULL },
-    { "setEnvp", NULL, fdn_spawn_options_set_envp, NULL, NULL, NULL, napi_default, NULL },
-    { "getEnv", NULL, fdn_spawn_options_get_env, NULL, NULL, NULL, napi_default, NULL },
-    { "setEnv", NULL, fdn_spawn_options_set_env, NULL, NULL, NULL, napi_default, NULL },
-    { "getCwd", NULL, fdn_spawn_options_get_cwd, NULL, NULL, NULL, napi_default, NULL },
-    { "setCwd", NULL, fdn_spawn_options_set_cwd, NULL, NULL, NULL, napi_default, NULL },
-    { "getStdio", NULL, fdn_spawn_options_get_stdio, NULL, NULL, NULL, napi_default, NULL },
-    { "setStdio", NULL, fdn_spawn_options_set_stdio, NULL, NULL, NULL, napi_default, NULL },
-    { "getAux", NULL, fdn_spawn_options_get_aux, NULL, NULL, NULL, napi_default, NULL },
-    { "setAux", NULL, fdn_spawn_options_set_aux, NULL, NULL, NULL, napi_default, NULL },
+    { "argv", NULL, NULL, fdn_spawn_options_get_argv, fdn_spawn_options_set_argv, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "envp", NULL, NULL, fdn_spawn_options_get_envp, fdn_spawn_options_set_envp, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "env", NULL, NULL, fdn_spawn_options_get_env, fdn_spawn_options_set_env, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "cwd", NULL, NULL, fdn_spawn_options_get_cwd, fdn_spawn_options_set_cwd, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "stdio", NULL, NULL, fdn_spawn_options_get_stdio, fdn_spawn_options_set_stdio, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "aux", NULL, NULL, fdn_spawn_options_get_aux, fdn_spawn_options_set_aux, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -7887,7 +7902,10 @@ fdn_spawn_options_get_argv (napi_env env,
 
   retval = frida_spawn_options_get_argv (handle, result_length1);
 
-  js_retval = fdn_strv_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_strv_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -7965,7 +7983,10 @@ fdn_spawn_options_get_envp (napi_env env,
 
   retval = frida_spawn_options_get_envp (handle, result_length1);
 
-  js_retval = fdn_strv_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_strv_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -8043,7 +8064,10 @@ fdn_spawn_options_get_env (napi_env env,
 
   retval = frida_spawn_options_get_env (handle, result_length1);
 
-  js_retval = fdn_strv_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_strv_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -8120,7 +8144,10 @@ fdn_spawn_options_get_cwd (napi_env env,
 
   retval = frida_spawn_options_get_cwd (handle);
 
-  js_retval = fdn_utf8_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_utf8_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -8476,8 +8503,8 @@ fdn_spawn_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getPid", NULL, fdn_spawn_get_pid, NULL, NULL, NULL, napi_default, NULL },
-    { "getIdentifier", NULL, fdn_spawn_get_identifier, NULL, NULL, NULL, napi_default, NULL },
+    { "pid", NULL, NULL, fdn_spawn_get_pid, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "identifier", NULL, NULL, fdn_spawn_get_identifier, NULL, NULL, napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -8623,7 +8650,10 @@ fdn_spawn_get_identifier (napi_env env,
 
   retval = frida_spawn_get_identifier (handle);
 
-  js_retval = fdn_utf8_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_utf8_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -8806,13 +8836,13 @@ fdn_child_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getPid", NULL, fdn_child_get_pid, NULL, NULL, NULL, napi_default, NULL },
-    { "getParentPid", NULL, fdn_child_get_parent_pid, NULL, NULL, NULL, napi_default, NULL },
-    { "getOrigin", NULL, fdn_child_get_origin, NULL, NULL, NULL, napi_default, NULL },
-    { "getIdentifier", NULL, fdn_child_get_identifier, NULL, NULL, NULL, napi_default, NULL },
-    { "getPath", NULL, fdn_child_get_path, NULL, NULL, NULL, napi_default, NULL },
-    { "getArgv", NULL, fdn_child_get_argv, NULL, NULL, NULL, napi_default, NULL },
-    { "getEnvp", NULL, fdn_child_get_envp, NULL, NULL, NULL, napi_default, NULL },
+    { "pid", NULL, NULL, fdn_child_get_pid, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "parentPid", NULL, NULL, fdn_child_get_parent_pid, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "origin", NULL, NULL, fdn_child_get_origin, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "identifier", NULL, NULL, fdn_child_get_identifier, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "path", NULL, NULL, fdn_child_get_path, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "argv", NULL, NULL, fdn_child_get_argv, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "envp", NULL, NULL, fdn_child_get_envp, NULL, NULL, napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -9014,7 +9044,10 @@ fdn_child_get_identifier (napi_env env,
 
   retval = frida_child_get_identifier (handle);
 
-  js_retval = fdn_utf8_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_utf8_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -9042,7 +9075,10 @@ fdn_child_get_path (napi_env env,
 
   retval = frida_child_get_path (handle);
 
-  js_retval = fdn_utf8_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_utf8_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -9071,7 +9107,10 @@ fdn_child_get_argv (napi_env env,
 
   retval = frida_child_get_argv (handle, result_length1);
 
-  js_retval = fdn_strv_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_strv_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -9100,7 +9139,10 @@ fdn_child_get_envp (napi_env env,
 
   retval = frida_child_get_envp (handle, result_length1);
 
-  js_retval = fdn_strv_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_strv_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -9112,11 +9154,11 @@ fdn_crash_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getPid", NULL, fdn_crash_get_pid, NULL, NULL, NULL, napi_default, NULL },
-    { "getProcessName", NULL, fdn_crash_get_process_name, NULL, NULL, NULL, napi_default, NULL },
-    { "getSummary", NULL, fdn_crash_get_summary, NULL, NULL, NULL, napi_default, NULL },
-    { "getReport", NULL, fdn_crash_get_report, NULL, NULL, NULL, napi_default, NULL },
-    { "getParameters", NULL, fdn_crash_get_parameters, NULL, NULL, NULL, napi_default, NULL },
+    { "pid", NULL, NULL, fdn_crash_get_pid, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "processName", NULL, NULL, fdn_crash_get_process_name, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "summary", NULL, NULL, fdn_crash_get_summary, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "report", NULL, NULL, fdn_crash_get_report, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "parameters", NULL, NULL, fdn_crash_get_parameters, NULL, NULL, napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -9361,7 +9403,7 @@ fdn_bus_register (napi_env env,
     { "isDetached", NULL, fdn_bus_is_detached, NULL, NULL, NULL, napi_default, NULL },
     { "attach", NULL, fdn_bus_attach, NULL, NULL, NULL, napi_default, NULL },
     { "post", NULL, fdn_bus_post, NULL, NULL, NULL, napi_default, NULL },
-    { "getDevice", NULL, fdn_bus_get_device, NULL, NULL, NULL, napi_default, NULL },
+    { "device", NULL, NULL, fdn_bus_get_device, NULL, NULL, napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -9706,8 +9748,8 @@ fdn_session_register (napi_env env,
     { "snapshotScript", NULL, fdn_session_snapshot_script, NULL, NULL, NULL, napi_default, NULL },
     { "setupPeerConnection", NULL, fdn_session_setup_peer_connection, NULL, NULL, NULL, napi_default, NULL },
     { "joinPortal", NULL, fdn_session_join_portal, NULL, NULL, NULL, napi_default, NULL },
-    { "getPid", NULL, fdn_session_get_pid, NULL, NULL, NULL, napi_default, NULL },
-    { "getPersistTimeout", NULL, fdn_session_get_persist_timeout, NULL, NULL, NULL, napi_default, NULL },
+    { "pid", NULL, NULL, fdn_session_get_pid, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "persistTimeout", NULL, NULL, fdn_session_get_persist_timeout, NULL, NULL, napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -12311,12 +12353,9 @@ fdn_control_service_options_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getSysroot", NULL, fdn_control_service_options_get_sysroot, NULL, NULL, NULL, napi_default, NULL },
-    { "setSysroot", NULL, fdn_control_service_options_set_sysroot, NULL, NULL, NULL, napi_default, NULL },
-    { "getEnablePreload", NULL, fdn_control_service_options_get_enable_preload, NULL, NULL, NULL, napi_default, NULL },
-    { "setEnablePreload", NULL, fdn_control_service_options_set_enable_preload, NULL, NULL, NULL, napi_default, NULL },
-    { "getReportCrashes", NULL, fdn_control_service_options_get_report_crashes, NULL, NULL, NULL, napi_default, NULL },
-    { "setReportCrashes", NULL, fdn_control_service_options_set_report_crashes, NULL, NULL, NULL, napi_default, NULL },
+    { "sysroot", NULL, NULL, fdn_control_service_options_get_sysroot, fdn_control_service_options_set_sysroot, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "enablePreload", NULL, NULL, fdn_control_service_options_get_enable_preload, fdn_control_service_options_set_enable_preload, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "reportCrashes", NULL, NULL, fdn_control_service_options_get_report_crashes, fdn_control_service_options_set_report_crashes, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -12433,7 +12472,10 @@ fdn_control_service_options_get_sysroot (napi_env env,
 
   retval = frida_control_service_options_get_sysroot (handle);
 
-  js_retval = fdn_utf8_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_utf8_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -12627,9 +12669,9 @@ fdn_portal_service_register (napi_env env,
     { "enumerateTags", NULL, fdn_portal_service_enumerate_tags, NULL, NULL, NULL, napi_default, NULL },
     { "tag", NULL, fdn_portal_service_tag, NULL, NULL, NULL, napi_default, NULL },
     { "untag", NULL, fdn_portal_service_untag, NULL, NULL, NULL, napi_default, NULL },
-    { "getDevice", NULL, fdn_portal_service_get_device, NULL, NULL, NULL, napi_default, NULL },
-    { "getClusterParams", NULL, fdn_portal_service_get_cluster_params, NULL, NULL, NULL, napi_default, NULL },
-    { "getControlParams", NULL, fdn_portal_service_get_control_params, NULL, NULL, NULL, napi_default, NULL },
+    { "device", NULL, NULL, fdn_portal_service_get_device, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "clusterParams", NULL, NULL, fdn_portal_service_get_cluster_params, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "controlParams", NULL, NULL, fdn_portal_service_get_control_params, NULL, NULL, napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -13222,7 +13264,10 @@ fdn_portal_service_enumerate_tags (napi_env env,
 
   retval = frida_portal_service_enumerate_tags (handle, connection_id, result_length1);
 
-  js_retval = fdn_strv_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_strv_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -13408,7 +13453,10 @@ fdn_portal_service_get_control_params (napi_env env,
 
   retval = frida_portal_service_get_control_params (handle);
 
-  js_retval = fdn_endpoint_parameters_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_endpoint_parameters_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -13422,7 +13470,7 @@ fdn_file_monitor_register (napi_env env,
   {
     { "enable", NULL, fdn_file_monitor_enable, NULL, NULL, NULL, napi_default, NULL },
     { "disable", NULL, fdn_file_monitor_disable, NULL, NULL, NULL, napi_default, NULL },
-    { "getPath", NULL, fdn_file_monitor_get_path, NULL, NULL, NULL, napi_default, NULL },
+    { "path", NULL, NULL, fdn_file_monitor_get_path, NULL, NULL, napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -13804,7 +13852,7 @@ fdn_compiler_register (napi_env env,
   {
     { "build", NULL, fdn_compiler_build, NULL, NULL, NULL, napi_default, NULL },
     { "watch", NULL, fdn_compiler_watch, NULL, NULL, NULL, napi_default, NULL },
-    { "getManager", NULL, fdn_compiler_get_manager, NULL, NULL, NULL, napi_default, NULL },
+    { "manager", NULL, NULL, fdn_compiler_get_manager, NULL, NULL, napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -14231,12 +14279,9 @@ fdn_compiler_options_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getProjectRoot", NULL, fdn_compiler_options_get_project_root, NULL, NULL, NULL, napi_default, NULL },
-    { "setProjectRoot", NULL, fdn_compiler_options_set_project_root, NULL, NULL, NULL, napi_default, NULL },
-    { "getSourceMaps", NULL, fdn_compiler_options_get_source_maps, NULL, NULL, NULL, napi_default, NULL },
-    { "setSourceMaps", NULL, fdn_compiler_options_set_source_maps, NULL, NULL, NULL, napi_default, NULL },
-    { "getCompression", NULL, fdn_compiler_options_get_compression, NULL, NULL, NULL, napi_default, NULL },
-    { "setCompression", NULL, fdn_compiler_options_set_compression, NULL, NULL, NULL, napi_default, NULL },
+    { "projectRoot", NULL, NULL, fdn_compiler_options_get_project_root, fdn_compiler_options_set_project_root, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "sourceMaps", NULL, NULL, fdn_compiler_options_get_source_maps, fdn_compiler_options_set_source_maps, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "compression", NULL, NULL, fdn_compiler_options_get_compression, fdn_compiler_options_set_compression, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -14353,7 +14398,10 @@ fdn_compiler_options_get_project_root (napi_env env,
 
   retval = frida_compiler_options_get_project_root (handle);
 
-  js_retval = fdn_utf8_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_utf8_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -14740,7 +14788,7 @@ fdn_static_authentication_service_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getTokenHash", NULL, fdn_static_authentication_service_get_token_hash, NULL, NULL, NULL, napi_default, NULL },
+    { "tokenHash", NULL, NULL, fdn_static_authentication_service_get_token_hash, NULL, NULL, napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -14870,8 +14918,7 @@ fdn_frontmost_query_options_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getScope", NULL, fdn_frontmost_query_options_get_scope, NULL, NULL, NULL, napi_default, NULL },
-    { "setScope", NULL, fdn_frontmost_query_options_set_scope, NULL, NULL, NULL, napi_default, NULL },
+    { "scope", NULL, NULL, fdn_frontmost_query_options_get_scope, fdn_frontmost_query_options_set_scope, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -15041,8 +15088,7 @@ fdn_application_query_options_register (napi_env env,
   {
     { "selectIdentifier", NULL, fdn_application_query_options_select_identifier, NULL, NULL, NULL, napi_default, NULL },
     { "hasSelectedIdentifiers", NULL, fdn_application_query_options_has_selected_identifiers, NULL, NULL, NULL, napi_default, NULL },
-    { "getScope", NULL, fdn_application_query_options_get_scope, NULL, NULL, NULL, napi_default, NULL },
-    { "setScope", NULL, fdn_application_query_options_set_scope, NULL, NULL, NULL, napi_default, NULL },
+    { "scope", NULL, NULL, fdn_application_query_options_get_scope, fdn_application_query_options_set_scope, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -15280,8 +15326,7 @@ fdn_process_query_options_register (napi_env env,
   {
     { "selectPid", NULL, fdn_process_query_options_select_pid, NULL, NULL, NULL, napi_default, NULL },
     { "hasSelectedPids", NULL, fdn_process_query_options_has_selected_pids, NULL, NULL, NULL, napi_default, NULL },
-    { "getScope", NULL, fdn_process_query_options_get_scope, NULL, NULL, NULL, napi_default, NULL },
-    { "setScope", NULL, fdn_process_query_options_set_scope, NULL, NULL, NULL, napi_default, NULL },
+    { "scope", NULL, NULL, fdn_process_query_options_get_scope, fdn_process_query_options_set_scope, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -15516,12 +15561,9 @@ fdn_session_options_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getRealm", NULL, fdn_session_options_get_realm, NULL, NULL, NULL, napi_default, NULL },
-    { "setRealm", NULL, fdn_session_options_set_realm, NULL, NULL, NULL, napi_default, NULL },
-    { "getPersistTimeout", NULL, fdn_session_options_get_persist_timeout, NULL, NULL, NULL, napi_default, NULL },
-    { "setPersistTimeout", NULL, fdn_session_options_set_persist_timeout, NULL, NULL, NULL, napi_default, NULL },
-    { "getEmulatedAgentPath", NULL, fdn_session_options_get_emulated_agent_path, NULL, NULL, NULL, napi_default, NULL },
-    { "setEmulatedAgentPath", NULL, fdn_session_options_set_emulated_agent_path, NULL, NULL, NULL, napi_default, NULL },
+    { "realm", NULL, NULL, fdn_session_options_get_realm, fdn_session_options_set_realm, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "persistTimeout", NULL, NULL, fdn_session_options_get_persist_timeout, fdn_session_options_set_persist_timeout, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "emulatedAgentPath", NULL, NULL, fdn_session_options_get_emulated_agent_path, fdn_session_options_set_emulated_agent_path, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -15772,7 +15814,10 @@ fdn_session_options_get_emulated_agent_path (napi_env env,
 
   retval = frida_session_options_get_emulated_agent_path (handle);
 
-  js_retval = fdn_utf8_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_utf8_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -15823,14 +15868,10 @@ fdn_script_options_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getName", NULL, fdn_script_options_get_name, NULL, NULL, NULL, napi_default, NULL },
-    { "setName", NULL, fdn_script_options_set_name, NULL, NULL, NULL, napi_default, NULL },
-    { "getSnapshot", NULL, fdn_script_options_get_snapshot, NULL, NULL, NULL, napi_default, NULL },
-    { "setSnapshot", NULL, fdn_script_options_set_snapshot, NULL, NULL, NULL, napi_default, NULL },
-    { "getSnapshotTransport", NULL, fdn_script_options_get_snapshot_transport, NULL, NULL, NULL, napi_default, NULL },
-    { "setSnapshotTransport", NULL, fdn_script_options_set_snapshot_transport, NULL, NULL, NULL, napi_default, NULL },
-    { "getRuntime", NULL, fdn_script_options_get_runtime, NULL, NULL, NULL, napi_default, NULL },
-    { "setRuntime", NULL, fdn_script_options_set_runtime, NULL, NULL, NULL, napi_default, NULL },
+    { "name", NULL, NULL, fdn_script_options_get_name, fdn_script_options_set_name, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "snapshot", NULL, NULL, fdn_script_options_get_snapshot, fdn_script_options_set_snapshot, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "snapshotTransport", NULL, NULL, fdn_script_options_get_snapshot_transport, fdn_script_options_set_snapshot_transport, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "runtime", NULL, NULL, fdn_script_options_get_runtime, fdn_script_options_set_runtime, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -15947,7 +15988,10 @@ fdn_script_options_get_name (napi_env env,
 
   retval = frida_script_options_get_name (handle);
 
-  js_retval = fdn_utf8_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_utf8_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -16014,7 +16058,10 @@ fdn_script_options_get_snapshot (napi_env env,
 
   retval = frida_script_options_get_snapshot (handle);
 
-  js_retval = fdn_bytes_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_bytes_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -16198,10 +16245,8 @@ fdn_snapshot_options_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getWarmupScript", NULL, fdn_snapshot_options_get_warmup_script, NULL, NULL, NULL, napi_default, NULL },
-    { "setWarmupScript", NULL, fdn_snapshot_options_set_warmup_script, NULL, NULL, NULL, napi_default, NULL },
-    { "getRuntime", NULL, fdn_snapshot_options_get_runtime, NULL, NULL, NULL, napi_default, NULL },
-    { "setRuntime", NULL, fdn_snapshot_options_set_runtime, NULL, NULL, NULL, napi_default, NULL },
+    { "warmupScript", NULL, NULL, fdn_snapshot_options_get_warmup_script, fdn_snapshot_options_set_warmup_script, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "runtime", NULL, NULL, fdn_snapshot_options_get_runtime, fdn_snapshot_options_set_runtime, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -16318,7 +16363,10 @@ fdn_snapshot_options_get_warmup_script (napi_env env,
 
   retval = frida_snapshot_options_get_warmup_script (handle);
 
-  js_retval = fdn_utf8_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_utf8_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -16436,12 +16484,9 @@ fdn_portal_options_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getCertificate", NULL, fdn_portal_options_get_certificate, NULL, NULL, NULL, napi_default, NULL },
-    { "setCertificate", NULL, fdn_portal_options_set_certificate, NULL, NULL, NULL, napi_default, NULL },
-    { "getToken", NULL, fdn_portal_options_get_token, NULL, NULL, NULL, napi_default, NULL },
-    { "setToken", NULL, fdn_portal_options_set_token, NULL, NULL, NULL, napi_default, NULL },
-    { "getAcl", NULL, fdn_portal_options_get_acl, NULL, NULL, NULL, napi_default, NULL },
-    { "setAcl", NULL, fdn_portal_options_set_acl, NULL, NULL, NULL, napi_default, NULL },
+    { "certificate", NULL, NULL, fdn_portal_options_get_certificate, fdn_portal_options_set_certificate, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "token", NULL, NULL, fdn_portal_options_get_token, fdn_portal_options_set_token, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
+    { "acl", NULL, NULL, fdn_portal_options_get_acl, fdn_portal_options_set_acl, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -16558,7 +16603,10 @@ fdn_portal_options_get_certificate (napi_env env,
 
   retval = frida_portal_options_get_certificate (handle);
 
-  js_retval = fdn_tls_certificate_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_tls_certificate_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -16624,7 +16672,10 @@ fdn_portal_options_get_token (napi_env env,
 
   retval = frida_portal_options_get_token (handle);
 
-  js_retval = fdn_utf8_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_utf8_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -16692,7 +16743,10 @@ fdn_portal_options_get_acl (napi_env env,
 
   retval = frida_portal_options_get_acl (handle, result_length1);
 
-  js_retval = fdn_strv_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_strv_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -16755,8 +16809,7 @@ fdn_peer_options_register (napi_env env,
   {
     { "clearRelays", NULL, fdn_peer_options_clear_relays, NULL, NULL, NULL, napi_default, NULL },
     { "addRelay", NULL, fdn_peer_options_add_relay, NULL, NULL, NULL, napi_default, NULL },
-    { "getStunServer", NULL, fdn_peer_options_get_stun_server, NULL, NULL, NULL, napi_default, NULL },
-    { "setStunServer", NULL, fdn_peer_options_set_stun_server, NULL, NULL, NULL, napi_default, NULL },
+    { "stunServer", NULL, NULL, fdn_peer_options_get_stun_server, fdn_peer_options_set_stun_server, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -16939,7 +16992,10 @@ fdn_peer_options_get_stun_server (napi_env env,
 
   retval = frida_peer_options_get_stun_server (handle);
 
-  js_retval = fdn_utf8_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_utf8_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -16990,10 +17046,10 @@ fdn_relay_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getAddress", NULL, fdn_relay_get_address, NULL, NULL, NULL, napi_default, NULL },
-    { "getUsername", NULL, fdn_relay_get_username, NULL, NULL, NULL, napi_default, NULL },
-    { "getPassword", NULL, fdn_relay_get_password, NULL, NULL, NULL, napi_default, NULL },
-    { "getKind", NULL, fdn_relay_get_kind, NULL, NULL, NULL, napi_default, NULL },
+    { "address", NULL, NULL, fdn_relay_get_address, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "username", NULL, NULL, fdn_relay_get_username, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "password", NULL, NULL, fdn_relay_get_password, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "kind", NULL, NULL, fdn_relay_get_kind, NULL, NULL, napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -17207,13 +17263,12 @@ fdn_endpoint_parameters_register (napi_env env,
 {
   napi_property_descriptor properties[] =
   {
-    { "getAddress", NULL, fdn_endpoint_parameters_get_address, NULL, NULL, NULL, napi_default, NULL },
-    { "getPort", NULL, fdn_endpoint_parameters_get_port, NULL, NULL, NULL, napi_default, NULL },
-    { "getCertificate", NULL, fdn_endpoint_parameters_get_certificate, NULL, NULL, NULL, napi_default, NULL },
-    { "getOrigin", NULL, fdn_endpoint_parameters_get_origin, NULL, NULL, NULL, napi_default, NULL },
-    { "getAuthService", NULL, fdn_endpoint_parameters_get_auth_service, NULL, NULL, NULL, napi_default, NULL },
-    { "getAssetRoot", NULL, fdn_endpoint_parameters_get_asset_root, NULL, NULL, NULL, napi_default, NULL },
-    { "setAssetRoot", NULL, fdn_endpoint_parameters_set_asset_root, NULL, NULL, NULL, napi_default, NULL },
+    { "address", NULL, NULL, fdn_endpoint_parameters_get_address, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "port", NULL, NULL, fdn_endpoint_parameters_get_port, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "certificate", NULL, NULL, fdn_endpoint_parameters_get_certificate, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "origin", NULL, NULL, fdn_endpoint_parameters_get_origin, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "authService", NULL, NULL, fdn_endpoint_parameters_get_auth_service, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "assetRoot", NULL, NULL, fdn_endpoint_parameters_get_asset_root, fdn_endpoint_parameters_set_asset_root, NULL, napi_writable | napi_enumerable | napi_configurable, NULL },
   };
 
   napi_value constructor;
@@ -17331,7 +17386,10 @@ fdn_endpoint_parameters_get_address (napi_env env,
 
   retval = frida_endpoint_parameters_get_address (handle);
 
-  js_retval = fdn_utf8_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_utf8_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -17387,7 +17445,10 @@ fdn_endpoint_parameters_get_certificate (napi_env env,
 
   retval = frida_endpoint_parameters_get_certificate (handle);
 
-  js_retval = fdn_tls_certificate_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_tls_certificate_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -17415,7 +17476,10 @@ fdn_endpoint_parameters_get_origin (napi_env env,
 
   retval = frida_endpoint_parameters_get_origin (handle);
 
-  js_retval = fdn_utf8_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_utf8_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -17443,7 +17507,10 @@ fdn_endpoint_parameters_get_auth_service (napi_env env,
 
   retval = frida_endpoint_parameters_get_auth_service (handle);
 
-  js_retval = fdn_authentication_service_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_authentication_service_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;
@@ -17471,7 +17538,10 @@ fdn_endpoint_parameters_get_asset_root (napi_env env,
 
   retval = frida_endpoint_parameters_get_asset_root (handle);
 
-  js_retval = fdn_file_to_value (env, retval);
+  if (retval != NULL)
+    js_retval = fdn_file_to_value (env, retval);
+  else
+    napi_get_null (env, &js_retval);
 
 beach:
   return js_retval;

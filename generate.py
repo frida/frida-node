@@ -26,6 +26,7 @@ class Class:
     _methods: List[ET.Element]
     method_filter: Optional[MethodFilter]
     method_name_transformer: Optional[MethodNameTransformer]
+    _properties: List[ET.Element]
 
     @cached_property
     def c_symbol_prefix(self):
@@ -38,36 +39,51 @@ class Class:
     @cached_property
     def constructors(self) -> List[Constructor]:
         constructors = []
-        for constructor_element in self._constructors:
-            constructor_name = constructor_element.get("name")
+        for element in self._constructors:
+            name = element.get("name")
 
-            c_identifier, param_list, has_closure_param, throws, is_async = extract_callable_details(constructor_element)
+            c_identifier, param_list, has_closure_param, throws, is_async = extract_callable_details(element)
             if has_closure_param or throws or is_async:
                 continue
 
-            constructors.append(Constructor(constructor_name, c_identifier, param_list, throws))
+            constructors.append(Constructor(name, c_identifier, param_list, throws))
         return constructors
 
     @cached_property
     def methods(self) -> List[Method]:
         methods = []
-        for method_element in self._methods:
-            method_name = method_element.get("name")
-            if self.method_filter is not None and not self.method_filter(self.name, method_name):
+        for element in self._methods:
+            name = element.get("name")
+            if self.method_filter is not None and not self.method_filter(self.name, name):
                 continue
-            if method_name.startswith("_") or method_name.endswith("_sync") or method_name.endswith("_finish"):
+            if name.startswith("_") or name.endswith("_sync") or name.endswith("_finish"):
                 continue
-            transformed_method_name = self.method_name_transformer(self.name, method_name) if self.method_name_transformer is not None else method_name
+            transformed_method_name = self.method_name_transformer(self.name, name) if self.method_name_transformer is not None else name
 
-            c_identifier, param_list, has_closure_param, throws, is_async = extract_callable_details(method_element)
+            c_identifier, param_list, has_closure_param, throws, is_async = extract_callable_details(element)
             if has_closure_param:
                 continue
 
-            result_element = next((m for m in self._methods if m.get("name") == f"{method_name}_finish")) if is_async else method_element
-            return_type = extract_type_from_entity(result_element.find(".//return-value", GIR_NAMESPACES))
+            result_element = next((m for m in self._methods if m.get("name") == f"{name}_finish")) if is_async else element
+            retval_element = result_element.find(".//return-value", GIR_NAMESPACES)
+            rettype = extract_type_from_entity(retval_element)
+            retval = ReturnValue(rettype, retval_element.get("nullable") == "1") if rettype is not None else None
 
-            methods.append(Method(transformed_method_name, c_identifier, return_type, param_list, throws, is_async, self))
+            methods.append(Method(transformed_method_name, c_identifier, param_list, retval, throws, is_async, self))
         return methods
+
+    @cached_property
+    def properties(self) -> List[Property]:
+        properties = []
+        for element in self._properties:
+            name = element.get("name")
+            c_name = name.replace("-", "_")
+            properties.append(Property(name,
+                                       c_name,
+                                       type=extract_type_from_entity(element),
+                                       writable=element.get("writable") == "1",
+                                       construct_only=element.get("construct-only") == "1"))
+        return properties
 
 def extract_callable_details(element: ET.Element) -> Tuple[str, List[Parameter], bool, bool, bool]:
     c_identifier = element.get(f"{{{C_NAMESPACE}}}identifier")
@@ -110,8 +126,8 @@ class Constructor:
 class Method:
     name: str
     c_identifier: str
-    return_type: Optional[Type]
     parameters: List[Parameter]
+    return_value: Optional[ReturnValue]
     throws: bool
     is_async: bool
 
@@ -122,11 +138,24 @@ class Method:
         return f"Fdn{self.klass.name}{to_pascal_case(self.name)}Operation"
 
 @dataclass
+class Property:
+    name: str
+    c_name: str
+    type: Type
+    writable: bool
+    construct_only: bool
+
+@dataclass
 class Parameter:
     name: str
     type: Type
     nullable: bool
     direction: Direction
+
+@dataclass
+class ReturnValue:
+    type: Type
+    nullable: bool
 
 @dataclass
 class Type:
@@ -160,8 +189,9 @@ def parse_gir(file_path: str,
         class_c_type = klass_element.get(f"{{{C_NAMESPACE}}}type")
         constructors = klass_element.findall(".//constructor", GIR_NAMESPACES)
         methods = klass_element.findall(".//method", GIR_NAMESPACES)
+        properties = klass_element.findall(".//property", GIR_NAMESPACES)
 
-        classes[class_name] = Class(class_name, class_c_type, constructors, methods, method_filter, method_name_transformer)
+        classes[class_name] = Class(class_name, class_c_type, constructors, methods, method_filter, method_name_transformer, properties)
 
     enumerations = OrderedDict()
     for enum_element in tree.getroot().findall(".//enumeration", GIR_NAMESPACES):
@@ -273,7 +303,7 @@ def generate_operation_structs(classes: List[Class]) -> str:
             if method.is_async:
                 param_declarations = [f"{param.type.c.replace("const ", "")} {param.name};" for param in method.parameters]
                 param_declarations_str = "\n  ".join(param_declarations)
-                return_declaration = f"\n  {method.return_type.c} retval;" if method.return_type is not None else ""
+                return_declaration = f"\n  {method.return_value.type.c} retval;" if method.return_value is not None else ""
                 structs.append(f"""\
 typedef struct {{
   napi_env env;
@@ -409,18 +439,37 @@ NAPI_MODULE (NODE_GYP_MODULE_NAME, fdn_init)
 def generate_registration_code(klass: Class) -> str:
     class_cprefix = klass.c_symbol_prefix
 
-    method_registrations = []
+    jsprop_registrations = []
     tsfn_initializations = []
 
+    c_prop_names = {prop.c_name for prop in klass.properties}
+
     for method in klass.methods:
+        tokens = method.name.split("_", maxsplit=1)
+        if len(tokens) == 2 and tokens[0] in {"get", "set"} and tokens[1] in c_prop_names:
+            continue
         method_name_camel = to_camel_case(method.name)
-        method_registrations.append(f"""{{ "{method_name_camel}", NULL, {class_cprefix}_{method.name}, NULL, NULL, NULL, napi_default, NULL }},""")
+        jsprop_registrations.append(f"""{{ "{method_name_camel}", NULL, {class_cprefix}_{method.name}, NULL, NULL, NULL, napi_default, NULL }},""")
         if method.is_async:
             tsfn_initializations.append(f"""\
 napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, {class_cprefix}_{method.name}_deliver, &{class_cprefix}_{method.name}_tsfn);""")
 
-    method_registrations_str = "\n    ".join(method_registrations)
+    for prop in klass.properties:
+        prop_name_camel = to_camel_case(prop.c_name)
+
+        has_setter = prop.writable and not prop.construct_only
+
+        setter_str = f"{class_cprefix}_set_{prop.c_name}" if has_setter else "NULL"
+
+        attrs = ["enumerable", "configurable"]
+        if has_setter:
+            attrs.insert(0, "writable")
+        attrs_str = " | ".join([f"napi_{attr}" for attr in attrs])
+
+        jsprop_registrations.append(f"""{{ "{prop_name_camel}", NULL, NULL, {class_cprefix}_get_{prop.c_name}, {setter_str}, NULL, {attrs_str}, NULL }},""")
+
+    jsprop_registrations_str = "\n    ".join(jsprop_registrations)
     resource_name_declaration = "\n\n  napi_value resource_name;" if tsfn_initializations else ""
     tsfn_initializations_str = "\n\n  " + "\n\n  ".join(tsfn_initializations) if tsfn_initializations else ""
 
@@ -434,7 +483,7 @@ static void
 {{
   napi_property_descriptor properties[] =
   {{
-    {method_registrations_str}
+    {jsprop_registrations_str}
   }};
 
   napi_value constructor;
@@ -567,12 +616,14 @@ def generate_method_code(klass: Class, method: Method) -> str:
     param_frees = [f"g_free (operation->{param.name});" for param in method.parameters if param.type.name == "utf8"]
     param_frees_str = "\n  " + "\n  ".join(param_frees) if param_frees else ""
 
-    return_assignment = f"\n\n  operation->retval = " if method.return_type is not None else ""
-    if method.return_type is not None:
-        return_conversion = f"js_retval = fdn_{method.return_type.nick}_to_value (env, operation->retval);"
+    return_assignment = f"\n\n  operation->retval = " if method.return_value is not None else ""
+    if method.return_value is not None:
+        return_conversion = f"js_retval = fdn_{method.return_value.type.nick}_to_value (env, operation->retval);"
+        if method.return_value.nullable:
+            return_conversion = f"if (operation->retval != NULL)\n    {return_conversion}\n  else\n    napi_get_null (env, &js_retval);"
     else:
         return_conversion = "napi_get_undefined (env, &js_retval);"
-    return_frees_str = f"\n  g_free (operation->retval);" if method.return_type is not None and method.return_type.name == "utf8" else ""
+    return_frees_str = f"\n  g_free (operation->retval);" if method.return_value is not None and method.return_value.type.name == "utf8" else ""
 
     def calculate_indent(suffix: str) -> str:
         return " " * (len(class_cprefix) + 1 + len(method.name) + len(suffix) + 2)
@@ -728,7 +779,7 @@ static void
         else:
             error_check = ""
 
-        return_variable_declaration = f"\n  {method.return_type.c} retval;" if method.return_type is not None else ""
+        return_variable_declaration = f"\n  {method.return_value.type.c} retval;" if method.return_value is not None else ""
         return_assignment = return_assignment.replace("operation->", "").lstrip()
         return_conversion = return_conversion.replace("operation->", "")
 
