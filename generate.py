@@ -321,6 +321,8 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
         ]
 
     prototypes += [
+        ""
+        "static gboolean fdn_is_undefined_or_null (napi_env env, napi_value value);",
         "",
         "static gboolean fdn_boolean_from_value (napi_env env, napi_value value, gboolean * b);",
         "static napi_value fdn_boolean_to_value (napi_env env, gboolean b);",
@@ -362,7 +364,9 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
     return "\n".join(prototypes) + "\n\n"
 
 def generate_type_tags(classes: List[Class]) -> str:
-    type_tags = []
+    type_tags = [
+        "static napi_type_tag fdn_handle_wrapper_type_tag = { 0xdd596d4f2dad45f9, 0x844585a48e8d05ba };"
+    ]
     for klass in classes:
         uuid_str = uuid.uuid4().hex
         uuid_formatted = f"0x{uuid_str[:16]}, 0x{uuid_str[16:]}"
@@ -392,7 +396,10 @@ static napi_value
 fdn_init (napi_env env,
           napi_value exports)
 {{
+  frida_init ();
+
   {registration_calls}
+
   return exports;
 }}
 
@@ -478,6 +485,7 @@ static napi_value
   napi_get_reference_value (env, {class_cprefix}_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
 
   napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
 
@@ -494,22 +502,48 @@ def generate_constructor(klass: Class) -> str:
         return " " * (len(class_cprefix) + len(suffix) + 2)
 
     default_constructor = next((ctor for ctor in klass.constructors if not ctor.parameters), None)
+
     if default_constructor is not None:
-        return f"""
+        default_call = f"handle = {default_constructor.c_identifier} ();"
+    else:
+        default_call = "napi_throw_error (env, NULL, \"class {klass.name} cannot be constructed because it lacks a default constructor\");\n  return NULL;"
+
+    return f"""
 static napi_value
 {class_cprefix}_construct (napi_env env,
 {calculate_indent("_construct")}napi_callback_info info)
 {{
-  size_t argc = 0;
+  size_t argc = 1;
+  napi_value args[1];
   napi_value jsthis;
   napi_status status;
   {klass.c_type} * handle;
 
-  status = napi_get_cb_info (env, info, &argc, NULL, &jsthis, NULL);
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
     return NULL;
 
-  handle = {default_constructor.c_identifier} ();
+  if (argc == 0)
+  {{
+    {default_call}
+  }}
+  else
+  {{
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    {{
+      napi_throw_type_error (env, NULL, "expected a {klass.name} handle");
+      return FALSE;
+    }}
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    {{
+      return NULL;
+    }}
+
+    g_object_ref (handle);
+  }}
 
   status = napi_type_tag_object (env, jsthis, &{class_cprefix}_type_tag);
   if (status != napi_ok)
@@ -520,16 +554,6 @@ static napi_value
     return NULL;
 
   return jsthis;
-}}
-"""
-    else:
-        return f"""
-static napi_value
-{class_cprefix}_construct (napi_env env,
-{calculate_indent("_construct")}napi_callback_info info)
-{{
-  napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
-  return NULL;
 }}
 """
 
@@ -740,7 +764,7 @@ beach:{param_frees_str}
 
 def generate_parameter_conversion_code(param: Parameter, index: int, invalid_arg_label: str) -> str:
     code = f"""\
-  if (argc > {index})
+  if (argc > {index} && !fdn_is_undefined_or_null (env, args[{index}]))
   {{
     if (!fdn_{param.type.nick}_from_value (env, args[{index}], &operation->{param.name}))
       goto {invalid_arg_label};
@@ -784,6 +808,17 @@ fdn_{enum_name_snake}_to_value (napi_env env,
 
 def generate_builtin_conversion_helpers() -> str:
     return """
+static gboolean
+fdn_is_undefined_or_null (napi_env env,
+                          napi_value value)
+{
+  napi_valuetype type;
+
+  napi_typeof (env, value, &type);
+
+  return type == napi_undefined || type == napi_null;
+}
+
 static gboolean
 fdn_boolean_from_value (napi_env env,
                         napi_value value,
