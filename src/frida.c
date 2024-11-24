@@ -1379,39 +1379,39 @@ static napi_value fdn_service_to_value (napi_env env, FridaService * service);
 static napi_value fdn_authentication_service_to_value (napi_env env, FridaAuthenticationService * service);
 
 static napi_type_tag fdn_handle_wrapper_type_tag = { 0xdd596d4f2dad45f9, 0x844585a48e8d05ba };
-static napi_type_tag fdn_device_manager_type_tag = { 0x772917e8d1dd47a9, 0xb68c8cd74bbb2518 };
-static napi_type_tag fdn_device_type_tag = { 0x6d413dd9ae0c4724, 0xbc5d5d252e47c5bb };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0xb265446fcc024f2b, 0xb37e1516606caa56 };
-static napi_type_tag fdn_application_type_tag = { 0x03e539a8194048d9, 0x9020eec8fd5b20fa };
-static napi_type_tag fdn_process_type_tag = { 0x0f7e33a811b74153, 0xb55e33ed5f73ec54 };
-static napi_type_tag fdn_process_match_options_type_tag = { 0x08bbd0a7c96a44e8, 0xb32e4c8643a35bff };
-static napi_type_tag fdn_spawn_options_type_tag = { 0xde65f0311a9a409e, 0x9a59f528c198a88e };
-static napi_type_tag fdn_spawn_type_tag = { 0xadacb5dbb9e04578, 0xa290ff1071af56c1 };
-static napi_type_tag fdn_child_type_tag = { 0x65f138d16f914b83, 0xbbcc2f9790172d4c };
-static napi_type_tag fdn_crash_type_tag = { 0x303c5d657ef6475c, 0xafd10e690f02c334 };
-static napi_type_tag fdn_bus_type_tag = { 0x99db4a7594b24043, 0x924ee6fe4899b415 };
-static napi_type_tag fdn_session_type_tag = { 0x0ae1635b040b4dd1, 0x8830028c941ff1bc };
-static napi_type_tag fdn_script_type_tag = { 0xef8e8d99999f48a9, 0xab80fcadac143e4b };
-static napi_type_tag fdn_portal_membership_type_tag = { 0x27aab5f8cbe14fe3, 0xa344ecf93f7e8fe8 };
-static napi_type_tag fdn_control_service_options_type_tag = { 0xfa4f817bf43a465a, 0x95c0baf8d6564328 };
-static napi_type_tag fdn_portal_service_type_tag = { 0xdfba0edb4c3e42b8, 0xa42cfde7e428b67d };
-static napi_type_tag fdn_file_monitor_type_tag = { 0x0f3ba372c9bf41f3, 0x9485f671f2c1e0ec };
-static napi_type_tag fdn_compiler_type_tag = { 0x5448a70aa8bf478a, 0x929c303aabdfb53a };
-static napi_type_tag fdn_compiler_options_type_tag = { 0x41796bf0630846f8, 0x857134ebffce3c68 };
-static napi_type_tag fdn_build_options_type_tag = { 0xae03459274ed4ff7, 0xabc8f77ec47adb89 };
-static napi_type_tag fdn_watch_options_type_tag = { 0xe21db1b707f7406e, 0xae36efb30b984891 };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0xa2c5e54e6fd04a1d, 0x8d78311977c3a9fb };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x4cdcc58f00624f84, 0x9d023fcf71bfa65f };
-static napi_type_tag fdn_application_query_options_type_tag = { 0x1be01c62f9364558, 0x910f08fdaa89e4e1 };
-static napi_type_tag fdn_process_query_options_type_tag = { 0xb62f63890deb451a, 0x8639886d9432a090 };
-static napi_type_tag fdn_session_options_type_tag = { 0x5e946b7b8545481a, 0x9091bfddc4c840e4 };
-static napi_type_tag fdn_script_options_type_tag = { 0xffeb41856cd74248, 0xb63734e42339c55e };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0xa808deff150246f6, 0x8fa01f2163c53dd8 };
-static napi_type_tag fdn_portal_options_type_tag = { 0x5233b9d834044aff, 0x991bf01398b5ce49 };
-static napi_type_tag fdn_peer_options_type_tag = { 0xbca3fa0abc9d46e6, 0x973364301c2f2188 };
-static napi_type_tag fdn_relay_type_tag = { 0x2d4e7548c93d4dcb, 0xa431f563bb8871a3 };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x92c4608c177f461e, 0xabfded9964f06789 };
-static napi_type_tag fdn_cancellable_type_tag = { 0xdabdb1d833b64cab, 0x8db27fcdac40dd69 };
+static napi_type_tag fdn_device_manager_type_tag = { 0x61ed46b8492e4432, 0xa9f5b91ede69c2e2 };
+static napi_type_tag fdn_device_type_tag = { 0x6fd692c40c5d48f3, 0xbdb6564d4ba896a1 };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0xd514d6f70672458d, 0xb81d193e33fc2536 };
+static napi_type_tag fdn_application_type_tag = { 0xb7eacdba8b0e476b, 0xa2387bf5ebbd98eb };
+static napi_type_tag fdn_process_type_tag = { 0x8c36b9fd6b004452, 0xa2de7791b27f6e9d };
+static napi_type_tag fdn_process_match_options_type_tag = { 0x910a40e3965c4cd4, 0x9ac3aec4528fa02b };
+static napi_type_tag fdn_spawn_options_type_tag = { 0xef18ca6be8634620, 0x9d65fa734dbcb5e9 };
+static napi_type_tag fdn_spawn_type_tag = { 0xb86c16fd0ad4419f, 0xa225ca574623c06c };
+static napi_type_tag fdn_child_type_tag = { 0x928dea04fec14b23, 0x83fc1423f8bab077 };
+static napi_type_tag fdn_crash_type_tag = { 0x670eb0f262a5485a, 0x9b3e12ed2992f552 };
+static napi_type_tag fdn_bus_type_tag = { 0x01587f06379d4635, 0x827d5bd9d09396e6 };
+static napi_type_tag fdn_session_type_tag = { 0xeaffe7b1dd7f427a, 0xbdd1521787612beb };
+static napi_type_tag fdn_script_type_tag = { 0x925c479637374290, 0xa8bb8424fe763be0 };
+static napi_type_tag fdn_portal_membership_type_tag = { 0xeec94adb9c3d4c91, 0x987b444f2ca86433 };
+static napi_type_tag fdn_control_service_options_type_tag = { 0x6f3e3148ba81437c, 0xb367bbb62ab05dc6 };
+static napi_type_tag fdn_portal_service_type_tag = { 0x8df3bbd40f314de2, 0x87465696f8eeff80 };
+static napi_type_tag fdn_file_monitor_type_tag = { 0x8e33af5623774b91, 0xadc191fd6b785839 };
+static napi_type_tag fdn_compiler_type_tag = { 0x2da307acf4ec430f, 0xb4a9d2f0765d7029 };
+static napi_type_tag fdn_compiler_options_type_tag = { 0x27b0508d552b475f, 0xa1b21c2992a36ac9 };
+static napi_type_tag fdn_build_options_type_tag = { 0xad76131091cb4d63, 0xbee99629a31aa50b };
+static napi_type_tag fdn_watch_options_type_tag = { 0x7899f3ccde044fdf, 0xa5fdab8984ec7d44 };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0x27742b336e6d467b, 0xad12df75df77ed21 };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x2bb0854642e74bb8, 0xa3559d74d5bcb6d2 };
+static napi_type_tag fdn_application_query_options_type_tag = { 0x39b89fe2dc154d97, 0x9fa52de320505376 };
+static napi_type_tag fdn_process_query_options_type_tag = { 0xdd106a9cd863465a, 0xb5254bb78f76f127 };
+static napi_type_tag fdn_session_options_type_tag = { 0xf0d70c3d69874695, 0x88ba5d4c4020b17f };
+static napi_type_tag fdn_script_options_type_tag = { 0x57a1fcd686ac4bad, 0xb5c3da88c2d90971 };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0xa5bc64e27d354a76, 0xb0a8b945267b38e8 };
+static napi_type_tag fdn_portal_options_type_tag = { 0x3b231d90f237485c, 0xb7d02822a8eea072 };
+static napi_type_tag fdn_peer_options_type_tag = { 0x97e20dbb467d434b, 0x8cf2bf527aaa6679 };
+static napi_type_tag fdn_relay_type_tag = { 0x77fe4d07a80d4a0f, 0x95195988dde2069e };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x60118b4f131b437a, 0xa788fde6903e5046 };
+static napi_type_tag fdn_cancellable_type_tag = { 0x2309bc7779134925, 0xb652ffc0551f7aa9 };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_constructor;
@@ -1951,7 +1951,7 @@ fdn_device_manager_get_device_by_id_deliver (napi_env env,
 static void
 fdn_device_manager_get_device_by_id_operation_free (FdnDeviceManagerGetDeviceByIdOperation * operation)
 {
-  g_free (operation->id);
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceManagerGetDeviceByIdOperation, operation);
 }
 
@@ -2097,6 +2097,7 @@ fdn_device_manager_get_device_by_type_deliver (napi_env env,
 static void
 fdn_device_manager_get_device_by_type_operation_free (FdnDeviceManagerGetDeviceByTypeOperation * operation)
 {
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceManagerGetDeviceByTypeOperation, operation);
 }
 
@@ -2245,7 +2246,7 @@ fdn_device_manager_find_device_by_id_deliver (napi_env env,
 static void
 fdn_device_manager_find_device_by_id_operation_free (FdnDeviceManagerFindDeviceByIdOperation * operation)
 {
-  g_free (operation->id);
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceManagerFindDeviceByIdOperation, operation);
 }
 
@@ -2394,6 +2395,7 @@ fdn_device_manager_find_device_by_type_deliver (napi_env env,
 static void
 fdn_device_manager_find_device_by_type_operation_free (FdnDeviceManagerFindDeviceByTypeOperation * operation)
 {
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceManagerFindDeviceByTypeOperation, operation);
 }
 
@@ -2517,6 +2519,7 @@ fdn_device_manager_enumerate_devices_deliver (napi_env env,
 static void
 fdn_device_manager_enumerate_devices_operation_free (FdnDeviceManagerEnumerateDevicesOperation * operation)
 {
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceManagerEnumerateDevicesOperation, operation);
 }
 
@@ -2661,7 +2664,7 @@ fdn_device_manager_add_remote_device_deliver (napi_env env,
 static void
 fdn_device_manager_add_remote_device_operation_free (FdnDeviceManagerAddRemoteDeviceOperation * operation)
 {
-  g_free (operation->address);
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceManagerAddRemoteDeviceOperation, operation);
 }
 
@@ -2794,7 +2797,6 @@ fdn_device_manager_remove_remote_device_deliver (napi_env env,
 static void
 fdn_device_manager_remove_remote_device_operation_free (FdnDeviceManagerRemoveRemoteDeviceOperation * operation)
 {
-  g_free (operation->address);
   g_slice_free (FdnDeviceManagerRemoveRemoteDeviceOperation, operation);
 }
 
@@ -3163,6 +3165,7 @@ fdn_device_query_system_parameters_deliver (napi_env env,
 static void
 fdn_device_query_system_parameters_operation_free (FdnDeviceQuerySystemParametersOperation * operation)
 {
+  g_hash_table_unref (operation->retval);
   g_slice_free (FdnDeviceQuerySystemParametersOperation, operation);
 }
 
@@ -3299,6 +3302,7 @@ fdn_device_get_frontmost_application_deliver (napi_env env,
 static void
 fdn_device_get_frontmost_application_operation_free (FdnDeviceGetFrontmostApplicationOperation * operation)
 {
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceGetFrontmostApplicationOperation, operation);
 }
 
@@ -3432,6 +3436,7 @@ fdn_device_enumerate_applications_deliver (napi_env env,
 static void
 fdn_device_enumerate_applications_operation_free (FdnDeviceEnumerateApplicationsOperation * operation)
 {
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceEnumerateApplicationsOperation, operation);
 }
 
@@ -3576,6 +3581,7 @@ fdn_device_get_process_by_pid_deliver (napi_env env,
 static void
 fdn_device_get_process_by_pid_operation_free (FdnDeviceGetProcessByPidOperation * operation)
 {
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceGetProcessByPidOperation, operation);
 }
 
@@ -3720,7 +3726,7 @@ fdn_device_get_process_by_name_deliver (napi_env env,
 static void
 fdn_device_get_process_by_name_operation_free (FdnDeviceGetProcessByNameOperation * operation)
 {
-  g_free (operation->name);
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceGetProcessByNameOperation, operation);
 }
 
@@ -3868,6 +3874,7 @@ fdn_device_find_process_by_pid_deliver (napi_env env,
 static void
 fdn_device_find_process_by_pid_operation_free (FdnDeviceFindProcessByPidOperation * operation)
 {
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceFindProcessByPidOperation, operation);
 }
 
@@ -4015,7 +4022,7 @@ fdn_device_find_process_by_name_deliver (napi_env env,
 static void
 fdn_device_find_process_by_name_operation_free (FdnDeviceFindProcessByNameOperation * operation)
 {
-  g_free (operation->name);
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceFindProcessByNameOperation, operation);
 }
 
@@ -4149,6 +4156,7 @@ fdn_device_enumerate_processes_deliver (napi_env env,
 static void
 fdn_device_enumerate_processes_operation_free (FdnDeviceEnumerateProcessesOperation * operation)
 {
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceEnumerateProcessesOperation, operation);
 }
 
@@ -4514,6 +4522,7 @@ fdn_device_enumerate_pending_spawn_deliver (napi_env env,
 static void
 fdn_device_enumerate_pending_spawn_operation_free (FdnDeviceEnumeratePendingSpawnOperation * operation)
 {
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceEnumeratePendingSpawnOperation, operation);
 }
 
@@ -4637,6 +4646,7 @@ fdn_device_enumerate_pending_children_deliver (napi_env env,
 static void
 fdn_device_enumerate_pending_children_operation_free (FdnDeviceEnumeratePendingChildrenOperation * operation)
 {
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceEnumeratePendingChildrenOperation, operation);
 }
 
@@ -4781,7 +4791,6 @@ fdn_device_spawn_deliver (napi_env env,
 static void
 fdn_device_spawn_operation_free (FdnDeviceSpawnOperation * operation)
 {
-  g_free (operation->program);
   g_slice_free (FdnDeviceSpawnOperation, operation);
 }
 
@@ -5333,6 +5342,7 @@ fdn_device_attach_deliver (napi_env env,
 static void
 fdn_device_attach_operation_free (FdnDeviceAttachOperation * operation)
 {
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceAttachOperation, operation);
 }
 
@@ -5500,9 +5510,6 @@ fdn_device_inject_library_file_deliver (napi_env env,
 static void
 fdn_device_inject_library_file_operation_free (FdnDeviceInjectLibraryFileOperation * operation)
 {
-  g_free (operation->path);
-  g_free (operation->entrypoint);
-  g_free (operation->data);
   g_slice_free (FdnDeviceInjectLibraryFileOperation, operation);
 }
 
@@ -5670,8 +5677,6 @@ fdn_device_inject_library_blob_deliver (napi_env env,
 static void
 fdn_device_inject_library_blob_operation_free (FdnDeviceInjectLibraryBlobOperation * operation)
 {
-  g_free (operation->entrypoint);
-  g_free (operation->data);
   g_slice_free (FdnDeviceInjectLibraryBlobOperation, operation);
 }
 
@@ -5806,7 +5811,7 @@ fdn_device_open_channel_deliver (napi_env env,
 static void
 fdn_device_open_channel_operation_free (FdnDeviceOpenChannelOperation * operation)
 {
-  g_free (operation->address);
+  g_object_unref (operation->retval);
   g_slice_free (FdnDeviceOpenChannelOperation, operation);
 }
 
@@ -5941,7 +5946,7 @@ fdn_device_open_service_deliver (napi_env env,
 static void
 fdn_device_open_service_operation_free (FdnDeviceOpenServiceOperation * operation)
 {
-  g_free (operation->address);
+  frida_unref (operation->retval);
   g_slice_free (FdnDeviceOpenServiceOperation, operation);
 }
 
@@ -6448,7 +6453,6 @@ fdn_remote_device_options_set_origin (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (value);
   return js_retval;
 }
 
@@ -6518,7 +6522,6 @@ fdn_remote_device_options_set_token (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (value);
   return js_retval;
 }
 
@@ -7685,7 +7688,6 @@ fdn_spawn_options_set_cwd (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (value);
   return js_retval;
 }
 
@@ -8894,7 +8896,6 @@ fdn_bus_post (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (json);
   return js_retval;
 }
 
@@ -9725,7 +9726,7 @@ fdn_session_create_script_deliver (napi_env env,
 static void
 fdn_session_create_script_operation_free (FdnSessionCreateScriptOperation * operation)
 {
-  g_free (operation->source);
+  frida_unref (operation->retval);
   g_slice_free (FdnSessionCreateScriptOperation, operation);
 }
 
@@ -9870,6 +9871,7 @@ fdn_session_create_script_from_bytes_deliver (napi_env env,
 static void
 fdn_session_create_script_from_bytes_operation_free (FdnSessionCreateScriptFromBytesOperation * operation)
 {
+  frida_unref (operation->retval);
   g_slice_free (FdnSessionCreateScriptFromBytesOperation, operation);
 }
 
@@ -10014,7 +10016,7 @@ fdn_session_compile_script_deliver (napi_env env,
 static void
 fdn_session_compile_script_operation_free (FdnSessionCompileScriptOperation * operation)
 {
-  g_free (operation->source);
+  g_bytes_unref (operation->retval);
   g_slice_free (FdnSessionCompileScriptOperation, operation);
 }
 
@@ -10159,7 +10161,7 @@ fdn_session_snapshot_script_deliver (napi_env env,
 static void
 fdn_session_snapshot_script_operation_free (FdnSessionSnapshotScriptOperation * operation)
 {
-  g_free (operation->embed_script);
+  g_bytes_unref (operation->retval);
   g_slice_free (FdnSessionSnapshotScriptOperation, operation);
 }
 
@@ -10435,7 +10437,7 @@ fdn_session_join_portal_deliver (napi_env env,
 static void
 fdn_session_join_portal_operation_free (FdnSessionJoinPortalOperation * operation)
 {
-  g_free (operation->address);
+  frida_unref (operation->retval);
   g_slice_free (FdnSessionJoinPortalOperation, operation);
 }
 
@@ -11057,7 +11059,6 @@ fdn_script_post (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (json);
   return js_retval;
 }
 
@@ -11711,7 +11712,6 @@ fdn_control_service_options_set_sysroot (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (value);
   return js_retval;
 }
 
@@ -12308,7 +12308,6 @@ fdn_portal_service_post (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (json);
   return js_retval;
 }
 
@@ -12369,8 +12368,6 @@ fdn_portal_service_narrowcast (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (tag);
-  g_free (json);
   return js_retval;
 }
 
@@ -12420,7 +12417,6 @@ fdn_portal_service_broadcast (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (json);
   return js_retval;
 }
 
@@ -12515,7 +12511,6 @@ fdn_portal_service_tag (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (tag);
   return js_retval;
 }
 
@@ -12566,7 +12561,6 @@ fdn_portal_service_untag (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (tag);
   return js_retval;
 }
 
@@ -13292,7 +13286,6 @@ fdn_compiler_build_deliver (napi_env env,
 static void
 fdn_compiler_build_operation_free (FdnCompilerBuildOperation * operation)
 {
-  g_free (operation->entrypoint);
   g_free (operation->retval);
   g_slice_free (FdnCompilerBuildOperation, operation);
 }
@@ -13436,7 +13429,6 @@ fdn_compiler_watch_deliver (napi_env env,
 static void
 fdn_compiler_watch_operation_free (FdnCompilerWatchOperation * operation)
 {
-  g_free (operation->entrypoint);
   g_slice_free (FdnCompilerWatchOperation, operation);
 }
 
@@ -13637,7 +13629,6 @@ fdn_compiler_options_set_project_root (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (value);
   return js_retval;
 }
 
@@ -14414,7 +14405,6 @@ fdn_application_query_options_select_identifier (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (identifier);
   return js_retval;
 }
 
@@ -15053,7 +15043,6 @@ fdn_session_options_set_emulated_agent_path (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (value);
   return js_retval;
 }
 
@@ -15227,7 +15216,6 @@ fdn_script_options_set_name (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (value);
   return js_retval;
 }
 
@@ -15602,7 +15590,6 @@ fdn_snapshot_options_set_warmup_script (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (value);
   return js_retval;
 }
 
@@ -15911,7 +15898,6 @@ fdn_portal_options_set_token (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (value);
   return js_retval;
 }
 
@@ -16231,7 +16217,6 @@ fdn_peer_options_set_stun_server (napi_env env,
   napi_get_undefined (env, &js_retval);
 
 beach:
-  g_free (value);
   return js_retval;
 }
 

@@ -22,6 +22,7 @@ class Model:
 class Class:
     name: str
     c_type: str
+    parent: str
     _constructors: List[ET.Element]
     _methods: List[ET.Element]
     method_filter: Optional[MethodFilter]
@@ -71,7 +72,15 @@ class Class:
             result_element = next((m for m in self._methods if m.get("name") == f"{name}_finish")) if is_async else element
             retval_element = result_element.find(".//return-value", GIR_NAMESPACES)
             rettype = extract_type_from_entity(retval_element)
-            retval = ReturnValue(rettype, retval_element.get("nullable") == "1") if rettype is not None else None
+            if rettype is not None:
+                nullable = retval_element.get("nullable") == "1"
+
+                ownership_val = retval_element.get("transfer-ownership")
+                transfer_ownership = TransferOwnership[ownership_val] if ownership_val is not None else TransferOwnership.none
+
+                retval = ReturnValue(rettype, nullable, transfer_ownership)
+            else:
+                retval = None
 
             methods.append(Method(transformed_method_name, c_identifier, param_list, retval, throws, is_async, self))
         return methods
@@ -113,10 +122,13 @@ def extract_parameters(parameter_elements: List[ET.Element]) -> List[Parameter]:
 
         nullable = param.get("nullable") == "1"
 
+        ownership_val = param.get("transfer-ownership")
+        transfer_ownership = TransferOwnership[ownership_val] if ownership_val is not None else TransferOwnership.none
+
         raw_direction = param.get("direction")
         direction = Direction(raw_direction) if raw_direction is not None else Direction.IN
 
-        param_list.append(Parameter(param_name, type, nullable, direction))
+        param_list.append(Parameter(param_name, type, nullable, transfer_ownership, direction))
     return param_list
 
 @dataclass
@@ -149,17 +161,29 @@ class Property:
     writable: bool
     construct_only: bool
 
+TransferOwnership = Enum("TransferOwnership", ["none", "full", "container"])
+
 @dataclass
 class Parameter:
     name: str
     type: Type
     nullable: bool
+    transfer_ownership: TransferOwnership
     direction: Direction
+
+    @cached_property
+    def destroy_function(self) -> Optional[str]:
+        return resolve_destroy_function(self.transfer_ownership, self.type)
 
 @dataclass
 class ReturnValue:
     type: Type
     nullable: bool
+    transfer_ownership: TransferOwnership
+
+    @cached_property
+    def destroy_function(self) -> Optional[str]:
+        return resolve_destroy_function(self.transfer_ownership, self.type)
 
 @dataclass
 class Type:
@@ -188,22 +212,23 @@ def parse_gir(file_path: str,
     tree = ET.parse(file_path)
 
     classes = OrderedDict()
-    for klass_element in tree.getroot().findall(".//class", GIR_NAMESPACES):
-        class_name = klass_element.get("name")
-        class_c_type = klass_element.get(f"{{{C_NAMESPACE}}}type")
-        constructors = klass_element.findall(".//constructor", GIR_NAMESPACES)
-        methods = klass_element.findall(".//method", GIR_NAMESPACES)
-        properties = klass_element.findall(".//property", GIR_NAMESPACES)
+    for element in tree.getroot().findall(".//class", GIR_NAMESPACES):
+        class_name = element.get("name")
+        class_c_type = element.get(f"{{{C_NAMESPACE}}}type")
+        parent = element.get("parent")
+        constructors = element.findall(".//constructor", GIR_NAMESPACES)
+        methods = element.findall(".//method", GIR_NAMESPACES)
+        properties = element.findall(".//property", GIR_NAMESPACES)
 
-        classes[class_name] = Class(class_name, class_c_type, constructors, methods, method_filter, method_name_transformer, properties)
+        classes[class_name] = Class(class_name, class_c_type, parent, constructors, methods, method_filter, method_name_transformer, properties)
 
     enumerations = OrderedDict()
-    for enum_element in tree.getroot().findall(".//enumeration", GIR_NAMESPACES):
-        if enum_element.get(f"{{{GLIB_NAMESPACE}}}error-domain") is not None:
+    for element in tree.getroot().findall(".//enumeration", GIR_NAMESPACES):
+        if element.get(f"{{{GLIB_NAMESPACE}}}error-domain") is not None:
             continue
-        enum_name = enum_element.get("name")
-        enum_c_type = enum_element.get(f"{{{C_NAMESPACE}}}type")
-        get_type = enum_element.get(f"{{{GLIB_NAMESPACE}}}get-type")
+        enum_name = element.get("name")
+        enum_c_type = element.get(f"{{{C_NAMESPACE}}}type")
+        get_type = element.get(f"{{{GLIB_NAMESPACE}}}get-type")
         enumerations[enum_name] = Enumeration(enum_name, enum_c_type, get_type)
 
     return Model(classes, enumerations)
@@ -635,7 +660,7 @@ def generate_method_code(klass: Class, method: Method) -> str:
     invalid_arg_label = "invalid_argument" if method.is_async else "beach"
     input_params = [param for param in method.parameters if param.direction != Direction.OUT]
     param_conversions = [generate_parameter_conversion_code(param, i, invalid_arg_label) for i, param in enumerate(input_params)]
-    param_frees = [f"g_free (operation->{param.name});" for param in method.parameters if param.type.name == "utf8"]
+    param_frees = [f"{param.destroy_function} (operation->{param.name});" for param in method.parameters if param.destroy_function is not None]
     param_frees_str = "\n  " + "\n  ".join(param_frees) if param_frees else ""
 
     return_assignment = f"\n\n  operation->retval = " if method.return_value is not None else ""
@@ -645,7 +670,8 @@ def generate_method_code(klass: Class, method: Method) -> str:
             return_conversion = f"if (operation->retval != NULL)\n    {return_conversion}\n  else\n    napi_get_null (env, &js_retval);"
     else:
         return_conversion = "napi_get_undefined (env, &js_retval);"
-    return_frees_str = f"\n  g_free (operation->retval);" if method.return_value is not None and method.return_value.type.name == "utf8" else ""
+    retval = method.return_value
+    return_frees_str = f"\n  {retval.destroy_function} (operation->retval);" if retval is not None and retval.destroy_function is not None else ""
 
     def calculate_indent(suffix: str) -> str:
         return " " * (len(class_cprefix) + 1 + len(method.name) + len(suffix) + 2)
@@ -1753,6 +1779,26 @@ fdn_authentication_service_to_value (napi_env env,
   return result;
 }
 """
+
+def resolve_destroy_function(transfer_ownership: TransferOwnership, type: Type) -> Optional[str]:
+    if transfer_ownership == TransferOwnership.none:
+        return None
+    name = type.name
+    if name in {"gboolean", "guint"}:
+        return None
+    if name == "utf8":
+        return "g_free"
+    if name == "utf8[]":
+        return "g_strfreev"
+    if name == "GLib.Bytes":
+        return "g_bytes_unref"
+    if name == "GLib.HashTable":
+        return "g_hash_table_unref"
+    if name == "Gio.IOStream":
+        return "g_object_unref"
+    if name.startswith("Frida."):
+        return "frida_unref"
+    assert False, f"unable to determine destroy function for {name}"
 
 def to_snake_case(name: str) -> str:
     result = []
