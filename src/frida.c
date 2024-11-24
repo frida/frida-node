@@ -512,7 +512,7 @@ typedef struct {
 
 
 static void fdn_device_manager_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_device_manager_from_value (napi_env env, napi_value value, FridaDeviceManager ** result);
+G_GNUC_UNUSED static gboolean fdn_device_manager_from_value (napi_env env, napi_value value, FridaDeviceManager ** handle);
 G_GNUC_UNUSED static napi_value fdn_device_manager_to_value (napi_env env, FridaDeviceManager * handle);
 static napi_value fdn_device_manager_construct (napi_env env, napi_callback_info info);
 
@@ -565,7 +565,7 @@ static void fdn_device_manager_remove_remote_device_deliver (napi_env env, napi_
 static void fdn_device_manager_remove_remote_device_operation_free (FdnDeviceManagerRemoveRemoteDeviceOperation * operation);
 
 static void fdn_device_list_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_device_list_from_value (napi_env env, napi_value value, FridaDeviceList ** result);
+G_GNUC_UNUSED static gboolean fdn_device_list_from_value (napi_env env, napi_value value, FridaDeviceList ** handle);
 G_GNUC_UNUSED static napi_value fdn_device_list_to_value (napi_env env, FridaDeviceList * handle);
 static napi_value fdn_device_list_construct (napi_env env, napi_callback_info info);
 
@@ -574,7 +574,7 @@ static napi_value fdn_device_list_size (napi_env env, napi_callback_info info);
 static napi_value fdn_device_list_get (napi_env env, napi_callback_info info);
 
 static void fdn_device_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_device_from_value (napi_env env, napi_value value, FridaDevice ** result);
+G_GNUC_UNUSED static gboolean fdn_device_from_value (napi_env env, napi_value value, FridaDevice ** handle);
 G_GNUC_UNUSED static napi_value fdn_device_to_value (napi_env env, FridaDevice * handle);
 static napi_value fdn_device_construct (napi_env env, napi_callback_info info);
 
@@ -723,7 +723,7 @@ static napi_value fdn_device_get_dtype (napi_env env, napi_callback_info info);
 static napi_value fdn_device_get_bus (napi_env env, napi_callback_info info);
 
 static void fdn_remote_device_options_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_remote_device_options_from_value (napi_env env, napi_value value, FridaRemoteDeviceOptions ** result);
+G_GNUC_UNUSED static gboolean fdn_remote_device_options_from_value (napi_env env, napi_value value, FridaRemoteDeviceOptions ** handle);
 G_GNUC_UNUSED static napi_value fdn_remote_device_options_to_value (napi_env env, FridaRemoteDeviceOptions * handle);
 static napi_value fdn_remote_device_options_construct (napi_env env, napi_callback_info info);
 
@@ -744,7 +744,7 @@ static napi_value fdn_remote_device_options_get_keepalive_interval (napi_env env
 static napi_value fdn_remote_device_options_set_keepalive_interval (napi_env env, napi_callback_info info);
 
 static void fdn_application_list_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_application_list_from_value (napi_env env, napi_value value, FridaApplicationList ** result);
+G_GNUC_UNUSED static gboolean fdn_application_list_from_value (napi_env env, napi_value value, FridaApplicationList ** handle);
 G_GNUC_UNUSED static napi_value fdn_application_list_to_value (napi_env env, FridaApplicationList * handle);
 static napi_value fdn_application_list_construct (napi_env env, napi_callback_info info);
 
@@ -753,7 +753,7 @@ static napi_value fdn_application_list_size (napi_env env, napi_callback_info in
 static napi_value fdn_application_list_get (napi_env env, napi_callback_info info);
 
 static void fdn_application_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_application_from_value (napi_env env, napi_value value, FridaApplication ** result);
+G_GNUC_UNUSED static gboolean fdn_application_from_value (napi_env env, napi_value value, FridaApplication ** handle);
 G_GNUC_UNUSED static napi_value fdn_application_to_value (napi_env env, FridaApplication * handle);
 static napi_value fdn_application_construct (napi_env env, napi_callback_info info);
 
@@ -766,7 +766,7 @@ static napi_value fdn_application_get_pid (napi_env env, napi_callback_info info
 static napi_value fdn_application_get_parameters (napi_env env, napi_callback_info info);
 
 static void fdn_process_list_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_process_list_from_value (napi_env env, napi_value value, FridaProcessList ** result);
+G_GNUC_UNUSED static gboolean fdn_process_list_from_value (napi_env env, napi_value value, FridaProcessList ** handle);
 G_GNUC_UNUSED static napi_value fdn_process_list_to_value (napi_env env, FridaProcessList * handle);
 static napi_value fdn_process_list_construct (napi_env env, napi_callback_info info);
 
@@ -775,7 +775,7 @@ static napi_value fdn_process_list_size (napi_env env, napi_callback_info info);
 static napi_value fdn_process_list_get (napi_env env, napi_callback_info info);
 
 static void fdn_process_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_process_from_value (napi_env env, napi_value value, FridaProcess ** result);
+G_GNUC_UNUSED static gboolean fdn_process_from_value (napi_env env, napi_value value, FridaProcess ** handle);
 G_GNUC_UNUSED static napi_value fdn_process_to_value (napi_env env, FridaProcess * handle);
 static napi_value fdn_process_construct (napi_env env, napi_callback_info info);
 
@@ -786,7 +786,7 @@ static napi_value fdn_process_get_name (napi_env env, napi_callback_info info);
 static napi_value fdn_process_get_parameters (napi_env env, napi_callback_info info);
 
 static void fdn_process_match_options_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_process_match_options_from_value (napi_env env, napi_value value, FridaProcessMatchOptions ** result);
+G_GNUC_UNUSED static gboolean fdn_process_match_options_from_value (napi_env env, napi_value value, FridaProcessMatchOptions ** handle);
 G_GNUC_UNUSED static napi_value fdn_process_match_options_to_value (napi_env env, FridaProcessMatchOptions * handle);
 static napi_value fdn_process_match_options_construct (napi_env env, napi_callback_info info);
 
@@ -799,7 +799,7 @@ static napi_value fdn_process_match_options_get_scope (napi_env env, napi_callba
 static napi_value fdn_process_match_options_set_scope (napi_env env, napi_callback_info info);
 
 static void fdn_spawn_options_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_spawn_options_from_value (napi_env env, napi_value value, FridaSpawnOptions ** result);
+G_GNUC_UNUSED static gboolean fdn_spawn_options_from_value (napi_env env, napi_value value, FridaSpawnOptions ** handle);
 G_GNUC_UNUSED static napi_value fdn_spawn_options_to_value (napi_env env, FridaSpawnOptions * handle);
 static napi_value fdn_spawn_options_construct (napi_env env, napi_callback_info info);
 
@@ -828,7 +828,7 @@ static napi_value fdn_spawn_options_get_aux (napi_env env, napi_callback_info in
 static napi_value fdn_spawn_options_set_aux (napi_env env, napi_callback_info info);
 
 static void fdn_spawn_list_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_spawn_list_from_value (napi_env env, napi_value value, FridaSpawnList ** result);
+G_GNUC_UNUSED static gboolean fdn_spawn_list_from_value (napi_env env, napi_value value, FridaSpawnList ** handle);
 G_GNUC_UNUSED static napi_value fdn_spawn_list_to_value (napi_env env, FridaSpawnList * handle);
 static napi_value fdn_spawn_list_construct (napi_env env, napi_callback_info info);
 
@@ -837,7 +837,7 @@ static napi_value fdn_spawn_list_size (napi_env env, napi_callback_info info);
 static napi_value fdn_spawn_list_get (napi_env env, napi_callback_info info);
 
 static void fdn_spawn_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_spawn_from_value (napi_env env, napi_value value, FridaSpawn ** result);
+G_GNUC_UNUSED static gboolean fdn_spawn_from_value (napi_env env, napi_value value, FridaSpawn ** handle);
 G_GNUC_UNUSED static napi_value fdn_spawn_to_value (napi_env env, FridaSpawn * handle);
 static napi_value fdn_spawn_construct (napi_env env, napi_callback_info info);
 
@@ -846,7 +846,7 @@ static napi_value fdn_spawn_get_pid (napi_env env, napi_callback_info info);
 static napi_value fdn_spawn_get_identifier (napi_env env, napi_callback_info info);
 
 static void fdn_child_list_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_child_list_from_value (napi_env env, napi_value value, FridaChildList ** result);
+G_GNUC_UNUSED static gboolean fdn_child_list_from_value (napi_env env, napi_value value, FridaChildList ** handle);
 G_GNUC_UNUSED static napi_value fdn_child_list_to_value (napi_env env, FridaChildList * handle);
 static napi_value fdn_child_list_construct (napi_env env, napi_callback_info info);
 
@@ -855,7 +855,7 @@ static napi_value fdn_child_list_size (napi_env env, napi_callback_info info);
 static napi_value fdn_child_list_get (napi_env env, napi_callback_info info);
 
 static void fdn_child_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_child_from_value (napi_env env, napi_value value, FridaChild ** result);
+G_GNUC_UNUSED static gboolean fdn_child_from_value (napi_env env, napi_value value, FridaChild ** handle);
 G_GNUC_UNUSED static napi_value fdn_child_to_value (napi_env env, FridaChild * handle);
 static napi_value fdn_child_construct (napi_env env, napi_callback_info info);
 
@@ -874,7 +874,7 @@ static napi_value fdn_child_get_argv (napi_env env, napi_callback_info info);
 static napi_value fdn_child_get_envp (napi_env env, napi_callback_info info);
 
 static void fdn_crash_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_crash_from_value (napi_env env, napi_value value, FridaCrash ** result);
+G_GNUC_UNUSED static gboolean fdn_crash_from_value (napi_env env, napi_value value, FridaCrash ** handle);
 G_GNUC_UNUSED static napi_value fdn_crash_to_value (napi_env env, FridaCrash * handle);
 static napi_value fdn_crash_construct (napi_env env, napi_callback_info info);
 
@@ -889,7 +889,7 @@ static napi_value fdn_crash_get_report (napi_env env, napi_callback_info info);
 static napi_value fdn_crash_get_parameters (napi_env env, napi_callback_info info);
 
 static void fdn_bus_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_bus_from_value (napi_env env, napi_value value, FridaBus ** result);
+G_GNUC_UNUSED static gboolean fdn_bus_from_value (napi_env env, napi_value value, FridaBus ** handle);
 G_GNUC_UNUSED static napi_value fdn_bus_to_value (napi_env env, FridaBus * handle);
 static napi_value fdn_bus_construct (napi_env env, napi_callback_info info);
 
@@ -906,7 +906,7 @@ static napi_value fdn_bus_post (napi_env env, napi_callback_info info);
 static napi_value fdn_bus_get_device (napi_env env, napi_callback_info info);
 
 static void fdn_session_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_session_from_value (napi_env env, napi_value value, FridaSession ** result);
+G_GNUC_UNUSED static gboolean fdn_session_from_value (napi_env env, napi_value value, FridaSession ** handle);
 G_GNUC_UNUSED static napi_value fdn_session_to_value (napi_env env, FridaSession * handle);
 static napi_value fdn_session_construct (napi_env env, napi_callback_info info);
 
@@ -977,7 +977,7 @@ static napi_value fdn_session_get_pid (napi_env env, napi_callback_info info);
 static napi_value fdn_session_get_persist_timeout (napi_env env, napi_callback_info info);
 
 static void fdn_script_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_script_from_value (napi_env env, napi_value value, FridaScript ** result);
+G_GNUC_UNUSED static gboolean fdn_script_from_value (napi_env env, napi_value value, FridaScript ** handle);
 G_GNUC_UNUSED static napi_value fdn_script_to_value (napi_env env, FridaScript * handle);
 static napi_value fdn_script_construct (napi_env env, napi_callback_info info);
 
@@ -1016,7 +1016,7 @@ static void fdn_script_disable_debugger_deliver (napi_env env, napi_value js_cb,
 static void fdn_script_disable_debugger_operation_free (FdnScriptDisableDebuggerOperation * operation);
 
 static void fdn_portal_membership_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_portal_membership_from_value (napi_env env, napi_value value, FridaPortalMembership ** result);
+G_GNUC_UNUSED static gboolean fdn_portal_membership_from_value (napi_env env, napi_value value, FridaPortalMembership ** handle);
 G_GNUC_UNUSED static napi_value fdn_portal_membership_to_value (napi_env env, FridaPortalMembership * handle);
 static napi_value fdn_portal_membership_construct (napi_env env, napi_callback_info info);
 
@@ -1027,7 +1027,7 @@ static void fdn_portal_membership_terminate_deliver (napi_env env, napi_value js
 static void fdn_portal_membership_terminate_operation_free (FdnPortalMembershipTerminateOperation * operation);
 
 static void fdn_control_service_options_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_control_service_options_from_value (napi_env env, napi_value value, FridaControlServiceOptions ** result);
+G_GNUC_UNUSED static gboolean fdn_control_service_options_from_value (napi_env env, napi_value value, FridaControlServiceOptions ** handle);
 G_GNUC_UNUSED static napi_value fdn_control_service_options_to_value (napi_env env, FridaControlServiceOptions * handle);
 static napi_value fdn_control_service_options_construct (napi_env env, napi_callback_info info);
 
@@ -1044,7 +1044,7 @@ static napi_value fdn_control_service_options_get_report_crashes (napi_env env, 
 static napi_value fdn_control_service_options_set_report_crashes (napi_env env, napi_callback_info info);
 
 static void fdn_portal_service_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_portal_service_from_value (napi_env env, napi_value value, FridaPortalService ** result);
+G_GNUC_UNUSED static gboolean fdn_portal_service_from_value (napi_env env, napi_value value, FridaPortalService ** handle);
 G_GNUC_UNUSED static napi_value fdn_portal_service_to_value (napi_env env, FridaPortalService * handle);
 static napi_value fdn_portal_service_construct (napi_env env, napi_callback_info info);
 
@@ -1081,7 +1081,7 @@ static napi_value fdn_portal_service_get_cluster_params (napi_env env, napi_call
 static napi_value fdn_portal_service_get_control_params (napi_env env, napi_callback_info info);
 
 static void fdn_file_monitor_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_file_monitor_from_value (napi_env env, napi_value value, FridaFileMonitor ** result);
+G_GNUC_UNUSED static gboolean fdn_file_monitor_from_value (napi_env env, napi_value value, FridaFileMonitor ** handle);
 G_GNUC_UNUSED static napi_value fdn_file_monitor_to_value (napi_env env, FridaFileMonitor * handle);
 static napi_value fdn_file_monitor_construct (napi_env env, napi_callback_info info);
 
@@ -1100,7 +1100,7 @@ static void fdn_file_monitor_disable_operation_free (FdnFileMonitorDisableOperat
 static napi_value fdn_file_monitor_get_path (napi_env env, napi_callback_info info);
 
 static void fdn_compiler_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_compiler_from_value (napi_env env, napi_value value, FridaCompiler ** result);
+G_GNUC_UNUSED static gboolean fdn_compiler_from_value (napi_env env, napi_value value, FridaCompiler ** handle);
 G_GNUC_UNUSED static napi_value fdn_compiler_to_value (napi_env env, FridaCompiler * handle);
 static napi_value fdn_compiler_construct (napi_env env, napi_callback_info info);
 
@@ -1119,7 +1119,7 @@ static void fdn_compiler_watch_operation_free (FdnCompilerWatchOperation * opera
 static napi_value fdn_compiler_get_manager (napi_env env, napi_callback_info info);
 
 static void fdn_compiler_options_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_compiler_options_from_value (napi_env env, napi_value value, FridaCompilerOptions ** result);
+G_GNUC_UNUSED static gboolean fdn_compiler_options_from_value (napi_env env, napi_value value, FridaCompilerOptions ** handle);
 G_GNUC_UNUSED static napi_value fdn_compiler_options_to_value (napi_env env, FridaCompilerOptions * handle);
 static napi_value fdn_compiler_options_construct (napi_env env, napi_callback_info info);
 
@@ -1136,24 +1136,24 @@ static napi_value fdn_compiler_options_get_compression (napi_env env, napi_callb
 static napi_value fdn_compiler_options_set_compression (napi_env env, napi_callback_info info);
 
 static void fdn_build_options_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_build_options_from_value (napi_env env, napi_value value, FridaBuildOptions ** result);
+G_GNUC_UNUSED static gboolean fdn_build_options_from_value (napi_env env, napi_value value, FridaBuildOptions ** handle);
 G_GNUC_UNUSED static napi_value fdn_build_options_to_value (napi_env env, FridaBuildOptions * handle);
 static napi_value fdn_build_options_construct (napi_env env, napi_callback_info info);
 
 static void fdn_watch_options_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_watch_options_from_value (napi_env env, napi_value value, FridaWatchOptions ** result);
+G_GNUC_UNUSED static gboolean fdn_watch_options_from_value (napi_env env, napi_value value, FridaWatchOptions ** handle);
 G_GNUC_UNUSED static napi_value fdn_watch_options_to_value (napi_env env, FridaWatchOptions * handle);
 static napi_value fdn_watch_options_construct (napi_env env, napi_callback_info info);
 
 static void fdn_static_authentication_service_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_static_authentication_service_from_value (napi_env env, napi_value value, FridaStaticAuthenticationService ** result);
+G_GNUC_UNUSED static gboolean fdn_static_authentication_service_from_value (napi_env env, napi_value value, FridaStaticAuthenticationService ** handle);
 G_GNUC_UNUSED static napi_value fdn_static_authentication_service_to_value (napi_env env, FridaStaticAuthenticationService * handle);
 static napi_value fdn_static_authentication_service_construct (napi_env env, napi_callback_info info);
 
 static napi_value fdn_static_authentication_service_get_token_hash (napi_env env, napi_callback_info info);
 
 static void fdn_frontmost_query_options_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_frontmost_query_options_from_value (napi_env env, napi_value value, FridaFrontmostQueryOptions ** result);
+G_GNUC_UNUSED static gboolean fdn_frontmost_query_options_from_value (napi_env env, napi_value value, FridaFrontmostQueryOptions ** handle);
 G_GNUC_UNUSED static napi_value fdn_frontmost_query_options_to_value (napi_env env, FridaFrontmostQueryOptions * handle);
 static napi_value fdn_frontmost_query_options_construct (napi_env env, napi_callback_info info);
 
@@ -1162,7 +1162,7 @@ static napi_value fdn_frontmost_query_options_get_scope (napi_env env, napi_call
 static napi_value fdn_frontmost_query_options_set_scope (napi_env env, napi_callback_info info);
 
 static void fdn_application_query_options_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_application_query_options_from_value (napi_env env, napi_value value, FridaApplicationQueryOptions ** result);
+G_GNUC_UNUSED static gboolean fdn_application_query_options_from_value (napi_env env, napi_value value, FridaApplicationQueryOptions ** handle);
 G_GNUC_UNUSED static napi_value fdn_application_query_options_to_value (napi_env env, FridaApplicationQueryOptions * handle);
 static napi_value fdn_application_query_options_construct (napi_env env, napi_callback_info info);
 
@@ -1175,7 +1175,7 @@ static napi_value fdn_application_query_options_get_scope (napi_env env, napi_ca
 static napi_value fdn_application_query_options_set_scope (napi_env env, napi_callback_info info);
 
 static void fdn_process_query_options_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_process_query_options_from_value (napi_env env, napi_value value, FridaProcessQueryOptions ** result);
+G_GNUC_UNUSED static gboolean fdn_process_query_options_from_value (napi_env env, napi_value value, FridaProcessQueryOptions ** handle);
 G_GNUC_UNUSED static napi_value fdn_process_query_options_to_value (napi_env env, FridaProcessQueryOptions * handle);
 static napi_value fdn_process_query_options_construct (napi_env env, napi_callback_info info);
 
@@ -1188,7 +1188,7 @@ static napi_value fdn_process_query_options_get_scope (napi_env env, napi_callba
 static napi_value fdn_process_query_options_set_scope (napi_env env, napi_callback_info info);
 
 static void fdn_session_options_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_session_options_from_value (napi_env env, napi_value value, FridaSessionOptions ** result);
+G_GNUC_UNUSED static gboolean fdn_session_options_from_value (napi_env env, napi_value value, FridaSessionOptions ** handle);
 G_GNUC_UNUSED static napi_value fdn_session_options_to_value (napi_env env, FridaSessionOptions * handle);
 static napi_value fdn_session_options_construct (napi_env env, napi_callback_info info);
 
@@ -1205,7 +1205,7 @@ static napi_value fdn_session_options_get_emulated_agent_path (napi_env env, nap
 static napi_value fdn_session_options_set_emulated_agent_path (napi_env env, napi_callback_info info);
 
 static void fdn_script_options_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_script_options_from_value (napi_env env, napi_value value, FridaScriptOptions ** result);
+G_GNUC_UNUSED static gboolean fdn_script_options_from_value (napi_env env, napi_value value, FridaScriptOptions ** handle);
 G_GNUC_UNUSED static napi_value fdn_script_options_to_value (napi_env env, FridaScriptOptions * handle);
 static napi_value fdn_script_options_construct (napi_env env, napi_callback_info info);
 
@@ -1226,7 +1226,7 @@ static napi_value fdn_script_options_get_runtime (napi_env env, napi_callback_in
 static napi_value fdn_script_options_set_runtime (napi_env env, napi_callback_info info);
 
 static void fdn_snapshot_options_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_snapshot_options_from_value (napi_env env, napi_value value, FridaSnapshotOptions ** result);
+G_GNUC_UNUSED static gboolean fdn_snapshot_options_from_value (napi_env env, napi_value value, FridaSnapshotOptions ** handle);
 G_GNUC_UNUSED static napi_value fdn_snapshot_options_to_value (napi_env env, FridaSnapshotOptions * handle);
 static napi_value fdn_snapshot_options_construct (napi_env env, napi_callback_info info);
 
@@ -1239,7 +1239,7 @@ static napi_value fdn_snapshot_options_get_runtime (napi_env env, napi_callback_
 static napi_value fdn_snapshot_options_set_runtime (napi_env env, napi_callback_info info);
 
 static void fdn_portal_options_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_portal_options_from_value (napi_env env, napi_value value, FridaPortalOptions ** result);
+G_GNUC_UNUSED static gboolean fdn_portal_options_from_value (napi_env env, napi_value value, FridaPortalOptions ** handle);
 G_GNUC_UNUSED static napi_value fdn_portal_options_to_value (napi_env env, FridaPortalOptions * handle);
 static napi_value fdn_portal_options_construct (napi_env env, napi_callback_info info);
 
@@ -1256,7 +1256,7 @@ static napi_value fdn_portal_options_get_acl (napi_env env, napi_callback_info i
 static napi_value fdn_portal_options_set_acl (napi_env env, napi_callback_info info);
 
 static void fdn_peer_options_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_peer_options_from_value (napi_env env, napi_value value, FridaPeerOptions ** result);
+G_GNUC_UNUSED static gboolean fdn_peer_options_from_value (napi_env env, napi_value value, FridaPeerOptions ** handle);
 G_GNUC_UNUSED static napi_value fdn_peer_options_to_value (napi_env env, FridaPeerOptions * handle);
 static napi_value fdn_peer_options_construct (napi_env env, napi_callback_info info);
 
@@ -1269,7 +1269,7 @@ static napi_value fdn_peer_options_get_stun_server (napi_env env, napi_callback_
 static napi_value fdn_peer_options_set_stun_server (napi_env env, napi_callback_info info);
 
 static void fdn_relay_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_relay_from_value (napi_env env, napi_value value, FridaRelay ** result);
+G_GNUC_UNUSED static gboolean fdn_relay_from_value (napi_env env, napi_value value, FridaRelay ** handle);
 G_GNUC_UNUSED static napi_value fdn_relay_to_value (napi_env env, FridaRelay * handle);
 static napi_value fdn_relay_construct (napi_env env, napi_callback_info info);
 
@@ -1282,7 +1282,7 @@ static napi_value fdn_relay_get_password (napi_env env, napi_callback_info info)
 static napi_value fdn_relay_get_kind (napi_env env, napi_callback_info info);
 
 static void fdn_endpoint_parameters_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_endpoint_parameters_from_value (napi_env env, napi_value value, FridaEndpointParameters ** result);
+G_GNUC_UNUSED static gboolean fdn_endpoint_parameters_from_value (napi_env env, napi_value value, FridaEndpointParameters ** handle);
 G_GNUC_UNUSED static napi_value fdn_endpoint_parameters_to_value (napi_env env, FridaEndpointParameters * handle);
 static napi_value fdn_endpoint_parameters_construct (napi_env env, napi_callback_info info);
 
@@ -1301,7 +1301,7 @@ static napi_value fdn_endpoint_parameters_get_asset_root (napi_env env, napi_cal
 static napi_value fdn_endpoint_parameters_set_asset_root (napi_env env, napi_callback_info info);
 
 static void fdn_cancellable_register (napi_env env, napi_value exports);
-G_GNUC_UNUSED static gboolean fdn_cancellable_from_value (napi_env env, napi_value value, GCancellable ** result);
+G_GNUC_UNUSED static gboolean fdn_cancellable_from_value (napi_env env, napi_value value, GCancellable ** handle);
 G_GNUC_UNUSED static napi_value fdn_cancellable_to_value (napi_env env, GCancellable * handle);
 static napi_value fdn_cancellable_construct (napi_env env, napi_callback_info info);
 
@@ -1321,62 +1321,62 @@ static napi_value fdn_cancellable_reset (napi_env env, napi_callback_info info);
 
 static napi_value fdn_cancellable_throw_if_cancelled (napi_env env, napi_callback_info info);
 
-G_GNUC_UNUSED static gboolean fdn_runtime_from_value (napi_env env, napi_value value, FridaRuntime * result);
-G_GNUC_UNUSED static napi_value fdn_runtime_to_value (napi_env env, FridaRuntime value);
+G_GNUC_UNUSED static gboolean fdn_runtime_from_value (napi_env env, napi_value value, FridaRuntime * e);
+G_GNUC_UNUSED static napi_value fdn_runtime_to_value (napi_env env, FridaRuntime e);
 
-G_GNUC_UNUSED static gboolean fdn_device_type_from_value (napi_env env, napi_value value, FridaDeviceType * result);
-G_GNUC_UNUSED static napi_value fdn_device_type_to_value (napi_env env, FridaDeviceType value);
+G_GNUC_UNUSED static gboolean fdn_device_type_from_value (napi_env env, napi_value value, FridaDeviceType * e);
+G_GNUC_UNUSED static napi_value fdn_device_type_to_value (napi_env env, FridaDeviceType e);
 
-G_GNUC_UNUSED static gboolean fdn_source_maps_from_value (napi_env env, napi_value value, FridaSourceMaps * result);
-G_GNUC_UNUSED static napi_value fdn_source_maps_to_value (napi_env env, FridaSourceMaps value);
+G_GNUC_UNUSED static gboolean fdn_source_maps_from_value (napi_env env, napi_value value, FridaSourceMaps * e);
+G_GNUC_UNUSED static napi_value fdn_source_maps_to_value (napi_env env, FridaSourceMaps e);
 
-G_GNUC_UNUSED static gboolean fdn_js_compression_from_value (napi_env env, napi_value value, FridaJsCompression * result);
-G_GNUC_UNUSED static napi_value fdn_js_compression_to_value (napi_env env, FridaJsCompression value);
+G_GNUC_UNUSED static gboolean fdn_js_compression_from_value (napi_env env, napi_value value, FridaJsCompression * e);
+G_GNUC_UNUSED static napi_value fdn_js_compression_to_value (napi_env env, FridaJsCompression e);
 
-G_GNUC_UNUSED static gboolean fdn_agent_message_kind_from_value (napi_env env, napi_value value, FridaAgentMessageKind * result);
-G_GNUC_UNUSED static napi_value fdn_agent_message_kind_to_value (napi_env env, FridaAgentMessageKind value);
+G_GNUC_UNUSED static gboolean fdn_agent_message_kind_from_value (napi_env env, napi_value value, FridaAgentMessageKind * e);
+G_GNUC_UNUSED static napi_value fdn_agent_message_kind_to_value (napi_env env, FridaAgentMessageKind e);
 
-G_GNUC_UNUSED static gboolean fdn_realm_from_value (napi_env env, napi_value value, FridaRealm * result);
-G_GNUC_UNUSED static napi_value fdn_realm_to_value (napi_env env, FridaRealm value);
+G_GNUC_UNUSED static gboolean fdn_realm_from_value (napi_env env, napi_value value, FridaRealm * e);
+G_GNUC_UNUSED static napi_value fdn_realm_to_value (napi_env env, FridaRealm e);
 
-G_GNUC_UNUSED static gboolean fdn_unload_policy_from_value (napi_env env, napi_value value, FridaUnloadPolicy * result);
-G_GNUC_UNUSED static napi_value fdn_unload_policy_to_value (napi_env env, FridaUnloadPolicy value);
+G_GNUC_UNUSED static gboolean fdn_unload_policy_from_value (napi_env env, napi_value value, FridaUnloadPolicy * e);
+G_GNUC_UNUSED static napi_value fdn_unload_policy_to_value (napi_env env, FridaUnloadPolicy e);
 
-G_GNUC_UNUSED static gboolean fdn_session_detach_reason_from_value (napi_env env, napi_value value, FridaSessionDetachReason * result);
-G_GNUC_UNUSED static napi_value fdn_session_detach_reason_to_value (napi_env env, FridaSessionDetachReason value);
+G_GNUC_UNUSED static gboolean fdn_session_detach_reason_from_value (napi_env env, napi_value value, FridaSessionDetachReason * e);
+G_GNUC_UNUSED static napi_value fdn_session_detach_reason_to_value (napi_env env, FridaSessionDetachReason e);
 
-G_GNUC_UNUSED static gboolean fdn_scope_from_value (napi_env env, napi_value value, FridaScope * result);
-G_GNUC_UNUSED static napi_value fdn_scope_to_value (napi_env env, FridaScope value);
+G_GNUC_UNUSED static gboolean fdn_scope_from_value (napi_env env, napi_value value, FridaScope * e);
+G_GNUC_UNUSED static napi_value fdn_scope_to_value (napi_env env, FridaScope e);
 
-G_GNUC_UNUSED static gboolean fdn_stdio_from_value (napi_env env, napi_value value, FridaStdio * result);
-G_GNUC_UNUSED static napi_value fdn_stdio_to_value (napi_env env, FridaStdio value);
+G_GNUC_UNUSED static gboolean fdn_stdio_from_value (napi_env env, napi_value value, FridaStdio * e);
+G_GNUC_UNUSED static napi_value fdn_stdio_to_value (napi_env env, FridaStdio e);
 
-G_GNUC_UNUSED static gboolean fdn_child_origin_from_value (napi_env env, napi_value value, FridaChildOrigin * result);
-G_GNUC_UNUSED static napi_value fdn_child_origin_to_value (napi_env env, FridaChildOrigin value);
+G_GNUC_UNUSED static gboolean fdn_child_origin_from_value (napi_env env, napi_value value, FridaChildOrigin * e);
+G_GNUC_UNUSED static napi_value fdn_child_origin_to_value (napi_env env, FridaChildOrigin e);
 
-G_GNUC_UNUSED static gboolean fdn_snapshot_transport_from_value (napi_env env, napi_value value, FridaSnapshotTransport * result);
-G_GNUC_UNUSED static napi_value fdn_snapshot_transport_to_value (napi_env env, FridaSnapshotTransport value);
+G_GNUC_UNUSED static gboolean fdn_snapshot_transport_from_value (napi_env env, napi_value value, FridaSnapshotTransport * e);
+G_GNUC_UNUSED static napi_value fdn_snapshot_transport_to_value (napi_env env, FridaSnapshotTransport e);
 
-G_GNUC_UNUSED static gboolean fdn_script_runtime_from_value (napi_env env, napi_value value, FridaScriptRuntime * result);
-G_GNUC_UNUSED static napi_value fdn_script_runtime_to_value (napi_env env, FridaScriptRuntime value);
+G_GNUC_UNUSED static gboolean fdn_script_runtime_from_value (napi_env env, napi_value value, FridaScriptRuntime * e);
+G_GNUC_UNUSED static napi_value fdn_script_runtime_to_value (napi_env env, FridaScriptRuntime e);
 
-G_GNUC_UNUSED static gboolean fdn_relay_kind_from_value (napi_env env, napi_value value, FridaRelayKind * result);
-G_GNUC_UNUSED static napi_value fdn_relay_kind_to_value (napi_env env, FridaRelayKind value);
+G_GNUC_UNUSED static gboolean fdn_relay_kind_from_value (napi_env env, napi_value value, FridaRelayKind * e);
+G_GNUC_UNUSED static napi_value fdn_relay_kind_to_value (napi_env env, FridaRelayKind e);
 
-G_GNUC_UNUSED static gboolean fdn_peer_setup_from_value (napi_env env, napi_value value, FridaPeerSetup * result);
-G_GNUC_UNUSED static napi_value fdn_peer_setup_to_value (napi_env env, FridaPeerSetup value);
+G_GNUC_UNUSED static gboolean fdn_peer_setup_from_value (napi_env env, napi_value value, FridaPeerSetup * e);
+G_GNUC_UNUSED static napi_value fdn_peer_setup_to_value (napi_env env, FridaPeerSetup e);
 
-G_GNUC_UNUSED static gboolean fdn_web_service_transport_from_value (napi_env env, napi_value value, FridaWebServiceTransport * result);
-G_GNUC_UNUSED static napi_value fdn_web_service_transport_to_value (napi_env env, FridaWebServiceTransport value);
+G_GNUC_UNUSED static gboolean fdn_web_service_transport_from_value (napi_env env, napi_value value, FridaWebServiceTransport * e);
+G_GNUC_UNUSED static napi_value fdn_web_service_transport_to_value (napi_env env, FridaWebServiceTransport e);
 
-G_GNUC_UNUSED static gboolean fdn_web_service_flavor_from_value (napi_env env, napi_value value, FridaWebServiceFlavor * result);
-G_GNUC_UNUSED static napi_value fdn_web_service_flavor_to_value (napi_env env, FridaWebServiceFlavor value);
+G_GNUC_UNUSED static gboolean fdn_web_service_flavor_from_value (napi_env env, napi_value value, FridaWebServiceFlavor * e);
+G_GNUC_UNUSED static napi_value fdn_web_service_flavor_to_value (napi_env env, FridaWebServiceFlavor e);
 
-G_GNUC_UNUSED static gboolean fdn_port_conflict_behavior_from_value (napi_env env, napi_value value, FridaPortConflictBehavior * result);
-G_GNUC_UNUSED static napi_value fdn_port_conflict_behavior_to_value (napi_env env, FridaPortConflictBehavior value);
+G_GNUC_UNUSED static gboolean fdn_port_conflict_behavior_from_value (napi_env env, napi_value value, FridaPortConflictBehavior * e);
+G_GNUC_UNUSED static napi_value fdn_port_conflict_behavior_to_value (napi_env env, FridaPortConflictBehavior e);
 
-G_GNUC_UNUSED static gboolean fdn_string_terminator_from_value (napi_env env, napi_value value, FridaStringTerminator * result);
-G_GNUC_UNUSED static napi_value fdn_string_terminator_to_value (napi_env env, FridaStringTerminator value);
+G_GNUC_UNUSED static gboolean fdn_string_terminator_from_value (napi_env env, napi_value value, FridaStringTerminator * e);
+G_GNUC_UNUSED static napi_value fdn_string_terminator_to_value (napi_env env, FridaStringTerminator e);
 
 static gboolean fdn_boolean_from_value (napi_env env, napi_value value, gboolean * b);
 static napi_value fdn_boolean_to_value (napi_env env, gboolean b);
@@ -1408,44 +1408,44 @@ static napi_value fdn_file_to_value (napi_env env, GFile * file);
 static gboolean fdn_tls_certificate_from_value (napi_env env, napi_value value, GTlsCertificate ** certificate);
 static napi_value fdn_tls_certificate_to_value (napi_env env, GTlsCertificate * certificate);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0xfb4cfcb1fb0742c7, 0xb6f74a7e99526ddc };
-static napi_type_tag fdn_device_list_type_tag = { 0x3fdbe5648bd54031, 0x807407b6db6b1010 };
-static napi_type_tag fdn_device_type_tag = { 0x845f9466ae6f4b9c, 0x81d053f939549318 };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0x3eef19cf93fd42fb, 0x934c1ea12fe36b7c };
-static napi_type_tag fdn_application_list_type_tag = { 0x558a85782ffc4d79, 0xbc87ef045748c946 };
-static napi_type_tag fdn_application_type_tag = { 0x4e0580617bf74eea, 0x82a98c74b951421c };
-static napi_type_tag fdn_process_list_type_tag = { 0x8f63b9f277354ac5, 0x895c31052f8dc49c };
-static napi_type_tag fdn_process_type_tag = { 0x08eeaa83c46f4b54, 0xa34b079f6a2d0563 };
-static napi_type_tag fdn_process_match_options_type_tag = { 0x52249d9ae4f4460b, 0x86821c6c2eab6fe5 };
-static napi_type_tag fdn_spawn_options_type_tag = { 0xcca09558808b4749, 0x8d7c10851c87a607 };
-static napi_type_tag fdn_spawn_list_type_tag = { 0x8b02cf68799844d2, 0x94dadc332a5b0458 };
-static napi_type_tag fdn_spawn_type_tag = { 0xa7275733165d4e62, 0xbeddc8dc2a4a308e };
-static napi_type_tag fdn_child_list_type_tag = { 0x56281cb986434adc, 0x971bece2694043f0 };
-static napi_type_tag fdn_child_type_tag = { 0xc8656eeca9234412, 0x89dfd35fdf3a4e79 };
-static napi_type_tag fdn_crash_type_tag = { 0xd4cc9d428adb475a, 0xb19384ebab0029be };
-static napi_type_tag fdn_bus_type_tag = { 0x69fec9fe3a53402c, 0xaf568f2fb50e20b8 };
-static napi_type_tag fdn_session_type_tag = { 0xaeba5699bf604690, 0xb8fdf9c8a267040f };
-static napi_type_tag fdn_script_type_tag = { 0x93eaf1a222e5485a, 0x861523ec82d0c75f };
-static napi_type_tag fdn_portal_membership_type_tag = { 0x12e4e84856e2466c, 0x9cdc44e5b406a996 };
-static napi_type_tag fdn_control_service_options_type_tag = { 0xea309713e4574779, 0x8ec5ef52863d0568 };
-static napi_type_tag fdn_portal_service_type_tag = { 0x1f9957e470c947cb, 0x99b053b67f8efa24 };
-static napi_type_tag fdn_file_monitor_type_tag = { 0x50c8028402e14e60, 0x82f6fe69138223b3 };
-static napi_type_tag fdn_compiler_type_tag = { 0xb68d314b07dd4fc3, 0x870dc10a621ee0e0 };
-static napi_type_tag fdn_compiler_options_type_tag = { 0x43b5d57793364b07, 0xa29649e5f2567684 };
-static napi_type_tag fdn_build_options_type_tag = { 0xda34711767bc4be2, 0x9decbec31f8ad670 };
-static napi_type_tag fdn_watch_options_type_tag = { 0x4000b4e89ffb4f1b, 0xa3b445bdfc66174c };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0x4a89cdffebd14e55, 0xb37a6216005071dd };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0xd1e2bcf0912a4e9a, 0x858e31bd71a7f9c4 };
-static napi_type_tag fdn_application_query_options_type_tag = { 0xbdcd0586d3234e6e, 0xafa7c7f97637da79 };
-static napi_type_tag fdn_process_query_options_type_tag = { 0x3eab9af1794548eb, 0x97e620a75030ba00 };
-static napi_type_tag fdn_session_options_type_tag = { 0x6760ea85dca947bc, 0x8f42fc51e3c14972 };
-static napi_type_tag fdn_script_options_type_tag = { 0x4a6391e1dc3a4827, 0x9298217ea3fd1fc6 };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0x04fc455c89f64351, 0xbe0f5e65ca4df7b3 };
-static napi_type_tag fdn_portal_options_type_tag = { 0xaa3d0d7e772a40b2, 0xa6200ccb102d7311 };
-static napi_type_tag fdn_peer_options_type_tag = { 0xa4a4a77a44464672, 0xac4dda4261514afb };
-static napi_type_tag fdn_relay_type_tag = { 0xdee9156b04964ed2, 0xba3f4f79eda87bea };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x28ddbdf11932418b, 0x83bd1df985f1569a };
-static napi_type_tag fdn_cancellable_type_tag = { 0x90a5b6ec257d4287, 0xbb777312fb7639c6 };
+static napi_type_tag fdn_device_manager_type_tag = { 0x4ddf383d6c24437f, 0x803e88f920df3206 };
+static napi_type_tag fdn_device_list_type_tag = { 0xf2fd7e56377643b4, 0xb6cb4d58832ce497 };
+static napi_type_tag fdn_device_type_tag = { 0xe3fd841c906243b7, 0xa239618b4f99abef };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0x06c5e6f3c1aa4dc7, 0xad551bc9e3f02873 };
+static napi_type_tag fdn_application_list_type_tag = { 0xaeb1b07ac39f4198, 0x894d26165d4755cb };
+static napi_type_tag fdn_application_type_tag = { 0x53e01f5aea5b4c94, 0x83d9daaf5f0ff0b5 };
+static napi_type_tag fdn_process_list_type_tag = { 0xc5c75b0a06284fa2, 0x848020a59045a2b9 };
+static napi_type_tag fdn_process_type_tag = { 0x0105fc4bb7b14fc5, 0xbc8c9e592af7a8e7 };
+static napi_type_tag fdn_process_match_options_type_tag = { 0xba1a4bd81fda4a4a, 0xa27d8e7bd34f6422 };
+static napi_type_tag fdn_spawn_options_type_tag = { 0x305aa2ff42204b22, 0xbe644377bc9dc5dc };
+static napi_type_tag fdn_spawn_list_type_tag = { 0xa67d519d265f42a1, 0x90d3e0ba0f80bee8 };
+static napi_type_tag fdn_spawn_type_tag = { 0xdbd0771cfe4e44e5, 0x96cd98d6348856e6 };
+static napi_type_tag fdn_child_list_type_tag = { 0x59ec5408fb714909, 0xa9c235a542fa6a49 };
+static napi_type_tag fdn_child_type_tag = { 0x8ae12ea7d4fc4fd3, 0x9bea33fe756a1707 };
+static napi_type_tag fdn_crash_type_tag = { 0xfc9ab9dbfb104fd0, 0xb5b1496d427d9f11 };
+static napi_type_tag fdn_bus_type_tag = { 0x8fe27d2c2fef4371, 0xa662f6b2167ecc2f };
+static napi_type_tag fdn_session_type_tag = { 0x4aa06e3059e747b3, 0xbaaf9b748f84c804 };
+static napi_type_tag fdn_script_type_tag = { 0x007d268ccaec41ef, 0x941b75d6ea91c615 };
+static napi_type_tag fdn_portal_membership_type_tag = { 0x6550e1593e204c91, 0xaa386ccc03dc113c };
+static napi_type_tag fdn_control_service_options_type_tag = { 0x7906e1d3d8fc42ab, 0x9cd2f3598cd03def };
+static napi_type_tag fdn_portal_service_type_tag = { 0x1d49b4ea6cb44333, 0x80d2254e39e99dbb };
+static napi_type_tag fdn_file_monitor_type_tag = { 0x3742df0420124b24, 0x8ddba309b8c3a84f };
+static napi_type_tag fdn_compiler_type_tag = { 0x319bcfc01b734a52, 0x9110bf10d2f77168 };
+static napi_type_tag fdn_compiler_options_type_tag = { 0xcce9f24613e84c14, 0x82173e14789723d2 };
+static napi_type_tag fdn_build_options_type_tag = { 0xa28aab78ddf84849, 0xa960e9de4e28d8ba };
+static napi_type_tag fdn_watch_options_type_tag = { 0x28eee463a78d4cba, 0xb091d92b5ad0a56e };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0x1d52ce3d38f94e50, 0x896a27ff70fe4daf };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x95ff15d839dc462a, 0x997cceaa74844ddb };
+static napi_type_tag fdn_application_query_options_type_tag = { 0xf417554697e94932, 0xaae2d93f0e27d533 };
+static napi_type_tag fdn_process_query_options_type_tag = { 0xd5731663f9444452, 0x93c225909a0f020d };
+static napi_type_tag fdn_session_options_type_tag = { 0xed38df59e6f04fe8, 0xa348a70943c0e6cb };
+static napi_type_tag fdn_script_options_type_tag = { 0xc380b337a86f46ac, 0x8221b5a8f2485ec9 };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0x81d11194e1754d6b, 0x8b5068ade60555ed };
+static napi_type_tag fdn_portal_options_type_tag = { 0x8296f7d263744b50, 0xa392bcfd0d5531b5 };
+static napi_type_tag fdn_peer_options_type_tag = { 0x7fc7bdac1be0434c, 0x9dd24d64318e929f };
+static napi_type_tag fdn_relay_type_tag = { 0x8f9bffe2a2e44bd5, 0xad16443209fa8892 };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x1420aff334774f5a, 0xb0ec79dea8ce094a };
+static napi_type_tag fdn_cancellable_type_tag = { 0x06df089dea134f4b, 0xad885acce3bfe1d8 };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_list_constructor;
@@ -1647,11 +1647,10 @@ fdn_device_manager_register (napi_env env,
 static gboolean
 fdn_device_manager_from_value (napi_env env,
                                napi_value value,
-                               FridaDeviceManager ** result)
+                               FridaDeviceManager ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaDeviceManager * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_device_manager_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -1660,10 +1659,9 @@ fdn_device_manager_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -2833,11 +2831,10 @@ fdn_device_list_register (napi_env env,
 static gboolean
 fdn_device_list_from_value (napi_env env,
                             napi_value value,
-                            FridaDeviceList ** result)
+                            FridaDeviceList ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaDeviceList * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_device_list_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -2846,10 +2843,9 @@ fdn_device_list_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -3059,11 +3055,10 @@ fdn_device_register (napi_env env,
 static gboolean
 fdn_device_from_value (napi_env env,
                        napi_value value,
-                       FridaDevice ** result)
+                       FridaDevice ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaDevice * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_device_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -3072,10 +3067,9 @@ fdn_device_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -6311,11 +6305,10 @@ fdn_remote_device_options_register (napi_env env,
 static gboolean
 fdn_remote_device_options_from_value (napi_env env,
                                       napi_value value,
-                                      FridaRemoteDeviceOptions ** result)
+                                      FridaRemoteDeviceOptions ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaRemoteDeviceOptions * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_remote_device_options_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -6324,10 +6317,9 @@ fdn_remote_device_options_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -6660,11 +6652,10 @@ fdn_application_list_register (napi_env env,
 static gboolean
 fdn_application_list_from_value (napi_env env,
                                  napi_value value,
-                                 FridaApplicationList ** result)
+                                 FridaApplicationList ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaApplicationList * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_application_list_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -6673,10 +6664,9 @@ fdn_application_list_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -6794,11 +6784,10 @@ fdn_application_register (napi_env env,
 static gboolean
 fdn_application_from_value (napi_env env,
                             napi_value value,
-                            FridaApplication ** result)
+                            FridaApplication ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaApplication * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_application_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -6807,10 +6796,9 @@ fdn_application_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -6970,11 +6958,10 @@ fdn_process_list_register (napi_env env,
 static gboolean
 fdn_process_list_from_value (napi_env env,
                              napi_value value,
-                             FridaProcessList ** result)
+                             FridaProcessList ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaProcessList * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_process_list_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -6983,10 +6970,9 @@ fdn_process_list_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -7103,11 +7089,10 @@ fdn_process_register (napi_env env,
 static gboolean
 fdn_process_from_value (napi_env env,
                         napi_value value,
-                        FridaProcess ** result)
+                        FridaProcess ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaProcess * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_process_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -7116,10 +7101,9 @@ fdn_process_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -7253,11 +7237,10 @@ fdn_process_match_options_register (napi_env env,
 static gboolean
 fdn_process_match_options_from_value (napi_env env,
                                       napi_value value,
-                                      FridaProcessMatchOptions ** result)
+                                      FridaProcessMatchOptions ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaProcessMatchOptions * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_process_match_options_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -7266,10 +7249,9 @@ fdn_process_match_options_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -7479,11 +7461,10 @@ fdn_spawn_options_register (napi_env env,
 static gboolean
 fdn_spawn_options_from_value (napi_env env,
                               napi_value value,
-                              FridaSpawnOptions ** result)
+                              FridaSpawnOptions ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaSpawnOptions * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_spawn_options_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -7492,10 +7473,9 @@ fdn_spawn_options_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -8029,11 +8009,10 @@ fdn_spawn_list_register (napi_env env,
 static gboolean
 fdn_spawn_list_from_value (napi_env env,
                            napi_value value,
-                           FridaSpawnList ** result)
+                           FridaSpawnList ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaSpawnList * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_spawn_list_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -8042,10 +8021,9 @@ fdn_spawn_list_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -8161,11 +8139,10 @@ fdn_spawn_register (napi_env env,
 static gboolean
 fdn_spawn_from_value (napi_env env,
                       napi_value value,
-                      FridaSpawn ** result)
+                      FridaSpawn ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaSpawn * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_spawn_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -8174,10 +8151,9 @@ fdn_spawn_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -8281,11 +8257,10 @@ fdn_child_list_register (napi_env env,
 static gboolean
 fdn_child_list_from_value (napi_env env,
                            napi_value value,
-                           FridaChildList ** result)
+                           FridaChildList ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaChildList * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_child_list_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -8294,10 +8269,9 @@ fdn_child_list_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -8418,11 +8392,10 @@ fdn_child_register (napi_env env,
 static gboolean
 fdn_child_from_value (napi_env env,
                       napi_value value,
-                      FridaChild ** result)
+                      FridaChild ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaChild * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_child_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -8431,10 +8404,9 @@ fdn_child_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -8705,11 +8677,10 @@ fdn_crash_register (napi_env env,
 static gboolean
 fdn_crash_from_value (napi_env env,
                       napi_value value,
-                      FridaCrash ** result)
+                      FridaCrash ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaCrash * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_crash_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -8718,10 +8689,9 @@ fdn_crash_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -8916,11 +8886,10 @@ fdn_bus_register (napi_env env,
 static gboolean
 fdn_bus_from_value (napi_env env,
                     napi_value value,
-                    FridaBus ** result)
+                    FridaBus ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaBus * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_bus_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -8929,10 +8898,9 @@ fdn_bus_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -9250,11 +9218,10 @@ fdn_session_register (napi_env env,
 static gboolean
 fdn_session_from_value (napi_env env,
                         napi_value value,
-                        FridaSession ** result)
+                        FridaSession ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaSession * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_session_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -9263,10 +9230,9 @@ fdn_session_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -10759,11 +10725,10 @@ fdn_script_register (napi_env env,
 static gboolean
 fdn_script_from_value (napi_env env,
                        napi_value value,
-                       FridaScript ** result)
+                       FridaScript ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaScript * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_script_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -10772,10 +10737,9 @@ fdn_script_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -11521,11 +11485,10 @@ fdn_portal_membership_register (napi_env env,
 static gboolean
 fdn_portal_membership_from_value (napi_env env,
                                   napi_value value,
-                                  FridaPortalMembership ** result)
+                                  FridaPortalMembership ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaPortalMembership * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_portal_membership_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -11534,10 +11497,9 @@ fdn_portal_membership_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -11710,11 +11672,10 @@ fdn_control_service_options_register (napi_env env,
 static gboolean
 fdn_control_service_options_from_value (napi_env env,
                                         napi_value value,
-                                        FridaControlServiceOptions ** result)
+                                        FridaControlServiceOptions ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaControlServiceOptions * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_control_service_options_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -11723,10 +11684,9 @@ fdn_control_service_options_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -12011,11 +11971,10 @@ fdn_portal_service_register (napi_env env,
 static gboolean
 fdn_portal_service_from_value (napi_env env,
                                napi_value value,
-                               FridaPortalService ** result)
+                               FridaPortalService ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaPortalService * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_portal_service_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -12024,10 +11983,9 @@ fdn_portal_service_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -12775,11 +12733,10 @@ fdn_file_monitor_register (napi_env env,
 static gboolean
 fdn_file_monitor_from_value (napi_env env,
                              napi_value value,
-                             FridaFileMonitor ** result)
+                             FridaFileMonitor ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaFileMonitor * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_file_monitor_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -12788,10 +12745,9 @@ fdn_file_monitor_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -13118,11 +13074,10 @@ fdn_compiler_register (napi_env env,
 static gboolean
 fdn_compiler_from_value (napi_env env,
                          napi_value value,
-                         FridaCompiler ** result)
+                         FridaCompiler ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaCompiler * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_compiler_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -13131,10 +13086,9 @@ fdn_compiler_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -13503,11 +13457,10 @@ fdn_compiler_options_register (napi_env env,
 static gboolean
 fdn_compiler_options_from_value (napi_env env,
                                  napi_value value,
-                                 FridaCompilerOptions ** result)
+                                 FridaCompilerOptions ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaCompilerOptions * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_compiler_options_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -13516,10 +13469,9 @@ fdn_compiler_options_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -13785,11 +13737,10 @@ fdn_build_options_register (napi_env env,
 static gboolean
 fdn_build_options_from_value (napi_env env,
                               napi_value value,
-                              FridaBuildOptions ** result)
+                              FridaBuildOptions ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaBuildOptions * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_build_options_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -13798,10 +13749,9 @@ fdn_build_options_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -13866,11 +13816,10 @@ fdn_watch_options_register (napi_env env,
 static gboolean
 fdn_watch_options_from_value (napi_env env,
                               napi_value value,
-                              FridaWatchOptions ** result)
+                              FridaWatchOptions ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaWatchOptions * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_watch_options_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -13879,10 +13828,9 @@ fdn_watch_options_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -13947,11 +13895,10 @@ fdn_static_authentication_service_register (napi_env env,
 static gboolean
 fdn_static_authentication_service_from_value (napi_env env,
                                               napi_value value,
-                                              FridaStaticAuthenticationService ** result)
+                                              FridaStaticAuthenticationService ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaStaticAuthenticationService * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_static_authentication_service_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -13960,10 +13907,9 @@ fdn_static_authentication_service_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -14039,11 +13985,10 @@ fdn_frontmost_query_options_register (napi_env env,
 static gboolean
 fdn_frontmost_query_options_from_value (napi_env env,
                                         napi_value value,
-                                        FridaFrontmostQueryOptions ** result)
+                                        FridaFrontmostQueryOptions ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaFrontmostQueryOptions * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_frontmost_query_options_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -14052,10 +13997,9 @@ fdn_frontmost_query_options_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -14190,11 +14134,10 @@ fdn_application_query_options_register (napi_env env,
 static gboolean
 fdn_application_query_options_from_value (napi_env env,
                                           napi_value value,
-                                          FridaApplicationQueryOptions ** result)
+                                          FridaApplicationQueryOptions ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaApplicationQueryOptions * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_application_query_options_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -14203,10 +14146,9 @@ fdn_application_query_options_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -14409,11 +14351,10 @@ fdn_process_query_options_register (napi_env env,
 static gboolean
 fdn_process_query_options_from_value (napi_env env,
                                       napi_value value,
-                                      FridaProcessQueryOptions ** result)
+                                      FridaProcessQueryOptions ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaProcessQueryOptions * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_process_query_options_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -14422,10 +14363,9 @@ fdn_process_query_options_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -14629,11 +14569,10 @@ fdn_session_options_register (napi_env env,
 static gboolean
 fdn_session_options_from_value (napi_env env,
                                 napi_value value,
-                                FridaSessionOptions ** result)
+                                FridaSessionOptions ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaSessionOptions * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_session_options_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -14642,10 +14581,9 @@ fdn_session_options_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -14918,11 +14856,10 @@ fdn_script_options_register (napi_env env,
 static gboolean
 fdn_script_options_from_value (napi_env env,
                                napi_value value,
-                               FridaScriptOptions ** result)
+                               FridaScriptOptions ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaScriptOptions * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_script_options_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -14931,10 +14868,9 @@ fdn_script_options_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -15269,11 +15205,10 @@ fdn_snapshot_options_register (napi_env env,
 static gboolean
 fdn_snapshot_options_from_value (napi_env env,
                                  napi_value value,
-                                 FridaSnapshotOptions ** result)
+                                 FridaSnapshotOptions ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaSnapshotOptions * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_snapshot_options_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -15282,10 +15217,9 @@ fdn_snapshot_options_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -15489,11 +15423,10 @@ fdn_portal_options_register (napi_env env,
 static gboolean
 fdn_portal_options_from_value (napi_env env,
                                napi_value value,
-                               FridaPortalOptions ** result)
+                               FridaPortalOptions ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaPortalOptions * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_portal_options_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -15502,10 +15435,9 @@ fdn_portal_options_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -15795,11 +15727,10 @@ fdn_peer_options_register (napi_env env,
 static gboolean
 fdn_peer_options_from_value (napi_env env,
                              napi_value value,
-                             FridaPeerOptions ** result)
+                             FridaPeerOptions ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaPeerOptions * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_peer_options_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -15808,10 +15739,9 @@ fdn_peer_options_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -16012,11 +15942,10 @@ fdn_relay_register (napi_env env,
 static gboolean
 fdn_relay_from_value (napi_env env,
                       napi_value value,
-                      FridaRelay ** result)
+                      FridaRelay ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaRelay * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_relay_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -16025,10 +15954,9 @@ fdn_relay_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -16193,11 +16121,10 @@ fdn_endpoint_parameters_register (napi_env env,
 static gboolean
 fdn_endpoint_parameters_from_value (napi_env env,
                                     napi_value value,
-                                    FridaEndpointParameters ** result)
+                                    FridaEndpointParameters ** handle)
 {
   napi_status status;
   bool is_instance;
-  FridaEndpointParameters * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_endpoint_parameters_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -16206,10 +16133,9 @@ fdn_endpoint_parameters_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -16469,11 +16395,10 @@ fdn_cancellable_register (napi_env env,
 static gboolean
 fdn_cancellable_from_value (napi_env env,
                             napi_value value,
-                            GCancellable ** result)
+                            GCancellable ** handle)
 {
   napi_status status;
   bool is_instance;
-  GCancellable * handle;
 
   status = napi_check_object_type_tag (env, value, &fdn_cancellable_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -16482,10 +16407,9 @@ fdn_cancellable_from_value (napi_env env,
     return FALSE;
   }
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }
@@ -16773,286 +16697,286 @@ beach:
 static gboolean
 fdn_runtime_from_value (napi_env env,
                         napi_value value,
-                        FridaRuntime * result)
+                        FridaRuntime * e)
 {
-  return fdn_enum_from_value (env, frida_runtime_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_runtime_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_runtime_to_value (napi_env env,
-                      FridaRuntime value)
+                      FridaRuntime e)
 {
-  return fdn_enum_to_value (env, frida_runtime_get_type (), value);
+  return fdn_enum_to_value (env, frida_runtime_get_type (), e);
 }
 
 static gboolean
 fdn_device_type_from_value (napi_env env,
                             napi_value value,
-                            FridaDeviceType * result)
+                            FridaDeviceType * e)
 {
-  return fdn_enum_from_value (env, frida_device_type_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_device_type_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_device_type_to_value (napi_env env,
-                          FridaDeviceType value)
+                          FridaDeviceType e)
 {
-  return fdn_enum_to_value (env, frida_device_type_get_type (), value);
+  return fdn_enum_to_value (env, frida_device_type_get_type (), e);
 }
 
 static gboolean
 fdn_source_maps_from_value (napi_env env,
                             napi_value value,
-                            FridaSourceMaps * result)
+                            FridaSourceMaps * e)
 {
-  return fdn_enum_from_value (env, frida_source_maps_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_source_maps_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_source_maps_to_value (napi_env env,
-                          FridaSourceMaps value)
+                          FridaSourceMaps e)
 {
-  return fdn_enum_to_value (env, frida_source_maps_get_type (), value);
+  return fdn_enum_to_value (env, frida_source_maps_get_type (), e);
 }
 
 static gboolean
 fdn_js_compression_from_value (napi_env env,
                                napi_value value,
-                               FridaJsCompression * result)
+                               FridaJsCompression * e)
 {
-  return fdn_enum_from_value (env, frida_js_compression_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_js_compression_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_js_compression_to_value (napi_env env,
-                             FridaJsCompression value)
+                             FridaJsCompression e)
 {
-  return fdn_enum_to_value (env, frida_js_compression_get_type (), value);
+  return fdn_enum_to_value (env, frida_js_compression_get_type (), e);
 }
 
 static gboolean
 fdn_agent_message_kind_from_value (napi_env env,
                                    napi_value value,
-                                   FridaAgentMessageKind * result)
+                                   FridaAgentMessageKind * e)
 {
-  return fdn_enum_from_value (env, frida_agent_message_kind_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_agent_message_kind_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_agent_message_kind_to_value (napi_env env,
-                                 FridaAgentMessageKind value)
+                                 FridaAgentMessageKind e)
 {
-  return fdn_enum_to_value (env, frida_agent_message_kind_get_type (), value);
+  return fdn_enum_to_value (env, frida_agent_message_kind_get_type (), e);
 }
 
 static gboolean
 fdn_realm_from_value (napi_env env,
                       napi_value value,
-                      FridaRealm * result)
+                      FridaRealm * e)
 {
-  return fdn_enum_from_value (env, frida_realm_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_realm_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_realm_to_value (napi_env env,
-                    FridaRealm value)
+                    FridaRealm e)
 {
-  return fdn_enum_to_value (env, frida_realm_get_type (), value);
+  return fdn_enum_to_value (env, frida_realm_get_type (), e);
 }
 
 static gboolean
 fdn_unload_policy_from_value (napi_env env,
                               napi_value value,
-                              FridaUnloadPolicy * result)
+                              FridaUnloadPolicy * e)
 {
-  return fdn_enum_from_value (env, frida_unload_policy_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_unload_policy_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_unload_policy_to_value (napi_env env,
-                            FridaUnloadPolicy value)
+                            FridaUnloadPolicy e)
 {
-  return fdn_enum_to_value (env, frida_unload_policy_get_type (), value);
+  return fdn_enum_to_value (env, frida_unload_policy_get_type (), e);
 }
 
 static gboolean
 fdn_session_detach_reason_from_value (napi_env env,
                                       napi_value value,
-                                      FridaSessionDetachReason * result)
+                                      FridaSessionDetachReason * e)
 {
-  return fdn_enum_from_value (env, frida_session_detach_reason_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_session_detach_reason_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_session_detach_reason_to_value (napi_env env,
-                                    FridaSessionDetachReason value)
+                                    FridaSessionDetachReason e)
 {
-  return fdn_enum_to_value (env, frida_session_detach_reason_get_type (), value);
+  return fdn_enum_to_value (env, frida_session_detach_reason_get_type (), e);
 }
 
 static gboolean
 fdn_scope_from_value (napi_env env,
                       napi_value value,
-                      FridaScope * result)
+                      FridaScope * e)
 {
-  return fdn_enum_from_value (env, frida_scope_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_scope_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_scope_to_value (napi_env env,
-                    FridaScope value)
+                    FridaScope e)
 {
-  return fdn_enum_to_value (env, frida_scope_get_type (), value);
+  return fdn_enum_to_value (env, frida_scope_get_type (), e);
 }
 
 static gboolean
 fdn_stdio_from_value (napi_env env,
                       napi_value value,
-                      FridaStdio * result)
+                      FridaStdio * e)
 {
-  return fdn_enum_from_value (env, frida_stdio_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_stdio_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_stdio_to_value (napi_env env,
-                    FridaStdio value)
+                    FridaStdio e)
 {
-  return fdn_enum_to_value (env, frida_stdio_get_type (), value);
+  return fdn_enum_to_value (env, frida_stdio_get_type (), e);
 }
 
 static gboolean
 fdn_child_origin_from_value (napi_env env,
                              napi_value value,
-                             FridaChildOrigin * result)
+                             FridaChildOrigin * e)
 {
-  return fdn_enum_from_value (env, frida_child_origin_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_child_origin_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_child_origin_to_value (napi_env env,
-                           FridaChildOrigin value)
+                           FridaChildOrigin e)
 {
-  return fdn_enum_to_value (env, frida_child_origin_get_type (), value);
+  return fdn_enum_to_value (env, frida_child_origin_get_type (), e);
 }
 
 static gboolean
 fdn_snapshot_transport_from_value (napi_env env,
                                    napi_value value,
-                                   FridaSnapshotTransport * result)
+                                   FridaSnapshotTransport * e)
 {
-  return fdn_enum_from_value (env, frida_snapshot_transport_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_snapshot_transport_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_snapshot_transport_to_value (napi_env env,
-                                 FridaSnapshotTransport value)
+                                 FridaSnapshotTransport e)
 {
-  return fdn_enum_to_value (env, frida_snapshot_transport_get_type (), value);
+  return fdn_enum_to_value (env, frida_snapshot_transport_get_type (), e);
 }
 
 static gboolean
 fdn_script_runtime_from_value (napi_env env,
                                napi_value value,
-                               FridaScriptRuntime * result)
+                               FridaScriptRuntime * e)
 {
-  return fdn_enum_from_value (env, frida_script_runtime_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_script_runtime_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_script_runtime_to_value (napi_env env,
-                             FridaScriptRuntime value)
+                             FridaScriptRuntime e)
 {
-  return fdn_enum_to_value (env, frida_script_runtime_get_type (), value);
+  return fdn_enum_to_value (env, frida_script_runtime_get_type (), e);
 }
 
 static gboolean
 fdn_relay_kind_from_value (napi_env env,
                            napi_value value,
-                           FridaRelayKind * result)
+                           FridaRelayKind * e)
 {
-  return fdn_enum_from_value (env, frida_relay_kind_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_relay_kind_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_relay_kind_to_value (napi_env env,
-                         FridaRelayKind value)
+                         FridaRelayKind e)
 {
-  return fdn_enum_to_value (env, frida_relay_kind_get_type (), value);
+  return fdn_enum_to_value (env, frida_relay_kind_get_type (), e);
 }
 
 static gboolean
 fdn_peer_setup_from_value (napi_env env,
                            napi_value value,
-                           FridaPeerSetup * result)
+                           FridaPeerSetup * e)
 {
-  return fdn_enum_from_value (env, frida_peer_setup_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_peer_setup_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_peer_setup_to_value (napi_env env,
-                         FridaPeerSetup value)
+                         FridaPeerSetup e)
 {
-  return fdn_enum_to_value (env, frida_peer_setup_get_type (), value);
+  return fdn_enum_to_value (env, frida_peer_setup_get_type (), e);
 }
 
 static gboolean
 fdn_web_service_transport_from_value (napi_env env,
                                       napi_value value,
-                                      FridaWebServiceTransport * result)
+                                      FridaWebServiceTransport * e)
 {
-  return fdn_enum_from_value (env, frida_web_service_transport_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_web_service_transport_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_web_service_transport_to_value (napi_env env,
-                                    FridaWebServiceTransport value)
+                                    FridaWebServiceTransport e)
 {
-  return fdn_enum_to_value (env, frida_web_service_transport_get_type (), value);
+  return fdn_enum_to_value (env, frida_web_service_transport_get_type (), e);
 }
 
 static gboolean
 fdn_web_service_flavor_from_value (napi_env env,
                                    napi_value value,
-                                   FridaWebServiceFlavor * result)
+                                   FridaWebServiceFlavor * e)
 {
-  return fdn_enum_from_value (env, frida_web_service_flavor_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_web_service_flavor_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_web_service_flavor_to_value (napi_env env,
-                                 FridaWebServiceFlavor value)
+                                 FridaWebServiceFlavor e)
 {
-  return fdn_enum_to_value (env, frida_web_service_flavor_get_type (), value);
+  return fdn_enum_to_value (env, frida_web_service_flavor_get_type (), e);
 }
 
 static gboolean
 fdn_port_conflict_behavior_from_value (napi_env env,
                                        napi_value value,
-                                       FridaPortConflictBehavior * result)
+                                       FridaPortConflictBehavior * e)
 {
-  return fdn_enum_from_value (env, frida_port_conflict_behavior_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_port_conflict_behavior_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_port_conflict_behavior_to_value (napi_env env,
-                                     FridaPortConflictBehavior value)
+                                     FridaPortConflictBehavior e)
 {
-  return fdn_enum_to_value (env, frida_port_conflict_behavior_get_type (), value);
+  return fdn_enum_to_value (env, frida_port_conflict_behavior_get_type (), e);
 }
 
 static gboolean
 fdn_string_terminator_from_value (napi_env env,
                                   napi_value value,
-                                  FridaStringTerminator * result)
+                                  FridaStringTerminator * e)
 {
-  return fdn_enum_from_value (env, frida_string_terminator_get_type (), value, (gint *) result);
+  return fdn_enum_from_value (env, frida_string_terminator_get_type (), value, (gint *) e);
 }
 
 static napi_value
 fdn_string_terminator_to_value (napi_env env,
-                                FridaStringTerminator value)
+                                FridaStringTerminator e)
 {
-  return fdn_enum_to_value (env, frida_string_terminator_get_type (), value);
+  return fdn_enum_to_value (env, frida_string_terminator_get_type (), e);
 }
 
 static gboolean
@@ -17826,4 +17750,3 @@ fdn_tls_certificate_to_value (napi_env env,
 
   return result;
 }
-

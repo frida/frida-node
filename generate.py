@@ -277,7 +277,7 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
         prototypes += [
             "",
             f"static void {class_cprefix}_register (napi_env env, napi_value exports);",
-            f"G_GNUC_UNUSED static gboolean {class_cprefix}_from_value (napi_env env, napi_value value, {klass.c_type} ** result);",
+            f"G_GNUC_UNUSED static gboolean {class_cprefix}_from_value (napi_env env, napi_value value, {klass.c_type} ** handle);",
             f"G_GNUC_UNUSED static napi_value {class_cprefix}_to_value (napi_env env, {klass.c_type} * handle);",
             f"static napi_value {class_cprefix}_construct (napi_env env, napi_callback_info info);",
         ]
@@ -300,8 +300,8 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
         enum_name_snake = to_snake_case(enum.name)
         prototypes += [
             "",
-            f"G_GNUC_UNUSED static gboolean fdn_{enum_name_snake}_from_value (napi_env env, napi_value value, {enum.c_type} * result);",
-            f"G_GNUC_UNUSED static napi_value fdn_{enum_name_snake}_to_value (napi_env env, {enum.c_type} value);",
+            f"G_GNUC_UNUSED static gboolean fdn_{enum_name_snake}_from_value (napi_env env, napi_value value, {enum.c_type} * e);",
+            f"G_GNUC_UNUSED static napi_value fdn_{enum_name_snake}_to_value (napi_env env, {enum.c_type} e);",
         ]
 
     prototypes += [
@@ -426,11 +426,10 @@ def generate_class_conversion_functions(klass: Class) -> str:
 static gboolean
 {class_cprefix}_from_value (napi_env env,
 {calculate_indent("_from_value")}napi_value value,
-{calculate_indent("_from_value")}{klass.c_type} ** result)
+{calculate_indent("_from_value")}{klass.c_type} ** handle)
 {{
   napi_status status;
   bool is_instance;
-  {klass.c_type} * handle;
 
   status = napi_check_object_type_tag (env, value, &{class_cprefix}_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
@@ -439,10 +438,9 @@ static gboolean
     return FALSE;
   }}
 
-  napi_unwrap (env, value, (void **) &handle);
+  napi_unwrap (env, value, (void **) handle);
 
-  g_object_ref (handle);
-  *result = handle;
+  g_object_ref (*handle);
 
   return TRUE;
 }}
@@ -748,16 +746,16 @@ def generate_enum_conversion_functions(enum: Enumeration) -> str:
 static gboolean
 fdn_{enum_name_snake}_from_value (napi_env env,
 {calculate_indent("_from_value")}napi_value value,
-{calculate_indent("_from_value")}{enum.c_type} * result)
+{calculate_indent("_from_value")}{enum.c_type} * e)
 {{
-  return fdn_enum_from_value (env, {enum.get_type} (), value, (gint *) result);
+  return fdn_enum_from_value (env, {enum.get_type} (), value, (gint *) e);
 }}
 
 static napi_value
 fdn_{enum_name_snake}_to_value (napi_env env,
-{calculate_indent("_to_value")}{enum.c_type} value)
+{calculate_indent("_to_value")}{enum.c_type} e)
 {{
-  return fdn_enum_to_value (env, {enum.get_type} (), value);
+  return fdn_enum_to_value (env, {enum.get_type} (), e);
 }}
 """
 
@@ -1533,8 +1531,7 @@ fdn_tls_certificate_to_value (napi_env env,
   g_free (pem);
 
   return result;
-}
-"""
+}"""
 
 def to_snake_case(name: str) -> str:
     result = []
