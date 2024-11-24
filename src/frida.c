@@ -1412,44 +1412,44 @@ static napi_value fdn_io_stream_to_value (napi_env env, GIOStream * stream);
 static napi_value fdn_service_to_value (napi_env env, FridaService * service);
 static napi_value fdn_authentication_service_to_value (napi_env env, FridaAuthenticationService * service);
 
-static napi_type_tag fdn_device_manager_type_tag = { 0x288e8bad1e934ff5, 0x8c1b5749e0c4e9fd };
-static napi_type_tag fdn_device_list_type_tag = { 0x46ec9b4b5cec4b53, 0x9d38b99cbd114c52 };
-static napi_type_tag fdn_device_type_tag = { 0x17d389358d1c4850, 0xb9e646b6ea556b39 };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0xa1c96527bf1a4436, 0xb70ec6c8bdb2d52e };
-static napi_type_tag fdn_application_list_type_tag = { 0x4b055506b93f4af6, 0xa48a0ac8e060e53e };
-static napi_type_tag fdn_application_type_tag = { 0x19cea5866a254c91, 0x96b257d4a1f919a0 };
-static napi_type_tag fdn_process_list_type_tag = { 0xa431add95f664615, 0x9bb6b4eabbbcd99c };
-static napi_type_tag fdn_process_type_tag = { 0x0e3c44f0a6b9406e, 0xb72ac61b4fff6938 };
-static napi_type_tag fdn_process_match_options_type_tag = { 0x2830bef53332480f, 0x821ef9e4b7cbb18d };
-static napi_type_tag fdn_spawn_options_type_tag = { 0xc635379c80f242ba, 0xaacae6b7a0f0e74e };
-static napi_type_tag fdn_spawn_list_type_tag = { 0x61b8261f0a4e411c, 0x8e2cd55231db0f32 };
-static napi_type_tag fdn_spawn_type_tag = { 0x4f4518e62e474a69, 0x8a52c553c517694d };
-static napi_type_tag fdn_child_list_type_tag = { 0xab996d84074d48f4, 0x9f6531a06dbacf33 };
-static napi_type_tag fdn_child_type_tag = { 0x4880ceff788e42e1, 0xa80cae59c5757682 };
-static napi_type_tag fdn_crash_type_tag = { 0xb4d8fe7ee7c44ecf, 0xbe6b779a62855c5a };
-static napi_type_tag fdn_bus_type_tag = { 0xa39135613f9c4473, 0x8577e4bb0869a7ba };
-static napi_type_tag fdn_session_type_tag = { 0x7817180ba00b4e33, 0x9b55605488beb2ce };
-static napi_type_tag fdn_script_type_tag = { 0x332ba35fe2934a3a, 0x885077e2d1ba42e3 };
-static napi_type_tag fdn_portal_membership_type_tag = { 0x6bd374a06ad74785, 0xbb9eca438e92ef10 };
-static napi_type_tag fdn_control_service_options_type_tag = { 0x7b09dfb4439c4915, 0x967132c304ad7eee };
-static napi_type_tag fdn_portal_service_type_tag = { 0xdb935787ee974668, 0x959914f318d930fe };
-static napi_type_tag fdn_file_monitor_type_tag = { 0x4782748f3a1245ac, 0xb2c0b316895b7f75 };
-static napi_type_tag fdn_compiler_type_tag = { 0x9cff2bcf10454544, 0x87e77a3bcbcdc02c };
-static napi_type_tag fdn_compiler_options_type_tag = { 0xfd63b46a0a45479d, 0x9d9fd720b6029971 };
-static napi_type_tag fdn_build_options_type_tag = { 0xdcd0b360f9a44853, 0xa22e03d72487c0ab };
-static napi_type_tag fdn_watch_options_type_tag = { 0x6601f40435fd4d69, 0xb0d326a34957ca3d };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0xbde2fa4231a94cdf, 0xab5ee2116489c976 };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0xe7f86d8faa9d442d, 0x90df6cd03dd88ea2 };
-static napi_type_tag fdn_application_query_options_type_tag = { 0x3bf7406df3ce477f, 0xb2a1fdaece0639fd };
-static napi_type_tag fdn_process_query_options_type_tag = { 0x3cfd335ed1474669, 0xb32eb5d1e8017e5d };
-static napi_type_tag fdn_session_options_type_tag = { 0xd4520df7f2e44972, 0x91e1da210eed2cc8 };
-static napi_type_tag fdn_script_options_type_tag = { 0x2d030926e9df4f21, 0xbbbe29a20ac5ed83 };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0xfa545832a9c249f7, 0xb0a48ed8a8da7d70 };
-static napi_type_tag fdn_portal_options_type_tag = { 0xd08acd905ce1479b, 0x9116525c1941b0d6 };
-static napi_type_tag fdn_peer_options_type_tag = { 0xfa2f8de7cd514719, 0xbaa0e7b8f0f59976 };
-static napi_type_tag fdn_relay_type_tag = { 0x5efe3c18704a4064, 0x883bcab48839e247 };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0xd1be1e76b0ae4183, 0xa0ff868b96f68fa3 };
-static napi_type_tag fdn_cancellable_type_tag = { 0xd494952df7f04be6, 0xab7e1e36a62970d7 };
+static napi_type_tag fdn_device_manager_type_tag = { 0xd05fbe40a8e14185, 0xa25c5a245ef29ad6 };
+static napi_type_tag fdn_device_list_type_tag = { 0x798415bd392b4387, 0x8a5daabb261d40e8 };
+static napi_type_tag fdn_device_type_tag = { 0x3736dad734f942df, 0xa475a7125d92b98b };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0xfdfe26aeb2a0483c, 0x8891faa280b7cc7d };
+static napi_type_tag fdn_application_list_type_tag = { 0x7f3e2a2b3fac44c7, 0xb884c52ed10358a3 };
+static napi_type_tag fdn_application_type_tag = { 0x30a865a9e5c24ff0, 0xb4b0c2cda323a3d3 };
+static napi_type_tag fdn_process_list_type_tag = { 0x6f552db92c594be2, 0xa4629584f95076f3 };
+static napi_type_tag fdn_process_type_tag = { 0xb67993649cdd4569, 0x977f36eee0fb82f1 };
+static napi_type_tag fdn_process_match_options_type_tag = { 0x217ede8bdb0b430b, 0xaf710dba165c9b35 };
+static napi_type_tag fdn_spawn_options_type_tag = { 0x43993d4e229e461e, 0xb7dcf30b0d15fdb5 };
+static napi_type_tag fdn_spawn_list_type_tag = { 0x4913ba6bfbea4dee, 0x889d73f48bd55589 };
+static napi_type_tag fdn_spawn_type_tag = { 0x27633e44e3db4b1f, 0x848c635bf95e621a };
+static napi_type_tag fdn_child_list_type_tag = { 0x99f6d8434f7c438d, 0xa941ad75f42a4d6a };
+static napi_type_tag fdn_child_type_tag = { 0x1b79c4519de6488a, 0xb778abb1725a0890 };
+static napi_type_tag fdn_crash_type_tag = { 0x59dd7f19c46a405f, 0x934e25f7ca0691ad };
+static napi_type_tag fdn_bus_type_tag = { 0xb652f335b9fe4bc3, 0xb20b1803d9d9b5ec };
+static napi_type_tag fdn_session_type_tag = { 0x5f210e5851194cc6, 0x96b424a8ee996e95 };
+static napi_type_tag fdn_script_type_tag = { 0x58c3dd329e64444c, 0xb53cfa6a05aa61e4 };
+static napi_type_tag fdn_portal_membership_type_tag = { 0xf295a03959234f4d, 0x8e0e3eab6928af48 };
+static napi_type_tag fdn_control_service_options_type_tag = { 0xe491f8e942004dd1, 0x8808472b3f11f25c };
+static napi_type_tag fdn_portal_service_type_tag = { 0xe5739227230249fe, 0x9b5c4dfeefa1b3e0 };
+static napi_type_tag fdn_file_monitor_type_tag = { 0x4435dc002b4e4aa4, 0xa4420ecb66bfdea6 };
+static napi_type_tag fdn_compiler_type_tag = { 0xec3560c365e4467f, 0xa562bd539c367df6 };
+static napi_type_tag fdn_compiler_options_type_tag = { 0x408fb71ba2154641, 0x9c86a3651dacd108 };
+static napi_type_tag fdn_build_options_type_tag = { 0x6101087f80714533, 0x93640938378f8fb6 };
+static napi_type_tag fdn_watch_options_type_tag = { 0xadfeb150cfcd4573, 0xa94a28df2971fe58 };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0x08ff20d6305f4c02, 0x894b1be956d0982a };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x3299f3e34cac426c, 0xb9ae147511cfc154 };
+static napi_type_tag fdn_application_query_options_type_tag = { 0x043510fe4d144d6a, 0x8262f42a6324309e };
+static napi_type_tag fdn_process_query_options_type_tag = { 0x72de010875174fa0, 0xa959d991471ac168 };
+static napi_type_tag fdn_session_options_type_tag = { 0x290f2d98d02d4a75, 0x81bd8ead1ee8d132 };
+static napi_type_tag fdn_script_options_type_tag = { 0x5644978945ac4ff9, 0xa3788b60e6196610 };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0x387a42362f0941f5, 0x8321a4bfff7171c9 };
+static napi_type_tag fdn_portal_options_type_tag = { 0xd88373c1eccb4159, 0xb1e9af983d75139a };
+static napi_type_tag fdn_peer_options_type_tag = { 0x183f30b807614ac5, 0xacf51b93d5cd7dd5 };
+static napi_type_tag fdn_relay_type_tag = { 0x576c2e0d19604fb4, 0x812cd5ac12a09c2a };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x755db337a5964dd7, 0xb36bc31802c0ea1a };
+static napi_type_tag fdn_cancellable_type_tag = { 0xe4f46ccfb4d1490f, 0x8092fec0ca5558b0 };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_list_constructor;
@@ -1553,8 +1553,8 @@ static napi_threadsafe_function fdn_compiler_build_tsfn;
 static napi_threadsafe_function fdn_compiler_watch_tsfn;
 
 static napi_value
-Init (napi_env env,
-      napi_value exports)
+fdn_init (napi_env env,
+          napi_value exports)
 {
   fdn_device_manager_register (env, exports);
   fdn_device_list_register (env, exports);
@@ -1597,7 +1597,7 @@ Init (napi_env env,
   return exports;
 }
 
-NAPI_MODULE (NODE_GYP_MODULE_NAME, Init)
+NAPI_MODULE (NODE_GYP_MODULE_NAME, fdn_init)
 
 static void
 fdn_device_manager_register (napi_env env,

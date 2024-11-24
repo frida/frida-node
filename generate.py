@@ -389,14 +389,14 @@ def generate_init_function(classes: List[Class]) -> str:
     registration_calls = "\n  ".join([f"{klass.c_symbol_prefix}_register (env, exports);" for klass in classes])
     return f"""
 static napi_value
-Init (napi_env env,
-      napi_value exports)
+fdn_init (napi_env env,
+          napi_value exports)
 {{
   {registration_calls}
   return exports;
 }}
 
-NAPI_MODULE (NODE_GYP_MODULE_NAME, Init)
+NAPI_MODULE (NODE_GYP_MODULE_NAME, fdn_init)
 """
 
 def generate_registration_code(klass: Class) -> str:
