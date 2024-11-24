@@ -128,6 +128,7 @@ binding = shared_module('frida_binding', frida_binding_sources,
   dependencies: [frida_core_dep, nan_dep],
   install: true,
   install_dir: pkg_install_dir / 'build',
+  vs_module_defs: 'src' / 'addon.def',
 )
 
 custom_target('prebuild',
