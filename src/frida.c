@@ -18753,6 +18753,6 @@ static void
 fdn_object_finalize (napi_env env,
                      void * finalize_data,
                      void * finalize_hint)
-{{
+{
   g_object_unref (finalize_data);
-}}
+}
