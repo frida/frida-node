@@ -1378,40 +1378,42 @@ static napi_value fdn_io_stream_to_value (napi_env env, GIOStream * stream);
 static napi_value fdn_service_to_value (napi_env env, FridaService * service);
 static napi_value fdn_authentication_service_to_value (napi_env env, FridaAuthenticationService * service);
 
+static void fdn_object_finalize (napi_env env, void * finalize_data, void * finalize_hint);
+
 static napi_type_tag fdn_handle_wrapper_type_tag = { 0xdd596d4f2dad45f9, 0x844585a48e8d05ba };
-static napi_type_tag fdn_device_manager_type_tag = { 0xa52675f38b914812, 0xbbd312523f7a4089 };
-static napi_type_tag fdn_device_type_tag = { 0xf5b0ab8e86654211, 0xb65bc854809c6fe3 };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0x4585f74a2e2c4b0f, 0x9fcbbb5d6b33b0eb };
-static napi_type_tag fdn_application_type_tag = { 0xec57f821a247405c, 0x9f7e7cd911ee833b };
-static napi_type_tag fdn_process_type_tag = { 0x5000ce408fc14f3d, 0x8f88fb643f98385e };
-static napi_type_tag fdn_process_match_options_type_tag = { 0x466cb97295054c3d, 0xa7eefa35881f04ce };
-static napi_type_tag fdn_spawn_options_type_tag = { 0xc35825ca70954e92, 0x9ca143adb75abf9b };
-static napi_type_tag fdn_spawn_type_tag = { 0x68c858c19e6c4029, 0x8e4d0610c8f2cbce };
-static napi_type_tag fdn_child_type_tag = { 0x3d1b5a7ed1144ce2, 0x8c1336058cbec0fe };
-static napi_type_tag fdn_crash_type_tag = { 0x92e757c15eca4382, 0x9d7a805198bb2491 };
-static napi_type_tag fdn_bus_type_tag = { 0x9bc648660d294019, 0x950bf576c95426b8 };
-static napi_type_tag fdn_session_type_tag = { 0x4e150527c89c4ef4, 0x9cf1b8774499ee7b };
-static napi_type_tag fdn_script_type_tag = { 0x4b49edee5d2849e6, 0xa97c00c663f0f738 };
-static napi_type_tag fdn_portal_membership_type_tag = { 0xae2fd6b19bc54be2, 0xb32596c27e60f6ad };
-static napi_type_tag fdn_control_service_options_type_tag = { 0xade3eccb974042fd, 0xbf89bab81940fce4 };
-static napi_type_tag fdn_portal_service_type_tag = { 0x802e0af201064969, 0x963914c92d4250be };
-static napi_type_tag fdn_file_monitor_type_tag = { 0x91613c3697514bcf, 0x9960ee12d30b3918 };
-static napi_type_tag fdn_compiler_type_tag = { 0x397e9479005744b0, 0x94d9412f15602448 };
-static napi_type_tag fdn_compiler_options_type_tag = { 0xdbc1cf061bc540ad, 0xaf41d18767fb46b8 };
-static napi_type_tag fdn_build_options_type_tag = { 0x55fc0f7873694703, 0x95d975f4787c4f90 };
-static napi_type_tag fdn_watch_options_type_tag = { 0xbf583b5dba4d4de2, 0x8572c9366c24cd1f };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0x8a3ca5ef89af497d, 0x96bceeb1bb354e5e };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x5b926a5bd898408a, 0x857f5549ac10579a };
-static napi_type_tag fdn_application_query_options_type_tag = { 0xfa08df253b13436d, 0xa477b096aabdd5c3 };
-static napi_type_tag fdn_process_query_options_type_tag = { 0xa87771232f414a91, 0x84292c48c4f09d78 };
-static napi_type_tag fdn_session_options_type_tag = { 0x43e1c35ddf594b01, 0x9f5656490048f88c };
-static napi_type_tag fdn_script_options_type_tag = { 0x180e48d7bc074465, 0x965962644288e97b };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0x9ac50e0206b84756, 0x81c530a19b2ea8ea };
-static napi_type_tag fdn_portal_options_type_tag = { 0xcd40eefa67ab4bdd, 0xaadb8c7c170e9e37 };
-static napi_type_tag fdn_peer_options_type_tag = { 0xf811aa33cfc8428f, 0x92aa23d27f69b1f4 };
-static napi_type_tag fdn_relay_type_tag = { 0xc82384e163ee4d0a, 0x974a0b053c540712 };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x4111340069994ff0, 0x85cc1fe6d5029703 };
-static napi_type_tag fdn_cancellable_type_tag = { 0x94098af471484c84, 0x8e2e04fd25d3a9fc };
+static napi_type_tag fdn_device_manager_type_tag = { 0x79ed9a856e16454c, 0xb3767fffe1b4b5c9 };
+static napi_type_tag fdn_device_type_tag = { 0x15f5e2c384aa4a6b, 0x9c4c55bb59b0ac51 };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0xf78a819b762746d4, 0xa86c0617065b65bb };
+static napi_type_tag fdn_application_type_tag = { 0xa40e800faa354633, 0xb37e36704ac04030 };
+static napi_type_tag fdn_process_type_tag = { 0x030adfe98e374a70, 0xb81437a8eb66a474 };
+static napi_type_tag fdn_process_match_options_type_tag = { 0x695e3eae831c4fe8, 0x94a754953b9ddfef };
+static napi_type_tag fdn_spawn_options_type_tag = { 0xbf6ca8462db94b86, 0xa8965c3efd753cec };
+static napi_type_tag fdn_spawn_type_tag = { 0xfe0cd8d2627e4618, 0xafdcf209d0a268cd };
+static napi_type_tag fdn_child_type_tag = { 0x715bd7348ecf47f3, 0x951917c8fc764e50 };
+static napi_type_tag fdn_crash_type_tag = { 0x395e6dbf2d5441ae, 0x846b22eeb01b31df };
+static napi_type_tag fdn_bus_type_tag = { 0x3c6834b566904121, 0x8e6c9e7b927cb027 };
+static napi_type_tag fdn_session_type_tag = { 0x00b5e1981e9248d1, 0x8fd7703582d61a1c };
+static napi_type_tag fdn_script_type_tag = { 0x8f65d1b54bb0497d, 0xbe3e76c651d2d242 };
+static napi_type_tag fdn_portal_membership_type_tag = { 0x2d07144c6923457c, 0x8530c26e086d80f6 };
+static napi_type_tag fdn_control_service_options_type_tag = { 0x26e50bcae8be4c27, 0x9657757137e9af56 };
+static napi_type_tag fdn_portal_service_type_tag = { 0x240da68bc2344379, 0x86969b53f729a52a };
+static napi_type_tag fdn_file_monitor_type_tag = { 0x9213fe2d7ac745ec, 0xbc9df3444fab61c1 };
+static napi_type_tag fdn_compiler_type_tag = { 0xa8093d202c574210, 0xbd882f8f10936a54 };
+static napi_type_tag fdn_compiler_options_type_tag = { 0xd26eac10ae054ec1, 0xba965fe17f561ef9 };
+static napi_type_tag fdn_build_options_type_tag = { 0xf1a0a19d3e454b32, 0xab4ef2d6eaf3a636 };
+static napi_type_tag fdn_watch_options_type_tag = { 0xed349eff7bf047a0, 0x9563446148cadd03 };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0xc30cbb9bc4874a17, 0x97eee890a3c0216b };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x65eb7aae544949bb, 0x9a76bdbd4dbfc137 };
+static napi_type_tag fdn_application_query_options_type_tag = { 0x3e5587c6a3fb4daf, 0xa554de71881d5529 };
+static napi_type_tag fdn_process_query_options_type_tag = { 0x98c6808d9d2743c7, 0x8ffbdc0c3d350b3c };
+static napi_type_tag fdn_session_options_type_tag = { 0x15a4781c9968464f, 0xb990dbd30e94fc3e };
+static napi_type_tag fdn_script_options_type_tag = { 0x017b885d7792488a, 0xb2df7617bc084cca };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0xd831585951a54f70, 0xb99a2e58ed3e0009 };
+static napi_type_tag fdn_portal_options_type_tag = { 0xc01560bb21134057, 0xbf9669ca5fa7ae08 };
+static napi_type_tag fdn_peer_options_type_tag = { 0x2280bb2a3adf4989, 0xb7d3ae827848af83 };
+static napi_type_tag fdn_relay_type_tag = { 0x5b2006f127ec487d, 0xa665fd79b1b17dff };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x6727c17174544562, 0xa3e3d2698d9daa7a };
+static napi_type_tag fdn_cancellable_type_tag = { 0xab7680ffc9554d97, 0xad1cfee16487cf18 };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_constructor;
@@ -1580,27 +1582,35 @@ fdn_device_manager_register (napi_env env,
 
   napi_create_string_utf8 (env, "close", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_manager_close_deliver, &fdn_device_manager_close_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_manager_close_tsfn);
 
   napi_create_string_utf8 (env, "getDeviceById", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_manager_get_device_by_id_deliver, &fdn_device_manager_get_device_by_id_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_manager_get_device_by_id_tsfn);
 
   napi_create_string_utf8 (env, "getDeviceByType", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_manager_get_device_by_type_deliver, &fdn_device_manager_get_device_by_type_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_manager_get_device_by_type_tsfn);
 
   napi_create_string_utf8 (env, "findDeviceById", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_manager_find_device_by_id_deliver, &fdn_device_manager_find_device_by_id_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_manager_find_device_by_id_tsfn);
 
   napi_create_string_utf8 (env, "findDeviceByType", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_manager_find_device_by_type_deliver, &fdn_device_manager_find_device_by_type_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_manager_find_device_by_type_tsfn);
 
   napi_create_string_utf8 (env, "enumerateDevices", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_manager_enumerate_devices_deliver, &fdn_device_manager_enumerate_devices_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_manager_enumerate_devices_tsfn);
 
   napi_create_string_utf8 (env, "addRemoteDevice", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_manager_add_remote_device_deliver, &fdn_device_manager_add_remote_device_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_manager_add_remote_device_tsfn);
 
   napi_create_string_utf8 (env, "removeRemoteDevice", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_manager_remove_remote_device_deliver, &fdn_device_manager_remove_remote_device_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_manager_remove_remote_device_tsfn);
 }
 
 static gboolean
@@ -1649,11 +1659,11 @@ fdn_device_manager_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaDeviceManager * handle;
+  FridaDeviceManager * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -1664,28 +1674,38 @@ fdn_device_manager_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a DeviceManager handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_device_manager_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a DeviceManager handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -2879,69 +2899,91 @@ fdn_device_register (napi_env env,
 
   napi_create_string_utf8 (env, "querySystemParameters", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_query_system_parameters_deliver, &fdn_device_query_system_parameters_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_query_system_parameters_tsfn);
 
   napi_create_string_utf8 (env, "getFrontmostApplication", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_get_frontmost_application_deliver, &fdn_device_get_frontmost_application_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_get_frontmost_application_tsfn);
 
   napi_create_string_utf8 (env, "enumerateApplications", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_enumerate_applications_deliver, &fdn_device_enumerate_applications_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_enumerate_applications_tsfn);
 
   napi_create_string_utf8 (env, "getProcessByPid", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_get_process_by_pid_deliver, &fdn_device_get_process_by_pid_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_get_process_by_pid_tsfn);
 
   napi_create_string_utf8 (env, "getProcessByName", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_get_process_by_name_deliver, &fdn_device_get_process_by_name_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_get_process_by_name_tsfn);
 
   napi_create_string_utf8 (env, "findProcessByPid", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_find_process_by_pid_deliver, &fdn_device_find_process_by_pid_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_find_process_by_pid_tsfn);
 
   napi_create_string_utf8 (env, "findProcessByName", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_find_process_by_name_deliver, &fdn_device_find_process_by_name_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_find_process_by_name_tsfn);
 
   napi_create_string_utf8 (env, "enumerateProcesses", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_enumerate_processes_deliver, &fdn_device_enumerate_processes_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_enumerate_processes_tsfn);
 
   napi_create_string_utf8 (env, "enableSpawnGating", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_enable_spawn_gating_deliver, &fdn_device_enable_spawn_gating_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_enable_spawn_gating_tsfn);
 
   napi_create_string_utf8 (env, "disableSpawnGating", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_disable_spawn_gating_deliver, &fdn_device_disable_spawn_gating_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_disable_spawn_gating_tsfn);
 
   napi_create_string_utf8 (env, "enumeratePendingSpawn", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_enumerate_pending_spawn_deliver, &fdn_device_enumerate_pending_spawn_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_enumerate_pending_spawn_tsfn);
 
   napi_create_string_utf8 (env, "enumeratePendingChildren", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_enumerate_pending_children_deliver, &fdn_device_enumerate_pending_children_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_enumerate_pending_children_tsfn);
 
   napi_create_string_utf8 (env, "spawn", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_spawn_deliver, &fdn_device_spawn_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_spawn_tsfn);
 
   napi_create_string_utf8 (env, "input", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_input_deliver, &fdn_device_input_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_input_tsfn);
 
   napi_create_string_utf8 (env, "resume", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_resume_deliver, &fdn_device_resume_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_resume_tsfn);
 
   napi_create_string_utf8 (env, "kill", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_kill_deliver, &fdn_device_kill_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_kill_tsfn);
 
   napi_create_string_utf8 (env, "attach", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_attach_deliver, &fdn_device_attach_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_attach_tsfn);
 
   napi_create_string_utf8 (env, "injectLibraryFile", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_inject_library_file_deliver, &fdn_device_inject_library_file_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_inject_library_file_tsfn);
 
   napi_create_string_utf8 (env, "injectLibraryBlob", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_inject_library_blob_deliver, &fdn_device_inject_library_blob_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_inject_library_blob_tsfn);
 
   napi_create_string_utf8 (env, "openChannel", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_open_channel_deliver, &fdn_device_open_channel_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_open_channel_tsfn);
 
   napi_create_string_utf8 (env, "openService", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_open_service_deliver, &fdn_device_open_service_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_open_service_tsfn);
 
   napi_create_string_utf8 (env, "unpair", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_device_unpair_deliver, &fdn_device_unpair_tsfn);
+  napi_unref_threadsafe_function (env, fdn_device_unpair_tsfn);
 }
 
 static gboolean
@@ -2990,11 +3032,11 @@ fdn_device_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaDevice * handle;
+  FridaDevice * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -3006,28 +3048,38 @@ fdn_device_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a Device handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_device_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a Device handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -6335,11 +6387,11 @@ fdn_remote_device_options_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaRemoteDeviceOptions * handle;
+  FridaRemoteDeviceOptions * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -6350,28 +6402,38 @@ fdn_remote_device_options_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a RemoteDeviceOptions handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_remote_device_options_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a RemoteDeviceOptions handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -6736,11 +6798,11 @@ fdn_application_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaApplication * handle;
+  FridaApplication * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -6752,28 +6814,38 @@ fdn_application_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a Application handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_application_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a Application handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -6972,11 +7044,11 @@ fdn_process_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaProcess * handle;
+  FridaProcess * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -6988,28 +7060,38 @@ fdn_process_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a Process handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_process_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a Process handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -7159,11 +7241,11 @@ fdn_process_match_options_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaProcessMatchOptions * handle;
+  FridaProcessMatchOptions * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -7174,28 +7256,38 @@ fdn_process_match_options_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a ProcessMatchOptions handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_process_match_options_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a ProcessMatchOptions handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -7399,11 +7491,11 @@ fdn_spawn_options_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaSpawnOptions * handle;
+  FridaSpawnOptions * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -7414,28 +7506,38 @@ fdn_spawn_options_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a SpawnOptions handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_spawn_options_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a SpawnOptions handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -7972,11 +8074,11 @@ fdn_spawn_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaSpawn * handle;
+  FridaSpawn * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -7988,28 +8090,38 @@ fdn_spawn_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a Spawn handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_spawn_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a Spawn handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -8159,11 +8271,11 @@ fdn_child_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaChild * handle;
+  FridaChild * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -8175,28 +8287,38 @@ fdn_child_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a Child handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_child_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a Child handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -8475,11 +8597,11 @@ fdn_crash_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaCrash * handle;
+  FridaCrash * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -8491,28 +8613,38 @@ fdn_crash_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a Crash handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_crash_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a Crash handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -8677,6 +8809,7 @@ fdn_bus_register (napi_env env,
 
   napi_create_string_utf8 (env, "attach", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_bus_attach_deliver, &fdn_bus_attach_tsfn);
+  napi_unref_threadsafe_function (env, fdn_bus_attach_tsfn);
 }
 
 static gboolean
@@ -8725,11 +8858,11 @@ fdn_bus_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaBus * handle;
+  FridaBus * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -8741,28 +8874,38 @@ fdn_bus_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a Bus handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_bus_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a Bus handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -9025,33 +9168,43 @@ fdn_session_register (napi_env env,
 
   napi_create_string_utf8 (env, "detach", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_session_detach_deliver, &fdn_session_detach_tsfn);
+  napi_unref_threadsafe_function (env, fdn_session_detach_tsfn);
 
   napi_create_string_utf8 (env, "resume", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_session_resume_deliver, &fdn_session_resume_tsfn);
+  napi_unref_threadsafe_function (env, fdn_session_resume_tsfn);
 
   napi_create_string_utf8 (env, "enableChildGating", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_session_enable_child_gating_deliver, &fdn_session_enable_child_gating_tsfn);
+  napi_unref_threadsafe_function (env, fdn_session_enable_child_gating_tsfn);
 
   napi_create_string_utf8 (env, "disableChildGating", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_session_disable_child_gating_deliver, &fdn_session_disable_child_gating_tsfn);
+  napi_unref_threadsafe_function (env, fdn_session_disable_child_gating_tsfn);
 
   napi_create_string_utf8 (env, "createScript", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_session_create_script_deliver, &fdn_session_create_script_tsfn);
+  napi_unref_threadsafe_function (env, fdn_session_create_script_tsfn);
 
   napi_create_string_utf8 (env, "createScriptFromBytes", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_session_create_script_from_bytes_deliver, &fdn_session_create_script_from_bytes_tsfn);
+  napi_unref_threadsafe_function (env, fdn_session_create_script_from_bytes_tsfn);
 
   napi_create_string_utf8 (env, "compileScript", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_session_compile_script_deliver, &fdn_session_compile_script_tsfn);
+  napi_unref_threadsafe_function (env, fdn_session_compile_script_tsfn);
 
   napi_create_string_utf8 (env, "snapshotScript", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_session_snapshot_script_deliver, &fdn_session_snapshot_script_tsfn);
+  napi_unref_threadsafe_function (env, fdn_session_snapshot_script_tsfn);
 
   napi_create_string_utf8 (env, "setupPeerConnection", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_session_setup_peer_connection_deliver, &fdn_session_setup_peer_connection_tsfn);
+  napi_unref_threadsafe_function (env, fdn_session_setup_peer_connection_tsfn);
 
   napi_create_string_utf8 (env, "joinPortal", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_session_join_portal_deliver, &fdn_session_join_portal_tsfn);
+  napi_unref_threadsafe_function (env, fdn_session_join_portal_tsfn);
 }
 
 static gboolean
@@ -9100,11 +9253,11 @@ fdn_session_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaSession * handle;
+  FridaSession * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -9116,28 +9269,38 @@ fdn_session_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a Session handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_session_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a Session handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -10610,18 +10773,23 @@ fdn_script_register (napi_env env,
 
   napi_create_string_utf8 (env, "load", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_script_load_deliver, &fdn_script_load_tsfn);
+  napi_unref_threadsafe_function (env, fdn_script_load_tsfn);
 
   napi_create_string_utf8 (env, "unload", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_script_unload_deliver, &fdn_script_unload_tsfn);
+  napi_unref_threadsafe_function (env, fdn_script_unload_tsfn);
 
   napi_create_string_utf8 (env, "eternalize", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_script_eternalize_deliver, &fdn_script_eternalize_tsfn);
+  napi_unref_threadsafe_function (env, fdn_script_eternalize_tsfn);
 
   napi_create_string_utf8 (env, "enableDebugger", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_script_enable_debugger_deliver, &fdn_script_enable_debugger_tsfn);
+  napi_unref_threadsafe_function (env, fdn_script_enable_debugger_tsfn);
 
   napi_create_string_utf8 (env, "disableDebugger", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_script_disable_debugger_deliver, &fdn_script_disable_debugger_tsfn);
+  napi_unref_threadsafe_function (env, fdn_script_disable_debugger_tsfn);
 }
 
 static gboolean
@@ -10670,11 +10838,11 @@ fdn_script_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaScript * handle;
+  FridaScript * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -10686,28 +10854,38 @@ fdn_script_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a Script handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_script_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a Script handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -11429,6 +11607,7 @@ fdn_portal_membership_register (napi_env env,
 
   napi_create_string_utf8 (env, "terminate", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_portal_membership_terminate_deliver, &fdn_portal_membership_terminate_tsfn);
+  napi_unref_threadsafe_function (env, fdn_portal_membership_terminate_tsfn);
 }
 
 static gboolean
@@ -11477,11 +11656,11 @@ fdn_portal_membership_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaPortalMembership * handle;
+  FridaPortalMembership * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -11493,28 +11672,38 @@ fdn_portal_membership_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a PortalMembership handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_portal_membership_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a PortalMembership handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -11703,11 +11892,11 @@ fdn_control_service_options_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaControlServiceOptions * handle;
+  FridaControlServiceOptions * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -11718,28 +11907,38 @@ fdn_control_service_options_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a ControlServiceOptions handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_control_service_options_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a ControlServiceOptions handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -11976,9 +12175,11 @@ fdn_portal_service_register (napi_env env,
 
   napi_create_string_utf8 (env, "start", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_portal_service_start_deliver, &fdn_portal_service_start_tsfn);
+  napi_unref_threadsafe_function (env, fdn_portal_service_start_tsfn);
 
   napi_create_string_utf8 (env, "stop", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_portal_service_stop_deliver, &fdn_portal_service_stop_tsfn);
+  napi_unref_threadsafe_function (env, fdn_portal_service_stop_tsfn);
 }
 
 static gboolean
@@ -12027,11 +12228,11 @@ fdn_portal_service_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaPortalService * handle;
+  FridaPortalService * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -12043,28 +12244,38 @@ fdn_portal_service_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a PortalService handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_portal_service_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a PortalService handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -12780,9 +12991,11 @@ fdn_file_monitor_register (napi_env env,
 
   napi_create_string_utf8 (env, "enable", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_file_monitor_enable_deliver, &fdn_file_monitor_enable_tsfn);
+  napi_unref_threadsafe_function (env, fdn_file_monitor_enable_tsfn);
 
   napi_create_string_utf8 (env, "disable", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_file_monitor_disable_deliver, &fdn_file_monitor_disable_tsfn);
+  napi_unref_threadsafe_function (env, fdn_file_monitor_disable_tsfn);
 }
 
 static gboolean
@@ -12831,11 +13044,11 @@ fdn_file_monitor_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaFileMonitor * handle;
+  FridaFileMonitor * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -12847,28 +13060,38 @@ fdn_file_monitor_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a FileMonitor handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_file_monitor_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a FileMonitor handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -13164,9 +13387,11 @@ fdn_compiler_register (napi_env env,
 
   napi_create_string_utf8 (env, "build", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_compiler_build_deliver, &fdn_compiler_build_tsfn);
+  napi_unref_threadsafe_function (env, fdn_compiler_build_tsfn);
 
   napi_create_string_utf8 (env, "watch", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_compiler_watch_deliver, &fdn_compiler_watch_tsfn);
+  napi_unref_threadsafe_function (env, fdn_compiler_watch_tsfn);
 }
 
 static gboolean
@@ -13215,11 +13440,11 @@ fdn_compiler_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaCompiler * handle;
+  FridaCompiler * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -13231,28 +13456,38 @@ fdn_compiler_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a Compiler handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_compiler_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a Compiler handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -13640,11 +13875,11 @@ fdn_compiler_options_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaCompilerOptions * handle;
+  FridaCompilerOptions * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -13655,28 +13890,38 @@ fdn_compiler_options_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a CompilerOptions handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_compiler_options_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a CompilerOptions handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -13945,11 +14190,11 @@ fdn_build_options_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaBuildOptions * handle;
+  FridaBuildOptions * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -13960,28 +14205,38 @@ fdn_build_options_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a BuildOptions handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_build_options_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a BuildOptions handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static void
@@ -14046,11 +14301,11 @@ fdn_watch_options_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaWatchOptions * handle;
+  FridaWatchOptions * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -14061,28 +14316,38 @@ fdn_watch_options_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a WatchOptions handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_watch_options_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a WatchOptions handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static void
@@ -14147,11 +14412,11 @@ fdn_static_authentication_service_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaStaticAuthenticationService * handle;
+  FridaStaticAuthenticationService * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -14163,28 +14428,38 @@ fdn_static_authentication_service_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a StaticAuthenticationService handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_static_authentication_service_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a StaticAuthenticationService handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -14277,11 +14552,11 @@ fdn_frontmost_query_options_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaFrontmostQueryOptions * handle;
+  FridaFrontmostQueryOptions * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -14292,28 +14567,38 @@ fdn_frontmost_query_options_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a FrontmostQueryOptions handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_frontmost_query_options_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a FrontmostQueryOptions handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -14447,11 +14732,11 @@ fdn_application_query_options_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaApplicationQueryOptions * handle;
+  FridaApplicationQueryOptions * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -14462,28 +14747,38 @@ fdn_application_query_options_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a ApplicationQueryOptions handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_application_query_options_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a ApplicationQueryOptions handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -14685,11 +14980,11 @@ fdn_process_query_options_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaProcessQueryOptions * handle;
+  FridaProcessQueryOptions * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -14700,28 +14995,38 @@ fdn_process_query_options_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a ProcessQueryOptions handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_process_query_options_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a ProcessQueryOptions handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -14922,11 +15227,11 @@ fdn_session_options_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaSessionOptions * handle;
+  FridaSessionOptions * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -14937,28 +15242,38 @@ fdn_session_options_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a SessionOptions handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_session_options_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a SessionOptions handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -15230,11 +15545,11 @@ fdn_script_options_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaScriptOptions * handle;
+  FridaScriptOptions * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -15245,28 +15560,38 @@ fdn_script_options_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a ScriptOptions handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_script_options_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a ScriptOptions handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -15606,11 +15931,11 @@ fdn_snapshot_options_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaSnapshotOptions * handle;
+  FridaSnapshotOptions * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -15621,28 +15946,38 @@ fdn_snapshot_options_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a SnapshotOptions handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_snapshot_options_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a SnapshotOptions handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -15846,11 +16181,11 @@ fdn_portal_options_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaPortalOptions * handle;
+  FridaPortalOptions * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -15861,28 +16196,38 @@ fdn_portal_options_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a PortalOptions handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_portal_options_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a PortalOptions handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -16171,11 +16516,11 @@ fdn_peer_options_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaPeerOptions * handle;
+  FridaPeerOptions * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -16186,28 +16531,38 @@ fdn_peer_options_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a PeerOptions handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_peer_options_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a PeerOptions handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -16412,11 +16767,11 @@ fdn_relay_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaRelay * handle;
+  FridaRelay * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -16428,28 +16783,38 @@ fdn_relay_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a Relay handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_relay_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a Relay handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -16631,11 +16996,11 @@ fdn_endpoint_parameters_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  FridaEndpointParameters * handle;
+  FridaEndpointParameters * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -16647,28 +17012,38 @@ fdn_endpoint_parameters_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a EndpointParameters handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_endpoint_parameters_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a EndpointParameters handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -16962,11 +17337,11 @@ fdn_cancellable_construct (napi_env env,
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  GCancellable * handle;
+  GCancellable * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {
@@ -16977,28 +17352,38 @@ fdn_cancellable_construct (napi_env env,
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {
-      napi_throw_type_error (env, NULL, "expected a Cancellable handle");
-      return FALSE;
-    }
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {
-      return NULL;
-    }
+      goto propagate_error;
 
     g_object_ref (handle);
   }
 
   status = napi_type_tag_object (env, jsthis, &fdn_cancellable_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a Cancellable handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
 }
 
 static napi_value
@@ -18364,3 +18749,10 @@ fdn_authentication_service_to_value (napi_env env,
   return result;
 }
 
+static void
+fdn_object_finalize (napi_env env,
+                     void * finalize_data,
+                     void * finalize_hint)
+{{
+  g_object_unref (finalize_data);
+}}

@@ -434,6 +434,8 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
         "static napi_value fdn_io_stream_to_value (napi_env env, GIOStream * stream);",
         "static napi_value fdn_service_to_value (napi_env env, FridaService * service);",
         "static napi_value fdn_authentication_service_to_value (napi_env env, FridaAuthenticationService * service);",
+        "",
+        "static void fdn_object_finalize (napi_env env, void * finalize_data, void * finalize_hint);",
     ]
 
     return "\n".join(prototypes) + "\n\n"
@@ -502,7 +504,8 @@ def generate_registration_code(klass: Class) -> str:
         if method.is_async:
             tsfn_initializations.append(f"""\
 napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource_name);
-  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, {class_cprefix}_{method.name}_deliver, &{class_cprefix}_{method.name}_tsfn);""")
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, {class_cprefix}_{method.name}_deliver, &{class_cprefix}_{method.name}_tsfn);
+  napi_unref_threadsafe_function (env, {class_cprefix}_{method.name}_tsfn);""")
 
     for prop in klass.properties:
         prop_name_camel = to_camel_case(prop.c_name)
@@ -615,11 +618,11 @@ static napi_value
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  {klass.c_type} * handle;
+  {klass.c_type} * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   if (argc == 0)
   {{
@@ -630,28 +633,38 @@ static napi_value
     bool is_instance;
 
     if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
-    {{
-      napi_throw_type_error (env, NULL, "expected a {klass.name} handle");
-      return FALSE;
-    }}
+      goto invalid_handle;
 
     if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
-    {{
-      return NULL;
-    }}
+      goto propagate_error;
 
     g_object_ref (handle);
   }}
 
   status = napi_type_tag_object (env, jsthis, &{class_cprefix}_type_tag);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
 
   status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
   if (status != napi_ok)
-    return NULL;
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
 
   return jsthis;
+
+invalid_handle:
+  {{
+    napi_throw_type_error (env, NULL, "expected a {klass.name} handle");
+    goto propagate_error;
+  }}
+propagate_error:
+  {{
+    g_clear_object (&handle);
+    return NULL;
+  }}
 }}
 """
 
@@ -1780,7 +1793,14 @@ fdn_authentication_service_to_value (napi_env env,
 
   return result;
 }
-"""
+
+static void
+fdn_object_finalize (napi_env env,
+                     void * finalize_data,
+                     void * finalize_hint)
+{{
+  g_object_unref (finalize_data);
+}}"""
 
 def resolve_destroy_function(type: Type) -> Optional[str]:
     name = type.name
