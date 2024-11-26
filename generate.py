@@ -15,11 +15,11 @@ GIR_NAMESPACES = {"": CORE_NAMESPACE}
 
 @dataclass
 class Model:
-    classes: OrderedDict[str, Class]
+    object_types: OrderedDict[str, ObjectType]
     enumerations: OrderedDict[str, Enumeration]
 
 @dataclass
-class Class:
+class ObjectType:
     name: str
     c_type: str
     parent: str
@@ -98,39 +98,6 @@ class Class:
                                        construct_only=element.get("construct-only") == "1"))
         return properties
 
-def extract_callable_details(element: ET.Element) -> Tuple[str, List[Parameter], bool, bool, bool]:
-    c_identifier = element.get(f"{{{C_NAMESPACE}}}identifier")
-
-    parameters = element.findall("./parameters/parameter", GIR_NAMESPACES)
-    param_list = extract_parameters(parameters)
-    has_closure_param = any((param.get("closure") == "1" for param in parameters))
-
-    throws = element.get("throws") == "1"
-
-    is_async = any(param[0].get("name") == "Gio.AsyncReadyCallback" for param in parameters)
-
-    return (c_identifier, param_list, has_closure_param, throws, is_async)
-
-def extract_parameters(parameter_elements: List[ET.Element]) -> List[Parameter]:
-    param_list = []
-    for param in parameter_elements:
-        param_name = param.get("name")
-        if param_name.startswith("_"):
-            continue
-
-        type = extract_type_from_entity(param)
-
-        nullable = param.get("nullable") == "1"
-
-        ownership_val = param.get("transfer-ownership")
-        transfer_ownership = TransferOwnership[ownership_val] if ownership_val is not None else TransferOwnership.none
-
-        raw_direction = param.get("direction")
-        direction = Direction(raw_direction) if raw_direction is not None else Direction.IN
-
-        param_list.append(Parameter(param_name, type, nullable, transfer_ownership, direction))
-    return param_list
-
 @dataclass
 class Constructor:
     name: str
@@ -147,11 +114,11 @@ class Method:
     throws: bool
     is_async: bool
 
-    klass: Class
+    object_type: ObjectType
 
     @cached_property
     def operation_type_name(self) -> str:
-        return f"Fdn{self.klass.name}{to_pascal_case(self.name)}Operation"
+        return f"Fdn{self.object_type.name}{to_pascal_case(self.name)}Operation"
 
 @dataclass
 class Property:
@@ -208,23 +175,86 @@ class Enumeration:
 MethodFilter = Callable[[str, str], bool]
 MethodNameTransformer = Callable[[str, str], str]
 
+def generate_code() -> str:
+    srcroot = Path(__file__).parent
+    frida = parse_gir(srcroot / "Frida-1.0.gir")
+
+    gio = parse_gir(srcroot / "Gio-2.0.gir",
+                    method_filter=filter_gio_methods,
+                    method_name_transformer=transform_gio_method_name)
+
+    object_types = [otype for name, otype in frida.object_types.items() if name not in {"ControlService", "RpcClient", "RpcPeer"}]
+    object_types.append(gio.object_types["Cancellable"])
+
+    enumerations = frida.enumerations.values()
+
+    code = generate_includes()
+    code += generate_operation_structs(object_types)
+    code += generate_prototypes(object_types, enumerations)
+    code += generate_type_tags(object_types)
+    code += generate_constructor_declarations(object_types)
+    code += generate_tsfn_declarations(object_types)
+    code += generate_init_function(object_types)
+
+    for otype in object_types:
+        if otype.is_frida_list:
+            code += generate_list_conversion_functions(otype)
+            continue
+
+        code += generate_registration_code(otype)
+        code += generate_class_conversion_functions(otype)
+        code += generate_constructor(otype)
+
+        for method in otype.methods:
+            code += generate_method_code(otype, method)
+
+    for enum in enumerations:
+        code += generate_enum_conversion_functions(enum)
+
+    code += generate_builtin_conversion_helpers()
+
+    return code
+
+def filter_gio_methods(object_type: str, method: str) -> bool:
+    if object_type == "Cancellable" and method in {"make_pollfd", "release_fd", "source_new"}:
+        return False
+    return True
+
+def transform_gio_method_name(object_type: str, name: str) -> str:
+    if object_type == "Cancellable" and name == "set_error_if_cancelled":
+        return "throw_if_cancelled"
+    return name
+
 def parse_gir(file_path: str,
               method_filter: Optional[MethodFilter] = None,
               method_name_transformer: Optional[MethodNameTransformer] = None) -> Model:
     tree = ET.parse(file_path)
 
-    classes = OrderedDict()
+    object_types = OrderedDict()
+
     for element in tree.getroot().findall(".//class", GIR_NAMESPACES):
-        class_name = element.get("name")
-        class_c_type = element.get(f"{{{C_NAMESPACE}}}type")
+        name = element.get("name")
+        c_type = element.get(f"{{{C_NAMESPACE}}}type")
         parent = element.get("parent")
         constructors = element.findall(".//constructor", GIR_NAMESPACES)
         methods = element.findall(".//method", GIR_NAMESPACES)
         properties = element.findall(".//property", GIR_NAMESPACES)
 
-        classes[class_name] = Class(class_name, class_c_type, parent, constructors, methods, method_filter, method_name_transformer, properties)
+        object_types[name] = ObjectType(name, c_type, parent, constructors, methods, method_filter, method_name_transformer, properties)
+
+    for element in tree.getroot().findall(".//interface", GIR_NAMESPACES):
+        name = element.get("name")
+        c_type = element.get(f"{{{C_NAMESPACE}}}type")
+        prereq = element.find(".//prerequisite", GIR_NAMESPACES)
+        parent = prereq.get("name") if prereq is not None else ""
+        constructors = []
+        methods = element.findall(".//method", GIR_NAMESPACES)
+        properties = element.findall(".//property", GIR_NAMESPACES)
+
+        object_types[name] = ObjectType(name, c_type, parent, constructors, methods, method_filter, method_name_transformer, properties)
 
     enumerations = OrderedDict()
+
     for element in tree.getroot().findall(".//enumeration", GIR_NAMESPACES):
         if element.get(f"{{{GLIB_NAMESPACE}}}error-domain") is not None:
             continue
@@ -233,7 +263,40 @@ def parse_gir(file_path: str,
         get_type = element.get(f"{{{GLIB_NAMESPACE}}}get-type")
         enumerations[enum_name] = Enumeration(enum_name, enum_c_type, get_type)
 
-    return Model(classes, enumerations)
+    return Model(object_types, enumerations)
+
+def extract_callable_details(element: ET.Element) -> Tuple[str, List[Parameter], bool, bool, bool]:
+    c_identifier = element.get(f"{{{C_NAMESPACE}}}identifier")
+
+    parameters = element.findall("./parameters/parameter", GIR_NAMESPACES)
+    param_list = extract_parameters(parameters)
+    has_closure_param = any((param.get("closure") == "1" for param in parameters))
+
+    throws = element.get("throws") == "1"
+
+    is_async = any(param[0].get("name") == "Gio.AsyncReadyCallback" for param in parameters)
+
+    return (c_identifier, param_list, has_closure_param, throws, is_async)
+
+def extract_parameters(parameter_elements: List[ET.Element]) -> List[Parameter]:
+    param_list = []
+    for param in parameter_elements:
+        param_name = param.get("name")
+        if param_name.startswith("_"):
+            continue
+
+        type = extract_type_from_entity(param)
+
+        nullable = param.get("nullable") == "1"
+
+        ownership_val = param.get("transfer-ownership")
+        transfer_ownership = TransferOwnership[ownership_val] if ownership_val is not None else TransferOwnership.none
+
+        raw_direction = param.get("direction")
+        direction = Direction(raw_direction) if raw_direction is not None else Direction.IN
+
+        param_list.append(Parameter(param_name, type, nullable, transfer_ownership, direction))
+    return param_list
 
 def extract_type_from_entity(parent_element: ET.Element) -> Optional[Type]:
     child = parent_element.find("type", GIR_NAMESPACES)
@@ -273,56 +336,6 @@ def type_nick_from_name(name: str, element: ET.Element) -> str:
 
     return result
 
-def generate_code() -> str:
-    srcroot = Path(__file__).parent
-    frida = parse_gir(srcroot / "Frida-1.0.gir")
-
-    gio = parse_gir(srcroot / "Gio-2.0.gir",
-                    method_filter=filter_gio_methods,
-                    method_name_transformer=transform_gio_method_name)
-
-    classes = [klass for name, klass in frida.classes.items() if name not in {"ControlService", "RpcClient", "RpcPeer"}]
-    classes.append(gio.classes["Cancellable"])
-
-    enumerations = frida.enumerations.values()
-
-    code = generate_includes()
-    code += generate_operation_structs(classes)
-    code += generate_prototypes(classes, enumerations)
-    code += generate_type_tags(classes)
-    code += generate_constructor_declarations(classes)
-    code += generate_tsfn_declarations(classes)
-    code += generate_init_function(classes)
-
-    for klass in classes:
-        if klass.is_frida_list:
-            code += generate_list_conversion_functions(klass)
-            continue
-
-        code += generate_registration_code(klass)
-        code += generate_class_conversion_functions(klass)
-        code += generate_constructor(klass)
-
-        for method in klass.methods:
-            code += generate_method_code(klass, method)
-
-    for enum in enumerations:
-        code += generate_enum_conversion_functions(enum)
-
-    code += generate_builtin_conversion_helpers()
-
-    return code
-
-def filter_gio_methods(klass: str, method: str) -> bool:
-    if klass == "Cancellable" and method in {"make_pollfd", "release_fd", "source_new"}:
-        return False
-    return True
-
-def transform_gio_method_name(klass: str, name: str) -> str:
-    if klass == "Cancellable" and name == "set_error_if_cancelled":
-        return "throw_if_cancelled"
-    return name
-
 def generate_includes() -> str:
     return """\
 #include <frida-core.h>
@@ -331,10 +344,10 @@ def generate_includes() -> str:
 
 """
 
-def generate_operation_structs(classes: List[Class]) -> str:
+def generate_operation_structs(object_types: List[ObjectType]) -> str:
     structs = []
-    for klass in classes:
-        for method in klass.methods:
+    for otype in object_types:
+        for method in otype.methods:
             if method.is_async:
                 param_declarations = [f"{param.type.c.replace("const ", "")} {param.name};" for param in method.parameters]
                 param_declarations_str = "\n  ".join(param_declarations)
@@ -343,38 +356,38 @@ def generate_operation_structs(classes: List[Class]) -> str:
 typedef struct {{
   napi_env env;
   napi_deferred deferred;
-  {klass.c_type} * handle;
+  {otype.c_type} * handle;
   GError * error;
   {param_declarations_str}{return_declaration}
 }} {method.operation_type_name};
 """)
     return "\n".join(structs) + "\n"
 
-def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -> str:
+def generate_prototypes(object_types: List[ObjectType], enumerations: List[Enumeration]) -> str:
     prototypes = []
 
-    for klass in classes:
-        class_cprefix = klass.c_symbol_prefix
+    for otype in object_types:
+        otype_cprefix = otype.c_symbol_prefix
 
         prototypes.append("")
 
-        if not klass.is_frida_list:
+        if not otype.is_frida_list:
             prototypes += [
-                f"static void {class_cprefix}_register (napi_env env, napi_value exports);",
-                f"G_GNUC_UNUSED static gboolean {class_cprefix}_from_value (napi_env env, napi_value value, {klass.c_type} ** handle);",
+                f"static void {otype_cprefix}_register (napi_env env, napi_value exports);",
+                f"G_GNUC_UNUSED static gboolean {otype_cprefix}_from_value (napi_env env, napi_value value, {otype.c_type} ** handle);",
             ]
 
         prototypes += [
-            f"G_GNUC_UNUSED static napi_value {class_cprefix}_to_value (napi_env env, {klass.c_type} * handle);",
+            f"G_GNUC_UNUSED static napi_value {otype_cprefix}_to_value (napi_env env, {otype.c_type} * handle);",
         ]
 
-        if not klass.is_frida_list:
+        if not otype.is_frida_list:
             prototypes += [
-                f"static napi_value {class_cprefix}_construct (napi_env env, napi_callback_info info);",
+                f"static napi_value {otype_cprefix}_construct (napi_env env, napi_callback_info info);",
             ]
 
-            for method in klass.methods:
-                method_cprefix = f"{class_cprefix}_{method.name}"
+            for method in otype.methods:
+                method_cprefix = f"{otype_cprefix}_{method.name}"
                 prototypes += [
                     "",
                     f"static napi_value {method_cprefix} (napi_env env, napi_callback_info info);",
@@ -432,46 +445,44 @@ def generate_prototypes(classes: List[Class], enumerations: List[Enumeration]) -
 
         # Temporary stubs for missing types:
         "static napi_value fdn_io_stream_to_value (napi_env env, GIOStream * stream);",
-        "static napi_value fdn_service_to_value (napi_env env, FridaService * service);",
-        "static napi_value fdn_authentication_service_to_value (napi_env env, FridaAuthenticationService * service);",
         "",
         "static void fdn_object_finalize (napi_env env, void * finalize_data, void * finalize_hint);",
     ]
 
     return "\n".join(prototypes) + "\n\n"
 
-def generate_type_tags(classes: List[Class]) -> str:
+def generate_type_tags(object_types: List[ObjectType]) -> str:
     type_tags = [
         "static napi_type_tag fdn_handle_wrapper_type_tag = { 0xdd596d4f2dad45f9, 0x844585a48e8d05ba };"
     ]
-    for klass in classes:
-        if klass.is_frida_list:
+    for otype in object_types:
+        if otype.is_frida_list:
             continue
         uuid_str = uuid.uuid4().hex
         uuid_formatted = f"0x{uuid_str[:16]}, 0x{uuid_str[16:]}"
-        type_tags.append(f"static napi_type_tag {klass.c_symbol_prefix}_type_tag = {{ {uuid_formatted} }};")
+        type_tags.append(f"static napi_type_tag {otype.c_symbol_prefix}_type_tag = {{ {uuid_formatted} }};")
     return "\n".join(type_tags) + "\n"
 
-def generate_constructor_declarations(classes: List[Class]) -> str:
+def generate_constructor_declarations(object_types: List[ObjectType]) -> str:
     declarations = []
-    for klass in classes:
-        if klass.is_frida_list:
+    for otype in object_types:
+        if otype.is_frida_list:
             continue
-        declarations.append(f"static napi_ref {klass.c_symbol_prefix}_constructor;")
+        declarations.append(f"static napi_ref {otype.c_symbol_prefix}_constructor;")
     return "\n" + "\n".join(declarations) + "\n"
 
-def generate_tsfn_declarations(classes: List[Class]) -> str:
+def generate_tsfn_declarations(object_types: List[ObjectType]) -> str:
     declarations = []
-    for klass in classes:
-        async_methods = [method for method in klass.methods if method.is_async]
+    for otype in object_types:
+        async_methods = [method for method in otype.methods if method.is_async]
         if async_methods:
             declarations.append("")
             for method in async_methods:
-                declarations.append(f"static napi_threadsafe_function {klass.c_symbol_prefix}_{method.name}_tsfn;")
+                declarations.append(f"static napi_threadsafe_function {otype.c_symbol_prefix}_{method.name}_tsfn;")
     return "\n".join(declarations) + "\n"
 
-def generate_init_function(classes: List[Class]) -> str:
-    registration_calls = "\n  ".join([f"{klass.c_symbol_prefix}_register (env, exports);" for klass in classes if not klass.is_frida_list])
+def generate_init_function(object_types: List[ObjectType]) -> str:
+    registration_calls = "\n  ".join([f"{otype.c_symbol_prefix}_register (env, exports);" for otype in object_types if not otype.is_frida_list])
     return f"""
 static napi_value
 fdn_init (napi_env env,
@@ -487,50 +498,50 @@ fdn_init (napi_env env,
 NAPI_MODULE (NODE_GYP_MODULE_NAME, fdn_init)
 """
 
-def generate_registration_code(klass: Class) -> str:
-    class_cprefix = klass.c_symbol_prefix
+def generate_registration_code(otype: ObjectType) -> str:
+    otype_cprefix = otype.c_symbol_prefix
 
     jsprop_registrations = []
     tsfn_initializations = []
 
-    c_prop_names = {prop.c_name for prop in klass.properties}
+    c_prop_names = {prop.c_name for prop in otype.properties}
 
-    for method in klass.methods:
+    for method in otype.methods:
         tokens = method.name.split("_", maxsplit=1)
         if len(tokens) == 2 and tokens[0] in {"get", "set"} and tokens[1] in c_prop_names:
             continue
         method_name_camel = to_camel_case(method.name)
-        jsprop_registrations.append(f"""{{ "{method_name_camel}", NULL, {class_cprefix}_{method.name}, NULL, NULL, NULL, napi_default, NULL }},""")
+        jsprop_registrations.append(f"""{{ "{method_name_camel}", NULL, {otype_cprefix}_{method.name}, NULL, NULL, NULL, napi_default, NULL }},""")
         if method.is_async:
             tsfn_initializations.append(f"""\
 napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource_name);
-  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, {class_cprefix}_{method.name}_deliver, &{class_cprefix}_{method.name}_tsfn);
-  napi_unref_threadsafe_function (env, {class_cprefix}_{method.name}_tsfn);""")
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, {otype_cprefix}_{method.name}_deliver, &{otype_cprefix}_{method.name}_tsfn);
+  napi_unref_threadsafe_function (env, {otype_cprefix}_{method.name}_tsfn);""")
 
-    for prop in klass.properties:
+    for prop in otype.properties:
         prop_name_camel = to_camel_case(prop.c_name)
 
         has_setter = prop.writable and not prop.construct_only
 
-        setter_str = f"{class_cprefix}_set_{prop.c_name}" if has_setter else "NULL"
+        setter_str = f"{otype_cprefix}_set_{prop.c_name}" if has_setter else "NULL"
 
         attrs = ["enumerable", "configurable"]
         if has_setter:
             attrs.insert(0, "writable")
         attrs_str = " | ".join([f"napi_{attr}" for attr in attrs])
 
-        jsprop_registrations.append(f"""{{ "{prop_name_camel}", NULL, NULL, {class_cprefix}_get_{prop.c_name}, {setter_str}, NULL, {attrs_str}, NULL }},""")
+        jsprop_registrations.append(f"""{{ "{prop_name_camel}", NULL, NULL, {otype_cprefix}_get_{prop.c_name}, {setter_str}, NULL, {attrs_str}, NULL }},""")
 
     jsprop_registrations_str = "\n    ".join(jsprop_registrations)
     resource_name_declaration = "\n\n  napi_value resource_name;" if tsfn_initializations else ""
     tsfn_initializations_str = "\n\n  " + "\n\n  ".join(tsfn_initializations) if tsfn_initializations else ""
 
     def calculate_indent(suffix: str) -> str:
-        return " " * (len(class_cprefix) + len(suffix) + 2)
+        return " " * (len(otype_cprefix) + len(suffix) + 2)
 
     return f"""
 static void
-{class_cprefix}_register (napi_env env,
+{otype_cprefix}_register (napi_env env,
 {calculate_indent("_register")}napi_value exports)
 {{
   napi_property_descriptor properties[] =
@@ -539,32 +550,32 @@ static void
   }};
 
   napi_value constructor;
-  napi_define_class (env, "{klass.name}", NAPI_AUTO_LENGTH, {class_cprefix}_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
-  napi_create_reference (env, constructor, 1, &{class_cprefix}_constructor);
+  napi_define_class (env, "{otype.name}", NAPI_AUTO_LENGTH, {otype_cprefix}_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_create_reference (env, constructor, 1, &{otype_cprefix}_constructor);
 
-  napi_set_named_property (env, exports, "{klass.name}", constructor);{resource_name_declaration}{tsfn_initializations_str}
+  napi_set_named_property (env, exports, "{otype.name}", constructor);{resource_name_declaration}{tsfn_initializations_str}
 }}
 """
 
-def generate_class_conversion_functions(klass: Class) -> str:
-    class_cprefix = klass.c_symbol_prefix
+def generate_class_conversion_functions(otype: ObjectType) -> str:
+    otype_cprefix = otype.c_symbol_prefix
 
     def calculate_indent(suffix: str) -> str:
-        return " " * (len(class_cprefix) + len(suffix) + 2)
+        return " " * (len(otype_cprefix) + len(suffix) + 2)
 
     from_value_function = f"""
 static gboolean
-{class_cprefix}_from_value (napi_env env,
+{otype_cprefix}_from_value (napi_env env,
 {calculate_indent("_from_value")}napi_value value,
-{calculate_indent("_from_value")}{klass.c_type} ** handle)
+{calculate_indent("_from_value")}{otype.c_type} ** handle)
 {{
   napi_status status;
   bool is_instance;
 
-  status = napi_check_object_type_tag (env, value, &{class_cprefix}_type_tag, &is_instance);
+  status = napi_check_object_type_tag (env, value, &{otype_cprefix}_type_tag, &is_instance);
   if (status != napi_ok || !is_instance)
   {{
-    napi_throw_type_error (env, NULL, "expected an instance of {klass.name}");
+    napi_throw_type_error (env, NULL, "expected an instance of {otype.name}");
     return FALSE;
   }}
 
@@ -578,12 +589,12 @@ static gboolean
 
     to_value_function = f"""
 static napi_value
-{class_cprefix}_to_value (napi_env env,
-{calculate_indent("_to_value")}{klass.c_type} * handle)
+{otype_cprefix}_to_value (napi_env env,
+{calculate_indent("_to_value")}{otype.c_type} * handle)
 {{
   napi_value result, constructor, handle_wrapper;
 
-  napi_get_reference_value (env, {class_cprefix}_constructor, &constructor);
+  napi_get_reference_value (env, {otype_cprefix}_constructor, &constructor);
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
   napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
@@ -596,29 +607,29 @@ static napi_value
 
     return from_value_function + to_value_function
 
-def generate_constructor(klass: Class) -> str:
-    class_cprefix = klass.c_symbol_prefix
+def generate_constructor(otype: ObjectType) -> str:
+    otype_cprefix = otype.c_symbol_prefix
 
     def calculate_indent(suffix: str) -> str:
-        return " " * (len(class_cprefix) + len(suffix) + 2)
+        return " " * (len(otype_cprefix) + len(suffix) + 2)
 
-    default_constructor = next((ctor for ctor in klass.constructors if not ctor.parameters), None)
+    default_constructor = next((ctor for ctor in otype.constructors if not ctor.parameters), None)
 
     if default_constructor is not None:
         default_call = f"handle = {default_constructor.c_identifier} ();"
     else:
-        default_call = "napi_throw_error (env, NULL, \"class {klass.name} cannot be constructed because it lacks a default constructor\");\n  return NULL;"
+        default_call = "napi_throw_error (env, NULL, \"type {otype.name} cannot be constructed because it lacks a default constructor\");\n  return NULL;"
 
     return f"""
 static napi_value
-{class_cprefix}_construct (napi_env env,
+{otype_cprefix}_construct (napi_env env,
 {calculate_indent("_construct")}napi_callback_info info)
 {{
   size_t argc = 1;
   napi_value args[1];
   napi_value jsthis;
   napi_status status;
-  {klass.c_type} * handle = NULL;
+  {otype.c_type} * handle = NULL;
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -641,7 +652,7 @@ static napi_value
     g_object_ref (handle);
   }}
 
-  status = napi_type_tag_object (env, jsthis, &{class_cprefix}_type_tag);
+  status = napi_type_tag_object (env, jsthis, &{otype_cprefix}_type_tag);
   if (status != napi_ok)
     goto propagate_error;
 
@@ -657,7 +668,7 @@ static napi_value
 
 invalid_handle:
   {{
-    napi_throw_type_error (env, NULL, "expected a {klass.name} handle");
+    napi_throw_type_error (env, NULL, "expected a {otype.name} handle");
     goto propagate_error;
   }}
 propagate_error:
@@ -668,9 +679,9 @@ propagate_error:
 }}
 """
 
-def generate_method_code(klass: Class, method: Method) -> str:
+def generate_method_code(otype: ObjectType, method: Method) -> str:
     operation_type_name = method.operation_type_name
-    class_cprefix = klass.c_symbol_prefix
+    otype_cprefix = otype.c_symbol_prefix
 
     invalid_arg_label = "invalid_argument" if method.is_async else "beach"
     input_params = [param for param in method.parameters if param.direction != Direction.OUT]
@@ -689,27 +700,27 @@ def generate_method_code(klass: Class, method: Method) -> str:
     return_destruction_str = f"\n  g_clear_pointer (&operation->retval, {retval.destroy_function});" if retval is not None and retval.destroy_function is not None else ""
 
     def calculate_indent(suffix: str) -> str:
-        return " " * (len(class_cprefix) + 1 + len(method.name) + len(suffix) + 2)
+        return " " * (len(otype_cprefix) + 1 + len(method.name) + len(suffix) + 2)
 
     if method.is_async:
         param_conversions_str = "\n\n" + "\n\n".join(param_conversions)
         operation_free_function = f"""\
 static void
-{class_cprefix}_{method.name}_operation_free ({operation_type_name} * operation)
+{otype_cprefix}_{method.name}_operation_free ({operation_type_name} * operation)
 {{{param_destruction_str}{return_destruction_str}
   g_slice_free ({operation_type_name}, operation);
 }}"""
 
         code = f"""
 static napi_value
-{class_cprefix}_{method.name} (napi_env env,
+{otype_cprefix}_{method.name} (napi_env env,
 {calculate_indent('')}napi_callback_info info)
 {{
   size_t argc = {len(method.parameters)};
   napi_value args[{len(method.parameters)}];
   napi_status status;
   napi_value jsthis;
-  {klass.c_type} * handle;
+  {otype.c_type} * handle;
   napi_deferred deferred;
   napi_value promise;
   {operation_type_name} * operation;
@@ -734,37 +745,37 @@ static napi_value
   operation->error = NULL;{param_conversions_str}
 
   source = g_idle_source_new ();
-  g_source_set_callback (source, {class_cprefix}_{method.name}_begin,
+  g_source_set_callback (source, {otype_cprefix}_{method.name}_begin,
       operation, NULL);
   g_source_attach (source, frida_get_main_context ());
   g_source_unref (source);
 
-  napi_ref_threadsafe_function (env, {class_cprefix}_{method.name}_tsfn);
+  napi_ref_threadsafe_function (env, {otype_cprefix}_{method.name}_tsfn);
 
   return promise;
 
 invalid_argument:
   {{
     napi_reject_deferred (env, deferred, NULL);
-    {class_cprefix}_{method.name}_operation_free (operation);
+    {otype_cprefix}_{method.name}_operation_free (operation);
     return NULL;
   }}
 }}
 
 static gboolean
-{class_cprefix}_{method.name}_begin (gpointer user_data)
+{otype_cprefix}_{method.name}_begin (gpointer user_data)
 {{
   {operation_type_name} * operation = user_data;
 
   {method.c_identifier} (operation->handle,
       {", ".join([f"operation->{param.name}" for param in method.parameters])},
-      {class_cprefix}_{method.name}_end, operation);
+      {otype_cprefix}_{method.name}_end, operation);
 
   return G_SOURCE_REMOVE;
 }}
 
 static void
-{class_cprefix}_{method.name}_end (GObject * source_object,
+{otype_cprefix}_{method.name}_end (GObject * source_object,
 {calculate_indent("_end")}GAsyncResult * res,
 {calculate_indent("_end")}gpointer user_data)
 {{
@@ -773,11 +784,11 @@ static void
   {return_assignment}{method.c_identifier}_finish (operation->handle, res,
       &operation->error);
 
-  napi_call_threadsafe_function ({class_cprefix}_{method.name}_tsfn, operation, napi_tsfn_blocking);
+  napi_call_threadsafe_function ({otype_cprefix}_{method.name}_tsfn, operation, napi_tsfn_blocking);
 }}
 
 static void
-{class_cprefix}_{method.name}_deliver (napi_env env,
+{otype_cprefix}_{method.name}_deliver (napi_env env,
 {calculate_indent("_deliver")}napi_value js_cb,
 {calculate_indent("_deliver")}void * context,
 {calculate_indent("_deliver")}void * data)
@@ -801,9 +812,9 @@ static void
     napi_resolve_deferred (env, operation->deferred, js_retval);
   }}
 
-  {class_cprefix}_{method.name}_operation_free (operation);
+  {otype_cprefix}_{method.name}_operation_free (operation);
 
-  napi_unref_threadsafe_function (env, {class_cprefix}_{method.name}_tsfn);
+  napi_unref_threadsafe_function (env, {otype_cprefix}_{method.name}_tsfn);
 }}
 
 {operation_free_function}
@@ -848,7 +859,7 @@ static void
 
         code = f"""
 static napi_value
-{class_cprefix}_{method.name} (napi_env env,
+{otype_cprefix}_{method.name} (napi_env env,
 {calculate_indent('')}napi_callback_info info)
 {{
   napi_value js_retval = NULL;
@@ -856,7 +867,7 @@ static napi_value
   napi_value args[{len(method.parameters)}];
   napi_status status;
   napi_value jsthis;
-  {klass.c_type} * handle;{param_declarations_str}{return_variable_declaration}
+  {otype.c_type} * handle;{param_declarations_str}{return_variable_declaration}
 
   status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
   if (status != napi_ok)
@@ -920,21 +931,21 @@ fdn_{enum_name_snake}_to_value (napi_env env,
 }}
 """
 
-def generate_list_conversion_functions(klass: Class) -> str:
-    class_cprefix = klass.c_symbol_prefix
+def generate_list_conversion_functions(otype: ObjectType) -> str:
+    cprefix = otype.c_symbol_prefix
 
-    size_method = next((method for method in klass.methods if method.name == "size"))
-    get_method = next((method for method in klass.methods if method.name == "get"))
+    size_method = next((method for method in otype.methods if method.name == "size"))
+    get_method = next((method for method in otype.methods if method.name == "get"))
 
     element_type = get_method.return_value.type
 
     def calculate_indent(suffix: str) -> str:
-        return " " * (len(class_cprefix) + len(suffix) + 2)
+        return " " * (len(cprefix) + len(suffix) + 2)
 
     return f"""
 static napi_value
-{class_cprefix}_to_value (napi_env env,
-{calculate_indent("_to_value")}{klass.c_type} * list)
+{cprefix}_to_value (napi_env env,
+{calculate_indent("_to_value")}{otype.c_type} * list)
 {{
   napi_value result;
   gint size, i;
@@ -1375,7 +1386,7 @@ fdn_vardict_from_value (napi_env env,
     if (!fdn_variant_from_value (env, js_val, &val))
       goto propagate_error;
 
-    g_hash_table_insert (dict, g_steal_pointer (&key), val);
+    g_hash_table_insert (dict, g_steal_pointer (&key), g_variant_ref_sink (val));
   }
 
   *vardict = dict;
@@ -1772,35 +1783,13 @@ fdn_io_stream_to_value (napi_env env,
   return result;
 }
 
-static napi_value
-fdn_service_to_value (napi_env env,
-                      FridaService * service)
-{
-  napi_value result;
-
-  napi_create_external (env, service, NULL, NULL, &result);
-
-  return result;
-}
-
-static napi_value
-fdn_authentication_service_to_value (napi_env env,
-                                     FridaAuthenticationService * service)
-{
-  napi_value result;
-
-  napi_create_external (env, service, NULL, NULL, &result);
-
-  return result;
-}
-
 static void
 fdn_object_finalize (napi_env env,
                      void * finalize_data,
                      void * finalize_hint)
-{{
+{
   g_object_unref (finalize_data);
-}}"""
+}"""
 
 def resolve_destroy_function(type: Type) -> Optional[str]:
     name = type.name
@@ -1814,6 +1803,8 @@ def resolve_destroy_function(type: Type) -> Optional[str]:
         return "g_bytes_unref"
     if name == "GLib.HashTable":
         return "g_hash_table_unref"
+    if name == "GLib.Variant":
+        return "g_variant_unref"
     if name in {"Gio.Cancellable", "Gio.File", "Gio.IOStream", "Gio.TlsCertificate"}:
         return "g_object_unref"
     if name.startswith("Frida.") or name.startswith("FridaBase."):
