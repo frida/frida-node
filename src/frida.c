@@ -510,6 +510,105 @@ typedef struct {
   GCancellable * cancellable;
 } FdnCompilerWatchOperation;
 
+typedef struct {
+  napi_env env;
+  napi_deferred deferred;
+  FridaService * handle;
+  GError * error;
+  GCancellable * cancellable;
+} FdnServiceActivateOperation;
+
+typedef struct {
+  napi_env env;
+  napi_deferred deferred;
+  FridaService * handle;
+  GError * error;
+  GCancellable * cancellable;
+} FdnServiceCancelOperation;
+
+typedef struct {
+  napi_env env;
+  napi_deferred deferred;
+  FridaService * handle;
+  GError * error;
+  GVariant * parameters;
+  GCancellable * cancellable;
+  GVariant * retval;
+} FdnServiceRequestOperation;
+
+typedef struct {
+  napi_env env;
+  napi_deferred deferred;
+  FridaInjector * handle;
+  GError * error;
+  GCancellable * cancellable;
+} FdnInjectorCloseOperation;
+
+typedef struct {
+  napi_env env;
+  napi_deferred deferred;
+  FridaInjector * handle;
+  GError * error;
+  guint pid;
+  gchar * path;
+  gchar * entrypoint;
+  gchar * data;
+  GCancellable * cancellable;
+  guint retval;
+} FdnInjectorInjectLibraryFileOperation;
+
+typedef struct {
+  napi_env env;
+  napi_deferred deferred;
+  FridaInjector * handle;
+  GError * error;
+  guint pid;
+  GBytes * blob;
+  gchar * entrypoint;
+  gchar * data;
+  GCancellable * cancellable;
+  guint retval;
+} FdnInjectorInjectLibraryBlobOperation;
+
+typedef struct {
+  napi_env env;
+  napi_deferred deferred;
+  FridaInjector * handle;
+  GError * error;
+  guint id;
+  GCancellable * cancellable;
+} FdnInjectorDemonitorOperation;
+
+typedef struct {
+  napi_env env;
+  napi_deferred deferred;
+  FridaInjector * handle;
+  GError * error;
+  guint id;
+  GCancellable * cancellable;
+  guint retval;
+} FdnInjectorDemonitorAndCloneStateOperation;
+
+typedef struct {
+  napi_env env;
+  napi_deferred deferred;
+  FridaInjector * handle;
+  GError * error;
+  guint pid;
+  guint id;
+  GCancellable * cancellable;
+} FdnInjectorRecreateThreadOperation;
+
+typedef struct {
+  napi_env env;
+  napi_deferred deferred;
+  FridaAuthenticationService * handle;
+  GError * error;
+  gchar * token;
+  GCancellable * cancellable;
+  gchar * retval;
+} FdnAuthenticationServiceAuthenticateOperation;
+
 
 static void fdn_device_manager_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_device_manager_from_value (napi_env env, napi_value value, FridaDeviceManager ** handle);
@@ -1265,6 +1364,83 @@ static napi_value fdn_endpoint_parameters_get_asset_root (napi_env env, napi_cal
 
 static napi_value fdn_endpoint_parameters_set_asset_root (napi_env env, napi_callback_info info);
 
+static void fdn_service_register (napi_env env, napi_value exports);
+G_GNUC_UNUSED static gboolean fdn_service_from_value (napi_env env, napi_value value, FridaService ** handle);
+G_GNUC_UNUSED static napi_value fdn_service_to_value (napi_env env, FridaService * handle);
+static napi_value fdn_service_construct (napi_env env, napi_callback_info info);
+
+static napi_value fdn_service_is_closed (napi_env env, napi_callback_info info);
+
+static napi_value fdn_service_activate (napi_env env, napi_callback_info info);
+static gboolean fdn_service_activate_begin (gpointer user_data);
+static void fdn_service_activate_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
+static void fdn_service_activate_deliver (napi_env env, napi_value js_cb, void * context, void * data);
+static void fdn_service_activate_operation_free (FdnServiceActivateOperation * operation);
+
+static napi_value fdn_service_cancel (napi_env env, napi_callback_info info);
+static gboolean fdn_service_cancel_begin (gpointer user_data);
+static void fdn_service_cancel_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
+static void fdn_service_cancel_deliver (napi_env env, napi_value js_cb, void * context, void * data);
+static void fdn_service_cancel_operation_free (FdnServiceCancelOperation * operation);
+
+static napi_value fdn_service_request (napi_env env, napi_callback_info info);
+static gboolean fdn_service_request_begin (gpointer user_data);
+static void fdn_service_request_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
+static void fdn_service_request_deliver (napi_env env, napi_value js_cb, void * context, void * data);
+static void fdn_service_request_operation_free (FdnServiceRequestOperation * operation);
+
+static void fdn_injector_register (napi_env env, napi_value exports);
+G_GNUC_UNUSED static gboolean fdn_injector_from_value (napi_env env, napi_value value, FridaInjector ** handle);
+G_GNUC_UNUSED static napi_value fdn_injector_to_value (napi_env env, FridaInjector * handle);
+static napi_value fdn_injector_construct (napi_env env, napi_callback_info info);
+
+static napi_value fdn_injector_close (napi_env env, napi_callback_info info);
+static gboolean fdn_injector_close_begin (gpointer user_data);
+static void fdn_injector_close_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
+static void fdn_injector_close_deliver (napi_env env, napi_value js_cb, void * context, void * data);
+static void fdn_injector_close_operation_free (FdnInjectorCloseOperation * operation);
+
+static napi_value fdn_injector_inject_library_file (napi_env env, napi_callback_info info);
+static gboolean fdn_injector_inject_library_file_begin (gpointer user_data);
+static void fdn_injector_inject_library_file_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
+static void fdn_injector_inject_library_file_deliver (napi_env env, napi_value js_cb, void * context, void * data);
+static void fdn_injector_inject_library_file_operation_free (FdnInjectorInjectLibraryFileOperation * operation);
+
+static napi_value fdn_injector_inject_library_blob (napi_env env, napi_callback_info info);
+static gboolean fdn_injector_inject_library_blob_begin (gpointer user_data);
+static void fdn_injector_inject_library_blob_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
+static void fdn_injector_inject_library_blob_deliver (napi_env env, napi_value js_cb, void * context, void * data);
+static void fdn_injector_inject_library_blob_operation_free (FdnInjectorInjectLibraryBlobOperation * operation);
+
+static napi_value fdn_injector_demonitor (napi_env env, napi_callback_info info);
+static gboolean fdn_injector_demonitor_begin (gpointer user_data);
+static void fdn_injector_demonitor_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
+static void fdn_injector_demonitor_deliver (napi_env env, napi_value js_cb, void * context, void * data);
+static void fdn_injector_demonitor_operation_free (FdnInjectorDemonitorOperation * operation);
+
+static napi_value fdn_injector_demonitor_and_clone_state (napi_env env, napi_callback_info info);
+static gboolean fdn_injector_demonitor_and_clone_state_begin (gpointer user_data);
+static void fdn_injector_demonitor_and_clone_state_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
+static void fdn_injector_demonitor_and_clone_state_deliver (napi_env env, napi_value js_cb, void * context, void * data);
+static void fdn_injector_demonitor_and_clone_state_operation_free (FdnInjectorDemonitorAndCloneStateOperation * operation);
+
+static napi_value fdn_injector_recreate_thread (napi_env env, napi_callback_info info);
+static gboolean fdn_injector_recreate_thread_begin (gpointer user_data);
+static void fdn_injector_recreate_thread_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
+static void fdn_injector_recreate_thread_deliver (napi_env env, napi_value js_cb, void * context, void * data);
+static void fdn_injector_recreate_thread_operation_free (FdnInjectorRecreateThreadOperation * operation);
+
+static void fdn_authentication_service_register (napi_env env, napi_value exports);
+G_GNUC_UNUSED static gboolean fdn_authentication_service_from_value (napi_env env, napi_value value, FridaAuthenticationService ** handle);
+G_GNUC_UNUSED static napi_value fdn_authentication_service_to_value (napi_env env, FridaAuthenticationService * handle);
+static napi_value fdn_authentication_service_construct (napi_env env, napi_callback_info info);
+
+static napi_value fdn_authentication_service_authenticate (napi_env env, napi_callback_info info);
+static gboolean fdn_authentication_service_authenticate_begin (gpointer user_data);
+static void fdn_authentication_service_authenticate_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
+static void fdn_authentication_service_authenticate_deliver (napi_env env, napi_value js_cb, void * context, void * data);
+static void fdn_authentication_service_authenticate_operation_free (FdnAuthenticationServiceAuthenticateOperation * operation);
+
 static void fdn_cancellable_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_cancellable_from_value (napi_env env, napi_value value, GCancellable ** handle);
 G_GNUC_UNUSED static napi_value fdn_cancellable_to_value (napi_env env, GCancellable * handle);
@@ -1375,45 +1551,46 @@ static napi_value fdn_file_to_value (napi_env env, GFile * file);
 static gboolean fdn_tls_certificate_from_value (napi_env env, napi_value value, GTlsCertificate ** certificate);
 static napi_value fdn_tls_certificate_to_value (napi_env env, GTlsCertificate * certificate);
 static napi_value fdn_io_stream_to_value (napi_env env, GIOStream * stream);
-static napi_value fdn_service_to_value (napi_env env, FridaService * service);
-static napi_value fdn_authentication_service_to_value (napi_env env, FridaAuthenticationService * service);
 
 static void fdn_object_finalize (napi_env env, void * finalize_data, void * finalize_hint);
 
 static napi_type_tag fdn_handle_wrapper_type_tag = { 0xdd596d4f2dad45f9, 0x844585a48e8d05ba };
-static napi_type_tag fdn_device_manager_type_tag = { 0x79ed9a856e16454c, 0xb3767fffe1b4b5c9 };
-static napi_type_tag fdn_device_type_tag = { 0x15f5e2c384aa4a6b, 0x9c4c55bb59b0ac51 };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0xf78a819b762746d4, 0xa86c0617065b65bb };
-static napi_type_tag fdn_application_type_tag = { 0xa40e800faa354633, 0xb37e36704ac04030 };
-static napi_type_tag fdn_process_type_tag = { 0x030adfe98e374a70, 0xb81437a8eb66a474 };
-static napi_type_tag fdn_process_match_options_type_tag = { 0x695e3eae831c4fe8, 0x94a754953b9ddfef };
-static napi_type_tag fdn_spawn_options_type_tag = { 0xbf6ca8462db94b86, 0xa8965c3efd753cec };
-static napi_type_tag fdn_spawn_type_tag = { 0xfe0cd8d2627e4618, 0xafdcf209d0a268cd };
-static napi_type_tag fdn_child_type_tag = { 0x715bd7348ecf47f3, 0x951917c8fc764e50 };
-static napi_type_tag fdn_crash_type_tag = { 0x395e6dbf2d5441ae, 0x846b22eeb01b31df };
-static napi_type_tag fdn_bus_type_tag = { 0x3c6834b566904121, 0x8e6c9e7b927cb027 };
-static napi_type_tag fdn_session_type_tag = { 0x00b5e1981e9248d1, 0x8fd7703582d61a1c };
-static napi_type_tag fdn_script_type_tag = { 0x8f65d1b54bb0497d, 0xbe3e76c651d2d242 };
-static napi_type_tag fdn_portal_membership_type_tag = { 0x2d07144c6923457c, 0x8530c26e086d80f6 };
-static napi_type_tag fdn_control_service_options_type_tag = { 0x26e50bcae8be4c27, 0x9657757137e9af56 };
-static napi_type_tag fdn_portal_service_type_tag = { 0x240da68bc2344379, 0x86969b53f729a52a };
-static napi_type_tag fdn_file_monitor_type_tag = { 0x9213fe2d7ac745ec, 0xbc9df3444fab61c1 };
-static napi_type_tag fdn_compiler_type_tag = { 0xa8093d202c574210, 0xbd882f8f10936a54 };
-static napi_type_tag fdn_compiler_options_type_tag = { 0xd26eac10ae054ec1, 0xba965fe17f561ef9 };
-static napi_type_tag fdn_build_options_type_tag = { 0xf1a0a19d3e454b32, 0xab4ef2d6eaf3a636 };
-static napi_type_tag fdn_watch_options_type_tag = { 0xed349eff7bf047a0, 0x9563446148cadd03 };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0xc30cbb9bc4874a17, 0x97eee890a3c0216b };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x65eb7aae544949bb, 0x9a76bdbd4dbfc137 };
-static napi_type_tag fdn_application_query_options_type_tag = { 0x3e5587c6a3fb4daf, 0xa554de71881d5529 };
-static napi_type_tag fdn_process_query_options_type_tag = { 0x98c6808d9d2743c7, 0x8ffbdc0c3d350b3c };
-static napi_type_tag fdn_session_options_type_tag = { 0x15a4781c9968464f, 0xb990dbd30e94fc3e };
-static napi_type_tag fdn_script_options_type_tag = { 0x017b885d7792488a, 0xb2df7617bc084cca };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0xd831585951a54f70, 0xb99a2e58ed3e0009 };
-static napi_type_tag fdn_portal_options_type_tag = { 0xc01560bb21134057, 0xbf9669ca5fa7ae08 };
-static napi_type_tag fdn_peer_options_type_tag = { 0x2280bb2a3adf4989, 0xb7d3ae827848af83 };
-static napi_type_tag fdn_relay_type_tag = { 0x5b2006f127ec487d, 0xa665fd79b1b17dff };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x6727c17174544562, 0xa3e3d2698d9daa7a };
-static napi_type_tag fdn_cancellable_type_tag = { 0xab7680ffc9554d97, 0xad1cfee16487cf18 };
+static napi_type_tag fdn_device_manager_type_tag = { 0x5e5d8178ea9f431a, 0x848756822e2c53b9 };
+static napi_type_tag fdn_device_type_tag = { 0x8fbf87a2363b40bd, 0x8cd37415777caae3 };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0xe53f80e130c64456, 0x93677efcc5dfdc92 };
+static napi_type_tag fdn_application_type_tag = { 0x93a6ca39fba84fda, 0xa57d93c9f1cfbd42 };
+static napi_type_tag fdn_process_type_tag = { 0x5e1cab28c0804605, 0xa3144b08bfea0e1c };
+static napi_type_tag fdn_process_match_options_type_tag = { 0xd36cccb2c0184182, 0x9930f3c63ba4bf67 };
+static napi_type_tag fdn_spawn_options_type_tag = { 0xc514f6fcb8dc48bd, 0x8a6aac5c4416376e };
+static napi_type_tag fdn_spawn_type_tag = { 0x1fa985f5e3ad4b78, 0x8305745fe2ef9d67 };
+static napi_type_tag fdn_child_type_tag = { 0x6c8f772c5b9d4a4b, 0xbea75d4b4418f03d };
+static napi_type_tag fdn_crash_type_tag = { 0x60209362cac64882, 0x80038950211d172b };
+static napi_type_tag fdn_bus_type_tag = { 0x149477188e124470, 0x913ad72a66c9f3f3 };
+static napi_type_tag fdn_session_type_tag = { 0xb1722842f67b465e, 0x847bfdbe4d1c46f7 };
+static napi_type_tag fdn_script_type_tag = { 0x5a44aeb226684ced, 0x94f7b48d9bf800be };
+static napi_type_tag fdn_portal_membership_type_tag = { 0x13b36227b93b44ff, 0xa893ab195ec4c0ac };
+static napi_type_tag fdn_control_service_options_type_tag = { 0xf01c14d881ac4e6a, 0x8d69f5c8c796c7e4 };
+static napi_type_tag fdn_portal_service_type_tag = { 0x1ad95ce03182438e, 0xa8332f0b6f4255a9 };
+static napi_type_tag fdn_file_monitor_type_tag = { 0x1c8d618388834924, 0x8c27a01d47e8e2c7 };
+static napi_type_tag fdn_compiler_type_tag = { 0x6a9c6e33c3504d66, 0xba485f7ab12331ce };
+static napi_type_tag fdn_compiler_options_type_tag = { 0x3f8735618108420d, 0x8fa9f4875805cfba };
+static napi_type_tag fdn_build_options_type_tag = { 0x92ff65fe45ea4d3e, 0xacd84c4b023aec22 };
+static napi_type_tag fdn_watch_options_type_tag = { 0x2055605350a84212, 0x82912a48bbd54dbf };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0xa4c9145c60ce4c79, 0x8edab933b6706abd };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x16ed4e3b8248422b, 0xbf43fd34f92e5f9c };
+static napi_type_tag fdn_application_query_options_type_tag = { 0xea99b709685a4b8e, 0x909c6a12d25bd644 };
+static napi_type_tag fdn_process_query_options_type_tag = { 0x42ea4b8367d34aea, 0xa160f255e9e50e82 };
+static napi_type_tag fdn_session_options_type_tag = { 0xa3e62f3d7dc94a78, 0x8ee752ccd5a8073d };
+static napi_type_tag fdn_script_options_type_tag = { 0x0c6e8c1082f249c6, 0xaac15c7b7fd937b4 };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0xad8dba6218e74378, 0xbfe02af6e38a337d };
+static napi_type_tag fdn_portal_options_type_tag = { 0x19731fc651a14ca5, 0x97b6ee0546c59d54 };
+static napi_type_tag fdn_peer_options_type_tag = { 0x11110c66b4b74d12, 0x95096cba7b347213 };
+static napi_type_tag fdn_relay_type_tag = { 0x75bd16241f1d40de, 0xbc10ea351f7231e2 };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x4ac0be6d766b434f, 0x97d49fb644bd4de3 };
+static napi_type_tag fdn_service_type_tag = { 0x6ab3014c1b164575, 0xb06ed34e21cdb909 };
+static napi_type_tag fdn_injector_type_tag = { 0xda3e4e493e4c4985, 0x99f3268df9e83940 };
+static napi_type_tag fdn_authentication_service_type_tag = { 0xad93bfec064e49f4, 0xa70559c6c4e0d61b };
+static napi_type_tag fdn_cancellable_type_tag = { 0xebaebe02bcaa48a7, 0xba963cff7c729cdd };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_constructor;
@@ -1447,6 +1624,9 @@ static napi_ref fdn_portal_options_constructor;
 static napi_ref fdn_peer_options_constructor;
 static napi_ref fdn_relay_constructor;
 static napi_ref fdn_endpoint_parameters_constructor;
+static napi_ref fdn_service_constructor;
+static napi_ref fdn_injector_constructor;
+static napi_ref fdn_authentication_service_constructor;
 static napi_ref fdn_cancellable_constructor;
 
 static napi_threadsafe_function fdn_device_manager_close_tsfn;
@@ -1511,6 +1691,19 @@ static napi_threadsafe_function fdn_file_monitor_disable_tsfn;
 static napi_threadsafe_function fdn_compiler_build_tsfn;
 static napi_threadsafe_function fdn_compiler_watch_tsfn;
 
+static napi_threadsafe_function fdn_service_activate_tsfn;
+static napi_threadsafe_function fdn_service_cancel_tsfn;
+static napi_threadsafe_function fdn_service_request_tsfn;
+
+static napi_threadsafe_function fdn_injector_close_tsfn;
+static napi_threadsafe_function fdn_injector_inject_library_file_tsfn;
+static napi_threadsafe_function fdn_injector_inject_library_blob_tsfn;
+static napi_threadsafe_function fdn_injector_demonitor_tsfn;
+static napi_threadsafe_function fdn_injector_demonitor_and_clone_state_tsfn;
+static napi_threadsafe_function fdn_injector_recreate_thread_tsfn;
+
+static napi_threadsafe_function fdn_authentication_service_authenticate_tsfn;
+
 static napi_value
 fdn_init (napi_env env,
           napi_value exports)
@@ -1549,6 +1742,9 @@ fdn_init (napi_env env,
   fdn_peer_options_register (env, exports);
   fdn_relay_register (env, exports);
   fdn_endpoint_parameters_register (env, exports);
+  fdn_service_register (env, exports);
+  fdn_injector_register (env, exports);
+  fdn_authentication_service_register (env, exports);
   fdn_cancellable_register (env, exports);
 
   return exports;
@@ -3040,7 +3236,7 @@ fdn_device_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -6806,7 +7002,7 @@ fdn_application_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -7052,7 +7248,7 @@ fdn_process_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -8082,7 +8278,7 @@ fdn_spawn_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -8279,7 +8475,7 @@ fdn_child_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -8605,7 +8801,7 @@ fdn_crash_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -8866,7 +9062,7 @@ fdn_bus_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -9261,7 +9457,7 @@ fdn_session_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -10846,7 +11042,7 @@ fdn_script_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -11664,7 +11860,7 @@ fdn_portal_membership_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -12236,7 +12432,7 @@ fdn_portal_service_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -13052,7 +13248,7 @@ fdn_file_monitor_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -13448,7 +13644,7 @@ fdn_compiler_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -14420,7 +14616,7 @@ fdn_static_authentication_service_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -16775,7 +16971,7 @@ fdn_relay_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -17004,7 +17200,7 @@ fdn_endpoint_parameters_construct (napi_env env,
 
   if (argc == 0)
   {
-    napi_throw_error (env, NULL, "class {klass.name} cannot be constructed because it lacks a default constructor");
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
   return NULL;
   }
   else
@@ -17266,6 +17462,1818 @@ fdn_endpoint_parameters_set_asset_root (napi_env env,
 beach:
   g_clear_pointer (&value, g_object_unref);
   return js_retval;
+}
+
+static void
+fdn_service_register (napi_env env,
+                      napi_value exports)
+{
+  napi_property_descriptor properties[] =
+  {
+    { "isClosed", NULL, fdn_service_is_closed, NULL, NULL, NULL, napi_default, NULL },
+    { "activate", NULL, fdn_service_activate, NULL, NULL, NULL, napi_default, NULL },
+    { "cancel", NULL, fdn_service_cancel, NULL, NULL, NULL, napi_default, NULL },
+    { "request", NULL, fdn_service_request, NULL, NULL, NULL, napi_default, NULL },
+  };
+
+  napi_value constructor;
+  napi_define_class (env, "Service", NAPI_AUTO_LENGTH, fdn_service_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_create_reference (env, constructor, 1, &fdn_service_constructor);
+
+  napi_set_named_property (env, exports, "Service", constructor);
+
+  napi_value resource_name;
+
+  napi_create_string_utf8 (env, "activate", NAPI_AUTO_LENGTH, &resource_name);
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_service_activate_deliver, &fdn_service_activate_tsfn);
+  napi_unref_threadsafe_function (env, fdn_service_activate_tsfn);
+
+  napi_create_string_utf8 (env, "cancel", NAPI_AUTO_LENGTH, &resource_name);
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_service_cancel_deliver, &fdn_service_cancel_tsfn);
+  napi_unref_threadsafe_function (env, fdn_service_cancel_tsfn);
+
+  napi_create_string_utf8 (env, "request", NAPI_AUTO_LENGTH, &resource_name);
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_service_request_deliver, &fdn_service_request_tsfn);
+  napi_unref_threadsafe_function (env, fdn_service_request_tsfn);
+}
+
+static gboolean
+fdn_service_from_value (napi_env env,
+                        napi_value value,
+                        FridaService ** handle)
+{
+  napi_status status;
+  bool is_instance;
+
+  status = napi_check_object_type_tag (env, value, &fdn_service_type_tag, &is_instance);
+  if (status != napi_ok || !is_instance)
+  {
+    napi_throw_type_error (env, NULL, "expected an instance of Service");
+    return FALSE;
+  }
+
+  napi_unwrap (env, value, (void **) handle);
+
+  g_object_ref (*handle);
+
+  return TRUE;
+}
+
+static napi_value
+fdn_service_to_value (napi_env env,
+                      FridaService * handle)
+{
+  napi_value result, constructor, handle_wrapper;
+
+  napi_get_reference_value (env, fdn_service_constructor, &constructor);
+
+  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
+
+  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+
+  return result;
+}
+
+static napi_value
+fdn_service_construct (napi_env env,
+                       napi_callback_info info)
+{
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaService * handle = NULL;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
+  return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+      goto invalid_handle;
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+      goto propagate_error;
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_service_type_tag);
+  if (status != napi_ok)
+    goto propagate_error;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
+
+  return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a Service handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
+}
+
+static napi_value
+fdn_service_is_closed (napi_env env,
+                       napi_callback_info info)
+{
+  napi_value js_retval = NULL;
+  size_t argc = 0;
+  napi_value args[0];
+  napi_status status;
+  napi_value jsthis;
+  FridaService * handle;
+  gboolean retval;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    goto beach;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    goto beach;
+
+  retval = frida_service_is_closed (handle);
+
+  js_retval = fdn_boolean_to_value (env, retval);
+
+beach:
+  return js_retval;
+}
+
+static napi_value
+fdn_service_activate (napi_env env,
+                      napi_callback_info info)
+{
+  size_t argc = 1;
+  napi_value args[1];
+  napi_status status;
+  napi_value jsthis;
+  FridaService * handle;
+  napi_deferred deferred;
+  napi_value promise;
+  FdnServiceActivateOperation * operation;
+  GSource * source;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_create_promise (env, &deferred, &promise);
+  if (status != napi_ok)
+    return NULL;
+
+  operation = g_slice_new0 (FdnServiceActivateOperation);
+  operation->env = env;
+  operation->deferred = deferred;
+  operation->handle = handle;
+  operation->error = NULL;
+
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
+  {
+    if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
+      goto invalid_argument;
+  }
+  else
+  {
+    operation->cancellable = NULL;
+  }
+
+  source = g_idle_source_new ();
+  g_source_set_callback (source, fdn_service_activate_begin,
+      operation, NULL);
+  g_source_attach (source, frida_get_main_context ());
+  g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, fdn_service_activate_tsfn);
+
+  return promise;
+
+invalid_argument:
+  {
+    napi_reject_deferred (env, deferred, NULL);
+    fdn_service_activate_operation_free (operation);
+    return NULL;
+  }
+}
+
+static gboolean
+fdn_service_activate_begin (gpointer user_data)
+{
+  FdnServiceActivateOperation * operation = user_data;
+
+  frida_service_activate (operation->handle,
+      operation->cancellable,
+      fdn_service_activate_end, operation);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+fdn_service_activate_end (GObject * source_object,
+                          GAsyncResult * res,
+                          gpointer user_data)
+{
+  FdnServiceActivateOperation * operation = user_data;
+
+  frida_service_activate_finish (operation->handle, res,
+      &operation->error);
+
+  napi_call_threadsafe_function (fdn_service_activate_tsfn, operation, napi_tsfn_blocking);
+}
+
+static void
+fdn_service_activate_deliver (napi_env env,
+                              napi_value js_cb,
+                              void * context,
+                              void * data)
+{
+  FdnServiceActivateOperation * operation = data;
+
+  if (operation->error != NULL)
+  {
+    napi_value message;
+    napi_create_string_utf8 (env, operation->error->message, NAPI_AUTO_LENGTH,
+        &message);
+    napi_value error_obj;
+    napi_create_error (env, NULL, message, &error_obj);
+    napi_reject_deferred (env, operation->deferred, error_obj);
+    g_error_free (operation->error);
+  }
+  else
+  {
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
+  }
+
+  fdn_service_activate_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, fdn_service_activate_tsfn);
+}
+
+static void
+fdn_service_activate_operation_free (FdnServiceActivateOperation * operation)
+{
+  g_clear_pointer (&operation->cancellable, g_object_unref);
+  g_slice_free (FdnServiceActivateOperation, operation);
+}
+
+static napi_value
+fdn_service_cancel (napi_env env,
+                    napi_callback_info info)
+{
+  size_t argc = 1;
+  napi_value args[1];
+  napi_status status;
+  napi_value jsthis;
+  FridaService * handle;
+  napi_deferred deferred;
+  napi_value promise;
+  FdnServiceCancelOperation * operation;
+  GSource * source;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_create_promise (env, &deferred, &promise);
+  if (status != napi_ok)
+    return NULL;
+
+  operation = g_slice_new0 (FdnServiceCancelOperation);
+  operation->env = env;
+  operation->deferred = deferred;
+  operation->handle = handle;
+  operation->error = NULL;
+
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
+  {
+    if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
+      goto invalid_argument;
+  }
+  else
+  {
+    operation->cancellable = NULL;
+  }
+
+  source = g_idle_source_new ();
+  g_source_set_callback (source, fdn_service_cancel_begin,
+      operation, NULL);
+  g_source_attach (source, frida_get_main_context ());
+  g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, fdn_service_cancel_tsfn);
+
+  return promise;
+
+invalid_argument:
+  {
+    napi_reject_deferred (env, deferred, NULL);
+    fdn_service_cancel_operation_free (operation);
+    return NULL;
+  }
+}
+
+static gboolean
+fdn_service_cancel_begin (gpointer user_data)
+{
+  FdnServiceCancelOperation * operation = user_data;
+
+  frida_service_cancel (operation->handle,
+      operation->cancellable,
+      fdn_service_cancel_end, operation);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+fdn_service_cancel_end (GObject * source_object,
+                        GAsyncResult * res,
+                        gpointer user_data)
+{
+  FdnServiceCancelOperation * operation = user_data;
+
+  frida_service_cancel_finish (operation->handle, res,
+      &operation->error);
+
+  napi_call_threadsafe_function (fdn_service_cancel_tsfn, operation, napi_tsfn_blocking);
+}
+
+static void
+fdn_service_cancel_deliver (napi_env env,
+                            napi_value js_cb,
+                            void * context,
+                            void * data)
+{
+  FdnServiceCancelOperation * operation = data;
+
+  if (operation->error != NULL)
+  {
+    napi_value message;
+    napi_create_string_utf8 (env, operation->error->message, NAPI_AUTO_LENGTH,
+        &message);
+    napi_value error_obj;
+    napi_create_error (env, NULL, message, &error_obj);
+    napi_reject_deferred (env, operation->deferred, error_obj);
+    g_error_free (operation->error);
+  }
+  else
+  {
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
+  }
+
+  fdn_service_cancel_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, fdn_service_cancel_tsfn);
+}
+
+static void
+fdn_service_cancel_operation_free (FdnServiceCancelOperation * operation)
+{
+  g_clear_pointer (&operation->cancellable, g_object_unref);
+  g_slice_free (FdnServiceCancelOperation, operation);
+}
+
+static napi_value
+fdn_service_request (napi_env env,
+                     napi_callback_info info)
+{
+  size_t argc = 2;
+  napi_value args[2];
+  napi_status status;
+  napi_value jsthis;
+  FridaService * handle;
+  napi_deferred deferred;
+  napi_value promise;
+  FdnServiceRequestOperation * operation;
+  GSource * source;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_create_promise (env, &deferred, &promise);
+  if (status != napi_ok)
+    return NULL;
+
+  operation = g_slice_new0 (FdnServiceRequestOperation);
+  operation->env = env;
+  operation->deferred = deferred;
+  operation->handle = handle;
+  operation->error = NULL;
+
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
+  {
+    if (!fdn_variant_from_value (env, args[0], &operation->parameters))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: parameters");
+    goto invalid_argument;
+  }
+
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
+  {
+    if (!fdn_cancellable_from_value (env, args[1], &operation->cancellable))
+      goto invalid_argument;
+  }
+  else
+  {
+    operation->cancellable = NULL;
+  }
+
+  source = g_idle_source_new ();
+  g_source_set_callback (source, fdn_service_request_begin,
+      operation, NULL);
+  g_source_attach (source, frida_get_main_context ());
+  g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, fdn_service_request_tsfn);
+
+  return promise;
+
+invalid_argument:
+  {
+    napi_reject_deferred (env, deferred, NULL);
+    fdn_service_request_operation_free (operation);
+    return NULL;
+  }
+}
+
+static gboolean
+fdn_service_request_begin (gpointer user_data)
+{
+  FdnServiceRequestOperation * operation = user_data;
+
+  frida_service_request (operation->handle,
+      operation->parameters, operation->cancellable,
+      fdn_service_request_end, operation);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+fdn_service_request_end (GObject * source_object,
+                         GAsyncResult * res,
+                         gpointer user_data)
+{
+  FdnServiceRequestOperation * operation = user_data;
+
+  
+
+  operation->retval = frida_service_request_finish (operation->handle, res,
+      &operation->error);
+
+  napi_call_threadsafe_function (fdn_service_request_tsfn, operation, napi_tsfn_blocking);
+}
+
+static void
+fdn_service_request_deliver (napi_env env,
+                             napi_value js_cb,
+                             void * context,
+                             void * data)
+{
+  FdnServiceRequestOperation * operation = data;
+
+  if (operation->error != NULL)
+  {
+    napi_value message;
+    napi_create_string_utf8 (env, operation->error->message, NAPI_AUTO_LENGTH,
+        &message);
+    napi_value error_obj;
+    napi_create_error (env, NULL, message, &error_obj);
+    napi_reject_deferred (env, operation->deferred, error_obj);
+    g_error_free (operation->error);
+  }
+  else
+  {
+    napi_value js_retval;
+    js_retval = fdn_variant_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
+  }
+
+  fdn_service_request_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, fdn_service_request_tsfn);
+}
+
+static void
+fdn_service_request_operation_free (FdnServiceRequestOperation * operation)
+{
+  g_clear_pointer (&operation->parameters, g_variant_unref);
+  g_clear_pointer (&operation->cancellable, g_object_unref);
+  g_clear_pointer (&operation->retval, g_variant_unref);
+  g_slice_free (FdnServiceRequestOperation, operation);
+}
+
+static void
+fdn_injector_register (napi_env env,
+                       napi_value exports)
+{
+  napi_property_descriptor properties[] =
+  {
+    { "close", NULL, fdn_injector_close, NULL, NULL, NULL, napi_default, NULL },
+    { "injectLibraryFile", NULL, fdn_injector_inject_library_file, NULL, NULL, NULL, napi_default, NULL },
+    { "injectLibraryBlob", NULL, fdn_injector_inject_library_blob, NULL, NULL, NULL, napi_default, NULL },
+    { "demonitor", NULL, fdn_injector_demonitor, NULL, NULL, NULL, napi_default, NULL },
+    { "demonitorAndCloneState", NULL, fdn_injector_demonitor_and_clone_state, NULL, NULL, NULL, napi_default, NULL },
+    { "recreateThread", NULL, fdn_injector_recreate_thread, NULL, NULL, NULL, napi_default, NULL },
+  };
+
+  napi_value constructor;
+  napi_define_class (env, "Injector", NAPI_AUTO_LENGTH, fdn_injector_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_create_reference (env, constructor, 1, &fdn_injector_constructor);
+
+  napi_set_named_property (env, exports, "Injector", constructor);
+
+  napi_value resource_name;
+
+  napi_create_string_utf8 (env, "close", NAPI_AUTO_LENGTH, &resource_name);
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_injector_close_deliver, &fdn_injector_close_tsfn);
+  napi_unref_threadsafe_function (env, fdn_injector_close_tsfn);
+
+  napi_create_string_utf8 (env, "injectLibraryFile", NAPI_AUTO_LENGTH, &resource_name);
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_injector_inject_library_file_deliver, &fdn_injector_inject_library_file_tsfn);
+  napi_unref_threadsafe_function (env, fdn_injector_inject_library_file_tsfn);
+
+  napi_create_string_utf8 (env, "injectLibraryBlob", NAPI_AUTO_LENGTH, &resource_name);
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_injector_inject_library_blob_deliver, &fdn_injector_inject_library_blob_tsfn);
+  napi_unref_threadsafe_function (env, fdn_injector_inject_library_blob_tsfn);
+
+  napi_create_string_utf8 (env, "demonitor", NAPI_AUTO_LENGTH, &resource_name);
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_injector_demonitor_deliver, &fdn_injector_demonitor_tsfn);
+  napi_unref_threadsafe_function (env, fdn_injector_demonitor_tsfn);
+
+  napi_create_string_utf8 (env, "demonitorAndCloneState", NAPI_AUTO_LENGTH, &resource_name);
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_injector_demonitor_and_clone_state_deliver, &fdn_injector_demonitor_and_clone_state_tsfn);
+  napi_unref_threadsafe_function (env, fdn_injector_demonitor_and_clone_state_tsfn);
+
+  napi_create_string_utf8 (env, "recreateThread", NAPI_AUTO_LENGTH, &resource_name);
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_injector_recreate_thread_deliver, &fdn_injector_recreate_thread_tsfn);
+  napi_unref_threadsafe_function (env, fdn_injector_recreate_thread_tsfn);
+}
+
+static gboolean
+fdn_injector_from_value (napi_env env,
+                         napi_value value,
+                         FridaInjector ** handle)
+{
+  napi_status status;
+  bool is_instance;
+
+  status = napi_check_object_type_tag (env, value, &fdn_injector_type_tag, &is_instance);
+  if (status != napi_ok || !is_instance)
+  {
+    napi_throw_type_error (env, NULL, "expected an instance of Injector");
+    return FALSE;
+  }
+
+  napi_unwrap (env, value, (void **) handle);
+
+  g_object_ref (*handle);
+
+  return TRUE;
+}
+
+static napi_value
+fdn_injector_to_value (napi_env env,
+                       FridaInjector * handle)
+{
+  napi_value result, constructor, handle_wrapper;
+
+  napi_get_reference_value (env, fdn_injector_constructor, &constructor);
+
+  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
+
+  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+
+  return result;
+}
+
+static napi_value
+fdn_injector_construct (napi_env env,
+                        napi_callback_info info)
+{
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaInjector * handle = NULL;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
+  return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+      goto invalid_handle;
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+      goto propagate_error;
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_injector_type_tag);
+  if (status != napi_ok)
+    goto propagate_error;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
+
+  return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a Injector handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
+}
+
+static napi_value
+fdn_injector_close (napi_env env,
+                    napi_callback_info info)
+{
+  size_t argc = 1;
+  napi_value args[1];
+  napi_status status;
+  napi_value jsthis;
+  FridaInjector * handle;
+  napi_deferred deferred;
+  napi_value promise;
+  FdnInjectorCloseOperation * operation;
+  GSource * source;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_create_promise (env, &deferred, &promise);
+  if (status != napi_ok)
+    return NULL;
+
+  operation = g_slice_new0 (FdnInjectorCloseOperation);
+  operation->env = env;
+  operation->deferred = deferred;
+  operation->handle = handle;
+  operation->error = NULL;
+
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
+  {
+    if (!fdn_cancellable_from_value (env, args[0], &operation->cancellable))
+      goto invalid_argument;
+  }
+  else
+  {
+    operation->cancellable = NULL;
+  }
+
+  source = g_idle_source_new ();
+  g_source_set_callback (source, fdn_injector_close_begin,
+      operation, NULL);
+  g_source_attach (source, frida_get_main_context ());
+  g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, fdn_injector_close_tsfn);
+
+  return promise;
+
+invalid_argument:
+  {
+    napi_reject_deferred (env, deferred, NULL);
+    fdn_injector_close_operation_free (operation);
+    return NULL;
+  }
+}
+
+static gboolean
+fdn_injector_close_begin (gpointer user_data)
+{
+  FdnInjectorCloseOperation * operation = user_data;
+
+  frida_injector_close (operation->handle,
+      operation->cancellable,
+      fdn_injector_close_end, operation);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+fdn_injector_close_end (GObject * source_object,
+                        GAsyncResult * res,
+                        gpointer user_data)
+{
+  FdnInjectorCloseOperation * operation = user_data;
+
+  frida_injector_close_finish (operation->handle, res,
+      &operation->error);
+
+  napi_call_threadsafe_function (fdn_injector_close_tsfn, operation, napi_tsfn_blocking);
+}
+
+static void
+fdn_injector_close_deliver (napi_env env,
+                            napi_value js_cb,
+                            void * context,
+                            void * data)
+{
+  FdnInjectorCloseOperation * operation = data;
+
+  if (operation->error != NULL)
+  {
+    napi_value message;
+    napi_create_string_utf8 (env, operation->error->message, NAPI_AUTO_LENGTH,
+        &message);
+    napi_value error_obj;
+    napi_create_error (env, NULL, message, &error_obj);
+    napi_reject_deferred (env, operation->deferred, error_obj);
+    g_error_free (operation->error);
+  }
+  else
+  {
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
+  }
+
+  fdn_injector_close_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, fdn_injector_close_tsfn);
+}
+
+static void
+fdn_injector_close_operation_free (FdnInjectorCloseOperation * operation)
+{
+  g_clear_pointer (&operation->cancellable, g_object_unref);
+  g_slice_free (FdnInjectorCloseOperation, operation);
+}
+
+static napi_value
+fdn_injector_inject_library_file (napi_env env,
+                                  napi_callback_info info)
+{
+  size_t argc = 5;
+  napi_value args[5];
+  napi_status status;
+  napi_value jsthis;
+  FridaInjector * handle;
+  napi_deferred deferred;
+  napi_value promise;
+  FdnInjectorInjectLibraryFileOperation * operation;
+  GSource * source;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_create_promise (env, &deferred, &promise);
+  if (status != napi_ok)
+    return NULL;
+
+  operation = g_slice_new0 (FdnInjectorInjectLibraryFileOperation);
+  operation->env = env;
+  operation->deferred = deferred;
+  operation->handle = handle;
+  operation->error = NULL;
+
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
+  {
+    if (!fdn_uint_from_value (env, args[0], &operation->pid))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: pid");
+    goto invalid_argument;
+  }
+
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
+  {
+    if (!fdn_utf8_from_value (env, args[1], &operation->path))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: path");
+    goto invalid_argument;
+  }
+
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
+  {
+    if (!fdn_utf8_from_value (env, args[2], &operation->entrypoint))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: entrypoint");
+    goto invalid_argument;
+  }
+
+  if (argc > 3 && !fdn_is_undefined_or_null (env, args[3]))
+  {
+    if (!fdn_utf8_from_value (env, args[3], &operation->data))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: data");
+    goto invalid_argument;
+  }
+
+  if (argc > 4 && !fdn_is_undefined_or_null (env, args[4]))
+  {
+    if (!fdn_cancellable_from_value (env, args[4], &operation->cancellable))
+      goto invalid_argument;
+  }
+  else
+  {
+    operation->cancellable = NULL;
+  }
+
+  source = g_idle_source_new ();
+  g_source_set_callback (source, fdn_injector_inject_library_file_begin,
+      operation, NULL);
+  g_source_attach (source, frida_get_main_context ());
+  g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, fdn_injector_inject_library_file_tsfn);
+
+  return promise;
+
+invalid_argument:
+  {
+    napi_reject_deferred (env, deferred, NULL);
+    fdn_injector_inject_library_file_operation_free (operation);
+    return NULL;
+  }
+}
+
+static gboolean
+fdn_injector_inject_library_file_begin (gpointer user_data)
+{
+  FdnInjectorInjectLibraryFileOperation * operation = user_data;
+
+  frida_injector_inject_library_file (operation->handle,
+      operation->pid, operation->path, operation->entrypoint, operation->data, operation->cancellable,
+      fdn_injector_inject_library_file_end, operation);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+fdn_injector_inject_library_file_end (GObject * source_object,
+                                      GAsyncResult * res,
+                                      gpointer user_data)
+{
+  FdnInjectorInjectLibraryFileOperation * operation = user_data;
+
+  
+
+  operation->retval = frida_injector_inject_library_file_finish (operation->handle, res,
+      &operation->error);
+
+  napi_call_threadsafe_function (fdn_injector_inject_library_file_tsfn, operation, napi_tsfn_blocking);
+}
+
+static void
+fdn_injector_inject_library_file_deliver (napi_env env,
+                                          napi_value js_cb,
+                                          void * context,
+                                          void * data)
+{
+  FdnInjectorInjectLibraryFileOperation * operation = data;
+
+  if (operation->error != NULL)
+  {
+    napi_value message;
+    napi_create_string_utf8 (env, operation->error->message, NAPI_AUTO_LENGTH,
+        &message);
+    napi_value error_obj;
+    napi_create_error (env, NULL, message, &error_obj);
+    napi_reject_deferred (env, operation->deferred, error_obj);
+    g_error_free (operation->error);
+  }
+  else
+  {
+    napi_value js_retval;
+    js_retval = fdn_uint_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
+  }
+
+  fdn_injector_inject_library_file_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, fdn_injector_inject_library_file_tsfn);
+}
+
+static void
+fdn_injector_inject_library_file_operation_free (FdnInjectorInjectLibraryFileOperation * operation)
+{
+  g_clear_pointer (&operation->path, g_free);
+  g_clear_pointer (&operation->entrypoint, g_free);
+  g_clear_pointer (&operation->data, g_free);
+  g_clear_pointer (&operation->cancellable, g_object_unref);
+  g_slice_free (FdnInjectorInjectLibraryFileOperation, operation);
+}
+
+static napi_value
+fdn_injector_inject_library_blob (napi_env env,
+                                  napi_callback_info info)
+{
+  size_t argc = 5;
+  napi_value args[5];
+  napi_status status;
+  napi_value jsthis;
+  FridaInjector * handle;
+  napi_deferred deferred;
+  napi_value promise;
+  FdnInjectorInjectLibraryBlobOperation * operation;
+  GSource * source;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_create_promise (env, &deferred, &promise);
+  if (status != napi_ok)
+    return NULL;
+
+  operation = g_slice_new0 (FdnInjectorInjectLibraryBlobOperation);
+  operation->env = env;
+  operation->deferred = deferred;
+  operation->handle = handle;
+  operation->error = NULL;
+
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
+  {
+    if (!fdn_uint_from_value (env, args[0], &operation->pid))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: pid");
+    goto invalid_argument;
+  }
+
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
+  {
+    if (!fdn_bytes_from_value (env, args[1], &operation->blob))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: blob");
+    goto invalid_argument;
+  }
+
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
+  {
+    if (!fdn_utf8_from_value (env, args[2], &operation->entrypoint))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: entrypoint");
+    goto invalid_argument;
+  }
+
+  if (argc > 3 && !fdn_is_undefined_or_null (env, args[3]))
+  {
+    if (!fdn_utf8_from_value (env, args[3], &operation->data))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: data");
+    goto invalid_argument;
+  }
+
+  if (argc > 4 && !fdn_is_undefined_or_null (env, args[4]))
+  {
+    if (!fdn_cancellable_from_value (env, args[4], &operation->cancellable))
+      goto invalid_argument;
+  }
+  else
+  {
+    operation->cancellable = NULL;
+  }
+
+  source = g_idle_source_new ();
+  g_source_set_callback (source, fdn_injector_inject_library_blob_begin,
+      operation, NULL);
+  g_source_attach (source, frida_get_main_context ());
+  g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, fdn_injector_inject_library_blob_tsfn);
+
+  return promise;
+
+invalid_argument:
+  {
+    napi_reject_deferred (env, deferred, NULL);
+    fdn_injector_inject_library_blob_operation_free (operation);
+    return NULL;
+  }
+}
+
+static gboolean
+fdn_injector_inject_library_blob_begin (gpointer user_data)
+{
+  FdnInjectorInjectLibraryBlobOperation * operation = user_data;
+
+  frida_injector_inject_library_blob (operation->handle,
+      operation->pid, operation->blob, operation->entrypoint, operation->data, operation->cancellable,
+      fdn_injector_inject_library_blob_end, operation);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+fdn_injector_inject_library_blob_end (GObject * source_object,
+                                      GAsyncResult * res,
+                                      gpointer user_data)
+{
+  FdnInjectorInjectLibraryBlobOperation * operation = user_data;
+
+  
+
+  operation->retval = frida_injector_inject_library_blob_finish (operation->handle, res,
+      &operation->error);
+
+  napi_call_threadsafe_function (fdn_injector_inject_library_blob_tsfn, operation, napi_tsfn_blocking);
+}
+
+static void
+fdn_injector_inject_library_blob_deliver (napi_env env,
+                                          napi_value js_cb,
+                                          void * context,
+                                          void * data)
+{
+  FdnInjectorInjectLibraryBlobOperation * operation = data;
+
+  if (operation->error != NULL)
+  {
+    napi_value message;
+    napi_create_string_utf8 (env, operation->error->message, NAPI_AUTO_LENGTH,
+        &message);
+    napi_value error_obj;
+    napi_create_error (env, NULL, message, &error_obj);
+    napi_reject_deferred (env, operation->deferred, error_obj);
+    g_error_free (operation->error);
+  }
+  else
+  {
+    napi_value js_retval;
+    js_retval = fdn_uint_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
+  }
+
+  fdn_injector_inject_library_blob_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, fdn_injector_inject_library_blob_tsfn);
+}
+
+static void
+fdn_injector_inject_library_blob_operation_free (FdnInjectorInjectLibraryBlobOperation * operation)
+{
+  g_clear_pointer (&operation->blob, g_bytes_unref);
+  g_clear_pointer (&operation->entrypoint, g_free);
+  g_clear_pointer (&operation->data, g_free);
+  g_clear_pointer (&operation->cancellable, g_object_unref);
+  g_slice_free (FdnInjectorInjectLibraryBlobOperation, operation);
+}
+
+static napi_value
+fdn_injector_demonitor (napi_env env,
+                        napi_callback_info info)
+{
+  size_t argc = 2;
+  napi_value args[2];
+  napi_status status;
+  napi_value jsthis;
+  FridaInjector * handle;
+  napi_deferred deferred;
+  napi_value promise;
+  FdnInjectorDemonitorOperation * operation;
+  GSource * source;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_create_promise (env, &deferred, &promise);
+  if (status != napi_ok)
+    return NULL;
+
+  operation = g_slice_new0 (FdnInjectorDemonitorOperation);
+  operation->env = env;
+  operation->deferred = deferred;
+  operation->handle = handle;
+  operation->error = NULL;
+
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
+  {
+    if (!fdn_uint_from_value (env, args[0], &operation->id))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: id");
+    goto invalid_argument;
+  }
+
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
+  {
+    if (!fdn_cancellable_from_value (env, args[1], &operation->cancellable))
+      goto invalid_argument;
+  }
+  else
+  {
+    operation->cancellable = NULL;
+  }
+
+  source = g_idle_source_new ();
+  g_source_set_callback (source, fdn_injector_demonitor_begin,
+      operation, NULL);
+  g_source_attach (source, frida_get_main_context ());
+  g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, fdn_injector_demonitor_tsfn);
+
+  return promise;
+
+invalid_argument:
+  {
+    napi_reject_deferred (env, deferred, NULL);
+    fdn_injector_demonitor_operation_free (operation);
+    return NULL;
+  }
+}
+
+static gboolean
+fdn_injector_demonitor_begin (gpointer user_data)
+{
+  FdnInjectorDemonitorOperation * operation = user_data;
+
+  frida_injector_demonitor (operation->handle,
+      operation->id, operation->cancellable,
+      fdn_injector_demonitor_end, operation);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+fdn_injector_demonitor_end (GObject * source_object,
+                            GAsyncResult * res,
+                            gpointer user_data)
+{
+  FdnInjectorDemonitorOperation * operation = user_data;
+
+  frida_injector_demonitor_finish (operation->handle, res,
+      &operation->error);
+
+  napi_call_threadsafe_function (fdn_injector_demonitor_tsfn, operation, napi_tsfn_blocking);
+}
+
+static void
+fdn_injector_demonitor_deliver (napi_env env,
+                                napi_value js_cb,
+                                void * context,
+                                void * data)
+{
+  FdnInjectorDemonitorOperation * operation = data;
+
+  if (operation->error != NULL)
+  {
+    napi_value message;
+    napi_create_string_utf8 (env, operation->error->message, NAPI_AUTO_LENGTH,
+        &message);
+    napi_value error_obj;
+    napi_create_error (env, NULL, message, &error_obj);
+    napi_reject_deferred (env, operation->deferred, error_obj);
+    g_error_free (operation->error);
+  }
+  else
+  {
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
+  }
+
+  fdn_injector_demonitor_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, fdn_injector_demonitor_tsfn);
+}
+
+static void
+fdn_injector_demonitor_operation_free (FdnInjectorDemonitorOperation * operation)
+{
+  g_clear_pointer (&operation->cancellable, g_object_unref);
+  g_slice_free (FdnInjectorDemonitorOperation, operation);
+}
+
+static napi_value
+fdn_injector_demonitor_and_clone_state (napi_env env,
+                                        napi_callback_info info)
+{
+  size_t argc = 2;
+  napi_value args[2];
+  napi_status status;
+  napi_value jsthis;
+  FridaInjector * handle;
+  napi_deferred deferred;
+  napi_value promise;
+  FdnInjectorDemonitorAndCloneStateOperation * operation;
+  GSource * source;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_create_promise (env, &deferred, &promise);
+  if (status != napi_ok)
+    return NULL;
+
+  operation = g_slice_new0 (FdnInjectorDemonitorAndCloneStateOperation);
+  operation->env = env;
+  operation->deferred = deferred;
+  operation->handle = handle;
+  operation->error = NULL;
+
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
+  {
+    if (!fdn_uint_from_value (env, args[0], &operation->id))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: id");
+    goto invalid_argument;
+  }
+
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
+  {
+    if (!fdn_cancellable_from_value (env, args[1], &operation->cancellable))
+      goto invalid_argument;
+  }
+  else
+  {
+    operation->cancellable = NULL;
+  }
+
+  source = g_idle_source_new ();
+  g_source_set_callback (source, fdn_injector_demonitor_and_clone_state_begin,
+      operation, NULL);
+  g_source_attach (source, frida_get_main_context ());
+  g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, fdn_injector_demonitor_and_clone_state_tsfn);
+
+  return promise;
+
+invalid_argument:
+  {
+    napi_reject_deferred (env, deferred, NULL);
+    fdn_injector_demonitor_and_clone_state_operation_free (operation);
+    return NULL;
+  }
+}
+
+static gboolean
+fdn_injector_demonitor_and_clone_state_begin (gpointer user_data)
+{
+  FdnInjectorDemonitorAndCloneStateOperation * operation = user_data;
+
+  frida_injector_demonitor_and_clone_state (operation->handle,
+      operation->id, operation->cancellable,
+      fdn_injector_demonitor_and_clone_state_end, operation);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+fdn_injector_demonitor_and_clone_state_end (GObject * source_object,
+                                            GAsyncResult * res,
+                                            gpointer user_data)
+{
+  FdnInjectorDemonitorAndCloneStateOperation * operation = user_data;
+
+  
+
+  operation->retval = frida_injector_demonitor_and_clone_state_finish (operation->handle, res,
+      &operation->error);
+
+  napi_call_threadsafe_function (fdn_injector_demonitor_and_clone_state_tsfn, operation, napi_tsfn_blocking);
+}
+
+static void
+fdn_injector_demonitor_and_clone_state_deliver (napi_env env,
+                                                napi_value js_cb,
+                                                void * context,
+                                                void * data)
+{
+  FdnInjectorDemonitorAndCloneStateOperation * operation = data;
+
+  if (operation->error != NULL)
+  {
+    napi_value message;
+    napi_create_string_utf8 (env, operation->error->message, NAPI_AUTO_LENGTH,
+        &message);
+    napi_value error_obj;
+    napi_create_error (env, NULL, message, &error_obj);
+    napi_reject_deferred (env, operation->deferred, error_obj);
+    g_error_free (operation->error);
+  }
+  else
+  {
+    napi_value js_retval;
+    js_retval = fdn_uint_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
+  }
+
+  fdn_injector_demonitor_and_clone_state_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, fdn_injector_demonitor_and_clone_state_tsfn);
+}
+
+static void
+fdn_injector_demonitor_and_clone_state_operation_free (FdnInjectorDemonitorAndCloneStateOperation * operation)
+{
+  g_clear_pointer (&operation->cancellable, g_object_unref);
+  g_slice_free (FdnInjectorDemonitorAndCloneStateOperation, operation);
+}
+
+static napi_value
+fdn_injector_recreate_thread (napi_env env,
+                              napi_callback_info info)
+{
+  size_t argc = 3;
+  napi_value args[3];
+  napi_status status;
+  napi_value jsthis;
+  FridaInjector * handle;
+  napi_deferred deferred;
+  napi_value promise;
+  FdnInjectorRecreateThreadOperation * operation;
+  GSource * source;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_create_promise (env, &deferred, &promise);
+  if (status != napi_ok)
+    return NULL;
+
+  operation = g_slice_new0 (FdnInjectorRecreateThreadOperation);
+  operation->env = env;
+  operation->deferred = deferred;
+  operation->handle = handle;
+  operation->error = NULL;
+
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
+  {
+    if (!fdn_uint_from_value (env, args[0], &operation->pid))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: pid");
+    goto invalid_argument;
+  }
+
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
+  {
+    if (!fdn_uint_from_value (env, args[1], &operation->id))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: id");
+    goto invalid_argument;
+  }
+
+  if (argc > 2 && !fdn_is_undefined_or_null (env, args[2]))
+  {
+    if (!fdn_cancellable_from_value (env, args[2], &operation->cancellable))
+      goto invalid_argument;
+  }
+  else
+  {
+    operation->cancellable = NULL;
+  }
+
+  source = g_idle_source_new ();
+  g_source_set_callback (source, fdn_injector_recreate_thread_begin,
+      operation, NULL);
+  g_source_attach (source, frida_get_main_context ());
+  g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, fdn_injector_recreate_thread_tsfn);
+
+  return promise;
+
+invalid_argument:
+  {
+    napi_reject_deferred (env, deferred, NULL);
+    fdn_injector_recreate_thread_operation_free (operation);
+    return NULL;
+  }
+}
+
+static gboolean
+fdn_injector_recreate_thread_begin (gpointer user_data)
+{
+  FdnInjectorRecreateThreadOperation * operation = user_data;
+
+  frida_injector_recreate_thread (operation->handle,
+      operation->pid, operation->id, operation->cancellable,
+      fdn_injector_recreate_thread_end, operation);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+fdn_injector_recreate_thread_end (GObject * source_object,
+                                  GAsyncResult * res,
+                                  gpointer user_data)
+{
+  FdnInjectorRecreateThreadOperation * operation = user_data;
+
+  frida_injector_recreate_thread_finish (operation->handle, res,
+      &operation->error);
+
+  napi_call_threadsafe_function (fdn_injector_recreate_thread_tsfn, operation, napi_tsfn_blocking);
+}
+
+static void
+fdn_injector_recreate_thread_deliver (napi_env env,
+                                      napi_value js_cb,
+                                      void * context,
+                                      void * data)
+{
+  FdnInjectorRecreateThreadOperation * operation = data;
+
+  if (operation->error != NULL)
+  {
+    napi_value message;
+    napi_create_string_utf8 (env, operation->error->message, NAPI_AUTO_LENGTH,
+        &message);
+    napi_value error_obj;
+    napi_create_error (env, NULL, message, &error_obj);
+    napi_reject_deferred (env, operation->deferred, error_obj);
+    g_error_free (operation->error);
+  }
+  else
+  {
+    napi_value js_retval;
+    napi_get_undefined (env, &js_retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
+  }
+
+  fdn_injector_recreate_thread_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, fdn_injector_recreate_thread_tsfn);
+}
+
+static void
+fdn_injector_recreate_thread_operation_free (FdnInjectorRecreateThreadOperation * operation)
+{
+  g_clear_pointer (&operation->cancellable, g_object_unref);
+  g_slice_free (FdnInjectorRecreateThreadOperation, operation);
+}
+
+static void
+fdn_authentication_service_register (napi_env env,
+                                     napi_value exports)
+{
+  napi_property_descriptor properties[] =
+  {
+    { "authenticate", NULL, fdn_authentication_service_authenticate, NULL, NULL, NULL, napi_default, NULL },
+  };
+
+  napi_value constructor;
+  napi_define_class (env, "AuthenticationService", NAPI_AUTO_LENGTH, fdn_authentication_service_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_create_reference (env, constructor, 1, &fdn_authentication_service_constructor);
+
+  napi_set_named_property (env, exports, "AuthenticationService", constructor);
+
+  napi_value resource_name;
+
+  napi_create_string_utf8 (env, "authenticate", NAPI_AUTO_LENGTH, &resource_name);
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_authentication_service_authenticate_deliver, &fdn_authentication_service_authenticate_tsfn);
+  napi_unref_threadsafe_function (env, fdn_authentication_service_authenticate_tsfn);
+}
+
+static gboolean
+fdn_authentication_service_from_value (napi_env env,
+                                       napi_value value,
+                                       FridaAuthenticationService ** handle)
+{
+  napi_status status;
+  bool is_instance;
+
+  status = napi_check_object_type_tag (env, value, &fdn_authentication_service_type_tag, &is_instance);
+  if (status != napi_ok || !is_instance)
+  {
+    napi_throw_type_error (env, NULL, "expected an instance of AuthenticationService");
+    return FALSE;
+  }
+
+  napi_unwrap (env, value, (void **) handle);
+
+  g_object_ref (*handle);
+
+  return TRUE;
+}
+
+static napi_value
+fdn_authentication_service_to_value (napi_env env,
+                                     FridaAuthenticationService * handle)
+{
+  napi_value result, constructor, handle_wrapper;
+
+  napi_get_reference_value (env, fdn_authentication_service_constructor, &constructor);
+
+  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
+
+  napi_new_instance (env, constructor, 1, &handle_wrapper, &result);
+
+  return result;
+}
+
+static napi_value
+fdn_authentication_service_construct (napi_env env,
+                                      napi_callback_info info)
+{
+  size_t argc = 1;
+  napi_value args[1];
+  napi_value jsthis;
+  napi_status status;
+  FridaAuthenticationService * handle = NULL;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
+
+  if (argc == 0)
+  {
+    napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");
+  return NULL;
+  }
+  else
+  {
+    bool is_instance;
+
+    if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+      goto invalid_handle;
+
+    if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+      goto propagate_error;
+
+    g_object_ref (handle);
+  }
+
+  status = napi_type_tag_object (env, jsthis, &fdn_authentication_service_type_tag);
+  if (status != napi_ok)
+    goto propagate_error;
+
+  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
+
+  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
+  if (status != napi_ok)
+    goto propagate_error;
+
+  return jsthis;
+
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected a AuthenticationService handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_clear_object (&handle);
+    return NULL;
+  }
+}
+
+static napi_value
+fdn_authentication_service_authenticate (napi_env env,
+                                         napi_callback_info info)
+{
+  size_t argc = 2;
+  napi_value args[2];
+  napi_status status;
+  napi_value jsthis;
+  FridaAuthenticationService * handle;
+  napi_deferred deferred;
+  napi_value promise;
+  FdnAuthenticationServiceAuthenticateOperation * operation;
+  GSource * source;
+
+  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_unwrap (env, jsthis, (void **) &handle);
+  if (status != napi_ok)
+    return NULL;
+
+  status = napi_create_promise (env, &deferred, &promise);
+  if (status != napi_ok)
+    return NULL;
+
+  operation = g_slice_new0 (FdnAuthenticationServiceAuthenticateOperation);
+  operation->env = env;
+  operation->deferred = deferred;
+  operation->handle = handle;
+  operation->error = NULL;
+
+  if (argc > 0 && !fdn_is_undefined_or_null (env, args[0]))
+  {
+    if (!fdn_utf8_from_value (env, args[0], &operation->token))
+      goto invalid_argument;
+  }
+  else
+  {
+    napi_throw_type_error (env, NULL, "missing argument: token");
+    goto invalid_argument;
+  }
+
+  if (argc > 1 && !fdn_is_undefined_or_null (env, args[1]))
+  {
+    if (!fdn_cancellable_from_value (env, args[1], &operation->cancellable))
+      goto invalid_argument;
+  }
+  else
+  {
+    operation->cancellable = NULL;
+  }
+
+  source = g_idle_source_new ();
+  g_source_set_callback (source, fdn_authentication_service_authenticate_begin,
+      operation, NULL);
+  g_source_attach (source, frida_get_main_context ());
+  g_source_unref (source);
+
+  napi_ref_threadsafe_function (env, fdn_authentication_service_authenticate_tsfn);
+
+  return promise;
+
+invalid_argument:
+  {
+    napi_reject_deferred (env, deferred, NULL);
+    fdn_authentication_service_authenticate_operation_free (operation);
+    return NULL;
+  }
+}
+
+static gboolean
+fdn_authentication_service_authenticate_begin (gpointer user_data)
+{
+  FdnAuthenticationServiceAuthenticateOperation * operation = user_data;
+
+  frida_authentication_service_authenticate (operation->handle,
+      operation->token, operation->cancellable,
+      fdn_authentication_service_authenticate_end, operation);
+
+  return G_SOURCE_REMOVE;
+}
+
+static void
+fdn_authentication_service_authenticate_end (GObject * source_object,
+                                             GAsyncResult * res,
+                                             gpointer user_data)
+{
+  FdnAuthenticationServiceAuthenticateOperation * operation = user_data;
+
+  
+
+  operation->retval = frida_authentication_service_authenticate_finish (operation->handle, res,
+      &operation->error);
+
+  napi_call_threadsafe_function (fdn_authentication_service_authenticate_tsfn, operation, napi_tsfn_blocking);
+}
+
+static void
+fdn_authentication_service_authenticate_deliver (napi_env env,
+                                                 napi_value js_cb,
+                                                 void * context,
+                                                 void * data)
+{
+  FdnAuthenticationServiceAuthenticateOperation * operation = data;
+
+  if (operation->error != NULL)
+  {
+    napi_value message;
+    napi_create_string_utf8 (env, operation->error->message, NAPI_AUTO_LENGTH,
+        &message);
+    napi_value error_obj;
+    napi_create_error (env, NULL, message, &error_obj);
+    napi_reject_deferred (env, operation->deferred, error_obj);
+    g_error_free (operation->error);
+  }
+  else
+  {
+    napi_value js_retval;
+    js_retval = fdn_utf8_to_value (env, operation->retval);
+    napi_resolve_deferred (env, operation->deferred, js_retval);
+  }
+
+  fdn_authentication_service_authenticate_operation_free (operation);
+
+  napi_unref_threadsafe_function (env, fdn_authentication_service_authenticate_tsfn);
+}
+
+static void
+fdn_authentication_service_authenticate_operation_free (FdnAuthenticationServiceAuthenticateOperation * operation)
+{
+  g_clear_pointer (&operation->token, g_free);
+  g_clear_pointer (&operation->cancellable, g_object_unref);
+  g_clear_pointer (&operation->retval, g_free);
+  g_slice_free (FdnAuthenticationServiceAuthenticateOperation, operation);
 }
 
 static void
@@ -18330,7 +20338,7 @@ fdn_vardict_from_value (napi_env env,
     if (!fdn_variant_from_value (env, js_val, &val))
       goto propagate_error;
 
-    g_hash_table_insert (dict, g_steal_pointer (&key), val);
+    g_hash_table_insert (dict, g_steal_pointer (&key), g_variant_ref_sink (val));
   }
 
   *vardict = dict;
@@ -18723,28 +20731,6 @@ fdn_io_stream_to_value (napi_env env,
   napi_value result;
 
   napi_create_external (env, stream, NULL, NULL, &result);
-
-  return result;
-}
-
-static napi_value
-fdn_service_to_value (napi_env env,
-                      FridaService * service)
-{
-  napi_value result;
-
-  napi_create_external (env, service, NULL, NULL, &result);
-
-  return result;
-}
-
-static napi_value
-fdn_authentication_service_to_value (napi_env env,
-                                     FridaAuthenticationService * service)
-{
-  napi_value result;
-
-  napi_create_external (env, service, NULL, NULL, &result);
 
   return result;
 }
