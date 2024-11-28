@@ -184,7 +184,10 @@ def generate_code() -> str:
                     method_name_transformer=transform_gio_method_name)
 
     object_types = [otype for name, otype in frida.object_types.items() if name not in {"ControlService", "RpcClient", "RpcPeer"}]
-    object_types.append(gio.object_types["Cancellable"])
+    object_types += [
+        gio.object_types["IOStream"],
+        gio.object_types["Cancellable"],
+    ]
 
     enumerations = frida.enumerations.values()
 
