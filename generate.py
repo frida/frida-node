@@ -11,7 +11,7 @@ import xml.etree.ElementTree as ET
 CORE_NAMESPACE = "http://www.gtk.org/introspection/core/1.0"
 C_NAMESPACE = "http://www.gtk.org/introspection/c/1.0"
 GLIB_NAMESPACE = "http://www.gtk.org/introspection/glib/1.0"
-GIR_NAMESPACES = {"": CORE_NAMESPACE}
+GIR_NAMESPACES = {"": CORE_NAMESPACE, "glib": GLIB_NAMESPACE}
 
 @dataclass
 class Model:
@@ -28,6 +28,7 @@ class ObjectType:
     method_filter: Optional[MethodFilter]
     method_name_transformer: Optional[MethodNameTransformer]
     _properties: List[ET.Element]
+    _signals: List[ET.Element]
 
     @cached_property
     def is_frida_list(self):
@@ -98,6 +99,16 @@ class ObjectType:
                                        construct_only=element.get("construct-only") == "1"))
         return properties
 
+    @cached_property
+    def signals(self) -> List[Signal]:
+        signals = []
+        for element in self._signals:
+            name = element.get("name")
+            c_name = name.replace("-", "_")
+            param_list = extract_parameters(element.findall("./parameters/parameter", GIR_NAMESPACES))
+            signals.append(Signal(name, c_name, param_list))
+        return signals
+
 @dataclass
 class Constructor:
     name: str
@@ -127,6 +138,12 @@ class Property:
     type: Type
     writable: bool
     construct_only: bool
+
+@dataclass
+class Signal:
+    name: str
+    c_name: str
+    parameters: List[Parameter]
 
 TransferOwnership = Enum("TransferOwnership", ["none", "full", "container"])
 
@@ -185,7 +202,7 @@ def generate_code() -> str:
 
     object_types = [otype for name, otype in frida.object_types.items() if name not in {"ControlService", "RpcClient", "RpcPeer"}]
     object_types += [
-        gio.object_types["IOStream"],
+        #gio.object_types["IOStream"],
         gio.object_types["Cancellable"],
     ]
 
@@ -210,6 +227,9 @@ def generate_code() -> str:
 
         for method in otype.methods:
             code += generate_method_code(otype, method)
+
+        for signal in otype.signals:
+            code += generate_signal_getter_code(otype, signal)
 
     for enum in enumerations:
         code += generate_enum_conversion_functions(enum)
@@ -242,8 +262,9 @@ def parse_gir(file_path: str,
         constructors = element.findall(".//constructor", GIR_NAMESPACES)
         methods = element.findall(".//method", GIR_NAMESPACES)
         properties = element.findall(".//property", GIR_NAMESPACES)
+        signals = element.findall(".//glib:signal", GIR_NAMESPACES)
 
-        object_types[name] = ObjectType(name, c_type, parent, constructors, methods, method_filter, method_name_transformer, properties)
+        object_types[name] = ObjectType(name, c_type, parent, constructors, methods, method_filter, method_name_transformer, properties, signals)
 
     for element in tree.getroot().findall(".//interface", GIR_NAMESPACES):
         name = element.get("name")
@@ -253,8 +274,9 @@ def parse_gir(file_path: str,
         constructors = []
         methods = element.findall(".//method", GIR_NAMESPACES)
         properties = element.findall(".//property", GIR_NAMESPACES)
+        signals = element.findall(".//glib:signal", GIR_NAMESPACES)
 
-        object_types[name] = ObjectType(name, c_type, parent, constructors, methods, method_filter, method_name_transformer, properties)
+        object_types[name] = ObjectType(name, c_type, parent, constructors, methods, method_filter, method_name_transformer, properties, signals)
 
     enumerations = OrderedDict()
 
@@ -403,6 +425,11 @@ def generate_prototypes(object_types: List[ObjectType], enumerations: List[Enume
                         f"static void {method_cprefix}_operation_free ({method.operation_type_name} * operation);",
                     ]
 
+            for i, signal in enumerate(otype.signals):
+                if i == 0:
+                    prototypes.append("")
+                prototypes.append(f"static napi_value {otype_cprefix}_get_{signal.c_name} (napi_env env, napi_callback_info info);")
+
     for enum in enumerations:
         enum_name_snake = to_snake_case(enum.name)
         prototypes += [
@@ -534,6 +561,10 @@ napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource
         attrs_str = " | ".join([f"napi_{attr}" for attr in attrs])
 
         jsprop_registrations.append(f"""{{ "{prop_name_camel}", NULL, NULL, {otype_cprefix}_get_{prop.c_name}, {setter_str}, NULL, {attrs_str}, NULL }},""")
+
+    for signal in otype.signals:
+        signal_name_camel = to_camel_case(signal.c_name)
+        jsprop_registrations.append(f"""{{ "{signal_name_camel}", 0, 0, {otype_cprefix}_get_{signal.c_name}, NULL, 0, napi_default, NULL }},""")
 
     jsprop_registrations_str = "\n    ".join(jsprop_registrations)
     resource_name_declaration = "\n\n  napi_value resource_name;" if tsfn_initializations else ""
@@ -910,6 +941,26 @@ def generate_parameter_conversion_code(param: Parameter, index: int, invalid_arg
     code += "\n  }"
 
     return code
+
+def generate_signal_getter_code(otype: ObjectType, signal: Signal) -> str:
+    cprefix = otype.c_symbol_prefix
+    signal_name_camel = to_camel_case(signal.c_name)
+
+    indent = " " * (len(cprefix) + 5 + len(signal.c_name) + 2)
+
+    return f"""
+static napi_value
+{cprefix}_get_{signal.c_name} (napi_env env,
+{indent}napi_callback_info info)
+{{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "{signal_name_camel}", &signal_instance);
+
+  return signal_instance;
+}}
+"""
 
 def generate_enum_conversion_functions(enum: Enumeration) -> str:
     enum_name_snake = to_snake_case(enum.name)
