@@ -663,6 +663,10 @@ static void fdn_device_manager_remove_remote_device_end (GObject * source_object
 static void fdn_device_manager_remove_remote_device_deliver (napi_env env, napi_value js_cb, void * context, void * data);
 static void fdn_device_manager_remove_remote_device_operation_free (FdnDeviceManagerRemoveRemoteDeviceOperation * operation);
 
+static napi_value fdn_device_manager_get_added (napi_env env, napi_callback_info info);
+static napi_value fdn_device_manager_get_removed (napi_env env, napi_callback_info info);
+static napi_value fdn_device_manager_get_changed (napi_env env, napi_callback_info info);
+
 G_GNUC_UNUSED static napi_value fdn_device_list_to_value (napi_env env, FridaDeviceList * handle);
 
 static void fdn_device_register (napi_env env, napi_value exports);
@@ -813,6 +817,15 @@ static napi_value fdn_device_get_icon (napi_env env, napi_callback_info info);
 static napi_value fdn_device_get_dtype (napi_env env, napi_callback_info info);
 
 static napi_value fdn_device_get_bus (napi_env env, napi_callback_info info);
+
+static napi_value fdn_device_get_spawn_added (napi_env env, napi_callback_info info);
+static napi_value fdn_device_get_spawn_removed (napi_env env, napi_callback_info info);
+static napi_value fdn_device_get_child_added (napi_env env, napi_callback_info info);
+static napi_value fdn_device_get_child_removed (napi_env env, napi_callback_info info);
+static napi_value fdn_device_get_process_crashed (napi_env env, napi_callback_info info);
+static napi_value fdn_device_get_output (napi_env env, napi_callback_info info);
+static napi_value fdn_device_get_uninjected (napi_env env, napi_callback_info info);
+static napi_value fdn_device_get_lost (napi_env env, napi_callback_info info);
 
 static void fdn_remote_device_options_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_remote_device_options_from_value (napi_env env, napi_value value, FridaRemoteDeviceOptions ** handle);
@@ -969,6 +982,9 @@ static napi_value fdn_bus_post (napi_env env, napi_callback_info info);
 
 static napi_value fdn_bus_get_device (napi_env env, napi_callback_info info);
 
+static napi_value fdn_bus_get_detached (napi_env env, napi_callback_info info);
+static napi_value fdn_bus_get_message (napi_env env, napi_callback_info info);
+
 static void fdn_session_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_session_from_value (napi_env env, napi_value value, FridaSession ** handle);
 G_GNUC_UNUSED static napi_value fdn_session_to_value (napi_env env, FridaSession * handle);
@@ -1040,6 +1056,8 @@ static napi_value fdn_session_get_pid (napi_env env, napi_callback_info info);
 
 static napi_value fdn_session_get_persist_timeout (napi_env env, napi_callback_info info);
 
+static napi_value fdn_session_get_detached (napi_env env, napi_callback_info info);
+
 static void fdn_script_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_script_from_value (napi_env env, napi_value value, FridaScript ** handle);
 G_GNUC_UNUSED static napi_value fdn_script_to_value (napi_env env, FridaScript * handle);
@@ -1078,6 +1096,9 @@ static gboolean fdn_script_disable_debugger_begin (gpointer user_data);
 static void fdn_script_disable_debugger_end (GObject * source_object, GAsyncResult * res, gpointer user_data);
 static void fdn_script_disable_debugger_deliver (napi_env env, napi_value js_cb, void * context, void * data);
 static void fdn_script_disable_debugger_operation_free (FdnScriptDisableDebuggerOperation * operation);
+
+static napi_value fdn_script_get_destroyed (napi_env env, napi_callback_info info);
+static napi_value fdn_script_get_message (napi_env env, napi_callback_info info);
 
 static void fdn_portal_membership_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_portal_membership_from_value (napi_env env, napi_value value, FridaPortalMembership ** handle);
@@ -1144,6 +1165,16 @@ static napi_value fdn_portal_service_get_cluster_params (napi_env env, napi_call
 
 static napi_value fdn_portal_service_get_control_params (napi_env env, napi_callback_info info);
 
+static napi_value fdn_portal_service_get_node_connected (napi_env env, napi_callback_info info);
+static napi_value fdn_portal_service_get_node_joined (napi_env env, napi_callback_info info);
+static napi_value fdn_portal_service_get_node_left (napi_env env, napi_callback_info info);
+static napi_value fdn_portal_service_get_node_disconnected (napi_env env, napi_callback_info info);
+static napi_value fdn_portal_service_get_controller_connected (napi_env env, napi_callback_info info);
+static napi_value fdn_portal_service_get_controller_disconnected (napi_env env, napi_callback_info info);
+static napi_value fdn_portal_service_get_authenticated (napi_env env, napi_callback_info info);
+static napi_value fdn_portal_service_get_subscribe (napi_env env, napi_callback_info info);
+static napi_value fdn_portal_service_get_message (napi_env env, napi_callback_info info);
+
 static void fdn_file_monitor_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_file_monitor_from_value (napi_env env, napi_value value, FridaFileMonitor ** handle);
 G_GNUC_UNUSED static napi_value fdn_file_monitor_to_value (napi_env env, FridaFileMonitor * handle);
@@ -1163,6 +1194,8 @@ static void fdn_file_monitor_disable_operation_free (FdnFileMonitorDisableOperat
 
 static napi_value fdn_file_monitor_get_path (napi_env env, napi_callback_info info);
 
+static napi_value fdn_file_monitor_get_change (napi_env env, napi_callback_info info);
+
 static void fdn_compiler_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_compiler_from_value (napi_env env, napi_value value, FridaCompiler ** handle);
 G_GNUC_UNUSED static napi_value fdn_compiler_to_value (napi_env env, FridaCompiler * handle);
@@ -1181,6 +1214,11 @@ static void fdn_compiler_watch_deliver (napi_env env, napi_value js_cb, void * c
 static void fdn_compiler_watch_operation_free (FdnCompilerWatchOperation * operation);
 
 static napi_value fdn_compiler_get_manager (napi_env env, napi_callback_info info);
+
+static napi_value fdn_compiler_get_starting (napi_env env, napi_callback_info info);
+static napi_value fdn_compiler_get_finished (napi_env env, napi_callback_info info);
+static napi_value fdn_compiler_get_output (napi_env env, napi_callback_info info);
+static napi_value fdn_compiler_get_diagnostics (napi_env env, napi_callback_info info);
 
 static void fdn_compiler_options_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_compiler_options_from_value (napi_env env, napi_value value, FridaCompilerOptions ** handle);
@@ -1389,6 +1427,9 @@ static void fdn_service_request_end (GObject * source_object, GAsyncResult * res
 static void fdn_service_request_deliver (napi_env env, napi_value js_cb, void * context, void * data);
 static void fdn_service_request_operation_free (FdnServiceRequestOperation * operation);
 
+static napi_value fdn_service_get_close (napi_env env, napi_callback_info info);
+static napi_value fdn_service_get_message (napi_env env, napi_callback_info info);
+
 static void fdn_injector_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_injector_from_value (napi_env env, napi_value value, FridaInjector ** handle);
 G_GNUC_UNUSED static napi_value fdn_injector_to_value (napi_env env, FridaInjector * handle);
@@ -1430,6 +1471,8 @@ static void fdn_injector_recreate_thread_end (GObject * source_object, GAsyncRes
 static void fdn_injector_recreate_thread_deliver (napi_env env, napi_value js_cb, void * context, void * data);
 static void fdn_injector_recreate_thread_operation_free (FdnInjectorRecreateThreadOperation * operation);
 
+static napi_value fdn_injector_get_uninjected (napi_env env, napi_callback_info info);
+
 static void fdn_authentication_service_register (napi_env env, napi_value exports);
 G_GNUC_UNUSED static gboolean fdn_authentication_service_from_value (napi_env env, napi_value value, FridaAuthenticationService ** handle);
 G_GNUC_UNUSED static napi_value fdn_authentication_service_to_value (napi_env env, FridaAuthenticationService * handle);
@@ -1461,6 +1504,8 @@ static napi_value fdn_cancellable_push_current (napi_env env, napi_callback_info
 static napi_value fdn_cancellable_reset (napi_env env, napi_callback_info info);
 
 static napi_value fdn_cancellable_throw_if_cancelled (napi_env env, napi_callback_info info);
+
+static napi_value fdn_cancellable_get_cancelled (napi_env env, napi_callback_info info);
 
 G_GNUC_UNUSED static gboolean fdn_runtime_from_value (napi_env env, napi_value value, FridaRuntime * e);
 G_GNUC_UNUSED static napi_value fdn_runtime_to_value (napi_env env, FridaRuntime e);
@@ -1555,42 +1600,42 @@ static napi_value fdn_io_stream_to_value (napi_env env, GIOStream * stream);
 static void fdn_object_finalize (napi_env env, void * finalize_data, void * finalize_hint);
 
 static napi_type_tag fdn_handle_wrapper_type_tag = { 0xdd596d4f2dad45f9, 0x844585a48e8d05ba };
-static napi_type_tag fdn_device_manager_type_tag = { 0x5e5d8178ea9f431a, 0x848756822e2c53b9 };
-static napi_type_tag fdn_device_type_tag = { 0x8fbf87a2363b40bd, 0x8cd37415777caae3 };
-static napi_type_tag fdn_remote_device_options_type_tag = { 0xe53f80e130c64456, 0x93677efcc5dfdc92 };
-static napi_type_tag fdn_application_type_tag = { 0x93a6ca39fba84fda, 0xa57d93c9f1cfbd42 };
-static napi_type_tag fdn_process_type_tag = { 0x5e1cab28c0804605, 0xa3144b08bfea0e1c };
-static napi_type_tag fdn_process_match_options_type_tag = { 0xd36cccb2c0184182, 0x9930f3c63ba4bf67 };
-static napi_type_tag fdn_spawn_options_type_tag = { 0xc514f6fcb8dc48bd, 0x8a6aac5c4416376e };
-static napi_type_tag fdn_spawn_type_tag = { 0x1fa985f5e3ad4b78, 0x8305745fe2ef9d67 };
-static napi_type_tag fdn_child_type_tag = { 0x6c8f772c5b9d4a4b, 0xbea75d4b4418f03d };
-static napi_type_tag fdn_crash_type_tag = { 0x60209362cac64882, 0x80038950211d172b };
-static napi_type_tag fdn_bus_type_tag = { 0x149477188e124470, 0x913ad72a66c9f3f3 };
-static napi_type_tag fdn_session_type_tag = { 0xb1722842f67b465e, 0x847bfdbe4d1c46f7 };
-static napi_type_tag fdn_script_type_tag = { 0x5a44aeb226684ced, 0x94f7b48d9bf800be };
-static napi_type_tag fdn_portal_membership_type_tag = { 0x13b36227b93b44ff, 0xa893ab195ec4c0ac };
-static napi_type_tag fdn_control_service_options_type_tag = { 0xf01c14d881ac4e6a, 0x8d69f5c8c796c7e4 };
-static napi_type_tag fdn_portal_service_type_tag = { 0x1ad95ce03182438e, 0xa8332f0b6f4255a9 };
-static napi_type_tag fdn_file_monitor_type_tag = { 0x1c8d618388834924, 0x8c27a01d47e8e2c7 };
-static napi_type_tag fdn_compiler_type_tag = { 0x6a9c6e33c3504d66, 0xba485f7ab12331ce };
-static napi_type_tag fdn_compiler_options_type_tag = { 0x3f8735618108420d, 0x8fa9f4875805cfba };
-static napi_type_tag fdn_build_options_type_tag = { 0x92ff65fe45ea4d3e, 0xacd84c4b023aec22 };
-static napi_type_tag fdn_watch_options_type_tag = { 0x2055605350a84212, 0x82912a48bbd54dbf };
-static napi_type_tag fdn_static_authentication_service_type_tag = { 0xa4c9145c60ce4c79, 0x8edab933b6706abd };
-static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x16ed4e3b8248422b, 0xbf43fd34f92e5f9c };
-static napi_type_tag fdn_application_query_options_type_tag = { 0xea99b709685a4b8e, 0x909c6a12d25bd644 };
-static napi_type_tag fdn_process_query_options_type_tag = { 0x42ea4b8367d34aea, 0xa160f255e9e50e82 };
-static napi_type_tag fdn_session_options_type_tag = { 0xa3e62f3d7dc94a78, 0x8ee752ccd5a8073d };
-static napi_type_tag fdn_script_options_type_tag = { 0x0c6e8c1082f249c6, 0xaac15c7b7fd937b4 };
-static napi_type_tag fdn_snapshot_options_type_tag = { 0xad8dba6218e74378, 0xbfe02af6e38a337d };
-static napi_type_tag fdn_portal_options_type_tag = { 0x19731fc651a14ca5, 0x97b6ee0546c59d54 };
-static napi_type_tag fdn_peer_options_type_tag = { 0x11110c66b4b74d12, 0x95096cba7b347213 };
-static napi_type_tag fdn_relay_type_tag = { 0x75bd16241f1d40de, 0xbc10ea351f7231e2 };
-static napi_type_tag fdn_endpoint_parameters_type_tag = { 0x4ac0be6d766b434f, 0x97d49fb644bd4de3 };
-static napi_type_tag fdn_service_type_tag = { 0x6ab3014c1b164575, 0xb06ed34e21cdb909 };
-static napi_type_tag fdn_injector_type_tag = { 0xda3e4e493e4c4985, 0x99f3268df9e83940 };
-static napi_type_tag fdn_authentication_service_type_tag = { 0xad93bfec064e49f4, 0xa70559c6c4e0d61b };
-static napi_type_tag fdn_cancellable_type_tag = { 0xebaebe02bcaa48a7, 0xba963cff7c729cdd };
+static napi_type_tag fdn_device_manager_type_tag = { 0x2220fe85d3b8409d, 0xbce48c87efcf708d };
+static napi_type_tag fdn_device_type_tag = { 0xb233f1efe4dd48b7, 0x9fc5fcff36e9c22a };
+static napi_type_tag fdn_remote_device_options_type_tag = { 0xf5ffccd5dbcd4735, 0x8ec341ffe3285169 };
+static napi_type_tag fdn_application_type_tag = { 0x02f6d4cd2454482f, 0x806858dfeda7ab9f };
+static napi_type_tag fdn_process_type_tag = { 0x2605d7bd0e2b45fa, 0xbf215f9e3a1721c4 };
+static napi_type_tag fdn_process_match_options_type_tag = { 0xa7cc2d33fda34e09, 0x928cc71aef31adeb };
+static napi_type_tag fdn_spawn_options_type_tag = { 0x13ce2e3744b24214, 0xbcdd0db8948385b5 };
+static napi_type_tag fdn_spawn_type_tag = { 0xb1b23e9344c84b82, 0x86146a5f03df3b65 };
+static napi_type_tag fdn_child_type_tag = { 0xf07f60dd6fdd4a38, 0x86a9c9301bcb497f };
+static napi_type_tag fdn_crash_type_tag = { 0x698b2a2fd9954686, 0x99e3c3ceaaa93fe3 };
+static napi_type_tag fdn_bus_type_tag = { 0x84a13375f0df4748, 0x8ff19f3aee1c5435 };
+static napi_type_tag fdn_session_type_tag = { 0x45c4f299d4944efb, 0x806a3b4bdc127391 };
+static napi_type_tag fdn_script_type_tag = { 0x6472de2c08e349ef, 0x9938f503d5545e5a };
+static napi_type_tag fdn_portal_membership_type_tag = { 0xab8b7c9bd90445dc, 0x813f28f427f132a2 };
+static napi_type_tag fdn_control_service_options_type_tag = { 0xc51b410fd8e14019, 0xac720f4888feceb4 };
+static napi_type_tag fdn_portal_service_type_tag = { 0xf601e71d0b404694, 0xb9d502b6136f0a04 };
+static napi_type_tag fdn_file_monitor_type_tag = { 0x0b723d090761434b, 0x8cda6c68bd07bf36 };
+static napi_type_tag fdn_compiler_type_tag = { 0x29d4b767c8c44ee1, 0x9f9773ba2cd836ec };
+static napi_type_tag fdn_compiler_options_type_tag = { 0x118afcc47ef54b0a, 0xb39c9cd63f03a0be };
+static napi_type_tag fdn_build_options_type_tag = { 0xa381015a92794455, 0xaf38fcaeb1631119 };
+static napi_type_tag fdn_watch_options_type_tag = { 0xe0492fe6d5734108, 0x8b6beb29f1748d02 };
+static napi_type_tag fdn_static_authentication_service_type_tag = { 0x10cffe948b804ce0, 0x81f96044b96509f0 };
+static napi_type_tag fdn_frontmost_query_options_type_tag = { 0x602725c23e564e23, 0x8276cdc38ffd5425 };
+static napi_type_tag fdn_application_query_options_type_tag = { 0x551a03abf94642f1, 0xa57a4dcbb588ac71 };
+static napi_type_tag fdn_process_query_options_type_tag = { 0x15df5a36b3354836, 0x8d75697cbbc945c9 };
+static napi_type_tag fdn_session_options_type_tag = { 0xe723b323f56c4434, 0xb433bdf65a8d5572 };
+static napi_type_tag fdn_script_options_type_tag = { 0x5b7867ff741b43e6, 0x9a5d1aee72068745 };
+static napi_type_tag fdn_snapshot_options_type_tag = { 0xa13affb80ec14102, 0xbc6d1b62f5f2db0c };
+static napi_type_tag fdn_portal_options_type_tag = { 0x48f550791fe24bdf, 0x862446316fc47939 };
+static napi_type_tag fdn_peer_options_type_tag = { 0xc4c57bb3b1c64305, 0x8451b96074554bd4 };
+static napi_type_tag fdn_relay_type_tag = { 0x4a7759103d494d36, 0x850fdfcd41067b92 };
+static napi_type_tag fdn_endpoint_parameters_type_tag = { 0xc1ae165e15904cc4, 0x8423999a79a221ab };
+static napi_type_tag fdn_service_type_tag = { 0x4eb6416fac94433e, 0x91d48d40c3c94877 };
+static napi_type_tag fdn_injector_type_tag = { 0x3aeecb1e7c754a71, 0xa85b44bd6d240dd7 };
+static napi_type_tag fdn_authentication_service_type_tag = { 0x0b2281a408bd41db, 0x9cfea5bb69c3d112 };
+static napi_type_tag fdn_cancellable_type_tag = { 0xb74e1e3a64ba47a2, 0xa31c3d13d0278fa0 };
 
 static napi_ref fdn_device_manager_constructor;
 static napi_ref fdn_device_constructor;
@@ -1766,6 +1811,9 @@ fdn_device_manager_register (napi_env env,
     { "enumerateDevices", NULL, fdn_device_manager_enumerate_devices, NULL, NULL, NULL, napi_default, NULL },
     { "addRemoteDevice", NULL, fdn_device_manager_add_remote_device, NULL, NULL, NULL, napi_default, NULL },
     { "removeRemoteDevice", NULL, fdn_device_manager_remove_remote_device, NULL, NULL, NULL, napi_default, NULL },
+    { "added", 0, 0, fdn_device_manager_get_added, NULL, 0, napi_default, NULL },
+    { "removed", 0, 0, fdn_device_manager_get_removed, NULL, 0, napi_default, NULL },
+    { "changed", 0, 0, fdn_device_manager_get_changed, NULL, 0, napi_default, NULL },
   };
 
   napi_value constructor;
@@ -3030,6 +3078,42 @@ fdn_device_manager_remove_remote_device_operation_free (FdnDeviceManagerRemoveRe
 }
 
 static napi_value
+fdn_device_manager_get_added (napi_env env,
+                              napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "added", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_device_manager_get_removed (napi_env env,
+                                napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "removed", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_device_manager_get_changed (napi_env env,
+                                napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "changed", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
 fdn_device_list_to_value (napi_env env,
                           FridaDeviceList * list)
 {
@@ -3083,6 +3167,14 @@ fdn_device_register (napi_env env,
     { "icon", NULL, NULL, fdn_device_get_icon, NULL, NULL, napi_enumerable | napi_configurable, NULL },
     { "dtype", NULL, NULL, fdn_device_get_dtype, NULL, NULL, napi_enumerable | napi_configurable, NULL },
     { "bus", NULL, NULL, fdn_device_get_bus, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "spawnAdded", 0, 0, fdn_device_get_spawn_added, NULL, 0, napi_default, NULL },
+    { "spawnRemoved", 0, 0, fdn_device_get_spawn_removed, NULL, 0, napi_default, NULL },
+    { "childAdded", 0, 0, fdn_device_get_child_added, NULL, 0, napi_default, NULL },
+    { "childRemoved", 0, 0, fdn_device_get_child_removed, NULL, 0, napi_default, NULL },
+    { "processCrashed", 0, 0, fdn_device_get_process_crashed, NULL, 0, napi_default, NULL },
+    { "output", 0, 0, fdn_device_get_output, NULL, 0, napi_default, NULL },
+    { "uninjected", 0, 0, fdn_device_get_uninjected, NULL, 0, napi_default, NULL },
+    { "lost", 0, 0, fdn_device_get_lost, NULL, 0, napi_default, NULL },
   };
 
   napi_value constructor;
@@ -6518,6 +6610,102 @@ beach:
   return js_retval;
 }
 
+static napi_value
+fdn_device_get_spawn_added (napi_env env,
+                            napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "spawnAdded", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_device_get_spawn_removed (napi_env env,
+                              napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "spawnRemoved", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_device_get_child_added (napi_env env,
+                            napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "childAdded", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_device_get_child_removed (napi_env env,
+                              napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "childRemoved", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_device_get_process_crashed (napi_env env,
+                                napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "processCrashed", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_device_get_output (napi_env env,
+                       napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "output", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_device_get_uninjected (napi_env env,
+                           napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "uninjected", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_device_get_lost (napi_env env,
+                     napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "lost", &signal_instance);
+
+  return signal_instance;
+}
+
 static void
 fdn_remote_device_options_register (napi_env env,
                                     napi_value exports)
@@ -8993,6 +9181,8 @@ fdn_bus_register (napi_env env,
     { "attach", NULL, fdn_bus_attach, NULL, NULL, NULL, napi_default, NULL },
     { "post", NULL, fdn_bus_post, NULL, NULL, NULL, napi_default, NULL },
     { "device", NULL, NULL, fdn_bus_get_device, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "detached", 0, 0, fdn_bus_get_detached, NULL, 0, napi_default, NULL },
+    { "message", 0, 0, fdn_bus_get_message, NULL, 0, napi_default, NULL },
   };
 
   napi_value constructor;
@@ -9333,6 +9523,30 @@ beach:
   return js_retval;
 }
 
+static napi_value
+fdn_bus_get_detached (napi_env env,
+                      napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "detached", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_bus_get_message (napi_env env,
+                     napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "message", &signal_instance);
+
+  return signal_instance;
+}
+
 static void
 fdn_session_register (napi_env env,
                       napi_value exports)
@@ -9352,6 +9566,7 @@ fdn_session_register (napi_env env,
     { "joinPortal", NULL, fdn_session_join_portal, NULL, NULL, NULL, napi_default, NULL },
     { "pid", NULL, NULL, fdn_session_get_pid, NULL, NULL, napi_enumerable | napi_configurable, NULL },
     { "persistTimeout", NULL, NULL, fdn_session_get_persist_timeout, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "detached", 0, 0, fdn_session_get_detached, NULL, 0, napi_default, NULL },
   };
 
   napi_value constructor;
@@ -10944,6 +11159,18 @@ beach:
   return js_retval;
 }
 
+static napi_value
+fdn_session_get_detached (napi_env env,
+                          napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "detached", &signal_instance);
+
+  return signal_instance;
+}
+
 static void
 fdn_script_register (napi_env env,
                      napi_value exports)
@@ -10957,6 +11184,8 @@ fdn_script_register (napi_env env,
     { "post", NULL, fdn_script_post, NULL, NULL, NULL, napi_default, NULL },
     { "enableDebugger", NULL, fdn_script_enable_debugger, NULL, NULL, NULL, napi_default, NULL },
     { "disableDebugger", NULL, fdn_script_disable_debugger, NULL, NULL, NULL, napi_default, NULL },
+    { "destroyed", 0, 0, fdn_script_get_destroyed, NULL, 0, napi_default, NULL },
+    { "message", 0, 0, fdn_script_get_message, NULL, 0, napi_default, NULL },
   };
 
   napi_value constructor;
@@ -11784,6 +12013,30 @@ fdn_script_disable_debugger_operation_free (FdnScriptDisableDebuggerOperation * 
   g_slice_free (FdnScriptDisableDebuggerOperation, operation);
 }
 
+static napi_value
+fdn_script_get_destroyed (napi_env env,
+                          napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "destroyed", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_script_get_message (napi_env env,
+                        napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "message", &signal_instance);
+
+  return signal_instance;
+}
+
 static void
 fdn_portal_membership_register (napi_env env,
                                 napi_value exports)
@@ -12359,6 +12612,15 @@ fdn_portal_service_register (napi_env env,
     { "device", NULL, NULL, fdn_portal_service_get_device, NULL, NULL, napi_enumerable | napi_configurable, NULL },
     { "clusterParams", NULL, NULL, fdn_portal_service_get_cluster_params, NULL, NULL, napi_enumerable | napi_configurable, NULL },
     { "controlParams", NULL, NULL, fdn_portal_service_get_control_params, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "nodeConnected", 0, 0, fdn_portal_service_get_node_connected, NULL, 0, napi_default, NULL },
+    { "nodeJoined", 0, 0, fdn_portal_service_get_node_joined, NULL, 0, napi_default, NULL },
+    { "nodeLeft", 0, 0, fdn_portal_service_get_node_left, NULL, 0, napi_default, NULL },
+    { "nodeDisconnected", 0, 0, fdn_portal_service_get_node_disconnected, NULL, 0, napi_default, NULL },
+    { "controllerConnected", 0, 0, fdn_portal_service_get_controller_connected, NULL, 0, napi_default, NULL },
+    { "controllerDisconnected", 0, 0, fdn_portal_service_get_controller_disconnected, NULL, 0, napi_default, NULL },
+    { "authenticated", 0, 0, fdn_portal_service_get_authenticated, NULL, 0, napi_default, NULL },
+    { "subscribe", 0, 0, fdn_portal_service_get_subscribe, NULL, 0, napi_default, NULL },
+    { "message", 0, 0, fdn_portal_service_get_message, NULL, 0, napi_default, NULL },
   };
 
   napi_value constructor;
@@ -13166,6 +13428,114 @@ beach:
   return js_retval;
 }
 
+static napi_value
+fdn_portal_service_get_node_connected (napi_env env,
+                                       napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "nodeConnected", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_portal_service_get_node_joined (napi_env env,
+                                    napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "nodeJoined", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_portal_service_get_node_left (napi_env env,
+                                  napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "nodeLeft", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_portal_service_get_node_disconnected (napi_env env,
+                                          napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "nodeDisconnected", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_portal_service_get_controller_connected (napi_env env,
+                                             napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "controllerConnected", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_portal_service_get_controller_disconnected (napi_env env,
+                                                napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "controllerDisconnected", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_portal_service_get_authenticated (napi_env env,
+                                      napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "authenticated", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_portal_service_get_subscribe (napi_env env,
+                                  napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "subscribe", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_portal_service_get_message (napi_env env,
+                                napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "message", &signal_instance);
+
+  return signal_instance;
+}
+
 static void
 fdn_file_monitor_register (napi_env env,
                            napi_value exports)
@@ -13175,6 +13545,7 @@ fdn_file_monitor_register (napi_env env,
     { "enable", NULL, fdn_file_monitor_enable, NULL, NULL, NULL, napi_default, NULL },
     { "disable", NULL, fdn_file_monitor_disable, NULL, NULL, NULL, napi_default, NULL },
     { "path", NULL, NULL, fdn_file_monitor_get_path, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "change", 0, 0, fdn_file_monitor_get_change, NULL, 0, napi_default, NULL },
   };
 
   napi_value constructor;
@@ -13562,6 +13933,18 @@ beach:
   return js_retval;
 }
 
+static napi_value
+fdn_file_monitor_get_change (napi_env env,
+                             napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "change", &signal_instance);
+
+  return signal_instance;
+}
+
 static void
 fdn_compiler_register (napi_env env,
                        napi_value exports)
@@ -13571,6 +13954,10 @@ fdn_compiler_register (napi_env env,
     { "build", NULL, fdn_compiler_build, NULL, NULL, NULL, napi_default, NULL },
     { "watch", NULL, fdn_compiler_watch, NULL, NULL, NULL, napi_default, NULL },
     { "manager", NULL, NULL, fdn_compiler_get_manager, NULL, NULL, napi_enumerable | napi_configurable, NULL },
+    { "starting", 0, 0, fdn_compiler_get_starting, NULL, 0, napi_default, NULL },
+    { "finished", 0, 0, fdn_compiler_get_finished, NULL, 0, napi_default, NULL },
+    { "output", 0, 0, fdn_compiler_get_output, NULL, 0, napi_default, NULL },
+    { "diagnostics", 0, 0, fdn_compiler_get_diagnostics, NULL, 0, napi_default, NULL },
   };
 
   napi_value constructor;
@@ -14005,6 +14392,54 @@ fdn_compiler_get_manager (napi_env env,
 
 beach:
   return js_retval;
+}
+
+static napi_value
+fdn_compiler_get_starting (napi_env env,
+                           napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "starting", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_compiler_get_finished (napi_env env,
+                           napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "finished", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_compiler_get_output (napi_env env,
+                         napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "output", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_compiler_get_diagnostics (napi_env env,
+                              napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "diagnostics", &signal_instance);
+
+  return signal_instance;
 }
 
 static void
@@ -17474,6 +17909,8 @@ fdn_service_register (napi_env env,
     { "activate", NULL, fdn_service_activate, NULL, NULL, NULL, napi_default, NULL },
     { "cancel", NULL, fdn_service_cancel, NULL, NULL, NULL, napi_default, NULL },
     { "request", NULL, fdn_service_request, NULL, NULL, NULL, napi_default, NULL },
+    { "close", 0, 0, fdn_service_get_close, NULL, 0, napi_default, NULL },
+    { "message", 0, 0, fdn_service_get_message, NULL, 0, napi_default, NULL },
   };
 
   napi_value constructor;
@@ -18002,6 +18439,30 @@ fdn_service_request_operation_free (FdnServiceRequestOperation * operation)
   g_slice_free (FdnServiceRequestOperation, operation);
 }
 
+static napi_value
+fdn_service_get_close (napi_env env,
+                       napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "close", &signal_instance);
+
+  return signal_instance;
+}
+
+static napi_value
+fdn_service_get_message (napi_env env,
+                         napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "message", &signal_instance);
+
+  return signal_instance;
+}
+
 static void
 fdn_injector_register (napi_env env,
                        napi_value exports)
@@ -18014,6 +18475,7 @@ fdn_injector_register (napi_env env,
     { "demonitor", NULL, fdn_injector_demonitor, NULL, NULL, NULL, napi_default, NULL },
     { "demonitorAndCloneState", NULL, fdn_injector_demonitor_and_clone_state, NULL, NULL, NULL, napi_default, NULL },
     { "recreateThread", NULL, fdn_injector_recreate_thread, NULL, NULL, NULL, napi_default, NULL },
+    { "uninjected", 0, 0, fdn_injector_get_uninjected, NULL, 0, napi_default, NULL },
   };
 
   napi_value constructor;
@@ -19021,6 +19483,18 @@ fdn_injector_recreate_thread_operation_free (FdnInjectorRecreateThreadOperation 
   g_slice_free (FdnInjectorRecreateThreadOperation, operation);
 }
 
+static napi_value
+fdn_injector_get_uninjected (napi_env env,
+                             napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "uninjected", &signal_instance);
+
+  return signal_instance;
+}
+
 static void
 fdn_authentication_service_register (napi_env env,
                                      napi_value exports)
@@ -19290,6 +19764,7 @@ fdn_cancellable_register (napi_env env,
     { "pushCurrent", NULL, fdn_cancellable_push_current, NULL, NULL, NULL, napi_default, NULL },
     { "reset", NULL, fdn_cancellable_reset, NULL, NULL, NULL, napi_default, NULL },
     { "throwIfCancelled", NULL, fdn_cancellable_throw_if_cancelled, NULL, NULL, NULL, napi_default, NULL },
+    { "cancelled", 0, 0, fdn_cancellable_get_cancelled, NULL, 0, napi_default, NULL },
   };
 
   napi_value constructor;
@@ -19631,6 +20106,18 @@ fdn_cancellable_throw_if_cancelled (napi_env env,
 
 beach:
   return js_retval;
+}
+
+static napi_value
+fdn_cancellable_get_cancelled (napi_env env,
+                               napi_callback_info info)
+{
+  napi_value jsthis, signal_instance;
+
+  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
+  napi_get_named_property (env, jsthis, "cancelled", &signal_instance);
+
+  return signal_instance;
 }
 
 static gboolean
