@@ -428,7 +428,7 @@ def generate_prototypes(object_types: List[ObjectType], enumerations: List[Enume
             for i, signal in enumerate(otype.signals):
                 if i == 0:
                     prototypes.append("")
-                prototypes.append(f"static napi_value {otype_cprefix}_get_{signal.c_name} (napi_env env, napi_callback_info info);")
+                prototypes.append(f"static napi_value {otype_cprefix}_get_{signal.c_name}_signal (napi_env env, napi_callback_info info);")
 
     for enum in enumerations:
         enum_name_snake = to_snake_case(enum.name)
@@ -477,6 +477,13 @@ def generate_prototypes(object_types: List[ObjectType], enumerations: List[Enume
         "static napi_value fdn_io_stream_to_value (napi_env env, GIOStream * stream);",
         "",
         "static void fdn_object_finalize (napi_env env, void * finalize_data, void * finalize_hint);",
+        "static napi_value fdn_object_get_signal (napi_env env, napi_callback_info info, const gchar * name, const gchar * js_storage_name);",
+        "",
+        "static napi_value fdn_signal_new (napi_env env, GObject * handle, const gchar * name);",
+        "static void fdn_signal_register (napi_env env, napi_value exports);",
+        "static napi_value fdn_signal_construct (napi_env env, napi_callback_info info);",
+        "static napi_value fdn_signal_connect (napi_env env, napi_callback_info info);",
+        "static napi_value fdn_signal_disconnect (napi_env env, napi_callback_info info);",
     ]
 
     return "\n".join(prototypes) + "\n\n"
@@ -495,10 +502,17 @@ def generate_type_tags(object_types: List[ObjectType]) -> str:
 
 def generate_constructor_declarations(object_types: List[ObjectType]) -> str:
     declarations = []
+
     for otype in object_types:
         if otype.is_frida_list:
             continue
         declarations.append(f"static napi_ref {otype.c_symbol_prefix}_constructor;")
+
+    declarations += [
+        "",
+        f"static napi_ref fdn_signal_constructor;",
+    ]
+
     return "\n" + "\n".join(declarations) + "\n"
 
 def generate_tsfn_declarations(object_types: List[ObjectType]) -> str:
@@ -521,6 +535,8 @@ fdn_init (napi_env env,
   frida_init ();
 
   {registration_calls}
+
+  fdn_signal_register (env, exports);
 
   return exports;
 }}
@@ -564,7 +580,7 @@ napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource
 
     for signal in otype.signals:
         signal_name_camel = to_camel_case(signal.c_name)
-        jsprop_registrations.append(f"""{{ "{signal_name_camel}", 0, 0, {otype_cprefix}_get_{signal.c_name}, NULL, 0, napi_default, NULL }},""")
+        jsprop_registrations.append(f"""{{ "{signal_name_camel}", NULL, NULL, {otype_cprefix}_get_{signal.c_name}_signal, NULL, NULL, napi_default, NULL }},""")
 
     jsprop_registrations_str = "\n    ".join(jsprop_registrations)
     resource_name_declaration = "\n\n  napi_value resource_name;" if tsfn_initializations else ""
@@ -603,11 +619,9 @@ static gboolean
 {calculate_indent("_from_value")}napi_value value,
 {calculate_indent("_from_value")}{otype.c_type} ** handle)
 {{
-  napi_status status;
   bool is_instance;
 
-  status = napi_check_object_type_tag (env, value, &{otype_cprefix}_type_tag, &is_instance);
-  if (status != napi_ok || !is_instance)
+  if (napi_check_object_type_tag (env, value, &{otype_cprefix}_type_tag, &is_instance) != napi_ok || !is_instance)
   {{
     napi_throw_type_error (env, NULL, "expected an instance of {otype.name}");
     return FALSE;
@@ -652,7 +666,7 @@ def generate_constructor(otype: ObjectType) -> str:
     if default_constructor is not None:
         default_call = f"handle = {default_constructor.c_identifier} ();"
     else:
-        default_call = "napi_throw_error (env, NULL, \"type {otype.name} cannot be constructed because it lacks a default constructor\");\n  return NULL;"
+        default_call = f"napi_throw_error (env, NULL, \"type {otype.name} cannot be constructed because it lacks a default constructor\");\n    return NULL;"
 
     return f"""
 static napi_value
@@ -662,11 +676,9 @@ static napi_value
   size_t argc = 1;
   napi_value args[1];
   napi_value jsthis;
-  napi_status status;
   {otype.c_type} * handle = NULL;
 
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
+  if (napi_get_cb_info (env, info, &argc, args, &jsthis, NULL) != napi_ok)
     goto propagate_error;
 
   if (argc == 0)
@@ -686,16 +698,13 @@ static napi_value
     g_object_ref (handle);
   }}
 
-  status = napi_type_tag_object (env, jsthis, &{otype_cprefix}_type_tag);
-  if (status != napi_ok)
+  if (napi_type_tag_object (env, jsthis, &{otype_cprefix}_type_tag) != napi_ok)
     goto propagate_error;
 
-  status = napi_wrap (env, jsthis, handle, NULL, NULL, NULL);
-  if (status != napi_ok)
+  if (napi_wrap (env, jsthis, handle, NULL, NULL, NULL) != napi_ok)
     goto propagate_error;
 
-  status = napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL);
-  if (status != napi_ok)
+  if (napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL) != napi_ok)
     goto propagate_error;
 
   return jsthis;
@@ -752,7 +761,6 @@ static napi_value
 {{
   size_t argc = {len(method.parameters)};
   napi_value args[{len(method.parameters)}];
-  napi_status status;
   napi_value jsthis;
   {otype.c_type} * handle;
   napi_deferred deferred;
@@ -760,17 +768,13 @@ static napi_value
   {operation_type_name} * operation;
   GSource * source;
 
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
+  if (napi_get_cb_info (env, info, &argc, args, &jsthis, NULL) != napi_ok)
     return NULL;
 
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
+  if (napi_unwrap (env, jsthis, (void **) &handle) != napi_ok)
     return NULL;
 
-  status = napi_create_promise (env, &deferred, &promise);
-  if (status != napi_ok)
-    return NULL;
+  napi_create_promise (env, &deferred, &promise);
 
   operation = g_slice_new0 ({operation_type_name});
   operation->env = env;
@@ -899,16 +903,13 @@ static napi_value
   napi_value js_retval = NULL;
   size_t argc = {len(method.parameters)};
   napi_value args[{len(method.parameters)}];
-  napi_status status;
   napi_value jsthis;
   {otype.c_type} * handle;{param_declarations_str}{return_variable_declaration}
 
-  status = napi_get_cb_info (env, info, &argc, args, &jsthis, NULL);
-  if (status != napi_ok)
+  if (napi_get_cb_info (env, info, &argc, args, &jsthis, NULL) != napi_ok)
     goto beach;
 
-  status = napi_unwrap (env, jsthis, (void **) &handle);
-  if (status != napi_ok)
+  if (napi_unwrap (env, jsthis, (void **) &handle) != napi_ok)
     goto beach;{param_conversions_str_sync}
 
   {return_assignment}{method.c_identifier} (handle{param_call_str});
@@ -946,19 +947,14 @@ def generate_signal_getter_code(otype: ObjectType, signal: Signal) -> str:
     cprefix = otype.c_symbol_prefix
     signal_name_camel = to_camel_case(signal.c_name)
 
-    indent = " " * (len(cprefix) + 5 + len(signal.c_name) + 2)
+    indent = " " * (len(cprefix) + 5 + len(signal.c_name) + 9)
 
     return f"""
 static napi_value
-{cprefix}_get_{signal.c_name} (napi_env env,
+{cprefix}_get_{signal.c_name}_signal (napi_env env,
 {indent}napi_callback_info info)
 {{
-  napi_value jsthis, signal_instance;
-
-  napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL);
-  napi_get_named_property (env, jsthis, "{signal_name_camel}", &signal_instance);
-
-  return signal_instance;
+  return fdn_object_get_signal (env, info, "{signal.name}", "_{signal_name_camel}");
 }}
 """
 
@@ -1843,6 +1839,195 @@ fdn_object_finalize (napi_env env,
                      void * finalize_hint)
 {
   g_object_unref (finalize_data);
+}
+
+static napi_value
+fdn_object_get_signal (napi_env env,
+                       napi_callback_info info,
+                       const gchar * name,
+                       const gchar * js_storage_name)
+{
+  napi_value result, jsthis, js_storage_name_value;
+  napi_valuetype type;
+
+  if (napi_get_cb_info (env, info, NULL, NULL, &jsthis, NULL) != napi_ok)
+    return NULL;
+
+  js_storage_name_value = fdn_utf8_to_value (env, js_storage_name);
+
+  if (napi_get_property (env, jsthis, js_storage_name_value, &result) != napi_ok)
+    return NULL;
+
+  if (napi_typeof (env, result, &type) != napi_ok)
+    return NULL;
+
+  if (type == napi_undefined)
+  {{
+    GObject * handle;
+
+    if (napi_unwrap (env, jsthis, (void **) &handle) != napi_ok)
+      return NULL;
+
+    result = fdn_signal_new (env, handle, name);
+    napi_set_property (env, jsthis, js_storage_name_value, result);
+  }}
+
+  return result;
+}
+
+static napi_value
+fdn_signal_new (napi_env env,
+                GObject * handle,
+                const gchar * name)
+{
+  napi_value result, constructor, handle_wrapper;
+  napi_value args[2];
+
+  napi_get_reference_value (env, fdn_signal_constructor, &constructor);
+
+  napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
+  napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);
+
+  args[0] = handle_wrapper;
+  args[1] = fdn_utf8_to_value (env, name);
+
+  napi_new_instance (env, constructor, G_N_ELEMENTS (args), args, &result);
+
+  return result;
+}
+
+static void
+fdn_signal_register (napi_env env,
+                     napi_value exports)
+{
+  napi_property_descriptor properties[] =
+  {
+    { "connect", NULL, fdn_signal_connect, NULL, NULL, NULL, napi_default, NULL },
+    { "disconnect", NULL, fdn_signal_disconnect, NULL, NULL, NULL, napi_default, NULL },
+  };
+  napi_value constructor;
+
+  napi_define_class (env, "Signal", NAPI_AUTO_LENGTH, fdn_signal_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_create_reference (env, constructor, 1, &fdn_signal_constructor);
+
+  napi_set_named_property (env, exports, "Signal", constructor);
+}
+
+static napi_value
+fdn_signal_construct (napi_env env,
+                      napi_callback_info info)
+{
+  size_t argc = 2;
+  napi_value args[2];
+  napi_value jsthis;
+  bool is_instance;
+  GObject * handle = NULL;
+  gchar * name = NULL;
+
+  if (napi_get_cb_info (env, info, &argc, args, &jsthis, NULL) != napi_ok)
+    goto propagate_error;
+
+  if (argc != 2)
+    goto missing_argument;
+
+  if (napi_check_object_type_tag (env, args[0], &fdn_handle_wrapper_type_tag, &is_instance) != napi_ok || !is_instance)
+    goto invalid_handle;
+
+  if (napi_get_value_external (env, args[0], (void **) &handle) != napi_ok)
+    goto propagate_error;
+
+  if (!fdn_utf8_from_value (env, args[1], &name))
+    goto propagate_error;
+
+  g_object_ref (handle);
+
+  if (napi_wrap (env, jsthis, handle, NULL, NULL, NULL) != napi_ok)
+    goto propagate_error;
+
+  if (napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL) != napi_ok)
+    goto propagate_error;
+
+  handle = NULL;
+  g_free (name);
+
+  return jsthis;
+
+missing_argument:
+  {
+    napi_throw_error (env, NULL, "missing argument");
+    goto propagate_error;
+  }
+invalid_handle:
+  {
+    napi_throw_type_error (env, NULL, "expected an object handle");
+    goto propagate_error;
+  }
+propagate_error:
+  {
+    g_free (name);
+    g_clear_object (&handle);
+    return NULL;
+  }
+}
+
+static napi_value
+fdn_signal_connect (napi_env env,
+                    napi_callback_info info)
+{
+  napi_value js_retval = NULL;
+  size_t argc = 1;
+  napi_value handler, jsthis;
+  GObject * handle;
+
+  if (napi_get_cb_info (env, info, &argc, &handler, &jsthis, NULL) != napi_ok)
+    goto beach;
+
+  if (argc != 1)
+    goto missing_argument;
+
+  if (napi_unwrap (env, jsthis, (void **) &handle) != napi_ok)
+    goto beach;
+
+  napi_get_undefined (env, &js_retval);
+
+beach:
+  return js_retval;
+
+missing_argument:
+  {
+    napi_throw_error (env, NULL, "missing argument: handler");
+    return NULL;
+  }
+}
+
+static napi_value
+fdn_signal_disconnect (napi_env env,
+                       napi_callback_info info)
+{
+  napi_value js_retval = NULL;
+  size_t argc = 1;
+  napi_value handler, jsthis;
+  GObject * handle;
+
+  if (napi_get_cb_info (env, info, &argc, &handler, &jsthis, NULL) != napi_ok)
+    goto beach;
+
+  if (argc != 1)
+    goto missing_argument;
+
+  if (napi_unwrap (env, jsthis, (void **) &handle) != napi_ok)
+    goto beach;
+
+  napi_get_undefined (env, &js_retval);
+
+beach:
+  return js_retval;
+
+missing_argument:
+  {
+    napi_throw_error (env, NULL, "missing argument: handler");
+    return NULL;
+  }
 }"""
 
 def resolve_destroy_function(type: Type) -> Optional[str]:
