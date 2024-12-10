@@ -20,6 +20,8 @@ import * as socketAddressModule from "./socket_address";
 import * as spawnModule from "./spawn";
 import * as systemParametersModule from "./system_parameters";
 
+export { binding } from "./native";
+
 export type DeviceManager = deviceManagerModule.DeviceManager;
 export const DeviceManager = deviceManagerModule.DeviceManager;
 export type RemoteDeviceOptions = deviceManagerModule.RemoteDeviceOptions;
