@@ -49,7 +49,7 @@ def main(argv: list[str]):
                        cwd=abidir,
                        check=True)
 
-        abi = subprocess.run([node, "-e", f"console.log(require('node-abi').getAbi('{target}', '{runtime}'))"],
+        abi = subprocess.run([node, "-e", f"import('node-abi').then(abi => {{ console.log(abi.getAbi('{target}', '{runtime}')); }})"],
                              capture_output=True,
                              encoding="utf-8",
                              cwd=abidir,
