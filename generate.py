@@ -374,7 +374,7 @@ def generate_operation_structs(object_types: List[ObjectType]) -> str:
     for otype in object_types:
         for method in otype.methods:
             if method.is_async:
-                param_declarations = [f"{param.type.c.replace("const ", "")} {param.name};" for param in method.parameters]
+                param_declarations = [f"{param.type.c.replace('const ', '')} {param.name};" for param in method.parameters]
                 param_declarations_str = "\n  ".join(param_declarations)
                 return_declaration = f"\n  {method.return_value.type.c} retval;" if method.return_value is not None else ""
                 structs.append(f"""\
@@ -747,6 +747,7 @@ def generate_method_code(otype: ObjectType, method: Method) -> str:
 
     if method.is_async:
         param_conversions_str = "\n\n" + "\n\n".join(param_conversions)
+        return_conversion_str = return_conversion.replace("\\n", "\\n  ")
         operation_free_function = f"""\
 static void
 {otype_cprefix}_{method.name}_operation_free ({operation_type_name} * operation)
@@ -846,7 +847,7 @@ static void
   else
   {{
     napi_value js_retval;
-    {return_conversion.replace("\n", "\n  ")}
+    {return_conversion_str}
     napi_resolve_deferred (env, operation->deferred, js_retval);
   }}
 
@@ -858,7 +859,7 @@ static void
 {operation_free_function}
 """
     else:
-        param_declarations = [f"{param.type.c.replace("const ", "")} {param.name}{" = " + param.type.default_value if param.type.default_value is not None else ""};"
+        param_declarations = [f"{param.type.c.replace('const ', '')} {param.name}{' = ' + param.type.default_value if param.type.default_value is not None else ''};"
                               for param in method.parameters]
         if method.throws:
             param_declarations.append("GError * error = NULL;")
