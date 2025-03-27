@@ -4,6 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
 from pathlib import Path
+import sys
 from typing import Callable, List, Optional, Tuple
 import uuid
 import xml.etree.ElementTree as ET
@@ -192,21 +193,15 @@ class Enumeration:
 MethodFilter = Callable[[str, str], bool]
 MethodNameTransformer = Callable[[str, str], str]
 
-def generate_code() -> str:
-    srcroot = Path(__file__).parent
-    frida = parse_gir(srcroot / "Frida-1.0.gir")
+def main(args):
+    frida_c = Path(args[1])
 
-    gio = parse_gir(srcroot / "Gio-2.0.gir",
-                    method_filter=filter_gio_methods,
-                    method_name_transformer=transform_gio_method_name)
+    model = compute_model()
+    frida_c.write_text(generate_napi_bindings(model), encoding="utf-8")
 
-    object_types = [otype for name, otype in frida.object_types.items() if name not in {"ControlService", "RpcClient", "RpcPeer"}]
-    object_types += [
-        #gio.object_types["IOStream"],
-        gio.object_types["Cancellable"],
-    ]
-
-    enumerations = frida.enumerations.values()
+def generate_napi_bindings(model: Model) -> str:
+    object_types = model.object_types
+    enumerations = model.enumerations
 
     code = generate_includes()
     code += generate_operation_structs(object_types)
@@ -237,6 +232,24 @@ def generate_code() -> str:
     code += generate_builtin_conversion_helpers()
 
     return code
+
+def compute_model() -> Model:
+    srcdir = Path(__file__).parent
+    frida = parse_gir(srcdir / "Frida-1.0.gir")
+
+    gio = parse_gir(srcdir / "Gio-2.0.gir",
+                    method_filter=filter_gio_methods,
+                    method_name_transformer=transform_gio_method_name)
+
+    object_types = [otype for name, otype in frida.object_types.items() if name not in {"ControlService", "RpcClient", "RpcPeer"}]
+    object_types += [
+        #gio.object_types["IOStream"],
+        gio.object_types["Cancellable"],
+    ]
+
+    enumerations = frida.enumerations.values()
+
+    return Model(object_types, enumerations)
 
 def filter_gio_methods(object_type: str, method: str) -> bool:
     if object_type == "Cancellable" and method in {"make_pollfd", "release_fd", "source_new"}:
@@ -2092,5 +2105,4 @@ def to_macro_case(identifier: str) -> str:
     return "".join(result).upper()
 
 if __name__ == "__main__":
-    code = generate_code()
-    print(code)
+    main(sys.argv)

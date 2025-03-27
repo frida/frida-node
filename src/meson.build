@@ -1,7 +1,20 @@
-frida_binding_sources = files(
-  'frida.c',
-  'win_delay_load_hook.c',
+code = custom_target('binding-code',
+  output: 'frida.c',
+  input: [
+    'Frida-1.0.gir',
+    'Gio-2.0.gir',
+  ],
+  command: [
+    python,
+    files('generate.py'),
+    '@OUTPUT@',
+  ],
 )
+
+frida_binding_sources = [
+  code[0],
+  files('win_delay_load_hook.c'),
+]
 
 if system == 'windows'
   if cpp.get_argument_syntax() != 'msvc'
