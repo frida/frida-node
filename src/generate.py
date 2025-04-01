@@ -59,6 +59,7 @@ class ObjectType:
     @cached_property
     def methods(self) -> List[Method]:
         methods = []
+        c_prop_names = {prop.c_name for prop in self.properties}
         for element in self._methods:
             name = element.get("name")
             if self.method_filter is not None and not self.method_filter(self.name, name):
@@ -84,7 +85,10 @@ class ObjectType:
             else:
                 retval = None
 
-            methods.append(Method(transformed_method_name, c_identifier, param_list, retval, throws, is_async, self))
+            tokens = transformed_method_name.split("_", maxsplit=1)
+            is_property_accessor = len(tokens) == 2 and tokens[0] in {"get", "set"} and tokens[1] in c_prop_names
+
+            methods.append(Method(transformed_method_name, c_identifier, param_list, retval, throws, is_async, is_property_accessor, self))
         return methods
 
     @cached_property
@@ -125,6 +129,7 @@ class Method:
     return_value: Optional[ReturnValue]
     throws: bool
     is_async: bool
+    is_property_accessor: bool
 
     object_type: ObjectType
 
@@ -193,6 +198,7 @@ class Type:
     name: str
     nick: str
     c: str
+    js: str
     default_value: Optional[str]
 
 class Direction(Enum):
@@ -235,51 +241,62 @@ const binding = bindings({
 def generate_napi_dts(model: Model) -> str:
     lines = [
         "declare namespace bindings {",
-        "  class Signal<T extends (...args: any[]) => void> {",
-        "    connect(callback: T): void;",
-        "    disconnect(callback: T): void;",
-        "  }",
     ]
 
     for otype in model.object_types.values():
+        if otype.is_frida_list:
+            continue
+
         lines += [
             "",
-            f"  class {otype.name} {{",
+            f"    class {otype.name} {{",
         ]
 
         if otype.constructors:
             constructor = otype.constructors[0]
             params = ", ".join(
-                f"{param.js_name}: {param.type.nick}" for param in constructor.parameters
+                f"{param.js_name}: {param.type.js}" for param in constructor.parameters
             )
-            lines.append(f"    constructor({params});")
+            lines.append(f"        constructor({params});")
 
         for method in otype.methods:
+            if method.is_property_accessor:
+                continue
             params = ", ".join(
-                f"{param.js_name}: {param.type.nick}" for param in method.parameters
+                f"{param.js_name}: {param.type.js}" for param in method.parameters
             )
-            return_type = method.return_value.type.nick if method.return_value else "void"
-            lines.append(f"    {method.js_name}({params}): {return_type};")
+            return_type = method.return_value.type.js if method.return_value else "void"
+            lines.append(f"        {method.js_name}({params}): {return_type};")
 
         for prop in otype.properties:
-            prop_type = prop.type.nick
             readonly = "readonly " if not prop.writable else ""
-            lines.append(f"    {readonly}{prop.js_name}: {prop_type};")
+            lines.append(f"        {readonly}{prop.js_name}: {prop.type.js};")
 
         for signal in otype.signals:
             params = ", ".join(
-                f"{param.js_name}: {param.type.name}" for param in signal.parameters
+                f"{param.js_name}: {param.type.js}" for param in signal.parameters
             )
-            lines.append(f"    readonly {signal.js_name}: Signal<({params}) => void>;")
+            lines.append(f"        readonly {signal.js_name}: Signal<({params}) => void>;")
 
-        lines.append("  }")
+        lines.append("    }")
 
     for enum in model.enumerations.values():
-        lines.append(f"  enum {enum.name} {{")
-        lines.append(f"    // Add enum values here if needed")
-        lines.append("  }")
+        lines += [
+            "",
+            f"    enum {enum.name} {{",
+            f"        // TODO: enum values here",
+            "    }",
+        ]
 
-    lines.append("}")
+    lines += [
+        "",
+        "    class Signal<T extends (...args: any[]) => void> {",
+        "        connect(callback: T): void;",
+        "        disconnect(callback: T): void;",
+        "    }",
+        "",
+        "}",
+    ]
 
     return "\n".join(lines)
 
@@ -423,7 +440,7 @@ def extract_type_from_entity(parent_element: ET.Element) -> Optional[Type]:
         assert child is not None
         element_type = extract_type_from_entity(child)
         assert element_type.name == "utf8", "only string arrays are supported for now"
-        return Type("utf8[]", "strv", "gchar **", "NULL")
+        return Type("utf8[]", "strv", "gchar **", "string", "NULL")
     return parse_type(child)
 
 def parse_type(element: ET.Element) -> Optional[Type]:
@@ -432,7 +449,8 @@ def parse_type(element: ET.Element) -> Optional[Type]:
         return None
     nick = type_nick_from_name(name, element)
     c = element.get(f"{{{C_NAMESPACE}}}type").replace("*", " *")
-    return Type(name, nick, c, "NULL" if "*" in c else None)
+    js = js_type_from_gir(name)
+    return Type(name, nick, c, js, "NULL" if "*" in c else None)
 
 def type_nick_from_name(name: str, element: ET.Element) -> str:
     if name == "GLib.PollFD":
@@ -453,6 +471,29 @@ def type_nick_from_name(name: str, element: ET.Element) -> str:
         result = "vardict"
 
     return result
+
+def js_type_from_gir(name: str) -> str:
+    if name == "gboolean":
+        return "boolean"
+    if name in {"gint", "guint", "guint16", "gulong"}:
+        return "number"
+    if name == "utf8":
+        return "string"
+    if name == "utf8[]":
+        return "string[]"
+    if name == "GLib.Bytes":
+        return "Buffer"
+    if name == "GLib.HashTable":
+        return "Object"
+    if name == "GLib.Variant":
+        return "any"
+    if name == "Gio.TlsCertificate":
+        return "string"
+    if name in {"Gio.FileMonitorEvent", "Gio.IOStream", "Gio.SocketAddress"}:
+        return "any"
+    if name.startswith("Frida.") and name.endswith("List"):
+        return name[6:-4] + "[]"
+    return name.split(".")[-1]
 
 def generate_includes() -> str:
     return """\
@@ -643,11 +684,8 @@ def generate_registration_code(otype: ObjectType) -> str:
     jsprop_registrations = []
     tsfn_initializations = []
 
-    c_prop_names = {prop.c_name for prop in otype.properties}
-
     for method in otype.methods:
-        tokens = method.name.split("_", maxsplit=1)
-        if len(tokens) == 2 and tokens[0] in {"get", "set"} and tokens[1] in c_prop_names:
+        if method.is_property_accessor:
             continue
         jsprop_registrations.append(f"""{{ "{method.js_name}", NULL, {otype_cprefix}_{method.name}, NULL, NULL, NULL, napi_default, NULL }},""")
         if method.is_async:
