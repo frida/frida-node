@@ -129,6 +129,10 @@ class Method:
     object_type: ObjectType
 
     @cached_property
+    def js_name(self):
+        return to_camel_case(self.name)
+
+    @cached_property
     def operation_type_name(self) -> str:
         return f"Fdn{self.object_type.name}{to_pascal_case(self.name)}Operation"
 
@@ -140,11 +144,19 @@ class Property:
     writable: bool
     construct_only: bool
 
+    @cached_property
+    def js_name(self):
+        return to_camel_case(self.c_name)
+
 @dataclass
 class Signal:
     name: str
     c_name: str
     parameters: List[Parameter]
+
+    @cached_property
+    def js_name(self):
+        return to_camel_case(self.c_name)
 
 TransferOwnership = Enum("TransferOwnership", ["none", "full", "container"])
 
@@ -155,6 +167,10 @@ class Parameter:
     nullable: bool
     transfer_ownership: TransferOwnership
     direction: Direction
+
+    @cached_property
+    def js_name(self):
+        return to_camel_case(self.name)
 
     @cached_property
     def destroy_function(self) -> Optional[str]:
@@ -217,11 +233,59 @@ const binding = bindings({
 """
 
 def generate_napi_dts(model: Model) -> str:
-    return ""
+    lines = [
+        "declare namespace bindings {",
+        "  class Signal<T extends (...args: any[]) => void> {",
+        "    connect(callback: T): void;",
+        "    disconnect(callback: T): void;",
+        "  }",
+    ]
+
+    for otype in model.object_types.values():
+        lines += [
+            "",
+            f"  class {otype.name} {{",
+        ]
+
+        if otype.constructors:
+            constructor = otype.constructors[0]
+            params = ", ".join(
+                f"{param.js_name}: {param.type.nick}" for param in constructor.parameters
+            )
+            lines.append(f"    constructor({params});")
+
+        for method in otype.methods:
+            params = ", ".join(
+                f"{param.js_name}: {param.type.nick}" for param in method.parameters
+            )
+            return_type = method.return_value.type.nick if method.return_value else "void"
+            lines.append(f"    {method.js_name}({params}): {return_type};")
+
+        for prop in otype.properties:
+            prop_type = prop.type.nick
+            readonly = "readonly " if not prop.writable else ""
+            lines.append(f"    {readonly}{prop.js_name}: {prop_type};")
+
+        for signal in otype.signals:
+            params = ", ".join(
+                f"{param.js_name}: {param.type.name}" for param in signal.parameters
+            )
+            lines.append(f"    readonly {signal.js_name}: Signal<({params}) => void>;")
+
+        lines.append("  }")
+
+    for enum in model.enumerations.values():
+        lines.append(f"  enum {enum.name} {{")
+        lines.append(f"    // Add enum values here if needed")
+        lines.append("  }")
+
+    lines.append("}")
+
+    return "\n".join(lines)
 
 def generate_napi_bindings(model: Model) -> str:
-    object_types = model.object_types
-    enumerations = model.enumerations
+    object_types = model.object_types.values()
+    enumerations = model.enumerations.values()
 
     code = generate_includes()
     code += generate_operation_structs(object_types)
@@ -261,15 +325,11 @@ def compute_model() -> Model:
                     method_filter=filter_gio_methods,
                     method_name_transformer=transform_gio_method_name)
 
-    object_types = [otype for name, otype in frida.object_types.items() if name not in {"ControlService", "RpcClient", "RpcPeer"}]
-    object_types += [
-        #gio.object_types["IOStream"],
-        gio.object_types["Cancellable"],
-    ]
+    object_types = OrderedDict([(name, otype) for name, otype in frida.object_types.items() if name not in {"ControlService", "RpcClient", "RpcPeer"}])
+    #object_types["IOStream"] = gio.object_types["IOStream"]
+    object_types["Cancellable"] = gio.object_types["Cancellable"]
 
-    enumerations = frida.enumerations.values()
-
-    return Model(object_types, enumerations)
+    return Model(object_types, frida.enumerations)
 
 def filter_gio_methods(object_type: str, method: str) -> bool:
     if object_type == "Cancellable" and method in {"make_pollfd", "release_fd", "source_new"}:
@@ -589,17 +649,14 @@ def generate_registration_code(otype: ObjectType) -> str:
         tokens = method.name.split("_", maxsplit=1)
         if len(tokens) == 2 and tokens[0] in {"get", "set"} and tokens[1] in c_prop_names:
             continue
-        method_name_camel = to_camel_case(method.name)
-        jsprop_registrations.append(f"""{{ "{method_name_camel}", NULL, {otype_cprefix}_{method.name}, NULL, NULL, NULL, napi_default, NULL }},""")
+        jsprop_registrations.append(f"""{{ "{method.js_name}", NULL, {otype_cprefix}_{method.name}, NULL, NULL, NULL, napi_default, NULL }},""")
         if method.is_async:
             tsfn_initializations.append(f"""\
-napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource_name);
+napi_create_string_utf8 (env, "{method.js_name}", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, {otype_cprefix}_{method.name}_deliver, &{otype_cprefix}_{method.name}_tsfn);
   napi_unref_threadsafe_function (env, {otype_cprefix}_{method.name}_tsfn);""")
 
     for prop in otype.properties:
-        prop_name_camel = to_camel_case(prop.c_name)
-
         has_setter = prop.writable and not prop.construct_only
 
         setter_str = f"{otype_cprefix}_set_{prop.c_name}" if has_setter else "NULL"
@@ -609,11 +666,10 @@ napi_create_string_utf8 (env, "{method_name_camel}", NAPI_AUTO_LENGTH, &resource
             attrs.insert(0, "writable")
         attrs_str = " | ".join([f"napi_{attr}" for attr in attrs])
 
-        jsprop_registrations.append(f"""{{ "{prop_name_camel}", NULL, NULL, {otype_cprefix}_get_{prop.c_name}, {setter_str}, NULL, {attrs_str}, NULL }},""")
+        jsprop_registrations.append(f"""{{ "{prop.js_name}", NULL, NULL, {otype_cprefix}_get_{prop.c_name}, {setter_str}, NULL, {attrs_str}, NULL }},""")
 
     for signal in otype.signals:
-        signal_name_camel = to_camel_case(signal.c_name)
-        jsprop_registrations.append(f"""{{ "{signal_name_camel}", NULL, NULL, {otype_cprefix}_get_{signal.c_name}_signal, NULL, NULL, napi_default, NULL }},""")
+        jsprop_registrations.append(f"""{{ "{signal.js_name}", NULL, NULL, {otype_cprefix}_get_{signal.c_name}_signal, NULL, NULL, napi_default, NULL }},""")
 
     jsprop_registrations_str = "\n    ".join(jsprop_registrations)
     resource_name_declaration = "\n\n  napi_value resource_name;" if tsfn_initializations else ""
@@ -970,7 +1026,7 @@ def generate_parameter_conversion_code(param: Parameter, index: int, invalid_arg
     if param.nullable:
         code += f"    operation->{param.name} = NULL;"
     else:
-        code += f"""    napi_throw_type_error (env, NULL, "missing argument: {to_camel_case(param.name)}");
+        code += f"""    napi_throw_type_error (env, NULL, "missing argument: {param.js_name}");
     goto {invalid_arg_label};"""
 
     code += "\n  }"
@@ -979,7 +1035,6 @@ def generate_parameter_conversion_code(param: Parameter, index: int, invalid_arg
 
 def generate_signal_getter_code(otype: ObjectType, signal: Signal) -> str:
     cprefix = otype.c_symbol_prefix
-    signal_name_camel = to_camel_case(signal.c_name)
 
     indent = " " * (len(cprefix) + 5 + len(signal.c_name) + 9)
 
@@ -988,7 +1043,7 @@ static napi_value
 {cprefix}_get_{signal.c_name}_signal (napi_env env,
 {indent}napi_callback_info info)
 {{
-  return fdn_object_get_signal (env, info, "{signal.name}", "_{signal_name_camel}");
+  return fdn_object_get_signal (env, info, "{signal.name}", "_{signal.js_name}");
 }}
 """
 
@@ -1154,10 +1209,10 @@ fdn_uint16_from_value (napi_env env,
                        guint16 * u)
 {
   uint32_t napi_u;
-  
+
   if (napi_get_value_uint32 (env, value, &napi_u) != napi_ok)
     goto invalid_argument;
-    
+
   if (napi_u > G_MAXUINT16)
     goto invalid_argument;
 
