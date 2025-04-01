@@ -205,7 +205,16 @@ def main(args):
     frida_binding_c.write_text(generate_napi_bindings(model), encoding="utf-8")
 
 def generate_ts(model: Model) -> str:
-    return ""
+    return """import bindings from "bindings";
+
+const binding = bindings({
+    bindings: "frida_binding",
+    try: [
+        ["module_root", "build", "bindings"],
+        [process.cwd(), "bindings"],
+    ]
+});
+"""
 
 def generate_napi_dts(model: Model) -> str:
     return ""
