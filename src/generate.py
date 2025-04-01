@@ -194,10 +194,21 @@ MethodFilter = Callable[[str, str], bool]
 MethodNameTransformer = Callable[[str, str], str]
 
 def main(args):
-    frida_c = Path(args[1])
+    frida_ts = Path(args[1])
+    frida_binding_dts = Path(args[2])
+    frida_binding_c = Path(args[3])
 
     model = compute_model()
-    frida_c.write_text(generate_napi_bindings(model), encoding="utf-8")
+
+    frida_ts.write_text(generate_ts(model), encoding="utf-8")
+    frida_binding_dts.write_text(generate_napi_dts(model), encoding="utf-8")
+    frida_binding_c.write_text(generate_napi_bindings(model), encoding="utf-8")
+
+def generate_ts(model: Model) -> str:
+    return ""
+
+def generate_napi_dts(model: Model) -> str:
+    return ""
 
 def generate_napi_bindings(model: Model) -> str:
     object_types = model.object_types
@@ -760,7 +771,7 @@ def generate_method_code(otype: ObjectType, method: Method) -> str:
 
     if method.is_async:
         param_conversions_str = "\n\n" + "\n\n".join(param_conversions)
-        return_conversion_str = return_conversion.replace("\\n", "\\n  ")
+        return_conversion_str = return_conversion.replace("\n", "\n  ")
         operation_free_function = f"""\
 static void
 {otype_cprefix}_{method.name}_operation_free ({operation_type_name} * operation)

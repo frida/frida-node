@@ -12,16 +12,16 @@ def main(argv: list[str]):
         for asset in [package_json, tsconfig]:
             shutil.copy(asset, privdir)
 
-        libdir = privdir / "lib"
-        if libdir.exists():
-            shutil.rmtree(libdir)
-        libdir.mkdir()
+        srcdir = privdir / "src"
+        if srcdir.exists():
+            shutil.rmtree(srcdir)
+        srcdir.mkdir()
         for asset in sources:
-            shutil.copy(asset, libdir)
+            shutil.copy(asset, srcdir)
 
-        distdir = privdir / "dist"
-        if distdir.exists():
-            shutil.rmtree(distdir)
+        srcoutdir = privdir / "build" / "src"
+        if srcoutdir.exists():
+            shutil.rmtree(srcoutdir)
 
         run_kwargs = {
             "stdout": subprocess.PIPE,
@@ -32,13 +32,13 @@ def main(argv: list[str]):
         subprocess.run([npm, "install", "--ignore-scripts"],
                        cwd=privdir,
                        **run_kwargs)
-        subprocess.run([npm, "run", "build"],
+        subprocess.run([npm, "exec", "tsc"],
                        cwd=privdir,
                        **run_kwargs)
 
-        for asset in sources:
-            for ext in [".js", ".d.ts"]:
-                shutil.copy(distdir / (asset.stem + ext), outdir)
+        for asset in (s for s in sources if not s.name.endswith(".d.ts")):
+            shutil.copy(srcoutdir / (asset.stem + ".js"), outdir)
+            shutil.copy(srcoutdir / (asset.stem + ".d.ts"), outdir)
     except subprocess.CalledProcessError as e:
         print(e, file=sys.stderr)
         print("Output:\n\t| " + "\n\t| ".join(e.output.strip().split("\n")), file=sys.stderr)

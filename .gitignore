@@ -1,7 +1,5 @@
 /build/
 /deps/
-/dist/
 /node_modules/
 /npm-debug.log
-/prebuilds/
 /subprojects/*

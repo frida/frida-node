@@ -1,5 +1,9 @@
 code = custom_target('binding-code',
-  output: 'frida.c',
+  output: [
+    'frida.ts',
+    'frida_binding.d.ts',
+    'frida_binding.c',
+  ],
   input: [
     'Frida-1.0.gir',
     'Gio-2.0.gir',
@@ -9,10 +13,39 @@ code = custom_target('binding-code',
     files('generate.py'),
     '@OUTPUT@',
   ],
+  install: true,
+  install_dir: [
+    false,
+    pkg_install_dir / 'build' / 'src',
+    false,
+  ],
+)
+
+custom_target('js',
+  input: [
+    code[0],
+    code[1],
+  ],
+  output: [
+    'frida.js',
+    'frida.d.ts',
+  ],
+  command: [
+    python,
+    files('tsc.py'),
+    '@OUTDIR@',
+    '@PRIVATE_DIR@',
+    npm,
+    package_json,
+    tsconfig_json,
+    '@INPUT@',
+  ],
+  install: true,
+  install_dir: pkg_install_dir / 'build' / 'src',
 )
 
 frida_binding_sources = [
-  code[0],
+  code[2],
   files('win_delay_load_hook.c'),
 ]
 

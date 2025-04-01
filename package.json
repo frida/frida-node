@@ -21,20 +21,21 @@
   ],
   "homepage": "https://frida.re",
   "engines": {
-    "node": ">=16 || 14 >=14.17"
+    "node": ">=16"
   },
   "main": "./dist",
+  "type": "module",
   "files": [
     "BSDmakefile",
     "Makefile",
+    "build/src/*.d.ts",
+    "build/src/*.js",
     "configure",
     "configure.bat",
-    "dist/",
     "make.bat",
     "meson.build",
     "meson.options",
     "tsconfig.json",
-    "lib/",
     "releng/*.py",
     "releng/*.toml",
     "releng/devkit-assets/",
@@ -52,7 +53,6 @@
   "dependencies": {
     "bindings": "^1.5.0",
     "minimatch": "^9.0.3",
-    "nan": "^2.18.0",
     "prebuild-install": "^7.1.1"
   },
   "devDependencies": {
@@ -65,9 +65,6 @@
     "typescript": "^5.2.2"
   },
   "scripts": {
-    "prepare": "npm run build",
-    "build": "tsc",
-    "watch": "tsc -w",
     "install": "node scripts/install.js",
     "test": "node --expose-gc node_modules/mocha/bin/_mocha -r ts-node/register test/*.ts"
   },

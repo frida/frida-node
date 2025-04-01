@@ -101,16 +101,29 @@ if host_machine.system() == 'windows'
   ]
 endif
 
-nan_dep = dependency('nan')
-
 frida_core_dep = dependency('frida-core-1.0', default_options: [
   f'frida_version=@version@',
   'compiler_backend=disabled',
 ])
 
-subdir('src')
-
 pkg_install_dir = get_option('libdir') / 'node_modules' / 'frida'
+
+package_json = custom_target('package.json',
+  input: 'package.json',
+  output: 'package.json',
+  command: [
+    python,
+    files('scripts' / 'adjust-version.py'),
+    version,
+    '@INPUT@',
+    '@OUTPUT@',
+  ],
+  install: true,
+  install_dir: pkg_install_dir,
+)
+tsconfig_json = files('tsconfig.json')
+
+subdir('src')
 
 binding = shared_module('frida_binding', frida_binding_sources,
   name_prefix: '',
@@ -125,7 +138,7 @@ binding = shared_module('frida_binding', frida_binding_sources,
   ] + extra_c_args,
   link_args: node_libs + extra_link_args,
   link_depends: extra_link_depends,
-  dependencies: [frida_core_dep, nan_dep],
+  dependencies: frida_core_dep,
   install: true,
   install_dir: pkg_install_dir / 'build',
   vs_module_defs: 'src' / 'addon.def',
@@ -143,20 +156,3 @@ custom_target('prebuild',
     '@OUTPUT@',
   ],
 )
-
-package_json = custom_target('package.json',
-  input: 'package.json',
-  output: 'package.json',
-  command: [
-    python,
-    files('scripts' / 'adjust-version.py'),
-    version,
-    '@INPUT@',
-    '@OUTPUT@',
-  ],
-  install: true,
-  install_dir: pkg_install_dir,
-)
-tsconfig_json = files('tsconfig.json')
-
-subdir('lib')
