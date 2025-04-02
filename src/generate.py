@@ -308,7 +308,7 @@ def generate_ts(model: Model) -> str:
         "const binding: FridaBinding = bindings({",
         '    bindings: "frida_binding",',
         "    try: [",
-        '        ["module_root", "build", "bindings"],',
+        '        ["module_root", "bindings"],',
         '        [process.cwd(), "bindings"],',
         "    ]",
         "});",
@@ -321,6 +321,14 @@ def generate_ts(model: Model) -> str:
     for t in model.public_types.keys():
         lines.append(f"    {t},")
     lines.append("} = binding;")
+
+    lines += [
+        "",
+        "export default {",
+    ]
+    for t in model.public_types.keys():
+        lines.append(f"    {t},")
+    lines.append("};")
 
     return "\n".join(lines)
 

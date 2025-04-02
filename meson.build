@@ -133,6 +133,7 @@ binding = shared_module('frida_binding', frida_binding_sources,
   c_args: [
     '-DBUILDING_NODE_EXTENSION',
     '-DNODE_GYP_MODULE_NAME=frida_binding',
+    '-DNAPI_VERSION=8',
     f'-DHOST_BINARY="@host_binary@"',
     '-DFRIDA_' + runtime.underscorify().to_upper(),
   ] + extra_c_args,
