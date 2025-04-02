@@ -1,23 +1,34 @@
 from __future__ import annotations
+
+import sys
+import uuid
+import xml.etree.ElementTree as ET
 from collections import OrderedDict
 from dataclasses import dataclass
 from enum import Enum
 from functools import cached_property
+from io import StringIO
 from pathlib import Path
-import sys
-from typing import Callable, List, Optional, Tuple
-import uuid
-import xml.etree.ElementTree as ET
+from typing import Callable, List, Optional, Tuple, Union
 
 CORE_NAMESPACE = "http://www.gtk.org/introspection/core/1.0"
 C_NAMESPACE = "http://www.gtk.org/introspection/c/1.0"
 GLIB_NAMESPACE = "http://www.gtk.org/introspection/glib/1.0"
 GIR_NAMESPACES = {"": CORE_NAMESPACE, "glib": GLIB_NAMESPACE}
 
+
 @dataclass
 class Model:
     object_types: OrderedDict[str, ObjectType]
     enumerations: OrderedDict[str, Enumeration]
+
+    @cached_property
+    def public_types(self) -> OrderedDict[str, Union[ObjectType, Enumeration]]:
+        return OrderedDict(
+            [(k, v) for k, v in self.object_types.items() if v.is_public]
+            + list(self.enumerations.items())
+        )
+
 
 @dataclass
 class ObjectType:
@@ -31,16 +42,20 @@ class ObjectType:
     _properties: List[ET.Element]
     _signals: List[ET.Element]
 
+    @property
+    def is_public(self) -> bool:
+        return not self.is_frida_list
+
     @cached_property
-    def is_frida_list(self):
+    def is_frida_list(self) -> bool:
         return self.c_type.startswith("Frida") and self.c_type.endswith("List")
 
     @cached_property
-    def c_symbol_prefix(self):
+    def c_symbol_prefix(self) -> str:
         return f"fdn_{to_snake_case(self.name)}"
 
     @cached_property
-    def c_cast_macro(self):
+    def c_cast_macro(self) -> str:
         return to_macro_case(self.c_type)
 
     @cached_property
@@ -49,7 +64,9 @@ class ObjectType:
         for element in self._constructors:
             name = element.get("name")
 
-            c_identifier, param_list, has_closure_param, throws, is_async = extract_callable_details(element)
+            c_identifier, param_list, has_closure_param, throws, is_async = (
+                extract_callable_details(element)
+            )
             if has_closure_param or throws or is_async:
                 continue
 
@@ -62,33 +79,68 @@ class ObjectType:
         c_prop_names = {prop.c_name for prop in self.properties}
         for element in self._methods:
             name = element.get("name")
-            if self.method_filter is not None and not self.method_filter(self.name, name):
+            if self.method_filter is not None and not self.method_filter(
+                self.name, name
+            ):
                 continue
-            if name.startswith("_") or name.endswith("_sync") or name.endswith("_finish"):
+            if (
+                name.startswith("_")
+                or name.endswith("_sync")
+                or name.endswith("_finish")
+            ):
                 continue
-            transformed_method_name = self.method_name_transformer(self.name, name) if self.method_name_transformer is not None else name
+            transformed_method_name = (
+                self.method_name_transformer(self.name, name)
+                if self.method_name_transformer is not None
+                else name
+            )
 
-            c_identifier, param_list, has_closure_param, throws, is_async = extract_callable_details(element)
+            c_identifier, param_list, has_closure_param, throws, is_async = (
+                extract_callable_details(element)
+            )
             if has_closure_param:
                 continue
 
-            result_element = next((m for m in self._methods if m.get("name") == f"{name}_finish")) if is_async else element
+            result_element = (
+                next((m for m in self._methods if m.get("name") == f"{name}_finish"))
+                if is_async
+                else element
+            )
             retval_element = result_element.find(".//return-value", GIR_NAMESPACES)
             rettype = extract_type_from_entity(retval_element)
             if rettype is not None:
                 nullable = retval_element.get("nullable") == "1"
 
                 ownership_val = retval_element.get("transfer-ownership")
-                transfer_ownership = TransferOwnership[ownership_val] if ownership_val is not None else TransferOwnership.none
+                transfer_ownership = (
+                    TransferOwnership[ownership_val]
+                    if ownership_val is not None
+                    else TransferOwnership.none
+                )
 
                 retval = ReturnValue(rettype, nullable, transfer_ownership)
             else:
                 retval = None
 
             tokens = transformed_method_name.split("_", maxsplit=1)
-            is_property_accessor = len(tokens) == 2 and tokens[0] in {"get", "set"} and tokens[1] in c_prop_names
+            is_property_accessor = (
+                len(tokens) == 2
+                and tokens[0] in {"get", "set"}
+                and tokens[1] in c_prop_names
+            )
 
-            methods.append(Method(transformed_method_name, c_identifier, param_list, retval, throws, is_async, is_property_accessor, self))
+            methods.append(
+                Method(
+                    transformed_method_name,
+                    c_identifier,
+                    param_list,
+                    retval,
+                    throws,
+                    is_async,
+                    is_property_accessor,
+                    self,
+                )
+            )
         return methods
 
     @cached_property
@@ -97,11 +149,15 @@ class ObjectType:
         for element in self._properties:
             name = element.get("name")
             c_name = name.replace("-", "_")
-            properties.append(Property(name,
-                                       c_name,
-                                       type=extract_type_from_entity(element),
-                                       writable=element.get("writable") == "1",
-                                       construct_only=element.get("construct-only") == "1"))
+            properties.append(
+                Property(
+                    name,
+                    c_name,
+                    type=extract_type_from_entity(element),
+                    writable=element.get("writable") == "1",
+                    construct_only=element.get("construct-only") == "1",
+                )
+            )
         return properties
 
     @cached_property
@@ -110,9 +166,12 @@ class ObjectType:
         for element in self._signals:
             name = element.get("name")
             c_name = name.replace("-", "_")
-            param_list = extract_parameters(element.findall("./parameters/parameter", GIR_NAMESPACES))
+            param_list = extract_parameters(
+                element.findall("./parameters/parameter", GIR_NAMESPACES)
+            )
             signals.append(Signal(name, c_name, param_list))
         return signals
+
 
 @dataclass
 class Constructor:
@@ -120,6 +179,7 @@ class Constructor:
     c_identifier: str
     parameters: List[Parameter]
     throws: bool
+
 
 @dataclass
 class Method:
@@ -141,6 +201,7 @@ class Method:
     def operation_type_name(self) -> str:
         return f"Fdn{self.object_type.name}{to_pascal_case(self.name)}Operation"
 
+
 @dataclass
 class Property:
     name: str
@@ -153,6 +214,7 @@ class Property:
     def js_name(self):
         return to_camel_case(self.c_name)
 
+
 @dataclass
 class Signal:
     name: str
@@ -163,7 +225,9 @@ class Signal:
     def js_name(self):
         return to_camel_case(self.c_name)
 
+
 TransferOwnership = Enum("TransferOwnership", ["none", "full", "container"])
+
 
 @dataclass
 class Parameter:
@@ -181,6 +245,7 @@ class Parameter:
     def destroy_function(self) -> Optional[str]:
         return resolve_destroy_function(self.type)
 
+
 @dataclass
 class ReturnValue:
     type: Type
@@ -193,6 +258,7 @@ class ReturnValue:
             return None
         return resolve_destroy_function(self.type)
 
+
 @dataclass
 class Type:
     name: str
@@ -201,10 +267,12 @@ class Type:
     js: str
     default_value: Optional[str]
 
+
 class Direction(Enum):
     IN = "in"
     OUT = "out"
     INOUT = "inout"
+
 
 @dataclass
 class Enumeration:
@@ -212,8 +280,10 @@ class Enumeration:
     c_type: str
     get_type: str
 
+
 MethodFilter = Callable[[str, str], bool]
 MethodNameTransformer = Callable[[str, str], str]
+
 
 def main(args):
     frida_ts = Path(args[1])
@@ -222,34 +292,56 @@ def main(args):
 
     model = compute_model()
 
-    frida_ts.write_text(generate_ts(model), encoding="utf-8")
-    frida_binding_dts.write_text(generate_napi_dts(model), encoding="utf-8")
-    frida_binding_c.write_text(generate_napi_bindings(model), encoding="utf-8")
+    with OutputFile(frida_ts) as output:
+        output.write(generate_ts(model))
+    with OutputFile(frida_binding_dts) as output:
+        output.write(generate_napi_dts(model))
+    with OutputFile(frida_binding_c) as output:
+        output.write(generate_napi_bindings(model))
+
 
 def generate_ts(model: Model) -> str:
-    return """import bindings from "bindings";
-
-const binding = bindings({
-    bindings: "frida_binding",
-    try: [
-        ["module_root", "build", "bindings"],
-        [process.cwd(), "bindings"],
+    lines = [
+        'import bindings from "bindings";',
+        'import type { FridaBinding } from "./frida_binding.d.ts";',
+        "",
+        "const binding: FridaBinding = bindings({",
+        '    bindings: "frida_binding",',
+        "    try: [",
+        '        ["module_root", "build", "bindings"],',
+        '        [process.cwd(), "bindings"],',
+        "    ]",
+        "});",
     ]
-});
-"""
+
+    lines += [
+        "",
+        "export const {",
+    ]
+    for t in model.public_types.keys():
+        lines.append(f"    {t},")
+    lines.append("} = binding;")
+
+    return "\n".join(lines)
+
 
 def generate_napi_dts(model: Model) -> str:
     lines = [
-        "declare namespace bindings {",
+        "export interface FridaBinding {",
     ]
+    for t in model.public_types.keys():
+        lines.append(f"    {t}: typeof {t};")
+    lines.append("}")
 
     for otype in model.object_types.values():
-        if otype.is_frida_list:
+        if not otype.is_public:
             continue
 
+        if lines:
+            lines.append("")
+
         lines += [
-            "",
-            f"    class {otype.name} {{",
+            f"export class {otype.name} {{",
         ]
 
         if otype.constructors:
@@ -257,7 +349,7 @@ def generate_napi_dts(model: Model) -> str:
             params = ", ".join(
                 f"{param.js_name}: {param.type.js}" for param in constructor.parameters
             )
-            lines.append(f"        constructor({params});")
+            lines.append(f"    constructor({params});")
 
         for method in otype.methods:
             if method.is_property_accessor:
@@ -266,39 +358,38 @@ def generate_napi_dts(model: Model) -> str:
                 f"{param.js_name}: {param.type.js}" for param in method.parameters
             )
             return_type = method.return_value.type.js if method.return_value else "void"
-            lines.append(f"        {method.js_name}({params}): {return_type};")
+            lines.append(f"    {method.js_name}({params}): {return_type};")
 
         for prop in otype.properties:
             readonly = "readonly " if not prop.writable else ""
-            lines.append(f"        {readonly}{prop.js_name}: {prop.type.js};")
+            lines.append(f"    {readonly}{prop.js_name}: {prop.type.js};")
 
         for signal in otype.signals:
             params = ", ".join(
                 f"{param.js_name}: {param.type.js}" for param in signal.parameters
             )
-            lines.append(f"        readonly {signal.js_name}: Signal<({params}) => void>;")
+            lines.append(f"    readonly {signal.js_name}: Signal<({params}) => void>;")
 
-        lines.append("    }")
+        lines.append("}")
 
     for enum in model.enumerations.values():
         lines += [
             "",
-            f"    enum {enum.name} {{",
-            f"        // TODO: enum values here",
-            "    }",
+            f"export enum {enum.name} {{",
+            f"    // TODO: enum values here",
+            " }",
         ]
 
     lines += [
         "",
-        "    class Signal<T extends (...args: any[]) => void> {",
-        "        connect(callback: T): void;",
-        "        disconnect(callback: T): void;",
-        "    }",
-        "",
+        "export class Signal<T extends (...args: any[]) => void> {",
+        "    connect(callback: T): void;",
+        "    disconnect(callback: T): void;",
         "}",
     ]
 
     return "\n".join(lines)
+
 
 def generate_napi_bindings(model: Model) -> str:
     object_types = model.object_types.values()
@@ -334,33 +425,51 @@ def generate_napi_bindings(model: Model) -> str:
 
     return code
 
+
 def compute_model() -> Model:
     srcdir = Path(__file__).parent
     frida = parse_gir(srcdir / "Frida-1.0.gir")
 
-    gio = parse_gir(srcdir / "Gio-2.0.gir",
-                    method_filter=filter_gio_methods,
-                    method_name_transformer=transform_gio_method_name)
+    gio = parse_gir(
+        srcdir / "Gio-2.0.gir",
+        method_filter=filter_gio_methods,
+        method_name_transformer=transform_gio_method_name,
+    )
 
-    object_types = OrderedDict([(name, otype) for name, otype in frida.object_types.items() if name not in {"ControlService", "RpcClient", "RpcPeer"}])
-    #object_types["IOStream"] = gio.object_types["IOStream"]
+    object_types = OrderedDict(
+        [
+            (name, otype)
+            for name, otype in frida.object_types.items()
+            if name not in {"ControlService", "RpcClient", "RpcPeer"}
+        ]
+    )
+    # object_types["IOStream"] = gio.object_types["IOStream"]
     object_types["Cancellable"] = gio.object_types["Cancellable"]
 
     return Model(object_types, frida.enumerations)
 
+
 def filter_gio_methods(object_type: str, method: str) -> bool:
-    if object_type == "Cancellable" and method in {"make_pollfd", "release_fd", "source_new"}:
+    if object_type == "Cancellable" and method in {
+        "make_pollfd",
+        "release_fd",
+        "source_new",
+    }:
         return False
     return True
+
 
 def transform_gio_method_name(object_type: str, name: str) -> str:
     if object_type == "Cancellable" and name == "set_error_if_cancelled":
         return "throw_if_cancelled"
     return name
 
-def parse_gir(file_path: str,
-              method_filter: Optional[MethodFilter] = None,
-              method_name_transformer: Optional[MethodNameTransformer] = None) -> Model:
+
+def parse_gir(
+    file_path: str,
+    method_filter: Optional[MethodFilter] = None,
+    method_name_transformer: Optional[MethodNameTransformer] = None,
+) -> Model:
     tree = ET.parse(file_path)
 
     object_types = OrderedDict()
@@ -374,7 +483,17 @@ def parse_gir(file_path: str,
         properties = element.findall(".//property", GIR_NAMESPACES)
         signals = element.findall(".//glib:signal", GIR_NAMESPACES)
 
-        object_types[name] = ObjectType(name, c_type, parent, constructors, methods, method_filter, method_name_transformer, properties, signals)
+        object_types[name] = ObjectType(
+            name,
+            c_type,
+            parent,
+            constructors,
+            methods,
+            method_filter,
+            method_name_transformer,
+            properties,
+            signals,
+        )
 
     for element in tree.getroot().findall(".//interface", GIR_NAMESPACES):
         name = element.get("name")
@@ -386,7 +505,17 @@ def parse_gir(file_path: str,
         properties = element.findall(".//property", GIR_NAMESPACES)
         signals = element.findall(".//glib:signal", GIR_NAMESPACES)
 
-        object_types[name] = ObjectType(name, c_type, parent, constructors, methods, method_filter, method_name_transformer, properties, signals)
+        object_types[name] = ObjectType(
+            name,
+            c_type,
+            parent,
+            constructors,
+            methods,
+            method_filter,
+            method_name_transformer,
+            properties,
+            signals,
+        )
 
     enumerations = OrderedDict()
 
@@ -400,7 +529,10 @@ def parse_gir(file_path: str,
 
     return Model(object_types, enumerations)
 
-def extract_callable_details(element: ET.Element) -> Tuple[str, List[Parameter], bool, bool, bool]:
+
+def extract_callable_details(
+    element: ET.Element,
+) -> Tuple[str, List[Parameter], bool, bool, bool]:
     c_identifier = element.get(f"{{{C_NAMESPACE}}}identifier")
 
     parameters = element.findall("./parameters/parameter", GIR_NAMESPACES)
@@ -409,9 +541,12 @@ def extract_callable_details(element: ET.Element) -> Tuple[str, List[Parameter],
 
     throws = element.get("throws") == "1"
 
-    is_async = any(param[0].get("name") == "Gio.AsyncReadyCallback" for param in parameters)
+    is_async = any(
+        param[0].get("name") == "Gio.AsyncReadyCallback" for param in parameters
+    )
 
     return (c_identifier, param_list, has_closure_param, throws, is_async)
+
 
 def extract_parameters(parameter_elements: List[ET.Element]) -> List[Parameter]:
     param_list = []
@@ -425,13 +560,22 @@ def extract_parameters(parameter_elements: List[ET.Element]) -> List[Parameter]:
         nullable = param.get("nullable") == "1"
 
         ownership_val = param.get("transfer-ownership")
-        transfer_ownership = TransferOwnership[ownership_val] if ownership_val is not None else TransferOwnership.none
+        transfer_ownership = (
+            TransferOwnership[ownership_val]
+            if ownership_val is not None
+            else TransferOwnership.none
+        )
 
         raw_direction = param.get("direction")
-        direction = Direction(raw_direction) if raw_direction is not None else Direction.IN
+        direction = (
+            Direction(raw_direction) if raw_direction is not None else Direction.IN
+        )
 
-        param_list.append(Parameter(param_name, type, nullable, transfer_ownership, direction))
+        param_list.append(
+            Parameter(param_name, type, nullable, transfer_ownership, direction)
+        )
     return param_list
+
 
 def extract_type_from_entity(parent_element: ET.Element) -> Optional[Type]:
     child = parent_element.find("type", GIR_NAMESPACES)
@@ -443,6 +587,7 @@ def extract_type_from_entity(parent_element: ET.Element) -> Optional[Type]:
         return Type("utf8[]", "strv", "gchar **", "string", "NULL")
     return parse_type(child)
 
+
 def parse_type(element: ET.Element) -> Optional[Type]:
     name = element.get("name")
     if name == "none":
@@ -451,6 +596,7 @@ def parse_type(element: ET.Element) -> Optional[Type]:
     c = element.get(f"{{{C_NAMESPACE}}}type").replace("*", " *")
     js = js_type_from_gir(name)
     return Type(name, nick, c, js, "NULL" if "*" in c else None)
+
 
 def type_nick_from_name(name: str, element: ET.Element) -> str:
     if name == "GLib.PollFD":
@@ -467,10 +613,13 @@ def type_nick_from_name(name: str, element: ET.Element) -> str:
     if result == "hash_table":
         key_type = parse_type(element[0])
         value_type = parse_type(element[1])
-        assert key_type.name == "utf8" and value_type.name == "GLib.Variant", "only GHashTable<string, Variant> is supported for now"
+        assert (
+            key_type.name == "utf8" and value_type.name == "GLib.Variant"
+        ), "only GHashTable<string, Variant> is supported for now"
         result = "vardict"
 
     return result
+
 
 def js_type_from_gir(name: str) -> str:
     if name == "gboolean":
@@ -495,6 +644,7 @@ def js_type_from_gir(name: str) -> str:
         return name[6:-4] + "[]"
     return name.split(".")[-1]
 
+
 def generate_includes() -> str:
     return """\
 #include <frida-core.h>
@@ -503,15 +653,24 @@ def generate_includes() -> str:
 
 """
 
+
 def generate_operation_structs(object_types: List[ObjectType]) -> str:
     structs = []
     for otype in object_types:
         for method in otype.methods:
             if method.is_async:
-                param_declarations = [f"{param.type.c.replace('const ', '')} {param.name};" for param in method.parameters]
+                param_declarations = [
+                    f"{param.type.c.replace('const ', '')} {param.name};"
+                    for param in method.parameters
+                ]
                 param_declarations_str = "\n  ".join(param_declarations)
-                return_declaration = f"\n  {method.return_value.type.c} retval;" if method.return_value is not None else ""
-                structs.append(f"""\
+                return_declaration = (
+                    f"\n  {method.return_value.type.c} retval;"
+                    if method.return_value is not None
+                    else ""
+                )
+                structs.append(
+                    f"""\
 typedef struct {{
   napi_env env;
   napi_deferred deferred;
@@ -519,10 +678,14 @@ typedef struct {{
   GError * error;
   {param_declarations_str}{return_declaration}
 }} {method.operation_type_name};
-""")
+"""
+                )
     return "\n".join(structs) + "\n"
 
-def generate_prototypes(object_types: List[ObjectType], enumerations: List[Enumeration]) -> str:
+
+def generate_prototypes(
+    object_types: List[ObjectType], enumerations: List[Enumeration]
+) -> str:
     prototypes = []
 
     for otype in object_types:
@@ -562,7 +725,9 @@ def generate_prototypes(object_types: List[ObjectType], enumerations: List[Enume
             for i, signal in enumerate(otype.signals):
                 if i == 0:
                     prototypes.append("")
-                prototypes.append(f"static napi_value {otype_cprefix}_get_{signal.c_name}_signal (napi_env env, napi_callback_info info);")
+                prototypes.append(
+                    f"static napi_value {otype_cprefix}_get_{signal.c_name}_signal (napi_env env, napi_callback_info info);"
+                )
 
     for enum in enumerations:
         enum_name_snake = to_snake_case(enum.name)
@@ -573,8 +738,7 @@ def generate_prototypes(object_types: List[ObjectType], enumerations: List[Enume
         ]
 
     prototypes += [
-        ""
-        "static gboolean fdn_is_undefined_or_null (napi_env env, napi_value value);",
+        "" "static gboolean fdn_is_undefined_or_null (napi_env env, napi_value value);",
         "",
         "static gboolean fdn_boolean_from_value (napi_env env, napi_value value, gboolean * b);",
         "static napi_value fdn_boolean_to_value (napi_env env, gboolean b);",
@@ -606,7 +770,6 @@ def generate_prototypes(object_types: List[ObjectType], enumerations: List[Enume
         "static napi_value fdn_file_to_value (napi_env env, GFile * file);",
         "static gboolean fdn_tls_certificate_from_value (napi_env env, napi_value value, GTlsCertificate ** certificate);",
         "static napi_value fdn_tls_certificate_to_value (napi_env env, GTlsCertificate * certificate);",
-
         # Temporary stubs for missing types:
         "static napi_value fdn_io_stream_to_value (napi_env env, GIOStream * stream);",
         "",
@@ -622,6 +785,7 @@ def generate_prototypes(object_types: List[ObjectType], enumerations: List[Enume
 
     return "\n".join(prototypes) + "\n\n"
 
+
 def generate_type_tags(object_types: List[ObjectType]) -> str:
     type_tags = [
         "static napi_type_tag fdn_handle_wrapper_type_tag = { 0xdd596d4f2dad45f9, 0x844585a48e8d05ba };"
@@ -631,8 +795,11 @@ def generate_type_tags(object_types: List[ObjectType]) -> str:
             continue
         uuid_str = uuid.uuid4().hex
         uuid_formatted = f"0x{uuid_str[:16]}, 0x{uuid_str[16:]}"
-        type_tags.append(f"static napi_type_tag {otype.c_symbol_prefix}_type_tag = {{ {uuid_formatted} }};")
+        type_tags.append(
+            f"static napi_type_tag {otype.c_symbol_prefix}_type_tag = {{ {uuid_formatted} }};"
+        )
     return "\n".join(type_tags) + "\n"
+
 
 def generate_constructor_declarations(object_types: List[ObjectType]) -> str:
     declarations = []
@@ -649,6 +816,7 @@ def generate_constructor_declarations(object_types: List[ObjectType]) -> str:
 
     return "\n" + "\n".join(declarations) + "\n"
 
+
 def generate_tsfn_declarations(object_types: List[ObjectType]) -> str:
     declarations = []
     for otype in object_types:
@@ -656,11 +824,20 @@ def generate_tsfn_declarations(object_types: List[ObjectType]) -> str:
         if async_methods:
             declarations.append("")
             for method in async_methods:
-                declarations.append(f"static napi_threadsafe_function {otype.c_symbol_prefix}_{method.name}_tsfn;")
+                declarations.append(
+                    f"static napi_threadsafe_function {otype.c_symbol_prefix}_{method.name}_tsfn;"
+                )
     return "\n".join(declarations) + "\n"
 
+
 def generate_init_function(object_types: List[ObjectType]) -> str:
-    registration_calls = "\n  ".join([f"{otype.c_symbol_prefix}_register (env, exports);" for otype in object_types if not otype.is_frida_list])
+    registration_calls = "\n  ".join(
+        [
+            f"{otype.c_symbol_prefix}_register (env, exports);"
+            for otype in object_types
+            if not otype.is_frida_list
+        ]
+    )
     return f"""
 static napi_value
 fdn_init (napi_env env,
@@ -678,6 +855,7 @@ fdn_init (napi_env env,
 NAPI_MODULE (NODE_GYP_MODULE_NAME, fdn_init)
 """
 
+
 def generate_registration_code(otype: ObjectType) -> str:
     otype_cprefix = otype.c_symbol_prefix
 
@@ -687,12 +865,16 @@ def generate_registration_code(otype: ObjectType) -> str:
     for method in otype.methods:
         if method.is_property_accessor:
             continue
-        jsprop_registrations.append(f"""{{ "{method.js_name}", NULL, {otype_cprefix}_{method.name}, NULL, NULL, NULL, napi_default, NULL }},""")
+        jsprop_registrations.append(
+            f"""{{ "{method.js_name}", NULL, {otype_cprefix}_{method.name}, NULL, NULL, NULL, napi_default, NULL }},"""
+        )
         if method.is_async:
-            tsfn_initializations.append(f"""\
+            tsfn_initializations.append(
+                f"""\
 napi_create_string_utf8 (env, "{method.js_name}", NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, {otype_cprefix}_{method.name}_deliver, &{otype_cprefix}_{method.name}_tsfn);
-  napi_unref_threadsafe_function (env, {otype_cprefix}_{method.name}_tsfn);""")
+  napi_unref_threadsafe_function (env, {otype_cprefix}_{method.name}_tsfn);"""
+            )
 
     for prop in otype.properties:
         has_setter = prop.writable and not prop.construct_only
@@ -704,14 +886,22 @@ napi_create_string_utf8 (env, "{method.js_name}", NAPI_AUTO_LENGTH, &resource_na
             attrs.insert(0, "writable")
         attrs_str = " | ".join([f"napi_{attr}" for attr in attrs])
 
-        jsprop_registrations.append(f"""{{ "{prop.js_name}", NULL, NULL, {otype_cprefix}_get_{prop.c_name}, {setter_str}, NULL, {attrs_str}, NULL }},""")
+        jsprop_registrations.append(
+            f"""{{ "{prop.js_name}", NULL, NULL, {otype_cprefix}_get_{prop.c_name}, {setter_str}, NULL, {attrs_str}, NULL }},"""
+        )
 
     for signal in otype.signals:
-        jsprop_registrations.append(f"""{{ "{signal.js_name}", NULL, NULL, {otype_cprefix}_get_{signal.c_name}_signal, NULL, NULL, napi_default, NULL }},""")
+        jsprop_registrations.append(
+            f"""{{ "{signal.js_name}", NULL, NULL, {otype_cprefix}_get_{signal.c_name}_signal, NULL, NULL, napi_default, NULL }},"""
+        )
 
     jsprop_registrations_str = "\n    ".join(jsprop_registrations)
-    resource_name_declaration = "\n\n  napi_value resource_name;" if tsfn_initializations else ""
-    tsfn_initializations_str = "\n\n  " + "\n\n  ".join(tsfn_initializations) if tsfn_initializations else ""
+    resource_name_declaration = (
+        "\n\n  napi_value resource_name;" if tsfn_initializations else ""
+    )
+    tsfn_initializations_str = (
+        "\n\n  " + "\n\n  ".join(tsfn_initializations) if tsfn_initializations else ""
+    )
 
     def calculate_indent(suffix: str) -> str:
         return " " * (len(otype_cprefix) + len(suffix) + 2)
@@ -733,6 +923,7 @@ static void
   napi_set_named_property (env, exports, "{otype.name}", constructor);{resource_name_declaration}{tsfn_initializations_str}
 }}
 """
+
 
 def generate_class_conversion_functions(otype: ObjectType) -> str:
     otype_cprefix = otype.c_symbol_prefix
@@ -782,18 +973,21 @@ static napi_value
 
     return from_value_function + to_value_function
 
+
 def generate_constructor(otype: ObjectType) -> str:
     otype_cprefix = otype.c_symbol_prefix
 
     def calculate_indent(suffix: str) -> str:
         return " " * (len(otype_cprefix) + len(suffix) + 2)
 
-    default_constructor = next((ctor for ctor in otype.constructors if not ctor.parameters), None)
+    default_constructor = next(
+        (ctor for ctor in otype.constructors if not ctor.parameters), None
+    )
 
     if default_constructor is not None:
         default_call = f"handle = {default_constructor.c_identifier} ();"
     else:
-        default_call = f"napi_throw_error (env, NULL, \"type {otype.name} cannot be constructed because it lacks a default constructor\");\n    return NULL;"
+        default_call = f'napi_throw_error (env, NULL, "type {otype.name} cannot be constructed because it lacks a default constructor");\n    return NULL;'
 
     return f"""
 static napi_value
@@ -849,17 +1043,31 @@ propagate_error:
 }}
 """
 
+
 def generate_method_code(otype: ObjectType, method: Method) -> str:
     operation_type_name = method.operation_type_name
     otype_cprefix = otype.c_symbol_prefix
 
     invalid_arg_label = "invalid_argument" if method.is_async else "beach"
-    input_params = [param for param in method.parameters if param.direction != Direction.OUT]
-    param_conversions = [generate_parameter_conversion_code(param, i, invalid_arg_label) for i, param in enumerate(input_params)]
-    param_destruction = [f"g_clear_pointer (&operation->{param.name}, {param.destroy_function});" for param in method.parameters if param.destroy_function is not None]
-    param_destruction_str = "\n  " + "\n  ".join(param_destruction) if param_destruction else ""
+    input_params = [
+        param for param in method.parameters if param.direction != Direction.OUT
+    ]
+    param_conversions = [
+        generate_parameter_conversion_code(param, i, invalid_arg_label)
+        for i, param in enumerate(input_params)
+    ]
+    param_destruction = [
+        f"g_clear_pointer (&operation->{param.name}, {param.destroy_function});"
+        for param in method.parameters
+        if param.destroy_function is not None
+    ]
+    param_destruction_str = (
+        "\n  " + "\n  ".join(param_destruction) if param_destruction else ""
+    )
 
-    return_assignment = f"\n\n  operation->retval = " if method.return_value is not None else ""
+    return_assignment = (
+        f"\n\n  operation->retval = " if method.return_value is not None else ""
+    )
     if method.return_value is not None:
         return_conversion = f"js_retval = fdn_{method.return_value.type.nick}_to_value (env, operation->retval);"
         if method.return_value.nullable:
@@ -867,7 +1075,11 @@ def generate_method_code(otype: ObjectType, method: Method) -> str:
     else:
         return_conversion = "napi_get_undefined (env, &js_retval);"
     retval = method.return_value
-    return_destruction_str = f"\n  g_clear_pointer (&operation->retval, {retval.destroy_function});" if retval is not None and retval.destroy_function is not None else ""
+    return_destruction_str = (
+        f"\n  g_clear_pointer (&operation->retval, {retval.destroy_function});"
+        if retval is not None and retval.destroy_function is not None
+        else ""
+    )
 
     def calculate_indent(suffix: str) -> str:
         return " " * (len(otype_cprefix) + 1 + len(method.name) + len(suffix) + 2)
@@ -986,17 +1198,20 @@ static void
 {operation_free_function}
 """
     else:
-        param_declarations = [f"{param.type.c.replace('const ', '')} {param.name}{' = ' + param.type.default_value if param.type.default_value is not None else ''};"
-                              for param in method.parameters]
+        param_declarations = [
+            f"{param.type.c.replace('const ', '')} {param.name}{' = ' + param.type.default_value if param.type.default_value is not None else ''};"
+            for param in method.parameters
+        ]
         if method.throws:
             param_declarations.append("GError * error = NULL;")
-        param_declarations_str = "\n  " + "\n  ".join(param_declarations) if param_declarations else ""
+        param_declarations_str = (
+            "\n  " + "\n  ".join(param_declarations) if param_declarations else ""
+        )
 
         if param_conversions:
-            param_conversions_str_sync = "\n\n" + "\n".join([
-                line.replace("operation->", "")
-                for line in param_conversions
-            ])
+            param_conversions_str_sync = "\n\n" + "\n".join(
+                [line.replace("operation->", "") for line in param_conversions]
+            )
         else:
             param_conversions_str_sync = ""
 
@@ -1019,7 +1234,11 @@ static void
         else:
             error_check = ""
 
-        return_variable_declaration = f"\n  {method.return_value.type.c} retval;" if method.return_value is not None else ""
+        return_variable_declaration = (
+            f"\n  {method.return_value.type.c} retval;"
+            if method.return_value is not None
+            else ""
+        )
         return_assignment = return_assignment.replace("operation->", "").lstrip()
         return_conversion = return_conversion.replace("operation->", "")
 
@@ -1050,7 +1269,10 @@ beach:{param_destruction_str}
 """
     return code
 
-def generate_parameter_conversion_code(param: Parameter, index: int, invalid_arg_label: str) -> str:
+
+def generate_parameter_conversion_code(
+    param: Parameter, index: int, invalid_arg_label: str
+) -> str:
     code = f"""\
   if (argc > {index} && !fdn_is_undefined_or_null (env, args[{index}]))
   {{
@@ -1071,6 +1293,7 @@ def generate_parameter_conversion_code(param: Parameter, index: int, invalid_arg
 
     return code
 
+
 def generate_signal_getter_code(otype: ObjectType, signal: Signal) -> str:
     cprefix = otype.c_symbol_prefix
 
@@ -1084,6 +1307,7 @@ static napi_value
   return fdn_object_get_signal (env, info, "{signal.name}", "_{signal.js_name}");
 }}
 """
+
 
 def generate_enum_conversion_functions(enum: Enumeration) -> str:
     enum_name_snake = to_snake_case(enum.name)
@@ -1107,6 +1331,7 @@ fdn_{enum_name_snake}_to_value (napi_env env,
   return fdn_enum_to_value (env, {enum.get_type} (), e);
 }}
 """
+
 
 def generate_list_conversion_functions(otype: ObjectType) -> str:
     cprefix = otype.c_symbol_prefix
@@ -1140,6 +1365,7 @@ static napi_value
   return result;
 }}
 """
+
 
 def generate_builtin_conversion_helpers() -> str:
     return """
@@ -2157,6 +2383,7 @@ missing_argument:
   }
 }"""
 
+
 def resolve_destroy_function(type: Type) -> Optional[str]:
     name = type.name
     if name in {"gboolean", "gint", "guint", "guint16", "gulong"}:
@@ -2174,10 +2401,20 @@ def resolve_destroy_function(type: Type) -> Optional[str]:
     if name in {"Gio.Cancellable", "Gio.File", "Gio.IOStream", "Gio.TlsCertificate"}:
         return "g_object_unref"
     if name.startswith("Frida.") or name.startswith("FridaBase."):
-        if name in {"Frida.DeviceType", "Frida.JsCompression", "Frida.SourceMaps", "FridaBase.Realm", "FridaBase.Scope", "FridaBase.ScriptRuntime", "FridaBase.SnapshotTransport", "FridaBase.Stdio"}:
+        if name in {
+            "Frida.DeviceType",
+            "Frida.JsCompression",
+            "Frida.SourceMaps",
+            "FridaBase.Realm",
+            "FridaBase.Scope",
+            "FridaBase.ScriptRuntime",
+            "FridaBase.SnapshotTransport",
+            "FridaBase.Stdio",
+        }:
             return None
         return "frida_unref"
     assert False, f"unable to determine destroy function for {name}"
+
 
 def to_snake_case(name: str) -> str:
     result = []
@@ -2186,7 +2423,7 @@ def to_snake_case(name: str) -> str:
     while i < n:
         if name[i].isupper():
             if i > 0:
-                result.append('_')
+                result.append("_")
             start = i
             if i + 1 < n and name[i + 1].islower():
                 while i + 1 < n and name[i + 1].islower():
@@ -2196,26 +2433,48 @@ def to_snake_case(name: str) -> str:
                     i += 1
                 if i + 1 < n:
                     i -= 1
-            result.append(name[start:i + 1].lower())
+            result.append(name[start : i + 1].lower())
         else:
             result.append(name[i])
         i += 1
     return "".join(result)
 
+
 def to_pascal_case(name: str) -> str:
     return "".join(word.capitalize() for word in name.split("_"))
+
 
 def to_camel_case(name: str) -> str:
     words = name.split("_")
     return words[0] + "".join(word.capitalize() for word in words[1:])
 
+
 def to_macro_case(identifier: str) -> str:
     result = []
     for i, char in enumerate(identifier):
         if char.isupper() and i != 0:
-            result.append('_')
+            result.append("_")
         result.append(char)
     return "".join(result).upper()
+
+
+class OutputFile:
+    def __init__(self, output_path):
+        self._output_path = output_path
+        self._io = StringIO()
+
+    def __enter__(self):
+        return self._io
+
+    def __exit__(self, *exc):
+        result = self._io.getvalue()
+        if self._output_path.exists():
+            existing_contents = self._output_path.read_text(encoding="utf-8")
+            if existing_contents == result:
+                return False
+        self._output_path.write_text(result, encoding="utf-8")
+        return False
+
 
 if __name__ == "__main__":
     main(sys.argv)
