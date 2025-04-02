@@ -279,6 +279,20 @@ class Enumeration:
     name: str
     c_type: str
     get_type: str
+    members: List[EnumerationMember]
+
+
+@dataclass
+class EnumerationMember:
+    name: str
+
+    @cached_property
+    def js_name(self) -> str:
+        return to_pascal_case(self.name)
+
+    @cached_property
+    def nick(self) -> str:
+        return self.name.replace("_", "-")
 
 
 MethodFilter = Callable[[str, str], bool]
@@ -381,11 +395,12 @@ def generate_napi_dts(model: Model) -> str:
         lines.append("}")
 
     for enum in model.enumerations.values():
+        members = ",\n    ".join(f'{member.js_name} = "{member.nick}"' for member in enum.members)
         lines += [
             "",
             f"export enum {enum.name} {{",
-            f"    // TODO: enum values here",
-            " }",
+            f"    {members}",
+            "}",
         ]
 
     lines += [
@@ -533,7 +548,11 @@ def parse_gir(
         enum_name = element.get("name")
         enum_c_type = element.get(f"{{{C_NAMESPACE}}}type")
         get_type = element.get(f"{{{GLIB_NAMESPACE}}}get-type")
-        enumerations[enum_name] = Enumeration(enum_name, enum_c_type, get_type)
+        members = [
+            EnumerationMember(member.get("name"))
+            for member in element.findall(".//member", GIR_NAMESPACES)
+        ]
+        enumerations[enum_name] = Enumeration(enum_name, enum_c_type, get_type, members)
 
     return Model(object_types, enumerations)
 
