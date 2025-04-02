@@ -424,16 +424,16 @@ def generate_napi_bindings(model: Model) -> str:
     code += generate_type_tags(object_types)
     code += generate_constructor_declarations(object_types)
     code += generate_tsfn_declarations(object_types)
-    code += generate_init_function(object_types)
+    code += generate_init_function(object_types, enumerations)
 
     for otype in object_types:
         if otype.is_frida_list:
             code += generate_list_conversion_functions(otype)
             continue
 
-        code += generate_registration_code(otype)
-        code += generate_class_conversion_functions(otype)
-        code += generate_constructor(otype)
+        code += generate_object_type_registration_code(otype)
+        code += generate_object_type_conversion_functions(otype)
+        code += generate_object_type_constructor(otype)
 
         for method in otype.methods:
             code += generate_method_code(otype, method)
@@ -442,6 +442,7 @@ def generate_napi_bindings(model: Model) -> str:
             code += generate_signal_getter_code(otype, signal)
 
     for enum in enumerations:
+        code += generate_enum_registration_code(enum)
         code += generate_enum_conversion_functions(enum)
 
     code += generate_builtin_conversion_helpers()
@@ -760,6 +761,7 @@ def generate_prototypes(
         enum_name_snake = to_snake_case(enum.name)
         prototypes += [
             "",
+            f"static void fdn_{enum_name_snake}_register (napi_env env, napi_value exports);",
             f"G_GNUC_UNUSED static gboolean fdn_{enum_name_snake}_from_value (napi_env env, napi_value value, {enum.c_type} * e);",
             f"G_GNUC_UNUSED static napi_value fdn_{enum_name_snake}_to_value (napi_env env, {enum.c_type} e);",
         ]
@@ -857,14 +859,22 @@ def generate_tsfn_declarations(object_types: List[ObjectType]) -> str:
     return "\n".join(declarations) + "\n"
 
 
-def generate_init_function(object_types: List[ObjectType]) -> str:
-    registration_calls = "\n  ".join(
+def generate_init_function(object_types: List[ObjectType], enumerations: List[Enumeration]) -> str:
+    object_type_registration_calls = "\n  ".join(
         [
             f"{otype.c_symbol_prefix}_register (env, exports);"
             for otype in object_types
             if not otype.is_frida_list
         ]
     )
+
+    enum_type_registration_calls = "\n  ".join(
+        [
+            f"fdn_{to_snake_case(enum.name)}_register (env, exports);"
+            for enum in enumerations
+        ]
+    )
+
     return f"""
 static napi_value
 fdn_init (napi_env env,
@@ -872,7 +882,9 @@ fdn_init (napi_env env,
 {{
   frida_init ();
 
-  {registration_calls}
+  {object_type_registration_calls}
+
+  {enum_type_registration_calls}
 
   fdn_signal_register (env, exports);
 
@@ -883,7 +895,7 @@ NAPI_MODULE (NODE_GYP_MODULE_NAME, fdn_init)
 """
 
 
-def generate_registration_code(otype: ObjectType) -> str:
+def generate_object_type_registration_code(otype: ObjectType) -> str:
     otype_cprefix = otype.c_symbol_prefix
 
     jsprop_registrations = []
@@ -952,7 +964,7 @@ static void
 """
 
 
-def generate_class_conversion_functions(otype: ObjectType) -> str:
+def generate_object_type_conversion_functions(otype: ObjectType) -> str:
     otype_cprefix = otype.c_symbol_prefix
 
     def calculate_indent(suffix: str) -> str:
@@ -1001,7 +1013,7 @@ static napi_value
     return from_value_function + to_value_function
 
 
-def generate_constructor(otype: ObjectType) -> str:
+def generate_object_type_constructor(otype: ObjectType) -> str:
     otype_cprefix = otype.c_symbol_prefix
 
     def calculate_indent(suffix: str) -> str:
@@ -1336,15 +1348,45 @@ static napi_value
 """
 
 
-def generate_enum_conversion_functions(enum: Enumeration) -> str:
-    enum_name_snake = to_snake_case(enum.name)
+def generate_enum_registration_code(enum: Enumeration) -> str:
+    cprefix = f"fdn_{to_snake_case(enum.name)}"
+
+    properties = []
+    for member in enum.members:
+        properties.append(f'{{ "{member.js_name}", NULL, NULL, NULL, NULL, fdn_utf8_to_value (env, "{member.nick}"), napi_enumerable, NULL }}')
+
+    properties_str = ",\n    ".join(properties)
 
     def calculate_indent(suffix: str) -> str:
-        return " " * (4 + len(enum_name_snake) + len(suffix) + 2)
+        return " " * (len(cprefix) + len(suffix) + 2)
+
+    return f"""
+static void
+{cprefix}_register (napi_env env,
+{calculate_indent("_register")}napi_value exports)
+{{
+  napi_value enum_object;
+  napi_property_descriptor properties[] = {{
+    {properties_str}
+  }};
+
+  napi_create_object (env, &enum_object);
+  napi_define_properties (env, enum_object, G_N_ELEMENTS (properties), properties);
+
+  napi_set_named_property (env, exports, "{enum.name}", enum_object);
+}}
+"""
+
+
+def generate_enum_conversion_functions(enum: Enumeration) -> str:
+    name = to_snake_case(enum.name)
+
+    def calculate_indent(suffix: str) -> str:
+        return " " * (4 + len(name) + len(suffix) + 2)
 
     return f"""
 static gboolean
-fdn_{enum_name_snake}_from_value (napi_env env,
+fdn_{name}_from_value (napi_env env,
 {calculate_indent("_from_value")}napi_value value,
 {calculate_indent("_from_value")}{enum.c_type} * e)
 {{
@@ -1352,7 +1394,7 @@ fdn_{enum_name_snake}_from_value (napi_env env,
 }}
 
 static napi_value
-fdn_{enum_name_snake}_to_value (napi_env env,
+fdn_{name}_to_value (napi_env env,
 {calculate_indent("_to_value")}{enum.c_type} e)
 {{
   return fdn_enum_to_value (env, {enum.get_type} (), e);
