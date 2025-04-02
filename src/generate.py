@@ -363,7 +363,7 @@ def generate_napi_dts(model: Model) -> str:
             if method.is_property_accessor:
                 continue
             params = ", ".join(
-                f"{param.js_name}: {param.type.js}" for param in method.parameters
+                f"{param.js_name}{'?' if param.nullable else ''}: {param.type.js}" for param in method.parameters
             )
             return_type = method.return_value.type.js if method.return_value else "void"
             lines.append(f"    {method.js_name}({params}): {return_type};")
