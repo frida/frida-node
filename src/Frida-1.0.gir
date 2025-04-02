@@ -7,6 +7,21 @@
   <c:include name="frida-core.h" />
   <namespace name="Frida" version="1.0" c:prefix="Frida" c:identifier-prefixes="Frida" c:symbol-prefixes="frida">
     <class name="DeviceManager" c:type="FridaDeviceManager" c:symbol-prefix="device_manager" glib:type-name="FridaDeviceManager" glib:get-type="frida_device_manager_get_type" glib:type-struct="DeviceManagerClass" parent="GObject.Object">
+      <constructor name="new" c:identifier="frida_device_manager_new">
+        <return-value transfer-ownership="full">
+          <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
+        </return-value>
+      </constructor>
+      <constructor name="with_nonlocal_backends_only" c:identifier="frida_device_manager_new_with_nonlocal_backends_only">
+        <return-value transfer-ownership="full">
+          <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
+        </return-value>
+      </constructor>
+      <constructor name="with_socket_backend_only" c:identifier="frida_device_manager_new_with_socket_backend_only">
+        <return-value transfer-ownership="full">
+          <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
+        </return-value>
+      </constructor>
       <method name="close" c:identifier="frida_device_manager_close">
         <return-value transfer-ownership="none">
           <type name="none" c:type="void" />
@@ -559,11 +574,6 @@
           </parameter>
         </parameters>
       </method>
-      <constructor name="new" c:identifier="frida_device_manager_new">
-        <return-value transfer-ownership="full">
-          <type name="Frida.DeviceManager" c:type="FridaDeviceManager*" />
-        </return-value>
-      </constructor>
       <glib:signal name="added">
         <return-value transfer-ownership="full">
           <type name="none" c:type="void" />
@@ -2992,6 +3002,174 @@
         </parameters>
       </glib:signal>
     </class>
+    <class name="Service" c:type="FridaService" c:symbol-prefix="service" glib:type-name="FridaService" glib:get-type="frida_service_get_type" glib:type-struct="ServiceClass" parent="GObject.Object" final="1">
+      <method name="is_closed" c:identifier="frida_service_is_closed">
+        <return-value transfer-ownership="full">
+          <type name="gboolean" c:type="gboolean" />
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <type name="Frida.Service" c:type="FridaService*" />
+          </instance-parameter>
+        </parameters>
+      </method>
+      <method name="activate" c:identifier="frida_service_activate">
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void" />
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <type name="Frida.Service" c:type="FridaService*" />
+          </instance-parameter>
+          <parameter name="cancellable" transfer-ownership="none" nullable="1">
+            <type name="Gio.Cancellable" c:type="GCancellable*" />
+          </parameter>
+          <parameter name="_callback_" transfer-ownership="none" nullable="1" closure="2" scope="async">
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback" />
+          </parameter>
+          <parameter name="_callback__target" transfer-ownership="none" nullable="1">
+            <type name="gpointer" c:type="void*" />
+          </parameter>
+        </parameters>
+      </method>
+      <method name="activate_finish" c:identifier="frida_service_activate_finish" throws="1">
+        <return-value transfer-ownership="full">
+          <type name="none" c:type="void" />
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <type name="Frida.Service" c:type="FridaService*" />
+          </instance-parameter>
+          <parameter name="_res_" transfer-ownership="none">
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
+          </parameter>
+        </parameters>
+      </method>
+      <method name="activate_sync" c:identifier="frida_service_activate_sync" throws="1">
+        <return-value transfer-ownership="full">
+          <type name="none" c:type="void" />
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <type name="Frida.Service" c:type="FridaService*" />
+          </instance-parameter>
+          <parameter name="cancellable" transfer-ownership="none" nullable="1">
+            <type name="Gio.Cancellable" c:type="GCancellable*" />
+          </parameter>
+        </parameters>
+      </method>
+      <method name="cancel" c:identifier="frida_service_cancel">
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void" />
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <type name="Frida.Service" c:type="FridaService*" />
+          </instance-parameter>
+          <parameter name="cancellable" transfer-ownership="none" nullable="1">
+            <type name="Gio.Cancellable" c:type="GCancellable*" />
+          </parameter>
+          <parameter name="_callback_" transfer-ownership="none" nullable="1" closure="2" scope="async">
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback" />
+          </parameter>
+          <parameter name="_callback__target" transfer-ownership="none" nullable="1">
+            <type name="gpointer" c:type="void*" />
+          </parameter>
+        </parameters>
+      </method>
+      <method name="cancel_finish" c:identifier="frida_service_cancel_finish" throws="1">
+        <return-value transfer-ownership="full">
+          <type name="none" c:type="void" />
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <type name="Frida.Service" c:type="FridaService*" />
+          </instance-parameter>
+          <parameter name="_res_" transfer-ownership="none">
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
+          </parameter>
+        </parameters>
+      </method>
+      <method name="cancel_sync" c:identifier="frida_service_cancel_sync" throws="1">
+        <return-value transfer-ownership="full">
+          <type name="none" c:type="void" />
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <type name="Frida.Service" c:type="FridaService*" />
+          </instance-parameter>
+          <parameter name="cancellable" transfer-ownership="none" nullable="1">
+            <type name="Gio.Cancellable" c:type="GCancellable*" />
+          </parameter>
+        </parameters>
+      </method>
+      <method name="request" c:identifier="frida_service_request">
+        <return-value transfer-ownership="none">
+          <type name="none" c:type="void" />
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <type name="Frida.Service" c:type="FridaService*" />
+          </instance-parameter>
+          <parameter name="parameters" transfer-ownership="none">
+            <type name="GLib.Variant" c:type="GVariant*" />
+          </parameter>
+          <parameter name="cancellable" transfer-ownership="none" nullable="1">
+            <type name="Gio.Cancellable" c:type="GCancellable*" />
+          </parameter>
+          <parameter name="_callback_" transfer-ownership="none" nullable="1" closure="3" scope="async">
+            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback" />
+          </parameter>
+          <parameter name="_callback__target" transfer-ownership="none" nullable="1">
+            <type name="gpointer" c:type="void*" />
+          </parameter>
+        </parameters>
+      </method>
+      <method name="request_finish" c:identifier="frida_service_request_finish" throws="1">
+        <return-value transfer-ownership="full">
+          <type name="GLib.Variant" c:type="GVariant*" />
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <type name="Frida.Service" c:type="FridaService*" />
+          </instance-parameter>
+          <parameter name="_res_" transfer-ownership="none">
+            <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
+          </parameter>
+        </parameters>
+      </method>
+      <method name="request_sync" c:identifier="frida_service_request_sync" throws="1">
+        <return-value transfer-ownership="full">
+          <type name="GLib.Variant" c:type="GVariant*" />
+        </return-value>
+        <parameters>
+          <instance-parameter name="self" transfer-ownership="none">
+            <type name="Frida.Service" c:type="FridaService*" />
+          </instance-parameter>
+          <parameter name="parameters" transfer-ownership="none">
+            <type name="GLib.Variant" c:type="GVariant*" />
+          </parameter>
+          <parameter name="cancellable" transfer-ownership="none" nullable="1">
+            <type name="Gio.Cancellable" c:type="GCancellable*" />
+          </parameter>
+        </parameters>
+      </method>
+      <glib:signal name="close">
+        <return-value transfer-ownership="full">
+          <type name="none" c:type="void" />
+        </return-value>
+      </glib:signal>
+      <glib:signal name="message">
+        <return-value transfer-ownership="full">
+          <type name="none" c:type="void" />
+        </return-value>
+        <parameters>
+          <parameter name="message" transfer-ownership="none">
+            <type name="GLib.Variant" c:type="GVariant*" />
+          </parameter>
+        </parameters>
+      </glib:signal>
+    </class>
     <class name="Session" c:type="FridaSession" c:symbol-prefix="session" glib:type-name="FridaSession" glib:get-type="frida_session_get_type" glib:type-struct="SessionClass" parent="GObject.Object">
       <implements name="FridaBase.AgentMessageSink" />
       <method name="is_detached" c:identifier="frida_session_is_detached">
@@ -3885,7 +4063,7 @@
       </method>
     </class>
     <class name="ControlService" c:type="FridaControlService" c:symbol-prefix="control_service" glib:type-name="FridaControlService" glib:get-type="frida_control_service_get_type" glib:type-struct="ControlServiceClass" parent="GObject.Object">
-      <constructor name="new" c:identifier="frida_control_service_new">
+      <constructor name="new" c:identifier="frida_control_service_new" throws="1">
         <return-value transfer-ownership="full">
           <type name="Frida.ControlService" c:type="FridaControlService*" />
         </return-value>
@@ -3895,6 +4073,25 @@
           </parameter>
           <parameter name="options" transfer-ownership="none" nullable="1">
             <type name="Frida.ControlServiceOptions" c:type="FridaControlServiceOptions*" />
+          </parameter>
+        </parameters>
+      </constructor>
+      <constructor name="with_device" c:identifier="frida_control_service_new_with_device" throws="1">
+        <return-value transfer-ownership="full">
+          <type name="Frida.ControlService" c:type="FridaControlService*" />
+        </return-value>
+        <parameters>
+          <parameter name="device" transfer-ownership="none">
+            <type name="Frida.Device" c:type="FridaDevice*" />
+          </parameter>
+          <parameter name="endpoint_params" transfer-ownership="none">
+            <type name="FridaBase.EndpointParameters" c:type="FridaEndpointParameters*" />
+          </parameter>
+          <parameter name="options" transfer-ownership="none" nullable="1">
+            <type name="Frida.ControlServiceOptions" c:type="FridaControlServiceOptions*" />
+          </parameter>
+          <parameter name="cancellable" transfer-ownership="none" nullable="1">
+            <type name="Gio.Cancellable" c:type="GCancellable*" />
           </parameter>
         </parameters>
       </constructor>
@@ -5779,284 +5976,6 @@
         </parameters>
       </method>
     </class>
-    <interface name="Service" c:type="FridaService" c:symbol-prefix="service" glib:type-name="FridaService" glib:get-type="frida_service_get_type" glib:type-struct="ServiceIface">
-      <prerequisite name="GObject.Object" />
-      <method name="is_closed" c:identifier="frida_service_is_closed">
-        <return-value transfer-ownership="full">
-          <type name="gboolean" c:type="gboolean" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-        </parameters>
-      </method>
-      <virtual-method name="is_closed" invoker="is_closed">
-        <return-value transfer-ownership="full">
-          <type name="gboolean" c:type="gboolean" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-        </parameters>
-      </virtual-method>
-      <method name="activate" c:identifier="frida_service_activate">
-        <return-value transfer-ownership="none">
-          <type name="none" c:type="void" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-          <parameter name="cancellable" transfer-ownership="none" nullable="1">
-            <type name="Gio.Cancellable" c:type="GCancellable*" />
-          </parameter>
-          <parameter name="_callback_" transfer-ownership="none" nullable="1" closure="2" scope="async">
-            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback" />
-          </parameter>
-          <parameter name="_callback__target" transfer-ownership="none" nullable="1">
-            <type name="gpointer" c:type="void*" />
-          </parameter>
-        </parameters>
-      </method>
-      <method name="activate_finish" c:identifier="frida_service_activate_finish" throws="1">
-        <return-value transfer-ownership="full">
-          <type name="none" c:type="void" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-          <parameter name="_res_" transfer-ownership="none">
-            <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
-          </parameter>
-        </parameters>
-      </method>
-      <virtual-method name="activate" invoker="activate">
-        <return-value transfer-ownership="none">
-          <type name="none" c:type="void" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-          <parameter name="cancellable" transfer-ownership="none" nullable="1">
-            <type name="Gio.Cancellable" c:type="GCancellable*" />
-          </parameter>
-          <parameter name="_callback_" transfer-ownership="none" nullable="1" closure="2" scope="async">
-            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback" />
-          </parameter>
-          <parameter name="_callback__target" transfer-ownership="none" nullable="1">
-            <type name="gpointer" c:type="void*" />
-          </parameter>
-        </parameters>
-      </virtual-method>
-      <virtual-method name="activate_finish" invoker="activate_finish" throws="1">
-        <return-value transfer-ownership="full">
-          <type name="none" c:type="void" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-          <parameter name="_res_" transfer-ownership="none">
-            <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
-          </parameter>
-        </parameters>
-      </virtual-method>
-      <method name="activate_sync" c:identifier="frida_service_activate_sync" throws="1">
-        <return-value transfer-ownership="full">
-          <type name="none" c:type="void" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-          <parameter name="cancellable" transfer-ownership="none" nullable="1">
-            <type name="Gio.Cancellable" c:type="GCancellable*" />
-          </parameter>
-        </parameters>
-      </method>
-      <method name="cancel" c:identifier="frida_service_cancel">
-        <return-value transfer-ownership="none">
-          <type name="none" c:type="void" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-          <parameter name="cancellable" transfer-ownership="none" nullable="1">
-            <type name="Gio.Cancellable" c:type="GCancellable*" />
-          </parameter>
-          <parameter name="_callback_" transfer-ownership="none" nullable="1" closure="2" scope="async">
-            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback" />
-          </parameter>
-          <parameter name="_callback__target" transfer-ownership="none" nullable="1">
-            <type name="gpointer" c:type="void*" />
-          </parameter>
-        </parameters>
-      </method>
-      <method name="cancel_finish" c:identifier="frida_service_cancel_finish" throws="1">
-        <return-value transfer-ownership="full">
-          <type name="none" c:type="void" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-          <parameter name="_res_" transfer-ownership="none">
-            <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
-          </parameter>
-        </parameters>
-      </method>
-      <virtual-method name="cancel" invoker="cancel">
-        <return-value transfer-ownership="none">
-          <type name="none" c:type="void" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-          <parameter name="cancellable" transfer-ownership="none" nullable="1">
-            <type name="Gio.Cancellable" c:type="GCancellable*" />
-          </parameter>
-          <parameter name="_callback_" transfer-ownership="none" nullable="1" closure="2" scope="async">
-            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback" />
-          </parameter>
-          <parameter name="_callback__target" transfer-ownership="none" nullable="1">
-            <type name="gpointer" c:type="void*" />
-          </parameter>
-        </parameters>
-      </virtual-method>
-      <virtual-method name="cancel_finish" invoker="cancel_finish" throws="1">
-        <return-value transfer-ownership="full">
-          <type name="none" c:type="void" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-          <parameter name="_res_" transfer-ownership="none">
-            <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
-          </parameter>
-        </parameters>
-      </virtual-method>
-      <method name="cancel_sync" c:identifier="frida_service_cancel_sync" throws="1">
-        <return-value transfer-ownership="full">
-          <type name="none" c:type="void" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-          <parameter name="cancellable" transfer-ownership="none" nullable="1">
-            <type name="Gio.Cancellable" c:type="GCancellable*" />
-          </parameter>
-        </parameters>
-      </method>
-      <method name="request" c:identifier="frida_service_request">
-        <return-value transfer-ownership="none">
-          <type name="none" c:type="void" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-          <parameter name="parameters" transfer-ownership="none">
-            <type name="GLib.Variant" c:type="GVariant*" />
-          </parameter>
-          <parameter name="cancellable" transfer-ownership="none" nullable="1">
-            <type name="Gio.Cancellable" c:type="GCancellable*" />
-          </parameter>
-          <parameter name="_callback_" transfer-ownership="none" nullable="1" closure="3" scope="async">
-            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback" />
-          </parameter>
-          <parameter name="_callback__target" transfer-ownership="none" nullable="1">
-            <type name="gpointer" c:type="void*" />
-          </parameter>
-        </parameters>
-      </method>
-      <method name="request_finish" c:identifier="frida_service_request_finish" throws="1">
-        <return-value transfer-ownership="full">
-          <type name="GLib.Variant" c:type="GVariant*" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-          <parameter name="_res_" transfer-ownership="none">
-            <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
-          </parameter>
-        </parameters>
-      </method>
-      <virtual-method name="request" invoker="request">
-        <return-value transfer-ownership="none">
-          <type name="none" c:type="void" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-          <parameter name="parameters" transfer-ownership="none">
-            <type name="GLib.Variant" c:type="GVariant*" />
-          </parameter>
-          <parameter name="cancellable" transfer-ownership="none" nullable="1">
-            <type name="Gio.Cancellable" c:type="GCancellable*" />
-          </parameter>
-          <parameter name="_callback_" transfer-ownership="none" nullable="1" closure="3" scope="async">
-            <type name="Gio.AsyncReadyCallback" c:type="GAsyncReadyCallback" />
-          </parameter>
-          <parameter name="_callback__target" transfer-ownership="none" nullable="1">
-            <type name="gpointer" c:type="void*" />
-          </parameter>
-        </parameters>
-      </virtual-method>
-      <virtual-method name="request_finish" invoker="request_finish" throws="1">
-        <return-value transfer-ownership="full">
-          <type name="GLib.Variant" c:type="GVariant*" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-          <parameter name="_res_" transfer-ownership="none">
-            <type name="Gio.AsyncResult" c:type="GAsyncResult*" />
-          </parameter>
-        </parameters>
-      </virtual-method>
-      <method name="request_sync" c:identifier="frida_service_request_sync" throws="1">
-        <return-value transfer-ownership="full">
-          <type name="GLib.Variant" c:type="GVariant*" />
-        </return-value>
-        <parameters>
-          <instance-parameter name="self" transfer-ownership="none">
-            <type name="Frida.Service" c:type="FridaService*" />
-          </instance-parameter>
-          <parameter name="parameters" transfer-ownership="none">
-            <type name="GLib.Variant" c:type="GVariant*" />
-          </parameter>
-          <parameter name="cancellable" transfer-ownership="none" nullable="1">
-            <type name="Gio.Cancellable" c:type="GCancellable*" />
-          </parameter>
-        </parameters>
-      </method>
-      <glib:signal name="close">
-        <return-value transfer-ownership="full">
-          <type name="none" c:type="void" />
-        </return-value>
-      </glib:signal>
-      <glib:signal name="message">
-        <return-value transfer-ownership="full">
-          <type name="none" c:type="void" />
-        </return-value>
-        <parameters>
-          <parameter name="message" transfer-ownership="none">
-            <type name="GLib.Variant" c:type="GVariant*" />
-          </parameter>
-        </parameters>
-      </glib:signal>
-    </interface>
     <interface name="Injector" c:type="FridaInjector" c:symbol-prefix="injector" glib:type-name="FridaInjector" glib:get-type="frida_injector_get_type" glib:type-struct="InjectorIface">
       <prerequisite name="GObject.Object" />
       <function name="new" c:identifier="frida_injector_new">
@@ -6819,18 +6738,9 @@
       <member name="none" c:identifier="FRIDA_JS_COMPRESSION_NONE" value="0" />
       <member name="terser" c:identifier="FRIDA_JS_COMPRESSION_TERSER" value="1" />
     </enumeration>
-    <enumeration name="AgentMessageKind" c:type="FridaAgentMessageKind" glib:type-name="FridaAgentMessageKind" glib:get-type="frida_agent_message_kind_get_type">
-      <member name="script" c:identifier="FRIDA_AGENT_MESSAGE_KIND_SCRIPT" value="1" />
-      <member name="debugger" c:identifier="FRIDA_AGENT_MESSAGE_KIND_DEBUGGER" value="0" />
-    </enumeration>
     <enumeration name="Realm" c:type="FridaRealm" glib:type-name="FridaRealm" glib:get-type="frida_realm_get_type">
       <member name="native" c:identifier="FRIDA_REALM_NATIVE" value="0" />
       <member name="emulated" c:identifier="FRIDA_REALM_EMULATED" value="1" />
-    </enumeration>
-    <enumeration name="UnloadPolicy" c:type="FridaUnloadPolicy" glib:type-name="FridaUnloadPolicy" glib:get-type="frida_unload_policy_get_type">
-      <member name="immediate" c:identifier="FRIDA_UNLOAD_POLICY_IMMEDIATE" value="0" />
-      <member name="resident" c:identifier="FRIDA_UNLOAD_POLICY_RESIDENT" value="1" />
-      <member name="deferred" c:identifier="FRIDA_UNLOAD_POLICY_DEFERRED" value="2" />
     </enumeration>
     <enumeration name="SessionDetachReason" c:type="FridaSessionDetachReason" glib:type-name="FridaSessionDetachReason" glib:get-type="frida_session_detach_reason_get_type">
       <member name="application_requested" c:identifier="FRIDA_SESSION_DETACH_REASON_APPLICATION_REQUESTED" value="1" />
@@ -6866,28 +6776,6 @@
       <member name="turn_udp" c:identifier="FRIDA_RELAY_KIND_TURN_UDP" value="0" />
       <member name="turn_tcp" c:identifier="FRIDA_RELAY_KIND_TURN_TCP" value="1" />
       <member name="turn_tls" c:identifier="FRIDA_RELAY_KIND_TURN_TLS" value="2" />
-    </enumeration>
-    <enumeration name="PeerSetup" c:type="FridaPeerSetup" glib:type-name="FridaPeerSetup" glib:get-type="frida_peer_setup_get_type">
-      <member name="active" c:identifier="FRIDA_PEER_SETUP_ACTIVE" value="0" />
-      <member name="passive" c:identifier="FRIDA_PEER_SETUP_PASSIVE" value="1" />
-      <member name="actpass" c:identifier="FRIDA_PEER_SETUP_ACTPASS" value="2" />
-      <member name="holdconn" c:identifier="FRIDA_PEER_SETUP_HOLDCONN" value="3" />
-    </enumeration>
-    <enumeration name="WebServiceTransport" c:type="FridaWebServiceTransport" glib:type-name="FridaWebServiceTransport" glib:get-type="frida_web_service_transport_get_type">
-      <member name="plain" c:identifier="FRIDA_WEB_SERVICE_TRANSPORT_PLAIN" value="0" />
-      <member name="tls" c:identifier="FRIDA_WEB_SERVICE_TRANSPORT_TLS" value="1" />
-    </enumeration>
-    <enumeration name="WebServiceFlavor" c:type="FridaWebServiceFlavor" glib:type-name="FridaWebServiceFlavor" glib:get-type="frida_web_service_flavor_get_type">
-      <member name="control" c:identifier="FRIDA_WEB_SERVICE_FLAVOR_CONTROL" value="0" />
-      <member name="cluster" c:identifier="FRIDA_WEB_SERVICE_FLAVOR_CLUSTER" value="1" />
-    </enumeration>
-    <enumeration name="PortConflictBehavior" c:type="FridaPortConflictBehavior" glib:type-name="FridaPortConflictBehavior" glib:get-type="frida_port_conflict_behavior_get_type">
-      <member name="fail" c:identifier="FRIDA_PORT_CONFLICT_BEHAVIOR_FAIL" value="0" />
-      <member name="pick_next" c:identifier="FRIDA_PORT_CONFLICT_BEHAVIOR_PICK_NEXT" value="1" />
-    </enumeration>
-    <enumeration name="StringTerminator" c:type="FridaStringTerminator" glib:type-name="FridaStringTerminator" glib:get-type="frida_string_terminator_get_type">
-      <member name="none" c:identifier="FRIDA_STRING_TERMINATOR_NONE" value="0" />
-      <member name="nul" c:identifier="FRIDA_STRING_TERMINATOR_NUL" value="1" />
     </enumeration>
     <enumeration name="Error" c:type="FridaError" glib:type-name="FridaError" glib:get-type="frida_error_get_type" glib:error-domain="frida-error-quark">
       <member name="server_not_running" c:identifier="FRIDA_ERROR_SERVER_NOT_RUNNING" value="0" />
