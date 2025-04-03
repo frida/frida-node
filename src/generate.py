@@ -727,8 +727,31 @@ typedef struct {
 
 typedef struct {
   GClosure closure;
-  napi_threadsafe_function handler;
+  napi_threadsafe_function tsfn;
+  napi_ref handler;
 } FdnSignalClosure;
+
+typedef enum {
+  FDN_SIGNAL_CLOSURE_MESSAGE_DESTROY,
+  FDN_SIGNAL_CLOSURE_MESSAGE_MARSHAL,
+} FdnSignalClosureMessageType;
+
+typedef struct {
+  napi_threadsafe_function tsfn;
+  napi_ref handler;
+} FdnSignalClosureMessageDestroy;
+
+typedef struct {
+  GArray * args;
+} FdnSignalClosureMessageMarshal;
+
+typedef struct {
+  FdnSignalClosureMessageType type;
+  union {
+    FdnSignalClosureMessageDestroy destroy;
+    FdnSignalClosureMessageMarshal marshal;
+  } payload;
+} FdnSignalClosureMessage;
 """
 
 def generate_prototypes(
@@ -816,6 +839,7 @@ def generate_prototypes(
         "static napi_value fdn_vardict_to_value (napi_env env, GHashTable * vardict);",
         "static gboolean fdn_variant_from_value (napi_env env, napi_value value, GVariant ** variant);",
         "static napi_value fdn_variant_to_value (napi_env env, GVariant * variant);",
+        "static napi_value fdn_gvalue_to_value (napi_env env, GValue * val);",
         "static gboolean fdn_file_from_value (napi_env env, napi_value value, GFile ** file);",
         "static napi_value fdn_file_to_value (napi_env env, GFile * file);",
         "static gboolean fdn_tls_certificate_from_value (napi_env env, napi_value value, GTlsCertificate ** certificate);",
@@ -2210,6 +2234,73 @@ fdn_variant_to_value (napi_env env,
   return result;
 }
 
+static napi_value
+fdn_gvalue_to_value (napi_env env,
+                     GValue * val)
+{
+  GType gtype;
+
+  gtype = G_VALUE_TYPE (val);
+
+  switch (gtype)
+  {
+    case G_TYPE_BOOLEAN:
+      return fdn_boolean_to_value (env, g_value_get_boolean (val));
+    case G_TYPE_INT:
+      return fdn_int_to_value (env, g_value_get_int (val));
+    case G_TYPE_UINT:
+      return fdn_uint_to_value (env, g_value_get_uint (val));
+    case G_TYPE_FLOAT:
+      return fdn_double_to_value (env, g_value_get_float (val));
+    case G_TYPE_DOUBLE:
+      return fdn_double_to_value (env, g_value_get_double (val));
+    case G_TYPE_STRING:
+    {
+      const gchar * str;
+
+      str = g_value_get_string (val);
+      if (str == NULL)
+      {
+        napi_value result;
+        napi_get_null (env, &result);
+        return result;
+      }
+
+      return fdn_utf8_to_value (env, str);
+    }
+    default:
+    {
+      GBytes * bytes;
+
+      if (G_TYPE_IS_ENUM (gtype))
+        return fdn_enum_to_value (env, gtype, g_value_get_enum (val));
+
+      if (g_type_is_a (gtype, G_TYPE_SOCKET_ADDRESS))
+      {
+        napi_value result;
+
+        /* TODO */
+        napi_get_null (env, &result);
+
+        return result;
+      }
+
+      g_assert (gtype == G_TYPE_BYTES);
+      bytes = g_value_get_boxed (val);
+      if (bytes != NULL)
+      {
+        return fdn_bytes_to_value (env, bytes);
+      }
+      else
+      {
+        napi_value result;
+        napi_get_null (env, &result);
+        return result;
+      }
+    }
+  }
+}
+
 static gboolean
 fdn_file_from_value (napi_env env,
                      napi_value value,
@@ -2471,7 +2562,6 @@ fdn_signal_connect (napi_env env,
   g_closure_sink (closure);
 
   g_signal_connect_closure_by_id (self->handle, self->id, 0, closure, TRUE);
-  g_printerr ("connected it! signal ID: %u\\n", self->id);
 
   napi_get_undefined (env, &js_retval);
 
@@ -2550,8 +2640,9 @@ fdn_signal_closure_new (napi_env env,
 
   sc = (FdnSignalClosure *) closure;
   napi_create_string_utf8 (env, g_signal_name (signal_id), NAPI_AUTO_LENGTH, &resource_name);
-  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_signal_closure_deliver, &sc->handler);
-  napi_unref_threadsafe_function (env, sc->handler);
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, sc, fdn_signal_closure_deliver, &sc->tsfn);
+  napi_unref_threadsafe_function (env, sc->tsfn);
+  napi_create_reference (env, handler, 1, &sc->handler);
 
   return (GClosure *) sc;
 }
@@ -2561,8 +2652,17 @@ fdn_signal_closure_finalize (gpointer data,
                              GClosure * closure)
 {
   FdnSignalClosure * self = (FdnSignalClosure *) closure;
+  FdnSignalClosureMessage * message;
+  FdnSignalClosureMessageDestroy * d;
 
-  napi_release_threadsafe_function (self->handler, napi_tsfn_abort);
+  message = g_slice_new (FdnSignalClosureMessage);
+  message->type = FDN_SIGNAL_CLOSURE_MESSAGE_DESTROY;
+
+  d = &message->payload.destroy;
+  d->tsfn = self->tsfn;
+  d->handler = self->handler;
+
+  napi_call_threadsafe_function (self->tsfn, message, napi_tsfn_blocking);
 }
 
 static void
@@ -2574,8 +2674,28 @@ fdn_signal_closure_marshal (GClosure * closure,
                             gpointer marshal_data)
 {
   FdnSignalClosure * self = (FdnSignalClosure *) closure;
+  FdnSignalClosureMessage * message;
+  GArray * args;
+  guint i;
 
-  g_printerr ("%s: n_param_values=%u TODO!\\n", G_STRFUNC, n_param_values);
+  message = g_slice_new (FdnSignalClosureMessage);
+  message->type = FDN_SIGNAL_CLOSURE_MESSAGE_MARSHAL;
+
+  g_assert (n_param_values >= 1);
+  args = g_array_sized_new (FALSE, FALSE, sizeof (GValue), n_param_values - 1);
+  message->payload.marshal.args = args;
+
+  for (i = 1; i != n_param_values; i++)
+  {
+    GValue val;
+
+    g_value_init (&val, param_values[i].g_type);
+    g_value_copy (&param_values[i], &val);
+    g_array_append_val (args, val);
+  }
+
+  g_closure_ref (closure);
+  napi_call_threadsafe_function (self->tsfn, message, napi_tsfn_blocking);
 }
 
 static void
@@ -2584,7 +2704,51 @@ fdn_signal_closure_deliver (napi_env env,
                             void * context,
                             void * data)
 {
-  g_printerr ("%s: TODO\\n", G_STRFUNC);
+  FdnSignalClosureMessage * message = data;
+
+  switch (message->type)
+  {
+    case FDN_SIGNAL_CLOSURE_MESSAGE_DESTROY:
+    {
+      FdnSignalClosureMessageDestroy * d = &message->payload.destroy;
+
+      napi_delete_reference (env, d->handler);
+      napi_release_threadsafe_function (d->tsfn, napi_tsfn_abort);
+
+      break;
+    }
+    case FDN_SIGNAL_CLOSURE_MESSAGE_MARSHAL:
+    {
+      FdnSignalClosure * self = context;
+      GArray * args;
+      napi_value * js_args;
+      guint i;
+      napi_value global, handler, js_result;
+
+      args = message->payload.marshal.args;
+
+      js_args = g_newa (napi_value, args->len);
+      for (i = 0; i != args->len; i++)
+        js_args[i] = fdn_gvalue_to_value (env, &g_array_index (args, GValue, i));
+
+      napi_get_global (env, &global);
+      napi_get_reference_value (env, self->handler, &handler);
+
+      napi_call_function (env, global, handler, args->len, js_args, &js_result);
+
+      for (i = 0; i != args->len; i++)
+        g_value_reset (&g_array_index (args, GValue, i));
+      g_array_free (args, TRUE);
+
+      g_closure_unref ((GClosure *) self);
+
+      break;
+    }
+    default:
+      g_assert_not_reached ();
+  }
+
+  g_slice_free (FdnSignalClosureMessage, message);
 }
 """
 

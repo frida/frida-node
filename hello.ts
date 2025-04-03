@@ -4,12 +4,30 @@ function onDeviceAdded(device: frida.Device) {
     console.log("onDeviceAdded:", device.name);
 }
 
+function onMessage(json: string, data: Buffer) {
+    console.log("onMessage:", json, data);
+}
+
 const mgr = new frida.DeviceManager();
 mgr.added.connect(onDeviceAdded);
 const devices = await mgr.enumerateDevices();
 console.log("Got initial devices:", devices.map(d => d.name));
 const device = await mgr.getDeviceByType(frida.DeviceType.Local, 0);
 console.log("Got device:", device.name);
+
+const session = await device.attach(74287);
+
+const script = await session.createScript(`
+let beats = 1;
+setInterval(() => {
+  send({
+      type: 'heartbeat',
+      beats: beats++
+  });
+}, 1000);
+`);
+script.message.connect(onMessage);
+await script.load();
 
 let i = 0;
 setInterval(() => {
