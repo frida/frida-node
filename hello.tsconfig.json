@@ -1,0 +1,11 @@
+{
+    "compilerOptions": {
+        "lib": ["ES2022"],
+        "target": "ES2022",
+        "module": "Node18",
+        "outDir": "./"
+    },
+    "files": [
+        "hello.ts"
+    ]
+}

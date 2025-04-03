@@ -300,7 +300,7 @@ MethodNameTransformer = Callable[[str, str], str]
 
 
 def main(args: List[str]):
-    frida_gir, gio_gir, frida_ts, frida_binding_dts, frida_binding_c = (Path(p) for p in args[1:])
+    frida_gir, gio_gir, frida_ts, frida_binding_dts, frida_binding_c = [Path(p) for p in args[1:]]
 
     model = compute_model(frida_gir, gio_gir)
 
@@ -426,6 +426,7 @@ def generate_napi_bindings(model: Model) -> str:
 
     code = generate_includes()
     code += generate_operation_structs(object_types)
+    code += generate_internal_types()
     code += generate_prototypes(object_types, enumerations)
     code += generate_type_tags(object_types)
     code += generate_constructor_declarations(object_types)
@@ -716,6 +717,13 @@ typedef struct {{
     return "\n".join(structs) + "\n"
 
 
+def generate_internal_types() -> str:
+    return """typedef struct {
+  GClosure closure;
+  napi_threadsafe_function callback;
+} FdnSignalClosure;
+"""
+
 def generate_prototypes(
     object_types: List[ObjectType], enumerations: List[Enumeration]
 ) -> str:
@@ -815,6 +823,11 @@ def generate_prototypes(
         "static napi_value fdn_signal_construct (napi_env env, napi_callback_info info);",
         "static napi_value fdn_signal_connect (napi_env env, napi_callback_info info);",
         "static napi_value fdn_signal_disconnect (napi_env env, napi_callback_info info);",
+
+        "static FdnSignalClosure * fdn_signal_closure_new (napi_env env, guint signal_id, napi_value callback);",
+        "static void fdn_signal_closure_finalize (gpointer data, GClosure * closure);",
+        "static void fdn_signal_closure_marshal (GClosure * closure, GValue * return_gvalue, guint n_param_values, const GValue * param_values, gpointer invocation_hint, gpointer marshal_data);",
+        "static void fdn_signal_closure_deliver (napi_env env, napi_value js_cb, void * context, void * data);",
     ]
 
     return "\n".join(prototypes) + "\n\n"
@@ -2409,8 +2422,8 @@ fdn_signal_connect (napi_env env,
   if (napi_get_cb_info (env, info, &argc, &handler, &jsthis, NULL) != napi_ok)
     goto beach;
 
-  if (argc != 1)
-    goto missing_argument;
+  if (argc < 1)
+    goto missing_handler;
 
   if (napi_unwrap (env, jsthis, (void **) &handle) != napi_ok)
     goto beach;
@@ -2420,7 +2433,7 @@ fdn_signal_connect (napi_env env,
 beach:
   return js_retval;
 
-missing_argument:
+missing_handler:
   {
     napi_throw_error (env, NULL, "missing argument: handler");
     return NULL;
@@ -2439,8 +2452,8 @@ fdn_signal_disconnect (napi_env env,
   if (napi_get_cb_info (env, info, &argc, &handler, &jsthis, NULL) != napi_ok)
     goto beach;
 
-  if (argc != 1)
-    goto missing_argument;
+  if (argc < 1)
+    goto missing_handler;
 
   if (napi_unwrap (env, jsthis, (void **) &handle) != napi_ok)
     goto beach;
@@ -2450,12 +2463,62 @@ fdn_signal_disconnect (napi_env env,
 beach:
   return js_retval;
 
-missing_argument:
+missing_handler:
   {
     napi_throw_error (env, NULL, "missing argument: handler");
     return NULL;
   }
-}"""
+}
+
+static FdnSignalClosure *
+fdn_signal_closure_new (napi_env env,
+                        guint signal_id,
+                        napi_value callback)
+{
+  FdnSignalClosure * sc;
+  GClosure * closure;
+  napi_value resource_name;
+
+  closure = g_closure_new_simple (sizeof (FdnSignalClosure), NULL);
+  g_closure_add_finalize_notifier (closure, NULL, fdn_signal_closure_finalize);
+  g_closure_set_marshal (closure, fdn_signal_closure_marshal);
+
+  sc = (FdnSignalClosure *) closure;
+  napi_create_string_utf8 (env, g_signal_name (signal_id), NAPI_AUTO_LENGTH, &resource_name);
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_signal_closure_deliver, &sc->callback);
+  napi_unref_threadsafe_function (env, sc->callback);
+
+  return sc;
+}
+
+static void
+fdn_signal_closure_finalize (gpointer data,
+                             GClosure * closure)
+{
+  FdnSignalClosure * self = (FdnSignalClosure *) closure;
+
+  napi_release_threadsafe_function (self->callback, napi_tsfn_abort);
+}
+
+static void
+fdn_signal_closure_marshal (GClosure * closure,
+                            GValue * return_gvalue,
+                            guint n_param_values,
+                            const GValue * param_values,
+                            gpointer invocation_hint,
+                            gpointer marshal_data)
+{
+  FdnSignalClosure * self = (FdnSignalClosure *) closure;
+}
+
+static void
+fdn_signal_closure_deliver (napi_env env,
+                            napi_value js_cb,
+                            void * context,
+                            void * data)
+{
+}
+"""
 
 
 def resolve_destroy_function(type: Type) -> Optional[str]:
