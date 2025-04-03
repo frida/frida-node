@@ -412,8 +412,8 @@ def generate_napi_dts(model: Model) -> str:
     lines += [
         "",
         "export class Signal<T extends (...args: any[]) => void> {",
-        "    connect(callback: T): void;",
-        "    disconnect(callback: T): void;",
+        "    connect(handler: T): void;",
+        "    disconnect(handler: T): void;",
         "}",
     ]
 
@@ -718,9 +718,16 @@ typedef struct {{
 
 
 def generate_internal_types() -> str:
-    return """typedef struct {
+    return """
+
+typedef struct {
+  GObject * handle;
+  guint id;
+} FdnSignal;
+
+typedef struct {
   GClosure closure;
-  napi_threadsafe_function callback;
+  napi_threadsafe_function handler;
 } FdnSignalClosure;
 """
 
@@ -780,7 +787,8 @@ def generate_prototypes(
         ]
 
     prototypes += [
-        "" "static gboolean fdn_is_undefined_or_null (napi_env env, napi_value value);",
+        "static gboolean fdn_is_undefined_or_null (napi_env env, napi_value value);",
+        "static gboolean fdn_is_function (napi_env env, napi_value value);",
         "",
         "static gboolean fdn_boolean_from_value (napi_env env, napi_value value, gboolean * b);",
         "static napi_value fdn_boolean_to_value (napi_env env, gboolean b);",
@@ -821,10 +829,12 @@ def generate_prototypes(
         "static napi_value fdn_signal_new (napi_env env, GObject * handle, const gchar * name);",
         "static void fdn_signal_register (napi_env env, napi_value exports);",
         "static napi_value fdn_signal_construct (napi_env env, napi_callback_info info);",
+        "static void fdn_signal_finalize (napi_env env, void * finalize_data, void * finalize_hint);",
         "static napi_value fdn_signal_connect (napi_env env, napi_callback_info info);",
         "static napi_value fdn_signal_disconnect (napi_env env, napi_callback_info info);",
+        "static gboolean fdn_signal_parse_arguments (napi_env env, napi_callback_info info, FdnSignal ** self, napi_value * handler);",
 
-        "static FdnSignalClosure * fdn_signal_closure_new (napi_env env, guint signal_id, napi_value callback);",
+        "static GClosure * fdn_signal_closure_new (napi_env env, guint signal_id, napi_value handler);",
         "static void fdn_signal_closure_finalize (gpointer data, GClosure * closure);",
         "static void fdn_signal_closure_marshal (GClosure * closure, GValue * return_gvalue, guint n_param_values, const GValue * param_values, gpointer invocation_hint, gpointer marshal_data);",
         "static void fdn_signal_closure_deliver (napi_env env, napi_value js_cb, void * context, void * data);",
@@ -1465,6 +1475,17 @@ fdn_is_undefined_or_null (napi_env env,
   napi_typeof (env, value, &type);
 
   return type == napi_undefined || type == napi_null;
+}
+
+static gboolean
+fdn_is_function (napi_env env,
+                 napi_value value)
+{
+  napi_valuetype type;
+
+  napi_typeof (env, value, &type);
+
+  return type == napi_function;
 }
 
 static gboolean
@@ -2360,9 +2381,10 @@ fdn_signal_construct (napi_env env,
   size_t argc = 2;
   napi_value args[2];
   napi_value jsthis;
+  GObject * handle;
   bool is_instance;
-  GObject * handle = NULL;
   gchar * name = NULL;
+  FdnSignal * sig = NULL;
 
   if (napi_get_cb_info (env, info, &argc, args, &jsthis, NULL) != napi_ok)
     goto propagate_error;
@@ -2379,15 +2401,18 @@ fdn_signal_construct (napi_env env,
   if (!fdn_utf8_from_value (env, args[1], &name))
     goto propagate_error;
 
-  g_object_ref (handle);
+  sig = g_slice_new (FdnSignal);
+  sig->handle = g_object_ref (handle);
+  sig->id = g_signal_lookup (name, G_OBJECT_TYPE (sig->handle));
+  if (sig->id == 0)
+    goto invalid_signal_name;
 
-  if (napi_wrap (env, jsthis, handle, NULL, NULL, NULL) != napi_ok)
+  if (napi_wrap (env, jsthis, sig, NULL, NULL, NULL) != napi_ok)
     goto propagate_error;
 
-  if (napi_add_finalizer (env, jsthis, handle, fdn_object_finalize, NULL, NULL) != napi_ok)
+  if (napi_add_finalizer (env, jsthis, sig, fdn_signal_finalize, NULL, NULL) != napi_ok)
     goto propagate_error;
 
-  handle = NULL;
   g_free (name);
 
   return jsthis;
@@ -2402,78 +2427,118 @@ invalid_handle:
     napi_throw_type_error (env, NULL, "expected an object handle");
     goto propagate_error;
   }
+invalid_signal_name:
+  {
+    napi_throw_type_error (env, NULL, "bad signal name");
+    goto propagate_error;
+  }
 propagate_error:
   {
+    if (sig != NULL)
+      fdn_signal_finalize (env, sig, NULL);
+
     g_free (name);
-    g_clear_object (&handle);
+
     return NULL;
   }
+}
+
+static void
+fdn_signal_finalize (napi_env env,
+                     void * finalize_data,
+                     void * finalize_hint)
+{
+  FdnSignal * sig = finalize_data;
+
+  g_object_unref (sig->handle);
+  g_slice_free (FdnSignal, sig);
 }
 
 static napi_value
 fdn_signal_connect (napi_env env,
                     napi_callback_info info)
 {
-  napi_value js_retval = NULL;
-  size_t argc = 1;
-  napi_value handler, jsthis;
-  GObject * handle;
+  napi_value js_retval;
+  FdnSignal * self;
+  napi_value handler;
+  GClosure * closure;
 
-  if (napi_get_cb_info (env, info, &argc, &handler, &jsthis, NULL) != napi_ok)
-    goto beach;
+  if (!fdn_signal_parse_arguments (env, info, &self, &handler))
+    return NULL;
 
-  if (argc < 1)
-    goto missing_handler;
+  closure = fdn_signal_closure_new (env, self->id, handler);
+  g_closure_ref (closure);
+  g_closure_sink (closure);
 
-  if (napi_unwrap (env, jsthis, (void **) &handle) != napi_ok)
-    goto beach;
+  g_signal_connect_closure_by_id (self->handle, self->id, 0, closure, TRUE);
+  g_printerr ("connected it! signal ID: %u\\n", self->id);
 
   napi_get_undefined (env, &js_retval);
 
-beach:
   return js_retval;
-
-missing_handler:
-  {
-    napi_throw_error (env, NULL, "missing argument: handler");
-    return NULL;
-  }
 }
 
 static napi_value
 fdn_signal_disconnect (napi_env env,
                        napi_callback_info info)
 {
-  napi_value js_retval = NULL;
-  size_t argc = 1;
-  napi_value handler, jsthis;
-  GObject * handle;
+  napi_value js_retval;
+  FdnSignal * self;
+  napi_value handler;
 
-  if (napi_get_cb_info (env, info, &argc, &handler, &jsthis, NULL) != napi_ok)
-    goto beach;
+  if (!fdn_signal_parse_arguments (env, info, &self, &handler))
+    return NULL;
 
-  if (argc < 1)
-    goto missing_handler;
-
-  if (napi_unwrap (env, jsthis, (void **) &handle) != napi_ok)
-    goto beach;
+  /* TODO */
 
   napi_get_undefined (env, &js_retval);
 
-beach:
   return js_retval;
+}
+
+static gboolean
+fdn_signal_parse_arguments (napi_env env,
+                            napi_callback_info info,
+                            FdnSignal ** self,
+                            napi_value * handler)
+{
+  size_t argc = 1;
+  napi_value jsthis;
+
+  if (napi_get_cb_info (env, info, &argc, handler, &jsthis, NULL) != napi_ok)
+    goto propagate_error;
+
+  if (napi_unwrap (env, jsthis, (void **) self) != napi_ok)
+    goto propagate_error;
+
+  if (argc != 1)
+    goto missing_handler;
+
+  if (!fdn_is_function (env, *handler))
+    goto invalid_handler;
+
+  return TRUE;
 
 missing_handler:
   {
     napi_throw_error (env, NULL, "missing argument: handler");
-    return NULL;
+    return FALSE;
+  }
+invalid_handler:
+  {
+    napi_throw_error (env, NULL, "expected a function");
+    return FALSE;
+  }
+propagate_error:
+  {
+    return FALSE;
   }
 }
 
-static FdnSignalClosure *
+static GClosure *
 fdn_signal_closure_new (napi_env env,
                         guint signal_id,
-                        napi_value callback)
+                        napi_value handler)
 {
   FdnSignalClosure * sc;
   GClosure * closure;
@@ -2485,10 +2550,10 @@ fdn_signal_closure_new (napi_env env,
 
   sc = (FdnSignalClosure *) closure;
   napi_create_string_utf8 (env, g_signal_name (signal_id), NAPI_AUTO_LENGTH, &resource_name);
-  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_signal_closure_deliver, &sc->callback);
-  napi_unref_threadsafe_function (env, sc->callback);
+  napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, NULL, fdn_signal_closure_deliver, &sc->handler);
+  napi_unref_threadsafe_function (env, sc->handler);
 
-  return sc;
+  return (GClosure *) sc;
 }
 
 static void
@@ -2497,7 +2562,7 @@ fdn_signal_closure_finalize (gpointer data,
 {
   FdnSignalClosure * self = (FdnSignalClosure *) closure;
 
-  napi_release_threadsafe_function (self->callback, napi_tsfn_abort);
+  napi_release_threadsafe_function (self->handler, napi_tsfn_abort);
 }
 
 static void
@@ -2509,6 +2574,8 @@ fdn_signal_closure_marshal (GClosure * closure,
                             gpointer marshal_data)
 {
   FdnSignalClosure * self = (FdnSignalClosure *) closure;
+
+  g_printerr ("%s: n_param_values=%u TODO!\\n", G_STRFUNC, n_param_values);
 }
 
 static void
@@ -2517,6 +2584,7 @@ fdn_signal_closure_deliver (napi_env env,
                             void * context,
                             void * data)
 {
+  g_printerr ("%s: TODO\\n", G_STRFUNC);
 }
 """
 
