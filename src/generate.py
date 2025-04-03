@@ -313,9 +313,14 @@ def main(args: List[str]):
 
 
 def generate_ts(model: Model) -> str:
+    type_imports = ", ".join((f"{t} as _{t}" for t in model.public_types.keys()))
+
     lines = [
         'import bindings from "bindings";',
-        'import type { FridaBinding } from "./frida_binding.d.ts";',
+        f'import type {{ FridaBinding, {type_imports} }} from "./frida_binding.d.ts";',
+    ]
+
+    lines += [
         "",
         "const binding: FridaBinding = bindings({",
         '    bindings: "frida_binding",',
@@ -342,6 +347,10 @@ def generate_ts(model: Model) -> str:
         lines.append(f"    {t},")
     lines.append("};")
 
+    lines.append("")
+    for t in model.public_types.keys():
+        lines.append(f"export type {t} = _{t};")
+
     return "\n".join(lines)
 
 
@@ -357,8 +366,7 @@ def generate_napi_dts(model: Model) -> str:
         if not otype.is_public:
             continue
 
-        if lines:
-            lines.append("")
+        lines.append("")
 
         lines += [
             f"export class {otype.name} {{",
