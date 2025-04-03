@@ -299,12 +299,10 @@ MethodFilter = Callable[[str, str], bool]
 MethodNameTransformer = Callable[[str, str], str]
 
 
-def main(args):
-    frida_ts = Path(args[1])
-    frida_binding_dts = Path(args[2])
-    frida_binding_c = Path(args[3])
+def main(args: List[str]):
+    frida_gir, gio_gir, frida_ts, frida_binding_dts, frida_binding_c = (Path(p) for p in args[1:])
 
-    model = compute_model()
+    model = compute_model(frida_gir, gio_gir)
 
     with OutputFile(frida_ts) as output:
         output.write(generate_ts(model))
@@ -450,12 +448,11 @@ def generate_napi_bindings(model: Model) -> str:
     return code
 
 
-def compute_model() -> Model:
-    srcdir = Path(__file__).parent
-    frida = parse_gir(srcdir / "Frida-1.0.gir")
+def compute_model(frida_gir: Path, gio_gir: Path) -> Model:
+    frida = parse_gir(frida_gir)
 
     gio = parse_gir(
-        srcdir / "Gio-2.0.gir",
+        gio_gir,
         method_filter=filter_gio_methods,
         method_name_transformer=transform_gio_method_name,
     )

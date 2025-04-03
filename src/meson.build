@@ -1,3 +1,13 @@
+if frida_core_dep.type_name() == 'internal'
+  frida_core_subprj = subproject('frida-core')
+  frida_gir = frida_core_subprj.get_variable('core_public_gir')
+  gio_gir = frida_core_subprj.get_variable('gio_gir')
+else
+  girdir = frida_core_dep.get_variable('frida_girdir')
+  frida_gir = girdir / 'Frida-1.0.gir'
+  gio_gir = girdir / 'Gio-2.0.gir'
+endif
+
 code = custom_target('binding-code',
   output: [
     'frida.ts',
@@ -5,12 +15,13 @@ code = custom_target('binding-code',
     'frida_binding.c',
   ],
   input: [
-    'Frida-1.0.gir',
-    'Gio-2.0.gir',
+    frida_gir,
+    gio_gir,
   ],
   command: [
     python,
     files('generate.py'),
+    '@INPUT@',
     '@OUTPUT@',
   ],
   install: true,
