@@ -21,8 +21,11 @@ code = custom_target('binding-code',
   command: [
     python,
     files('generate.py'),
-    '@INPUT@',
-    '@OUTPUT@',
+    '--frida-gir=@INPUT0@',
+    '--gio-gir=@INPUT1@',
+    '--output-ts=@OUTPUT0@',
+    '--output-dts=@OUTPUT1@',
+    '--output-c=@OUTPUT2@',
   ],
   install: true,
   install_dir: [

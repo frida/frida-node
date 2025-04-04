@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import sys
 import uuid
 import xml.etree.ElementTree as ET
@@ -10,6 +11,40 @@ from functools import cached_property
 from io import StringIO
 from pathlib import Path
 from typing import Callable, List, Optional, Tuple, Union
+
+
+CUSTOMIZATIONS = {
+    "Device": {
+        "methods": {
+            "attach": {
+                "customLogic": """
+const target = args[0];
+if (typeof target === "string") {
+    const cancellable = args[2];
+    const processes = await this.enumerateProcesses(cancellable);
+    const process = processes.find(p => p.name === target);
+    if (process === undefined) {
+        throw new Error(`Process "${target}" not found`);
+    }
+    args[0] = process.pid;
+}
+""",
+            },
+            "openChannel": {
+                "returnWrapper": "wrapGioStreamAsNodeStream",
+            },
+        },
+    },
+    "Script": {
+        "signals": {
+            "message": {
+                "transform": {
+                    0: ("message: any", "JSON.parse"),
+                },
+            },
+        },
+    },
+}
 
 CORE_NAMESPACE = "http://www.gtk.org/introspection/core/1.0"
 C_NAMESPACE = "http://www.gtk.org/introspection/c/1.0"
@@ -299,57 +334,189 @@ MethodFilter = Callable[[str, str], bool]
 MethodNameTransformer = Callable[[str, str], str]
 
 
-def main(args: List[str]):
-    frida_gir, gio_gir, frida_ts, frida_binding_dts, frida_binding_c = [Path(p) for p in args[1:]]
+def main():
+    parser = argparse.ArgumentParser(
+        description="Generate TypeScript and N-API bindings for Frida."
+    )
+    parser.add_argument(
+        "--frida-gir",
+        required=True,
+        type=Path,
+        help="Path to the Frida .gir file.",
+    )
+    parser.add_argument(
+        "--gio-gir",
+        required=True,
+        type=Path,
+        help="Path to the GIO .gir file.",
+    )
+    parser.add_argument(
+        "--output-ts",
+        required=True,
+        type=Path,
+        help="Path to the output TypeScript file.",
+    )
+    parser.add_argument(
+        "--output-dts",
+        required=True,
+        type=Path,
+        help="Path to the output TypeScript declaration file.",
+    )
+    parser.add_argument(
+        "--output-c",
+        required=True,
+        type=Path,
+        help="Path to the output C file for N-API bindings.",
+    )
 
-    model = compute_model(frida_gir, gio_gir)
+    args = parser.parse_args()
 
-    with OutputFile(frida_ts) as output:
+    model = compute_model(args.frida_gir, args.gio_gir)
+
+    with OutputFile(args.output_ts) as output:
         output.write(generate_ts(model))
-    with OutputFile(frida_binding_dts) as output:
+    with OutputFile(args.output_dts) as output:
         output.write(generate_napi_dts(model))
-    with OutputFile(frida_binding_c) as output:
+    with OutputFile(args.output_c) as output:
         output.write(generate_napi_bindings(model))
 
 
 def generate_ts(model: Model) -> str:
-    type_imports = ", ".join((f"{t} as _{t}" for t in model.public_types.keys()))
+    type_imports = ", ".join(f"{t} as _{t}" for t in model.public_types.keys())
 
     lines = [
         'import bindings from "bindings";',
-        f'import type {{ FridaBinding, {type_imports} }} from "./frida_binding.d.ts";',
+        f'import type {{ FridaBinding, {type_imports}, Signal }} from "./frida_binding.d.ts";',
     ]
 
-    lines += [
-        "",
-        "const binding: FridaBinding = bindings({",
-        '    bindings: "frida_binding",',
-        "    try: [",
-        '        ["module_root", "bindings"],',
-        '        [process.cwd(), "bindings"],',
-        "    ]",
-        "});",
+    lines.append("""
+const binding: FridaBinding = bindings({
+    bindings: "frida_binding",
+    try: [
+        ["module_root", "bindings"],
+        [process.cwd(), "bindings"],
     ]
+});
+
+class SignalWrapper<T extends (...args: any[]) => void> {
+    #originalSignal: Signal<T>;
+    #transform: (...args: Parameters<T>) => Parameters<T>;
+
+    constructor(originalSignal: Signal<T>, transform: (...args: Parameters<T>) => Parameters<T>) {
+        this.#originalSignal = originalSignal;
+        this.#transform = transform;
+    }
+
+    connect(handler: T): void {
+        const wrappedHandler = (...args: Parameters<T>) => {
+            handler(...this.#transform(...args));
+        };
+        this.#originalSignal.connect(wrappedHandler as T);
+    }
+
+    disconnect(handler: T): void {
+        this.#originalSignal.disconnect(handler);
+    }
+}""")
+
+    customized_classes = set()
+    for otype in model.object_types.values():
+        if not otype.is_public:
+            continue
+
+        customizations = CUSTOMIZATIONS.get(otype.name, {})
+        if not customizations:
+            continue
+
+        customized_classes.add(otype.name)
+
+        lines += [
+            "",
+            f"export class {otype.name} extends binding.{otype.name} {{",
+        ]
+
+        num_members = 0
+
+        for method_name, customization in customizations.get("methods", {}).items():
+            custom_logic = customization.get("customLogic")
+            return_wrapper = customization.get("returnWrapper")
+
+            if num_members != 0:
+                lines.append("")
+            lines.append(f"    async {method_name}(...args: any[]): any {{")
+
+            if custom_logic is not None:
+                indent = " " * 8
+                lines += [
+                    indent + custom_logic.strip().replace("\n", "\n" + indent),
+                    "",
+                ]
+
+            lines += [
+                f"        const result = super.{method_name}(...args);",
+                "",
+            ]
+
+            if return_wrapper is not None:
+                lines.append(f"        return {return_wrapper}(result);")
+            else:
+                lines.append("        return result;")
+
+            lines.append("    }")
+
+            num_members += 1
+
+        for signal_name, customization in customizations.get("signals", {}).items():
+            transform_map = customization.get("transform", {})
+            signal = next((s for s in otype.signals if s.name == signal_name))
+
+            param_typings = []
+            transformed_params = []
+            for i, param in enumerate(signal.parameters):
+                if i in transform_map:
+                    transformed_name_and_type, transform_function = transform_map[i]
+                    param_typings.append(transformed_name_and_type)
+                    transformed_params.append(f"{transform_function}({param.js_name})")
+                else:
+                    param_typings.append(f"{param.js_name}: {param.type.js}")
+                    transformed_params.append(param.js_name)
+
+            param_typings_str = ", ".join(param_typings)
+            transformed_params_str = ", ".join(transformed_params)
+
+            prefixed_signal_name = f"_{signal_name}"
+            if num_members != 0:
+                lines.append("")
+            lines += [
+                f"    get {signal_name}(): Signal<({param_typings_str}) => void> {{",
+                f"        return new SignalWrapper(this.{prefixed_signal_name}, ({', '.join(p.js_name for p in signal.parameters)}) => {{",
+                f"            return [{transformed_params_str}];",
+                f"        }});",
+                f"    }}",
+            ]
+
+            num_members += 1
+
+        lines += [
+            "}",
+        ]
 
     lines += [
         "",
         "export const {",
     ]
-    for t in model.public_types.keys():
-        lines.append(f"    {t},")
-    lines.append("} = binding;")
-
+    lines += [f"    {t}," for t in model.public_types.keys() if t not in customized_classes]
     lines += [
+        "} = binding;",
         "",
         "export default {",
     ]
-    for t in model.public_types.keys():
-        lines.append(f"    {t},")
-    lines.append("};")
-
-    lines.append("")
-    for t in model.public_types.keys():
-        lines.append(f"export type {t} = _{t};")
+    lines += [f"    {t}," for t in model.public_types.keys()]
+    lines += [
+        "};",
+        "",
+    ]
+    lines += [f"export type {t} = _{t};" for t in model.public_types.keys() if t not in customized_classes]
 
     return "\n".join(lines)
 
@@ -386,6 +553,8 @@ def generate_napi_dts(model: Model) -> str:
                 f"{param.js_name}{'?' if param.nullable else ''}: {param.type.js}" for param in method.parameters
             )
             return_type = method.return_value.type.js if method.return_value else "void"
+            if method.is_async:
+                return_type = f"Promise<{return_type}>"
             lines.append(f"    {method.js_name}({params}): {return_type};")
 
         for prop in otype.properties:
@@ -2901,4 +3070,4 @@ class OutputFile:
 
 
 if __name__ == "__main__":
-    main(sys.argv)
+    main()
