@@ -15,9 +15,9 @@ console.log("Got initial devices:", devices.map(d => d.name));
 const device = await mgr.getDeviceByType(frida.DeviceType.Local, 0);
 console.log("Got device:", device.name);
 
-const session = await device.attach(74287);
+const session = await device.attach(115085);
 
-const script = await session.createScript(`
+let script = await session.createScript(`
 let beats = 1;
 setInterval(() => {
   send({
@@ -33,4 +33,10 @@ let i = 0;
 setInterval(() => {
   console.log(`Still alive. i=${i}`);
   i++;
-}, 5000);
+  if (i === 3) {
+    console.log("Disconnecting it!");
+    script.message.disconnect(onMessage);
+    script = null;
+    console.log("Disconnected it!");
+  }
+}, 1000);

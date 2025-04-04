@@ -723,12 +723,22 @@ def generate_internal_types() -> str:
 typedef struct {
   GObject * handle;
   guint id;
+  GSList * closures;
 } FdnSignal;
+
+typedef enum {
+  FDN_SIGNAL_CLOSURE_OPEN,
+  FDN_SIGNAL_CLOSURE_CLOSED,
+} FdnSignalClosureState;
 
 typedef struct {
   GClosure closure;
+  FdnSignal * sig;
+  napi_ref js_sig;
+  FdnSignalClosureState state;
   napi_threadsafe_function tsfn;
   napi_ref handler;
+  gulong handler_id;
 } FdnSignalClosure;
 
 typedef enum {
@@ -737,6 +747,7 @@ typedef enum {
 } FdnSignalClosureMessageType;
 
 typedef struct {
+  napi_ref js_sig;
   napi_threadsafe_function tsfn;
   napi_ref handler;
 } FdnSignalClosureMessageDestroy;
@@ -856,9 +867,9 @@ def generate_prototypes(
         "static void fdn_signal_finalize (napi_env env, void * finalize_data, void * finalize_hint);",
         "static napi_value fdn_signal_connect (napi_env env, napi_callback_info info);",
         "static napi_value fdn_signal_disconnect (napi_env env, napi_callback_info info);",
-        "static gboolean fdn_signal_parse_arguments (napi_env env, napi_callback_info info, FdnSignal ** self, napi_value * handler);",
+        "static gboolean fdn_signal_parse_arguments (napi_env env, napi_callback_info info, FdnSignal ** self, napi_value * js_self, napi_value * handler);",
 
-        "static GClosure * fdn_signal_closure_new (napi_env env, guint signal_id, napi_value handler);",
+        "static FdnSignalClosure * fdn_signal_closure_new (napi_env env, FdnSignal * sig, napi_value js_sig, napi_value handler);",
         "static void fdn_signal_closure_finalize (gpointer data, GClosure * closure);",
         "static void fdn_signal_closure_marshal (GClosure * closure, GValue * return_gvalue, guint n_param_values, const GValue * param_values, gpointer invocation_hint, gpointer marshal_data);",
         "static void fdn_signal_closure_deliver (napi_env env, napi_value js_cb, void * context, void * data);",
@@ -2495,6 +2506,7 @@ fdn_signal_construct (napi_env env,
   sig = g_slice_new (FdnSignal);
   sig->handle = g_object_ref (handle);
   sig->id = g_signal_lookup (name, G_OBJECT_TYPE (sig->handle));
+  sig->closures = NULL;
   if (sig->id == 0)
     goto invalid_signal_name;
 
@@ -2541,7 +2553,9 @@ fdn_signal_finalize (napi_env env,
 {
   FdnSignal * sig = finalize_data;
 
+  g_assert (sig->closures == NULL);
   g_object_unref (sig->handle);
+
   g_slice_free (FdnSignal, sig);
 }
 
@@ -2551,17 +2565,21 @@ fdn_signal_connect (napi_env env,
 {
   napi_value js_retval;
   FdnSignal * self;
-  napi_value handler;
+  napi_value js_self, handler;
+  FdnSignalClosure * sc;
   GClosure * closure;
 
-  if (!fdn_signal_parse_arguments (env, info, &self, &handler))
+  if (!fdn_signal_parse_arguments (env, info, &self, &js_self, &handler))
     return NULL;
 
-  closure = fdn_signal_closure_new (env, self->id, handler);
+  sc = fdn_signal_closure_new (env, self, js_self, handler);
+
+  closure = (GClosure *) sc;
   g_closure_ref (closure);
   g_closure_sink (closure);
+  self->closures = g_slist_prepend (self->closures, sc);
 
-  g_signal_connect_closure_by_id (self->handle, self->id, 0, closure, TRUE);
+  sc->handler_id = g_signal_connect_closure_by_id (self->handle, self->id, 0, closure, TRUE);
 
   napi_get_undefined (env, &js_retval);
 
@@ -2575,11 +2593,34 @@ fdn_signal_disconnect (napi_env env,
   napi_value js_retval;
   FdnSignal * self;
   napi_value handler;
+  GSList * cur;
 
-  if (!fdn_signal_parse_arguments (env, info, &self, &handler))
+  if (!fdn_signal_parse_arguments (env, info, &self, NULL, &handler))
     return NULL;
 
-  /* TODO */
+  for (cur = self->closures; cur != NULL; cur = cur->next)
+  {
+    FdnSignalClosure * closure = cur->data;
+    napi_value candidate_handler;
+    bool same_handler;
+
+    napi_get_reference_value (env, closure->handler, &candidate_handler);
+
+    napi_strict_equals (env, candidate_handler, handler, &same_handler);
+
+    if (same_handler)
+    {
+      g_signal_handler_disconnect (closure->sig->handle, closure->handler_id);
+      closure->handler_id = 0;
+
+      closure->state = FDN_SIGNAL_CLOSURE_CLOSED;
+
+      g_closure_unref ((GClosure *) closure);
+      self->closures = g_slist_delete_link (self->closures, cur);
+
+      break;
+    }
+  }
 
   napi_get_undefined (env, &js_retval);
 
@@ -2590,6 +2631,7 @@ static gboolean
 fdn_signal_parse_arguments (napi_env env,
                             napi_callback_info info,
                             FdnSignal ** self,
+                            napi_value * js_self,
                             napi_value * handler)
 {
   size_t argc = 1;
@@ -2600,6 +2642,9 @@ fdn_signal_parse_arguments (napi_env env,
 
   if (napi_unwrap (env, jsthis, (void **) self) != napi_ok)
     goto propagate_error;
+
+  if (js_self != NULL)
+    *js_self = jsthis;
 
   if (argc != 1)
     goto missing_handler;
@@ -2625,9 +2670,10 @@ propagate_error:
   }
 }
 
-static GClosure *
+static FdnSignalClosure *
 fdn_signal_closure_new (napi_env env,
-                        guint signal_id,
+                        FdnSignal * sig,
+                        napi_value js_sig,
                         napi_value handler)
 {
   FdnSignalClosure * sc;
@@ -2639,12 +2685,15 @@ fdn_signal_closure_new (napi_env env,
   g_closure_set_marshal (closure, fdn_signal_closure_marshal);
 
   sc = (FdnSignalClosure *) closure;
-  napi_create_string_utf8 (env, g_signal_name (signal_id), NAPI_AUTO_LENGTH, &resource_name);
+  sc->sig = sig;
+  napi_create_reference (env, js_sig, 1, &sc->js_sig);
+  sc->state = FDN_SIGNAL_CLOSURE_OPEN;
+  napi_create_string_utf8 (env, g_signal_name (sig->id), NAPI_AUTO_LENGTH, &resource_name);
   napi_create_threadsafe_function (env, NULL, NULL, resource_name, 0, 1, NULL, NULL, sc, fdn_signal_closure_deliver, &sc->tsfn);
   napi_unref_threadsafe_function (env, sc->tsfn);
   napi_create_reference (env, handler, 1, &sc->handler);
 
-  return (GClosure *) sc;
+  return sc;
 }
 
 static void
@@ -2659,6 +2708,7 @@ fdn_signal_closure_finalize (gpointer data,
   message->type = FDN_SIGNAL_CLOSURE_MESSAGE_DESTROY;
 
   d = &message->payload.destroy;
+  d->js_sig = self->js_sig;
   d->tsfn = self->tsfn;
   d->handler = self->handler;
 
@@ -2713,6 +2763,7 @@ fdn_signal_closure_deliver (napi_env env,
       FdnSignalClosureMessageDestroy * d = &message->payload.destroy;
 
       napi_delete_reference (env, d->handler);
+      napi_delete_reference (env, d->js_sig);
       napi_release_threadsafe_function (d->tsfn, napi_tsfn_abort);
 
       break;
@@ -2721,20 +2772,24 @@ fdn_signal_closure_deliver (napi_env env,
     {
       FdnSignalClosure * self = context;
       GArray * args;
-      napi_value * js_args;
       guint i;
-      napi_value global, handler, js_result;
 
       args = message->payload.marshal.args;
 
-      js_args = g_newa (napi_value, args->len);
-      for (i = 0; i != args->len; i++)
-        js_args[i] = fdn_gvalue_to_value (env, &g_array_index (args, GValue, i));
+      if (self->state == FDN_SIGNAL_CLOSURE_OPEN)
+      {
+        napi_value * js_args;
+        napi_value global, handler, js_result;
 
-      napi_get_global (env, &global);
-      napi_get_reference_value (env, self->handler, &handler);
+        js_args = g_newa (napi_value, args->len);
+        for (i = 0; i != args->len; i++)
+          js_args[i] = fdn_gvalue_to_value (env, &g_array_index (args, GValue, i));
 
-      napi_call_function (env, global, handler, args->len, js_args, &js_result);
+        napi_get_global (env, &global);
+        napi_get_reference_value (env, self->handler, &handler);
+
+        napi_call_function (env, global, handler, args->len, js_args, &js_result);
+      }
 
       for (i = 0; i != args->len; i++)
         g_value_reset (&g_array_index (args, GValue, i));
