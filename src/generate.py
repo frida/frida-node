@@ -17,21 +17,33 @@ CUSTOMIZATIONS = {
     "Device": {
         "methods": {
             "attach": {
+                "paramTypes": [
+                    "target: string | number",
+                    "options?: SessionOptions",
+                    "cancellable?: Cancellable",
+                ],
+                "returnType": "Promise<Session>",
                 "customLogic": """
-const target = args[0];
+let pid: number;
 if (typeof target === "string") {
-    const cancellable = args[2];
-    const processes = await this.enumerateProcesses(cancellable);
+    const processes = await this.enumerateProcesses(undefined, cancellable);
     const process = processes.find(p => p.name === target);
     if (process === undefined) {
         throw new Error(`Process "${target}" not found`);
     }
-    args[0] = process.pid;
+    pid = process.pid;
+} else {
+    pid = target;
 }
 """,
             },
             "openChannel": {
-                "returnWrapper": "wrapGioStreamAsNodeStream",
+                "paramTypes": [
+                    "address: string",
+                    "cancellable?: Cancellable",
+                ],
+                "returnType": "Promise<NodeJS.ReadableStream>",
+                "returnWrapper": "new IOStream",
             },
         },
     },
@@ -387,6 +399,7 @@ def generate_ts(model: Model) -> str:
     lines = [
         'import bindings from "bindings";',
         f'import type {{ FridaBinding, {type_imports}, Signal }} from "./frida_binding.d.ts";',
+        'import { Duplex } from "stream";',
     ]
 
     lines.append("""
@@ -417,6 +430,84 @@ class SignalWrapper<T extends (...args: any[]) => void> {
     disconnect(handler: T): void {
         this.#originalSignal.disconnect(handler);
     }
+}
+
+class IOStream extends Duplex {
+    #impl: any;
+    #pending = new Set<Promise<void>>();
+
+    #cancellable = new Cancellable();
+
+    constructor(impl: any) {
+        super({});
+
+        this.#impl = impl;
+    }
+
+    async _destroy(error: Error | null, callback: (error: Error | null) => void): Promise<void> {
+        this.#cancellable.cancel();
+
+        for (const operation of this.#pending) {
+            try {
+                await operation;
+            } catch (e) {
+            }
+        }
+
+        try {
+            await this.#impl.close();
+        } catch (e) {
+        }
+
+        callback(error);
+    }
+
+    _read(size: number): void {
+        const operation = this.#impl.read(size, this.#cancellable)
+            .then((data: Buffer): void => {
+                const isEof = data.length === 0;
+                if (isEof) {
+                    this.push(null);
+                    return;
+                }
+
+                this.push(data);
+            })
+            .catch((error: Error): void => {
+                if (this.#impl.isClosed) {
+                    this.push(null);
+                }
+                this.emit("error", error);
+            });
+        this.track(operation);
+    }
+
+    _write(chunk: any, encoding: BufferEncoding, callback: (error?: Error | null) => void): void {
+        let data: Buffer;
+        if (Buffer.isBuffer(chunk)) {
+            data = chunk;
+        } else {
+            data = Buffer.from(chunk, encoding);
+        }
+
+        const operation = this.#impl.write(data, this.#cancellable)
+            .then((): void => {
+                callback(null);
+            })
+            .catch((error: Error): void => {
+                callback(error);
+            });
+        this.track(operation);
+    }
+
+    private track(operation: Promise<void>): void {
+        this.#pending.add(operation);
+        operation
+            .catch(_ => {})
+            .finally(() => {
+                this.#pending.delete(operation);
+            });
+    }
 }""")
 
     customized_classes = set()
@@ -438,12 +529,27 @@ class SignalWrapper<T extends (...args: any[]) => void> {
         num_members = 0
 
         for method_name, customization in customizations.get("methods", {}).items():
+            method = next((m for m in otype.methods if m.js_name == method_name))
+
+            param_typings = customization.get("paramTypes")
+            if param_typings is None:
+                param_typings = [
+                    f"{param.js_name}{'?' if param.nullable else ''}: {param.type.js}"
+                    for param in method.parameters
+                ]
+
+            return_type = customization.get("returnType")
+            if return_type is None:
+                return_type = method.return_value.type.js if method.return_value is not None else "void"
+                if method.is_async:
+                    return_type = f"Promise<{return_type}>"
+
             custom_logic = customization.get("customLogic")
             return_wrapper = customization.get("returnWrapper")
 
             if num_members != 0:
                 lines.append("")
-            lines.append(f"    async {method_name}(...args: any[]): any {{")
+            lines.append(f"    async {method.js_name}({', '.join(param_typings)}): {return_type} {{")
 
             if custom_logic is not None:
                 indent = " " * 8
@@ -453,7 +559,7 @@ class SignalWrapper<T extends (...args: any[]) => void> {
                 ]
 
             lines += [
-                f"        const result = super.{method_name}(...args);",
+                f"        const result = super.{method.js_name}({', '.join(param.js_name for param in method.parameters)});",
                 "",
             ]
 
@@ -552,7 +658,7 @@ def generate_napi_dts(model: Model) -> str:
             params = ", ".join(
                 f"{param.js_name}{'?' if param.nullable else ''}: {param.type.js}" for param in method.parameters
             )
-            return_type = method.return_value.type.js if method.return_value else "void"
+            return_type = method.return_value.type.js if method.return_value is not None else "void"
             if method.is_async:
                 return_type = f"Promise<{return_type}>"
             lines.append(f"    {method.js_name}({params}): {return_type};")
