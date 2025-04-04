@@ -590,7 +590,7 @@ class IOStream extends Duplex {
             param_typings_str = ", ".join(param_typings)
             transformed_params_str = ", ".join(transformed_params)
 
-            prefixed_signal_name = f"_{signal_name}"
+            prefixed_signal_name = get_prefixed_name(otype, signal_name, "signals")
             if num_members != 0:
                 lines.append("")
             lines += [
@@ -668,10 +668,13 @@ def generate_napi_dts(model: Model) -> str:
             lines.append(f"    {readonly}{prop.js_name}: {prop.type.js};")
 
         for signal in otype.signals:
+            name = get_prefixed_name(otype, signal.js_name, "signals")
+
             params = ", ".join(
                 f"{param.js_name}: {param.type.js}" for param in signal.parameters
             )
-            lines.append(f"    readonly {signal.js_name}: Signal<({params}) => void>;")
+
+            lines.append(f"    readonly {name}: Signal<({params}) => void>;")
 
         lines.append("}")
 
@@ -1268,8 +1271,9 @@ napi_create_string_utf8 (env, "{method.js_name}", NAPI_AUTO_LENGTH, &resource_na
         )
 
     for signal in otype.signals:
+        js_name = get_prefixed_name(otype, signal.js_name, "signals")
         jsprop_registrations.append(
-            f"""{{ "{signal.js_name}", NULL, NULL, {otype_cprefix}_get_{signal.c_name}_signal, NULL, NULL, napi_default, NULL }},"""
+            f"""{{ "{js_name}", NULL, NULL, {otype_cprefix}_get_{signal.c_name}_signal, NULL, NULL, napi_default, NULL }},"""
         )
 
     jsprop_registrations_str = "\n    ".join(jsprop_registrations)
@@ -1674,6 +1678,8 @@ def generate_parameter_conversion_code(
 def generate_signal_getter_code(otype: ObjectType, signal: Signal) -> str:
     cprefix = otype.c_symbol_prefix
 
+    js_name = get_prefixed_name(otype, signal.js_name, "signals")
+
     indent = " " * (len(cprefix) + 5 + len(signal.c_name) + 9)
 
     return f"""
@@ -1681,7 +1687,7 @@ static napi_value
 {cprefix}_get_{signal.c_name}_signal (napi_env env,
 {indent}napi_callback_info info)
 {{
-  return fdn_object_get_signal (env, info, "{signal.name}", "_{signal.js_name}");
+  return fdn_object_get_signal (env, info, "{signal.name}", "_{js_name}");
 }}
 """
 
@@ -3081,6 +3087,13 @@ fdn_signal_closure_deliver (napi_env env,
   g_slice_free (FdnSignalClosureMessage, message);
 }
 """
+
+
+def get_prefixed_name(otype: ObjectType, name: str, kind: str) -> str:
+    customizations = CUSTOMIZATIONS.get(otype.name, {}).get(kind, {})
+    if name in customizations:
+        return f"_{name}"
+    return name
 
 
 def resolve_destroy_function(type: Type) -> Optional[str]:
