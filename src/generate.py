@@ -45,6 +45,10 @@ class ObjectType:
     _properties: List[ET.Element]
     _signals: List[ET.Element]
 
+    @cached_property
+    def prefixed_name(self):
+        return f"_{self.name}" if self.is_customized else self.name
+
     @property
     def is_public(self) -> bool:
         return not self.is_frida_list
@@ -221,6 +225,10 @@ class Method:
     @cached_property
     def js_name(self):
         return to_camel_case(self.name)
+
+    @cached_property
+    def prefixed_js_name(self):
+        return f"_{self.js_name}" if self.is_customized else self.js_name
 
     @property
     def is_customized(self) -> bool:
@@ -1367,7 +1375,7 @@ def generate_object_type_registration_code(otype: ObjectType) -> str:
         if method.is_property_accessor:
             continue
         jsprop_registrations.append(
-            f"""{{ "{method.js_name}", NULL, {otype_cprefix}_{method.name}, NULL, NULL, NULL, napi_default, NULL }},"""
+            f"""{{ "{method.prefixed_js_name}", NULL, {otype_cprefix}_{method.name}, NULL, NULL, NULL, napi_default, NULL }},"""
         )
         if method.is_async:
             tsfn_initializations.append(
@@ -1418,10 +1426,10 @@ static void
   }};
 
   napi_value constructor;
-  napi_define_class (env, "{otype.name}", NAPI_AUTO_LENGTH, {otype_cprefix}_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
+  napi_define_class (env, "{otype.prefixed_name}", NAPI_AUTO_LENGTH, {otype_cprefix}_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
   napi_create_reference (env, constructor, 1, &{otype_cprefix}_constructor);
 
-  napi_set_named_property (env, exports, "{otype.name}", constructor);{resource_name_declaration}{tsfn_initializations_str}
+  napi_set_named_property (env, exports, "{otype.prefixed_name}", constructor);{resource_name_declaration}{tsfn_initializations_str}
 }}
 """
 
