@@ -393,7 +393,7 @@ def main():
 
 
 def generate_ts(model: Model) -> str:
-    type_imports = ", ".join(f"{t} as _{t}" for t in model.public_types.keys())
+    type_imports = ", ".join(f"{t} as _{t}" for t in model.public_types.keys() if t not in CUSTOMIZATIONS)
 
     lines = [
         'import bindings from "bindings";',
@@ -524,7 +524,7 @@ class IOStream extends Duplex {
 
         lines += [
             "",
-            f"export class {otype.name} extends binding.{otype.name} {{",
+            f"export class {otype.name} extends binding._{otype.name} {{",
         ]
 
         num_members = 0
@@ -645,22 +645,61 @@ def generate_napi_dts(model: Model) -> str:
         "export interface FridaBinding {",
     ]
     for t in model.public_types.keys():
-        lines.append(f"    {t}: typeof {t};")
+        type_is_customized = t in CUSTOMIZATIONS
+        name = f"_{t}" if type_is_customized else t
+        lines.append(f"    {name}: typeof {name};")
     lines.append("}")
 
     for otype in model.object_types.values():
         if not otype.is_public:
             continue
 
-        lines.append("")
-
-        lines += [
-            f"export class {otype.name} {{",
-        ]
-
-        type_customizations = CUSTOMIZATIONS.get(otype.name, {})
+        type_customizations = CUSTOMIZATIONS.get(otype.name)
+        type_is_customized = type_customizations is not None
+        if not type_is_customized:
+            type_customizations = {}
         method_customizations = type_customizations.get("methods", {})
         signal_customizations = type_customizations.get("signals", {})
+
+        if type_is_customized:
+            lines += [
+                "",
+                f"export class {otype.name} {{",
+            ]
+
+            for method in otype.methods:
+                custom_typings = method_customizations.get(method.js_name)
+                is_customized = custom_typings is not None
+                if not is_customized:
+                    continue
+                custom_params = ", ".join(custom_typings["paramTypes"])
+                custom_return_type = custom_typings["returnType"]
+                lines.append(
+                    f"    {method.js_name}({custom_params}): {custom_return_type};"
+                )
+
+            for signal in otype.signals:
+                transform_map = signal_customizations.get(signal.js_name, {}).get(
+                    "transform"
+                )
+                is_customized = transform_map is not None
+                if not is_customized:
+                    continue
+                custom_params = ", ".join(
+                    transform_map.get(i, (f"{param.js_name}: {param.type.js}", ""))[0]
+                    for i, param in enumerate(signal.parameters)
+                )
+                lines.append(
+                    f"    readonly {signal.js_name}: Signal<({custom_params}) => void>;"
+                )
+
+            lines.append("}")
+
+        class_name = f"_{otype.name}" if type_is_customized else otype.name
+        lines += [
+            "",
+            f"export class {class_name} {{",
+        ]
 
         if otype.constructors:
             constructor = otype.constructors[0]
@@ -672,16 +711,7 @@ def generate_napi_dts(model: Model) -> str:
         for method in otype.methods:
             if method.is_property_accessor:
                 continue
-
-            custom_typings = method_customizations.get(method.js_name)
-            is_customized = custom_typings is not None
-            if is_customized:
-                custom_params = ", ".join(custom_typings["paramTypes"])
-                custom_return_type = custom_typings["returnType"]
-                lines.append(
-                    f"    {method.name}({custom_params}): {custom_return_type};"
-                )
-
+            is_customized = method.js_name in method_customizations
             visibility = "protected " if is_customized else ""
             method_name = f"_{method.js_name}" if is_customized else method.js_name
             params = ", ".join(
@@ -702,25 +732,12 @@ def generate_napi_dts(model: Model) -> str:
             lines.append(f"    {readonly}{prop.js_name}: {prop.type.js};")
 
         for signal in otype.signals:
+            is_customized = "transform" in signal_customizations.get(signal.js_name, {})
+            visibility = "protected " if is_customized else ""
+            signal_name = f"_{signal.js_name}" if is_customized else signal.js_name
             params = ", ".join(
                 f"{param.js_name}: {param.type.js}" for param in signal.parameters
             )
-
-            transform_map = signal_customizations.get(signal.js_name, {}).get(
-                "transform"
-            )
-            is_customized = transform_map is not None
-            if is_customized:
-                custom_params = ", ".join(
-                    transform_map.get(i, (f"{param.js_name}: {param.type.js}", ""))[0]
-                    for i, param in enumerate(signal.parameters)
-                )
-                lines.append(
-                    f"    readonly {signal.js_name}: Signal<({custom_params}) => void>;"
-                )
-
-            signal_name = f"_{signal.js_name}" if is_customized else signal.js_name
-            visibility = "protected " if is_customized else ""
             lines.append(
                 f"    {visibility}readonly {signal_name}: Signal<({params}) => void>;"
             )
