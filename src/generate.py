@@ -356,6 +356,10 @@ class Enumeration:
     members: List[EnumerationMember]
 
     @property
+    def prefixed_name(self):
+        return self.name
+
+    @property
     def is_customized(self):
         return False
 
@@ -689,6 +693,8 @@ class IOStream extends Duplex {
 
         lines += [
             "}",
+            "",
+            f"binding.{otype.name} = {otype.name};",
         ]
 
     lines += [
@@ -722,8 +728,9 @@ def generate_napi_dts(model: Model) -> str:
         "export interface FridaBinding {",
     ]
     for t in model.public_types.values():
-        name = f"_{t.name}" if t.is_customized else t.name
-        lines.append(f"    {name}: typeof {name};")
+        if t.is_customized:
+            lines.append(f"    {t.name}: typeof {t.name};")
+        lines.append(f"    {t.prefixed_name}: typeof {t.prefixed_name};")
     lines.append("}")
 
     for otype in model.object_types.values():
@@ -832,6 +839,7 @@ def generate_napi_bindings(model: Model) -> str:
     code = generate_includes()
     code += generate_operation_structs(object_types)
     code += generate_internal_types()
+    code += generate_exports_ref_variable()
     code += generate_prototypes(object_types, enumerations)
     code += generate_type_tags(object_types)
     code += generate_constructor_declarations(object_types)
@@ -1171,6 +1179,10 @@ typedef struct {
 """
 
 
+def generate_exports_ref_variable() -> str:
+    return "\nstatic napi_ref fdn_exports;\n"
+
+
 def generate_prototypes(
     object_types: List[ObjectType], enumerations: List[Enumeration]
 ) -> str:
@@ -1352,6 +1364,8 @@ fdn_init (napi_env env,
 {{
   frida_init ();
 
+  napi_create_reference (env, exports, 1, &fdn_exports);
+
   {object_type_registration_calls}
 
   {enum_type_registration_calls}
@@ -1368,6 +1382,7 @@ NAPI_MODULE (NODE_GYP_MODULE_NAME, fdn_init)
 def generate_object_type_registration_code(otype: ObjectType) -> str:
     otype_cprefix = otype.c_symbol_prefix
 
+    ctor_ref_creation = "" if otype.is_customized else f"\n  napi_create_reference (env, constructor, 1, &{otype_cprefix}_constructor);"
     jsprop_registrations = []
     tsfn_initializations = []
 
@@ -1426,8 +1441,7 @@ static void
   }};
 
   napi_value constructor;
-  napi_define_class (env, "{otype.prefixed_name}", NAPI_AUTO_LENGTH, {otype_cprefix}_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);
-  napi_create_reference (env, constructor, 1, &{otype_cprefix}_constructor);
+  napi_define_class (env, "{otype.prefixed_name}", NAPI_AUTO_LENGTH, {otype_cprefix}_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);{ctor_ref_creation}
 
   napi_set_named_property (env, exports, "{otype.prefixed_name}", constructor);{resource_name_declaration}{tsfn_initializations_str}
 }}
@@ -1436,6 +1450,24 @@ static void
 
 def generate_object_type_conversion_functions(otype: ObjectType) -> str:
     otype_cprefix = otype.c_symbol_prefix
+
+    if otype.is_customized:
+        ctor_lookup = "\n".join([
+            f"if ({otype_cprefix}_constructor != NULL)",
+            "  {",
+            f"    napi_get_reference_value (env, {otype_cprefix}_constructor, &constructor);",
+            "  }",
+            "  else",
+            "  {",
+            "    napi_value exports;",
+            "",
+            "    napi_get_reference_value (env, fdn_exports, &exports);",
+            f"    napi_get_named_property (env, exports, \"{otype.name}\", &constructor);",
+            f"    napi_create_reference (env, constructor, 1, &{otype_cprefix}_constructor);",
+            "  }",
+        ])
+    else:
+        ctor_lookup = f"napi_get_reference_value (env, {otype_cprefix}_constructor, &constructor);"
 
     def calculate_indent(suffix: str) -> str:
         return " " * (len(otype_cprefix) + len(suffix) + 2)
@@ -1469,7 +1501,7 @@ static napi_value
 {{
   napi_value result, constructor, handle_wrapper;
 
-  napi_get_reference_value (env, {otype_cprefix}_constructor, &constructor);
+  {ctor_lookup}
 
   napi_create_external (env, handle, NULL, NULL, &handle_wrapper);
   napi_type_tag_object (env, handle_wrapper, &fdn_handle_wrapper_type_tag);

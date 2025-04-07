@@ -15,7 +15,7 @@ console.log("Got initial devices:", devices.map(d => d.name));
 const device = await mgr.getDeviceByType(frida.DeviceType.Local, 0);
 console.log("Got device:", device.name);
 
-const session = await device.attach(115085);
+const session = await device.attach("hello2");
 
 let script = await session.createScript(`
 let beats = 1;
