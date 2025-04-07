@@ -664,7 +664,7 @@ def generate_napi_dts(model: Model) -> str:
         if type_is_customized:
             lines += [
                 "",
-                f"export class {otype.name} {{",
+                f"export class {otype.name} extends _{otype.name} {{",
             ]
 
             for method in otype.methods:
