@@ -4,58 +4,15 @@ import argparse
 import sys
 import uuid
 import xml.etree.ElementTree as ET
-from collections import OrderedDict
-from dataclasses import dataclass
+from collections import defaultdict, OrderedDict
+from dataclasses import dataclass, field
 from enum import Enum
 from functools import cached_property
 from io import StringIO
 from pathlib import Path
-from typing import Callable, List, Optional, Tuple, Union
+from typing import Callable, List, Mapping, Optional, Tuple, Union
 
-CUSTOMIZATIONS = {
-    "Device": {
-        "methods": {
-            "attach": {
-                "paramTypes": [
-                    "target: string | number",
-                    "options?: SessionOptions",
-                    "cancellable?: Cancellable",
-                ],
-                "returnType": "Promise<Session>",
-                "customLogic": """
-let pid: number;
-if (typeof target === "string") {
-    const processes = await this.enumerateProcesses(undefined, cancellable);
-    const process = processes.find(p => p.name === target);
-    if (process === undefined) {
-        throw new Error(`Process "${target}" not found`);
-    }
-    pid = process.pid;
-} else {
-    pid = target;
-}
-""",
-            },
-            "openChannel": {
-                "paramTypes": [
-                    "address: string",
-                    "cancellable?: Cancellable",
-                ],
-                "returnType": "Promise<NodeJS.ReadableStream>",
-                "returnWrapper": "new IOStream",
-            },
-        },
-    },
-    "Script": {
-        "signals": {
-            "message": {
-                "transform": {
-                    0: ("message: any", "JSON.parse"),
-                },
-            },
-        },
-    },
-}
+CUSTOMIZATIONS: Mapping[str, ObjectTypeCustomizations] = {}
 
 CORE_NAMESPACE = "http://www.gtk.org/introspection/core/1.0"
 C_NAMESPACE = "http://www.gtk.org/introspection/c/1.0"
@@ -95,6 +52,14 @@ class ObjectType:
     @cached_property
     def is_frida_list(self) -> bool:
         return self.c_type.startswith("Frida") and self.c_type.endswith("List")
+
+    @property
+    def is_customized(self) -> bool:
+        return self.name in CUSTOMIZATIONS
+
+    @property
+    def customizations(self) -> Optional[ObjectTypeCustomizations]:
+        return CUSTOMIZATIONS.get(self.name)
 
     @cached_property
     def c_symbol_prefix(self) -> str:
@@ -190,6 +155,10 @@ class ObjectType:
         return methods
 
     @cached_property
+    def customized_methods(self) -> List[Method]:
+        return [m for m in self.methods if m.is_customized]
+
+    @cached_property
     def properties(self) -> List[Property]:
         properties = []
         for element in self._properties:
@@ -215,8 +184,18 @@ class ObjectType:
             param_list = extract_parameters(
                 element.findall("./parameters/parameter", GIR_NAMESPACES)
             )
-            signals.append(Signal(name, c_name, param_list))
+            signals.append(Signal(name, c_name, param_list, self))
         return signals
+
+    @cached_property
+    def customized_signals(self) -> List[Signal]:
+        return [s for s in self.signals if s.is_customized]
+
+
+@dataclass
+class ObjectTypeCustomizations:
+    methods: Mapping[str, MethodCustomizations] = field(default_factory=lambda: defaultdict(dict))
+    signals: Mapping[str, SignalCustomizations] = field(default_factory=lambda: defaultdict(dict))
 
 
 @dataclass
@@ -243,9 +222,28 @@ class Method:
     def js_name(self):
         return to_camel_case(self.name)
 
+    @property
+    def is_customized(self) -> bool:
+        return self.customizations is not None
+
+    @cached_property
+    def customizations(self) -> Optional[MethodCustomizations]:
+        type_customizations = self.object_type.customizations
+        if type_customizations is None:
+            return None
+        return type_customizations.methods.get(self.name)
+
     @cached_property
     def operation_type_name(self) -> str:
         return f"Fdn{self.object_type.name}{to_pascal_case(self.name)}Operation"
+
+
+@dataclass
+class MethodCustomizations:
+    param_typings: List[str]
+    return_typing: str
+    custom_logic: Optional[str] = None
+    return_wrapper: Optional[str] = None
 
 
 @dataclass
@@ -267,9 +265,31 @@ class Signal:
     c_name: str
     parameters: List[Parameter]
 
+    object_type: ObjectType
+
     @cached_property
     def js_name(self):
         return to_camel_case(self.c_name)
+
+    @cached_property
+    def prefixed_js_name(self):
+        return f"_{self.js_name}" if self.is_customized else self.js_name
+
+    @property
+    def is_customized(self) -> bool:
+        return self.customizations is not None
+
+    @cached_property
+    def customizations(self) -> Optional[SignalCustomizations]:
+        type_customizations = self.object_type.customizations
+        if type_customizations is None:
+            return None
+        return type_customizations.signals.get(self.name)
+
+
+@dataclass
+class SignalCustomizations:
+    transform: Mapping[int, Tuple[str, str]]
 
 
 TransferOwnership = Enum("TransferOwnership", ["none", "full", "container"])
@@ -327,6 +347,10 @@ class Enumeration:
     get_type: str
     members: List[EnumerationMember]
 
+    @property
+    def is_customized(self):
+        return False
+
 
 @dataclass
 class EnumerationMember:
@@ -346,6 +370,10 @@ MethodNameTransformer = Callable[[str, str], str]
 
 
 def main():
+    global CUSTOMIZATIONS
+
+    CUSTOMIZATIONS = load_customizations()
+
     parser = argparse.ArgumentParser(
         description="Generate TypeScript and N-API bindings for Frida."
     )
@@ -392,8 +420,55 @@ def main():
         output.write(generate_napi_bindings(model))
 
 
+def load_customizations() -> Mapping[str, ObjectTypeCustomizations]:
+    return {
+        "Device": ObjectTypeCustomizations(
+            methods={
+                "attach": MethodCustomizations(
+                    param_typings=[
+                        "target: string | number",
+                        "options?: SessionOptions",
+                        "cancellable?: Cancellable",
+                    ],
+                    return_typing="Promise<Session>",
+                    custom_logic="""
+let pid: number;
+if (typeof target === "string") {
+    const processes = await this.enumerateProcesses(undefined, cancellable);
+    const process = processes.find(p => p.name === target);
+    if (process === undefined) {
+        throw new Error(`Process "${target}" not found`);
+    }
+    pid = process.pid;
+} else {
+    pid = target;
+}
+""",
+                ),
+                "open_channel": MethodCustomizations(
+                    param_typings=[
+                        "address: string",
+                        "cancellable?: Cancellable",
+                    ],
+                    return_typing="Promise<NodeJS.ReadableStream>",
+                    return_wrapper="new IOStream",
+                ),
+            },
+        ),
+        "Script": ObjectTypeCustomizations(
+            signals={
+                "message": SignalCustomizations(
+                    transform={
+                        0: ("message: any", "JSON.parse"),
+                    },
+                ),
+            },
+        ),
+    }
+
+
 def generate_ts(model: Model) -> str:
-    type_imports = ", ".join(f"{t} as _{t}" for t in model.public_types.keys() if t not in CUSTOMIZATIONS)
+    type_imports = ", ".join(f"{t.name} as _{t.name}" for t in model.public_types.values() if not t.is_customized)
 
     lines = [
         'import bindings from "bindings";',
@@ -513,11 +588,7 @@ class IOStream extends Duplex {
 
     customized_classes = set()
     for otype in model.object_types.values():
-        if not otype.is_public:
-            continue
-
-        customizations = CUSTOMIZATIONS.get(otype.name, {})
-        if not customizations:
+        if not otype.is_customized:
             continue
 
         customized_classes.add(otype.name)
@@ -529,35 +600,33 @@ class IOStream extends Duplex {
 
         num_members = 0
 
-        for method_name, customization in customizations.get("methods", {}).items():
-            method = next((m for m in otype.methods if m.js_name == method_name))
+        for method in otype.customized_methods:
+            customizations = method.customizations
 
-            param_typings = customization.get("paramTypes")
+            param_typings = customizations.param_typings
             if param_typings is None:
                 param_typings = [
                     f"{param.js_name}{'?' if param.nullable else ''}: {param.type.js}"
                     for param in method.parameters
                 ]
 
-            return_type = customization.get("returnType")
-            if return_type is None:
-                return_type = (
+            return_typing = customizations.return_typing
+            if return_typing is None:
+                return_typing = (
                     method.return_value.type.js
                     if method.return_value is not None
                     else "void"
                 )
                 if method.is_async:
-                    return_type = f"Promise<{return_type}>"
-
-            custom_logic = customization.get("customLogic")
-            return_wrapper = customization.get("returnWrapper")
+                    return_typing = f"Promise<{return_typing}>"
 
             if num_members != 0:
                 lines.append("")
             lines.append(
-                f"    async {method.js_name}({', '.join(param_typings)}): {return_type} {{"
+                f"    async {method.js_name}({', '.join(param_typings)}): {return_typing} {{"
             )
 
+            custom_logic = customizations.custom_logic
             if custom_logic is not None:
                 indent = " " * 8
                 lines += [
@@ -570,6 +639,7 @@ class IOStream extends Duplex {
                 "",
             ]
 
+            return_wrapper = customizations.return_wrapper
             if return_wrapper is not None:
                 lines.append(f"        return {return_wrapper}(result);")
             else:
@@ -579,9 +649,9 @@ class IOStream extends Duplex {
 
             num_members += 1
 
-        for signal_name, customization in customizations.get("signals", {}).items():
-            transform_map = customization.get("transform", {})
-            signal = next((s for s in otype.signals if s.name == signal_name))
+        for signal in otype.customized_signals:
+            customizations = signal.customizations
+            transform_map = customizations.transform
 
             param_typings = []
             transformed_params = []
@@ -597,12 +667,11 @@ class IOStream extends Duplex {
             param_typings_str = ", ".join(param_typings)
             transformed_params_str = ", ".join(transformed_params)
 
-            prefixed_signal_name = get_prefixed_name(otype, signal_name, "signals")
             if num_members != 0:
                 lines.append("")
             lines += [
-                f"    get {signal_name}(): Signal<({param_typings_str}) => void> {{",
-                f"        return new SignalWrapper(this.{prefixed_signal_name}, ({', '.join(p.js_name for p in signal.parameters)}) => {{",
+                f"    get {signal.js_name}(): Signal<({param_typings_str}) => void> {{",
+                f"        return new SignalWrapper(this._{signal.js_name}, ({', '.join(p.js_name for p in signal.parameters)}) => {{",
                 f"            return [{transformed_params_str}];",
                 f"        }});",
                 f"    }}",
@@ -644,9 +713,8 @@ def generate_napi_dts(model: Model) -> str:
     lines = [
         "export interface FridaBinding {",
     ]
-    for t in model.public_types.keys():
-        type_is_customized = t in CUSTOMIZATIONS
-        name = f"_{t}" if type_is_customized else t
+    for t in model.public_types.values():
+        name = f"_{t.name}" if t.is_customized else t.name
         lines.append(f"    {name}: typeof {name};")
     lines.append("}")
 
@@ -654,39 +722,22 @@ def generate_napi_dts(model: Model) -> str:
         if not otype.is_public:
             continue
 
-        type_customizations = CUSTOMIZATIONS.get(otype.name)
-        type_is_customized = type_customizations is not None
-        if not type_is_customized:
-            type_customizations = {}
-        method_customizations = type_customizations.get("methods", {})
-        signal_customizations = type_customizations.get("signals", {})
-
-        if type_is_customized:
+        if otype.is_customized:
             lines += [
                 "",
                 f"export class {otype.name} extends _{otype.name} {{",
             ]
 
-            for method in otype.methods:
-                custom_typings = method_customizations.get(method.js_name)
-                is_customized = custom_typings is not None
-                if not is_customized:
-                    continue
-                custom_params = ", ".join(custom_typings["paramTypes"])
-                custom_return_type = custom_typings["returnType"]
+            for method in otype.customized_methods:
+                customizations = method.customizations
+                custom_params = ", ".join(customizations.param_typings)
                 lines.append(
-                    f"    {method.js_name}({custom_params}): {custom_return_type};"
+                    f"    {method.js_name}({custom_params}): {customizations.return_typing};"
                 )
 
-            for signal in otype.signals:
-                transform_map = signal_customizations.get(signal.js_name, {}).get(
-                    "transform"
-                )
-                is_customized = transform_map is not None
-                if not is_customized:
-                    continue
+            for signal in otype.customized_signals:
                 custom_params = ", ".join(
-                    transform_map.get(i, (f"{param.js_name}: {param.type.js}", ""))[0]
+                    signal.customizations.transform.get(i, (f"{param.js_name}: {param.type.js}", ""))[0]
                     for i, param in enumerate(signal.parameters)
                 )
                 lines.append(
@@ -695,7 +746,7 @@ def generate_napi_dts(model: Model) -> str:
 
             lines.append("}")
 
-        class_name = f"_{otype.name}" if type_is_customized else otype.name
+        class_name = f"_{otype.name}" if otype.is_customized else otype.name
         lines += [
             "",
             f"export class {class_name} {{",
@@ -711,7 +762,7 @@ def generate_napi_dts(model: Model) -> str:
         for method in otype.methods:
             if method.is_property_accessor:
                 continue
-            is_customized = method.js_name in method_customizations
+            is_customized = method.is_customized
             visibility = "protected " if is_customized else ""
             method_name = f"_{method.js_name}" if is_customized else method.js_name
             params = ", ".join(
@@ -732,7 +783,7 @@ def generate_napi_dts(model: Model) -> str:
             lines.append(f"    {readonly}{prop.js_name}: {prop.type.js};")
 
         for signal in otype.signals:
-            is_customized = "transform" in signal_customizations.get(signal.js_name, {})
+            is_customized = signal.is_customized
             visibility = "protected " if is_customized else ""
             signal_name = f"_{signal.js_name}" if is_customized else signal.js_name
             params = ", ".join(
@@ -1341,9 +1392,8 @@ napi_create_string_utf8 (env, "{method.js_name}", NAPI_AUTO_LENGTH, &resource_na
         )
 
     for signal in otype.signals:
-        js_name = get_prefixed_name(otype, signal.js_name, "signals")
         jsprop_registrations.append(
-            f"""{{ "{js_name}", NULL, NULL, {otype_cprefix}_get_{signal.c_name}_signal, NULL, NULL, napi_default, NULL }},"""
+            f"""{{ "{signal.prefixed_js_name}", NULL, NULL, {otype_cprefix}_get_{signal.c_name}_signal, NULL, NULL, napi_default, NULL }},"""
         )
 
     jsprop_registrations_str = "\n    ".join(jsprop_registrations)
@@ -1748,8 +1798,6 @@ def generate_parameter_conversion_code(
 def generate_signal_getter_code(otype: ObjectType, signal: Signal) -> str:
     cprefix = otype.c_symbol_prefix
 
-    js_name = get_prefixed_name(otype, signal.js_name, "signals")
-
     indent = " " * (len(cprefix) + 5 + len(signal.c_name) + 9)
 
     return f"""
@@ -1757,7 +1805,7 @@ static napi_value
 {cprefix}_get_{signal.c_name}_signal (napi_env env,
 {indent}napi_callback_info info)
 {{
-  return fdn_object_get_signal (env, info, "{signal.name}", "_{js_name}");
+  return fdn_object_get_signal (env, info, "{signal.name}", "_{signal.prefixed_js_name}");
 }}
 """
 
@@ -3159,13 +3207,6 @@ fdn_signal_closure_deliver (napi_env env,
   g_slice_free (FdnSignalClosureMessage, message);
 }
 """
-
-
-def get_prefixed_name(otype: ObjectType, name: str, kind: str) -> str:
-    customizations = CUSTOMIZATIONS.get(otype.name, {}).get(kind, {})
-    if name in customizations:
-        return f"_{name}"
-    return name
 
 
 def resolve_destroy_function(type: Type) -> Optional[str]:
