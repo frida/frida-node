@@ -12,7 +12,6 @@ from io import StringIO
 from pathlib import Path
 from typing import Callable, List, Optional, Tuple, Union
 
-
 CUSTOMIZATIONS = {
     "Device": {
         "methods": {
@@ -402,7 +401,8 @@ def generate_ts(model: Model) -> str:
         'import { Duplex } from "stream";',
     ]
 
-    lines.append("""
+    lines.append(
+        """
 const binding: FridaBinding = bindings({
     bindings: "frida_binding",
     try: [
@@ -508,7 +508,8 @@ class IOStream extends Duplex {
                 this.#pending.delete(operation);
             });
     }
-}""")
+}"""
+    )
 
     customized_classes = set()
     for otype in model.object_types.values():
@@ -540,7 +541,11 @@ class IOStream extends Duplex {
 
             return_type = customization.get("returnType")
             if return_type is None:
-                return_type = method.return_value.type.js if method.return_value is not None else "void"
+                return_type = (
+                    method.return_value.type.js
+                    if method.return_value is not None
+                    else "void"
+                )
                 if method.is_async:
                     return_type = f"Promise<{return_type}>"
 
@@ -549,7 +554,9 @@ class IOStream extends Duplex {
 
             if num_members != 0:
                 lines.append("")
-            lines.append(f"    async {method.js_name}({', '.join(param_typings)}): {return_type} {{")
+            lines.append(
+                f"    async {method.js_name}({', '.join(param_typings)}): {return_type} {{"
+            )
 
             if custom_logic is not None:
                 indent = " " * 8
@@ -559,7 +566,7 @@ class IOStream extends Duplex {
                 ]
 
             lines += [
-                f"        const result = super.{method.js_name}({', '.join(param.js_name for param in method.parameters)});",
+                f"        const result = await this._{method.js_name}({', '.join(param.js_name for param in method.parameters)});",
                 "",
             ]
 
@@ -611,7 +618,9 @@ class IOStream extends Duplex {
         "",
         "export const {",
     ]
-    lines += [f"    {t}," for t in model.public_types.keys() if t not in customized_classes]
+    lines += [
+        f"    {t}," for t in model.public_types.keys() if t not in customized_classes
+    ]
     lines += [
         "} = binding;",
         "",
@@ -622,7 +631,11 @@ class IOStream extends Duplex {
         "};",
         "",
     ]
-    lines += [f"export type {t} = _{t};" for t in model.public_types.keys() if t not in customized_classes]
+    lines += [
+        f"export type {t} = _{t};"
+        for t in model.public_types.keys()
+        if t not in customized_classes
+    ]
 
     return "\n".join(lines)
 
@@ -645,6 +658,10 @@ def generate_napi_dts(model: Model) -> str:
             f"export class {otype.name} {{",
         ]
 
+        type_customizations = CUSTOMIZATIONS.get(otype.name, {})
+        method_customizations = type_customizations.get("methods", {})
+        signal_customizations = type_customizations.get("signals", {})
+
         if otype.constructors:
             constructor = otype.constructors[0]
             params = ", ".join(
@@ -655,31 +672,65 @@ def generate_napi_dts(model: Model) -> str:
         for method in otype.methods:
             if method.is_property_accessor:
                 continue
+
+            custom_typings = method_customizations.get(method.js_name)
+            is_customized = custom_typings is not None
+            if is_customized:
+                custom_params = ", ".join(custom_typings["paramTypes"])
+                custom_return_type = custom_typings["returnType"]
+                lines.append(
+                    f"    {method.name}({custom_params}): {custom_return_type};"
+                )
+
+            visibility = "protected " if is_customized else ""
+            method_name = f"_{method.js_name}" if is_customized else method.js_name
             params = ", ".join(
-                f"{param.js_name}{'?' if param.nullable else ''}: {param.type.js}" for param in method.parameters
+                f"{param.js_name}{'?' if param.nullable else ''}: {param.type.js}"
+                for param in method.parameters
             )
-            return_type = method.return_value.type.js if method.return_value is not None else "void"
+            return_type = (
+                method.return_value.type.js
+                if method.return_value is not None
+                else "void"
+            )
             if method.is_async:
                 return_type = f"Promise<{return_type}>"
-            lines.append(f"    {method.js_name}({params}): {return_type};")
+            lines.append(f"    {visibility}{method_name}({params}): {return_type};")
 
         for prop in otype.properties:
             readonly = "readonly " if not prop.writable else ""
             lines.append(f"    {readonly}{prop.js_name}: {prop.type.js};")
 
         for signal in otype.signals:
-            name = get_prefixed_name(otype, signal.js_name, "signals")
-
             params = ", ".join(
                 f"{param.js_name}: {param.type.js}" for param in signal.parameters
             )
 
-            lines.append(f"    readonly {name}: Signal<({params}) => void>;")
+            transform_map = signal_customizations.get(signal.js_name, {}).get(
+                "transform"
+            )
+            is_customized = transform_map is not None
+            if is_customized:
+                custom_params = ", ".join(
+                    transform_map.get(i, (f"{param.js_name}: {param.type.js}", ""))[0]
+                    for i, param in enumerate(signal.parameters)
+                )
+                lines.append(
+                    f"    readonly {signal.js_name}: Signal<({custom_params}) => void>;"
+                )
+
+            signal_name = f"_{signal.js_name}" if is_customized else signal.js_name
+            visibility = "protected " if is_customized else ""
+            lines.append(
+                f"    {visibility}readonly {signal_name}: Signal<({params}) => void>;"
+            )
 
         lines.append("}")
 
     for enum in model.enumerations.values():
-        members = ",\n    ".join(f'{member.js_name} = "{member.nick}"' for member in enum.members)
+        members = ",\n    ".join(
+            f'{member.js_name} = "{member.nick}"' for member in enum.members
+        )
         lines += [
             "",
             f"export enum {enum.name} {{",
@@ -1043,6 +1094,7 @@ typedef struct {
 } FdnSignalClosureMessage;
 """
 
+
 def generate_prototypes(
     object_types: List[ObjectType], enumerations: List[Enumeration]
 ) -> str:
@@ -1146,7 +1198,6 @@ def generate_prototypes(
         "static napi_value fdn_signal_connect (napi_env env, napi_callback_info info);",
         "static napi_value fdn_signal_disconnect (napi_env env, napi_callback_info info);",
         "static gboolean fdn_signal_parse_arguments (napi_env env, napi_callback_info info, FdnSignal ** self, napi_value * js_self, napi_value * handler);",
-
         "static FdnSignalClosure * fdn_signal_closure_new (napi_env env, FdnSignal * sig, napi_value js_sig, napi_value handler);",
         "static void fdn_signal_closure_finalize (gpointer data, GClosure * closure);",
         "static void fdn_signal_closure_marshal (GClosure * closure, GValue * return_gvalue, guint n_param_values, const GValue * param_values, gpointer invocation_hint, gpointer marshal_data);",
@@ -1200,7 +1251,9 @@ def generate_tsfn_declarations(object_types: List[ObjectType]) -> str:
     return "\n".join(declarations) + "\n"
 
 
-def generate_init_function(object_types: List[ObjectType], enumerations: List[Enumeration]) -> str:
+def generate_init_function(
+    object_types: List[ObjectType], enumerations: List[Enumeration]
+) -> str:
     object_type_registration_calls = "\n  ".join(
         [
             f"{otype.c_symbol_prefix}_register (env, exports);"
@@ -1697,7 +1750,9 @@ def generate_enum_registration_code(enum: Enumeration) -> str:
 
     properties = []
     for member in enum.members:
-        properties.append(f'{{ "{member.js_name}", NULL, NULL, NULL, NULL, fdn_utf8_to_value (env, "{member.nick}"), napi_enumerable, NULL }}')
+        properties.append(
+            f'{{ "{member.js_name}", NULL, NULL, NULL, NULL, fdn_utf8_to_value (env, "{member.nick}"), napi_enumerable, NULL }}'
+        )
 
     properties_str = ",\n    ".join(properties)
 
