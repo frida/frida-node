@@ -318,7 +318,7 @@ class Signal:
 
 @dataclass
 class SignalCustomizations:
-    transform: Mapping[int, Tuple[str, str]]
+    transform: Optional[Mapping[int, Tuple[str, str]]] = None
 
 
 TransferOwnership = Enum("TransferOwnership", ["none", "full", "container"])
@@ -495,6 +495,25 @@ if (typeof target === "string") {
                 ),
             },
         ),
+        "Bus": ObjectTypeCustomizations(
+            methods={
+                "post": MethodCustomizations(
+                    param_typings=[
+                        "message: any",
+                        "data?: Buffer",
+                    ],
+                    return_typing="void",
+                    custom_logic="const json = JSON.stringify(message);",
+                ),
+            },
+            signals={
+                "message": SignalCustomizations(
+                    transform={
+                        0: ("message: any", "JSON.parse"),
+                    },
+                ),
+            },
+        ),
         "Script": ObjectTypeCustomizations(
             methods={
                 "post": MethodCustomizations(
@@ -514,6 +533,43 @@ if (typeof target === "string") {
                 ),
             },
         ),
+        "PortalService": ObjectTypeCustomizations(
+            methods={
+                "post": MethodCustomizations(
+                    param_typings=[
+                        "connectionId: number",
+                        "message: any",
+                        "data?: Buffer",
+                    ],
+                    return_typing="void",
+                    custom_logic="const json = JSON.stringify(message);",
+                ),
+                "narrowcast": MethodCustomizations(
+                    param_typings=[
+                        "tag: string",
+                        "message: any",
+                        "data?: Buffer",
+                    ],
+                    return_typing="void",
+                    custom_logic="const json = JSON.stringify(message);",
+                ),
+                "broadcast": MethodCustomizations(
+                    param_typings=[
+                        "message: any",
+                        "data?: Buffer",
+                    ],
+                    return_typing="void",
+                    custom_logic="const json = JSON.stringify(message);",
+                ),
+            },
+            signals={
+                "message": SignalCustomizations(
+                    transform={
+                        1: ("message: any", "JSON.parse"),
+                    },
+                ),
+            },
+        ),
     }
 
 
@@ -528,7 +584,7 @@ def generate_ts(model: Model) -> str:
 
     lines = [
         'import bindings from "bindings";',
-        f'import type {{ FridaBinding, {", ".join(type_imports)}, Signal }} from "./frida_binding.d.ts";',
+        f'import type {{ FridaBinding, {", ".join(type_imports)}, Signal, SignalHandler }} from "./frida_binding.d.ts";',
         'import { Duplex } from "stream";',
     ]
 
@@ -542,25 +598,93 @@ const binding: FridaBinding = bindings({
     ]
 });
 
-class SignalWrapper<T extends (...args: any[]) => void> {
-    #originalSignal: Signal<T>;
-    #transform: (...args: Parameters<T>) => Parameters<T>;
+type SignalTransformer<
+  Source extends SignalHandler,
+  Target extends SignalHandler
+> = (...args: Parameters<Source>) => Parameters<Target>;
 
-    constructor(originalSignal: Signal<T>, transform: (...args: Parameters<T>) => Parameters<T>) {
-        this.#originalSignal = originalSignal;
-        this.#transform = transform;
-    }
+type SignalFilter<H extends SignalHandler> =
+  (args: Parameters<H>) => boolean;
 
-    connect(handler: T): void {
-        const wrappedHandler = (...args: Parameters<T>) => {
-            handler(...this.#transform(...args));
-        };
-        this.#originalSignal.connect(wrappedHandler as T);
-    }
+interface SignalWrapperOptionsNoTransform<H extends SignalHandler> {
+  transform?: undefined;
+  filter?: SignalFilter<H>;
+}
 
-    disconnect(handler: T): void {
-        this.#originalSignal.disconnect(handler);
+interface SignalWrapperOptionsTransform<
+  Source extends SignalHandler,
+  Target extends SignalHandler
+> {
+  transform: SignalTransformer<Source, Target>;
+  filter?: SignalFilter<Target>;
+}
+
+type SignalWrapperOptions<
+  Source extends SignalHandler,
+  Target extends SignalHandler
+> =
+  | SignalWrapperOptionsNoTransform<Source & Target>
+  | SignalWrapperOptionsTransform<Source, Target>;
+
+class SignalWrapper<
+  SourceHandler extends SignalHandler,
+  TargetHandler extends SignalHandler
+> {
+  #source: Signal<SourceHandler>;
+
+  #transform?: SignalTransformer<SourceHandler, TargetHandler>;
+
+  #filter?: SignalFilter<any>;
+
+  #map = new WeakMap<TargetHandler, SourceHandler>();
+
+  constructor(
+    source: Signal<SourceHandler>,
+    options?: SignalWrapperOptions<SourceHandler, TargetHandler>
+  ) {
+    this.#source = source;
+
+    if (options === undefined || options.transform === undefined) {
+      this.#filter = options?.filter;
+    } else {
+      this.#transform = options.transform;
+      this.#filter = options.filter;
     }
+  }
+
+  connect(targetHandler: TargetHandler): void {
+    const transform = this.#transform;
+    const filter = this.#filter;
+
+    const wrappedHandler = ((...sourceArgs: Parameters<SourceHandler>) => {
+      let targetArgs: Parameters<TargetHandler>;
+
+      if (transform === undefined) {
+        targetArgs = sourceArgs as unknown as Parameters<TargetHandler>;
+      } else {
+        targetArgs = transform(...sourceArgs);
+      }
+
+      if (filter !== undefined) {
+        if (!filter(targetArgs)) {
+          return;
+        }
+      }
+
+      targetHandler(...targetArgs);
+    }) as SourceHandler;
+
+    this.#map.set(targetHandler, wrappedHandler);
+    this.#source.connect(wrappedHandler);
+  }
+
+  disconnect(targetHandler: TargetHandler): void {
+    const wrappedHandler = this.#map.get(targetHandler);
+    if (wrappedHandler !== undefined) {
+      this.#source.disconnect(wrappedHandler);
+      this.#map.delete(targetHandler);
+    }
+  }
 }
 
 class IOStream extends Duplex {
@@ -654,32 +778,18 @@ class IOStream extends Duplex {
         num_members = 0
 
         for method in otype.customized_methods:
-            customizations = method.customizations
+            custom = method.customizations
 
-            param_typings = customizations.param_typings
-            if param_typings is None:
-                param_typings = [
-                    f"{param.js_name}{'?' if param.nullable else ''}: {param.type.js}"
-                    for param in method.parameters
-                ]
-
-            return_typing = customizations.return_typing
-            if return_typing is None:
-                return_typing = (
-                    method.return_value.type.js
-                    if method.return_value is not None
-                    else "void"
-                )
-                if method.is_async:
-                    return_typing = f"Promise<{return_typing}>"
+            maybe_async = "async " if method.is_async else ""
+            maybe_await = "await " if method.is_async else ""
 
             if num_members != 0:
                 lines.append("")
             lines.append(
-                f"    async {method.js_name}({', '.join(param_typings)}): {return_typing} {{"
+                f"    {maybe_async}{method.js_name}({', '.join(custom.param_typings)}): {custom.return_typing} {{"
             )
 
-            custom_logic = customizations.custom_logic
+            custom_logic = custom.custom_logic
             if custom_logic is not None:
                 indent = " " * 8
                 lines += [
@@ -688,11 +798,11 @@ class IOStream extends Duplex {
                 ]
 
             lines += [
-                f"        const result = await this._{method.js_name}({', '.join(param.js_name for param in method.parameters)});",
+                f"        const result = {maybe_await}this._{method.js_name}({', '.join(param.js_name for param in method.parameters)});",
                 "",
             ]
 
-            return_wrapper = customizations.return_wrapper
+            return_wrapper = custom.return_wrapper
             if return_wrapper is not None:
                 lines.append(f"        return {return_wrapper}(result);")
             else:
@@ -704,13 +814,13 @@ class IOStream extends Duplex {
 
         for signal in otype.customized_signals:
             customizations = signal.customizations
-            transform_map = customizations.transform
+            transform = customizations.transform
 
             param_typings = []
             transformed_params = []
             for i, param in enumerate(signal.parameters):
-                if i in transform_map:
-                    transformed_name_and_type, transform_function = transform_map[i]
+                if transform is not None and i in transform:
+                    transformed_name_and_type, transform_function = transform[i]
                     param_typings.append(transformed_name_and_type)
                     transformed_params.append(f"{transform_function}({param.js_name})")
                 else:
@@ -878,9 +988,9 @@ def generate_napi_dts(model: Model) -> str:
 
     lines += [
         "",
-        "export class Signal<T extends SignalHandler> {",
-        "    connect(handler: T): void;",
-        "    disconnect(handler: T): void;",
+        "export class Signal<H extends SignalHandler> {",
+        "    connect(handler: H): void;",
+        "    disconnect(handler: H): void;",
         "}",
         "",
         "export type SignalHandler = (...args: any[]) => void;",
