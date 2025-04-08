@@ -299,6 +299,11 @@ class Signal:
             prefix = class_name
         return f"{prefix}{to_pascal_case(self.c_name)}Handler"
 
+    @cached_property
+    def typing(self):
+        params = ", ".join([p.typing for p in self.parameters])
+        return f"({params}) => void"
+
     @property
     def is_customized(self) -> bool:
         return self.customizations is not None
@@ -330,6 +335,13 @@ class Parameter:
     @cached_property
     def js_name(self):
         return to_camel_case(self.name)
+
+    @cached_property
+    def typing(self):
+        t = f"{self.js_name}: {self.type.js}"
+        if self.nullable:
+            t += " | null"
+        return t
 
     @cached_property
     def destroy_function(self) -> Optional[str]:
@@ -484,6 +496,16 @@ if (typeof target === "string") {
             },
         ),
         "Script": ObjectTypeCustomizations(
+            methods={
+                "post": MethodCustomizations(
+                    param_typings=[
+                        "message: any",
+                        "data?: Buffer",
+                    ],
+                    return_typing="void",
+                    custom_logic="const json = JSON.stringify(message);",
+                ),
+            },
             signals={
                 "message": SignalCustomizations(
                     transform={
@@ -781,7 +803,7 @@ def generate_napi_dts(model: Model) -> str:
                 lines.append("")
                 for signal in otype.customized_signals:
                     params = ", ".join(
-                        signal.customizations.transform.get(i, (f"{param.js_name}: {param.type.js}", ""))[0]
+                        signal.customizations.transform.get(i, (param.typing, ""))[0]
                         for i, param in enumerate(signal.parameters)
                     )
                     lines.append(f"export type {signal.handler_type_name} = ({params}) => void;")
@@ -841,10 +863,7 @@ def generate_napi_dts(model: Model) -> str:
                 handler_type_name = signal.handler_type_name
                 if signal.is_customized:
                     handler_type_name = f"_{handler_type_name}"
-                params = ", ".join(
-                    f"{param.js_name}: {param.type.js}" for param in signal.parameters
-                )
-                lines.append(f"export type {handler_type_name} = ({params}) => void;")
+                lines.append(f"export type {handler_type_name} = {signal.typing};")
 
     for enum in model.enumerations.values():
         members = ",\n    ".join(
