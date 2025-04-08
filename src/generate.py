@@ -283,6 +283,22 @@ class Signal:
     def prefixed_js_name(self):
         return f"_{self.js_name}" if self.is_customized else self.js_name
 
+    @cached_property
+    def handler_type_name(self):
+        # XXX: Special-cases to avoid breaking API:
+        class_name = self.object_type.name
+        if class_name == "DeviceManager":
+            prefix = "Device"
+        elif class_name == "Device":
+            prefix = "Device" if self.name == "lost" else ""
+        elif class_name == "PortalService":
+            prefix = "Portal"
+        elif class_name == "Cancellable":
+            prefix = ""
+        else:
+            prefix = class_name
+        return f"{prefix}{to_pascal_case(self.c_name)}Handler"
+
     @property
     def is_customized(self) -> bool:
         return self.customizations is not None
@@ -480,11 +496,17 @@ if (typeof target === "string") {
 
 
 def generate_ts(model: Model) -> str:
-    type_imports = ", ".join(f"{t.name} as _{t.name}" for t in model.public_types.values() if not t.is_customized)
+    type_imports = []
+    for t in model.public_types.values():
+        if t.is_customized:
+            continue
+        type_imports.append(f"{t.name} as _{t.name}")
+        if isinstance(t, ObjectType):
+            type_imports += [f"{s.handler_type_name} as _{s.handler_type_name}" for s in t.signals]
 
     lines = [
         'import bindings from "bindings";',
-        f'import type {{ FridaBinding, {type_imports}, Signal }} from "./frida_binding.d.ts";',
+        f'import type {{ FridaBinding, {", ".join(type_imports)}, Signal }} from "./frida_binding.d.ts";',
         'import { Duplex } from "stream";',
     ]
 
@@ -598,12 +620,9 @@ class IOStream extends Duplex {
 }"""
     )
 
-    customized_classes = set()
     for otype in model.object_types.values():
         if not otype.is_customized:
             continue
-
-        customized_classes.add(otype.name)
 
         lines += [
             "",
@@ -702,7 +721,7 @@ class IOStream extends Duplex {
         "export const {",
     ]
     lines += [
-        f"    {t}," for t in model.public_types.keys() if t not in customized_classes
+        f"    {t.name}," for t in model.public_types.values() if not t.is_customized
     ]
     lines += [
         "} = binding;",
@@ -714,11 +733,12 @@ class IOStream extends Duplex {
         "};",
         "",
     ]
-    lines += [
-        f"export type {t} = _{t};"
-        for t in model.public_types.keys()
-        if t not in customized_classes
-    ]
+    for t in model.public_types.values():
+        if t.is_customized:
+            continue
+        lines.append(f"export type {t.name} = _{t.name};")
+        if isinstance(t, ObjectType):
+            lines += [f"export type {s.handler_type_name} = _{s.handler_type_name};" for s in t.signals]
 
     return "\n".join(lines)
 
@@ -745,21 +765,26 @@ def generate_napi_dts(model: Model) -> str:
 
             for method in otype.customized_methods:
                 customizations = method.customizations
-                custom_params = ", ".join(customizations.param_typings)
+                params = ", ".join(customizations.param_typings)
                 lines.append(
-                    f"    {method.js_name}({custom_params}): {customizations.return_typing};"
+                    f"    {method.js_name}({params}): {customizations.return_typing};"
                 )
 
             for signal in otype.customized_signals:
-                custom_params = ", ".join(
-                    signal.customizations.transform.get(i, (f"{param.js_name}: {param.type.js}", ""))[0]
-                    for i, param in enumerate(signal.parameters)
-                )
                 lines.append(
-                    f"    readonly {signal.js_name}: Signal<({custom_params}) => void>;"
+                    f"    readonly {signal.js_name}: Signal<{signal.handler_type_name}>;"
                 )
 
             lines.append("}")
+
+            if otype.customized_signals:
+                lines.append("")
+                for signal in otype.customized_signals:
+                    params = ", ".join(
+                        signal.customizations.transform.get(i, (f"{param.js_name}: {param.type.js}", ""))[0]
+                        for i, param in enumerate(signal.parameters)
+                    )
+                    lines.append(f"export type {signal.handler_type_name} = ({params}) => void;")
 
         class_name = f"_{otype.name}" if otype.is_customized else otype.name
         lines += [
@@ -801,14 +826,25 @@ def generate_napi_dts(model: Model) -> str:
             is_customized = signal.is_customized
             visibility = "protected " if is_customized else ""
             signal_name = f"_{signal.js_name}" if is_customized else signal.js_name
-            params = ", ".join(
-                f"{param.js_name}: {param.type.js}" for param in signal.parameters
-            )
+            handler_type_name = signal.handler_type_name
+            if is_customized:
+                handler_type_name = f"_{handler_type_name}"
             lines.append(
-                f"    {visibility}readonly {signal_name}: Signal<({params}) => void>;"
+                f"    {visibility}readonly {signal_name}: Signal<{handler_type_name}>;"
             )
 
         lines.append("}")
+
+        if otype.signals:
+            lines.append("")
+            for signal in otype.signals:
+                handler_type_name = signal.handler_type_name
+                if signal.is_customized:
+                    handler_type_name = f"_{handler_type_name}"
+                params = ", ".join(
+                    f"{param.js_name}: {param.type.js}" for param in signal.parameters
+                )
+                lines.append(f"export type {handler_type_name} = ({params}) => void;")
 
     for enum in model.enumerations.values():
         members = ",\n    ".join(
@@ -823,10 +859,12 @@ def generate_napi_dts(model: Model) -> str:
 
     lines += [
         "",
-        "export class Signal<T extends (...args: any[]) => void> {",
+        "export class Signal<T extends SignalHandler> {",
         "    connect(handler: T): void;",
         "    disconnect(handler: T): void;",
         "}",
+        "",
+        "export type SignalHandler = (...args: any[]) => void;",
     ]
 
     return "\n".join(lines)
