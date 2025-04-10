@@ -576,15 +576,22 @@ if (typeof target === "string") {
 def generate_ts(model: Model) -> str:
     type_imports = []
     for t in model.public_types.values():
-        if t.is_customized:
-            continue
-        type_imports.append(f"{t.name} as _{t.name}")
+        if not t.is_customized:
+            type_imports.append(f"{t.name} as _{t.name}")
         if isinstance(t, ObjectType):
-            type_imports += [f"{s.handler_type_name} as _{s.handler_type_name}" for s in t.signals]
+            for s in t.signals:
+                type_imports.append(f"{s.handler_type_name} as _{s.handler_type_name}")
+                if s.is_customized:
+                    type_imports.append(f"_{s.handler_type_name} as __{s.handler_type_name}")
 
     lines = [
         'import bindings from "bindings";',
-        f'import type {{ FridaBinding, {", ".join(type_imports)}, Signal, SignalHandler }} from "./frida_binding.d.ts";',
+        "import type {",
+        "    FridaBinding,",
+        *[f"    {i}," for i in type_imports],
+        "    Signal,",
+        "    SignalHandler,",
+        '} from "./frida_binding.d.ts";',
         'import { Duplex } from "stream";',
     ]
 
@@ -599,92 +606,91 @@ const binding: FridaBinding = bindings({
 });
 
 type SignalTransformer<
-  Source extends SignalHandler,
-  Target extends SignalHandler
+    Source extends SignalHandler,
+    Target extends SignalHandler
 > = (...args: Parameters<Source>) => Parameters<Target>;
 
-type SignalFilter<H extends SignalHandler> =
-  (args: Parameters<H>) => boolean;
+type SignalFilter<H extends SignalHandler> = (args: Parameters<H>) => boolean;
 
 interface SignalWrapperOptionsNoTransform<H extends SignalHandler> {
-  transform?: undefined;
-  filter?: SignalFilter<H>;
+    transform?: undefined;
+    filter?: SignalFilter<H>;
 }
 
 interface SignalWrapperOptionsTransform<
-  Source extends SignalHandler,
-  Target extends SignalHandler
+    Source extends SignalHandler,
+    Target extends SignalHandler
 > {
-  transform: SignalTransformer<Source, Target>;
-  filter?: SignalFilter<Target>;
+    transform: SignalTransformer<Source, Target>;
+    filter?: SignalFilter<Target>;
 }
 
 type SignalWrapperOptions<
-  Source extends SignalHandler,
-  Target extends SignalHandler
+    Source extends SignalHandler,
+    Target extends SignalHandler
 > =
-  | SignalWrapperOptionsNoTransform<Source & Target>
-  | SignalWrapperOptionsTransform<Source, Target>;
+    | SignalWrapperOptionsNoTransform<Source & Target>
+    | SignalWrapperOptionsTransform<Source, Target>;
 
 class SignalWrapper<
-  SourceHandler extends SignalHandler,
-  TargetHandler extends SignalHandler
+    SourceHandler extends SignalHandler,
+    TargetHandler extends SignalHandler
 > {
-  #source: Signal<SourceHandler>;
+    #source: Signal<SourceHandler>;
 
-  #transform?: SignalTransformer<SourceHandler, TargetHandler>;
+    #transform?: SignalTransformer<SourceHandler, TargetHandler>;
 
-  #filter?: SignalFilter<any>;
+    #filter?: SignalFilter<any>;
 
-  #map = new WeakMap<TargetHandler, SourceHandler>();
+    #map = new WeakMap<TargetHandler, SourceHandler>();
 
-  constructor(
-    source: Signal<SourceHandler>,
-    options?: SignalWrapperOptions<SourceHandler, TargetHandler>
-  ) {
-    this.#source = source;
+    constructor(
+        source: Signal<SourceHandler>,
+        options?: SignalWrapperOptions<SourceHandler, TargetHandler>
+    ) {
+        this.#source = source;
 
-    if (options === undefined || options.transform === undefined) {
-      this.#filter = options?.filter;
-    } else {
-      this.#transform = options.transform;
-      this.#filter = options.filter;
-    }
-  }
-
-  connect(targetHandler: TargetHandler): void {
-    const transform = this.#transform;
-    const filter = this.#filter;
-
-    const wrappedHandler = ((...sourceArgs: Parameters<SourceHandler>) => {
-      let targetArgs: Parameters<TargetHandler>;
-
-      if (transform === undefined) {
-        targetArgs = sourceArgs as unknown as Parameters<TargetHandler>;
-      } else {
-        targetArgs = transform(...sourceArgs);
-      }
-
-      if (filter !== undefined) {
-        if (!filter(targetArgs)) {
-          return;
+        if (options === undefined || options.transform === undefined) {
+            this.#filter = options?.filter;
+        } else {
+            this.#transform = options.transform;
+            this.#filter = options.filter;
         }
-      }
-
-      targetHandler(...targetArgs);
-    }) as SourceHandler;
-
-    this.#map.set(targetHandler, wrappedHandler);
-    this.#source.connect(wrappedHandler);
-  }
-
-  disconnect(targetHandler: TargetHandler): void {
-    const wrappedHandler = this.#map.get(targetHandler);
-    if (wrappedHandler !== undefined) {
-      this.#source.disconnect(wrappedHandler);
-      this.#map.delete(targetHandler);
     }
-  }
+
+    connect(targetHandler: TargetHandler): void {
+        const transform = this.#transform;
+        const filter = this.#filter;
+
+        const wrappedHandler = ((...sourceArgs: Parameters<SourceHandler>) => {
+            let targetArgs: Parameters<TargetHandler>;
+
+            if (transform === undefined) {
+                targetArgs = sourceArgs as unknown as Parameters<TargetHandler>;
+            } else {
+                targetArgs = transform(...sourceArgs);
+            }
+
+            if (filter !== undefined) {
+                if (!filter(targetArgs)) {
+                    return;
+                }
+            }
+
+            targetHandler(...targetArgs);
+        }) as SourceHandler;
+
+        this.#map.set(targetHandler, wrappedHandler);
+        this.#source.connect(wrappedHandler);
+    }
+
+    disconnect(targetHandler: TargetHandler): void {
+        const wrappedHandler = this.#map.get(targetHandler);
+        if (wrappedHandler !== undefined) {
+            this.#source.disconnect(wrappedHandler);
+            this.#map.delete(targetHandler);
+        }
+    }
 }
 
 class IOStream extends Duplex {
@@ -814,28 +820,38 @@ class IOStream extends Duplex {
 
         for signal in otype.customized_signals:
             customizations = signal.customizations
+
+            option_lines = []
+
             transform = customizations.transform
+            if transform is not None:
+                param_typings = []
+                transformed_params = []
+                for i, param in enumerate(signal.parameters):
+                    if transform is not None and i in transform:
+                        transformed_name_and_type, transform_function = transform[i]
+                        param_typings.append(transformed_name_and_type)
+                        transformed_params.append(f"{transform_function}({param.js_name})")
+                    else:
+                        param_typings.append(f"{param.js_name}: {param.type.js}")
+                        transformed_params.append(param.js_name)
 
-            param_typings = []
-            transformed_params = []
-            for i, param in enumerate(signal.parameters):
-                if transform is not None and i in transform:
-                    transformed_name_and_type, transform_function = transform[i]
-                    param_typings.append(transformed_name_and_type)
-                    transformed_params.append(f"{transform_function}({param.js_name})")
-                else:
-                    param_typings.append(f"{param.js_name}: {param.type.js}")
-                    transformed_params.append(param.js_name)
+                param_typings_str = ", ".join(param_typings)
+                transformed_params_str = ", ".join(transformed_params)
 
-            param_typings_str = ", ".join(param_typings)
-            transformed_params_str = ", ".join(transformed_params)
+                option_lines += [
+                    f"transform({', '.join(p.js_name for p in signal.parameters)}) {{",
+                    f"    return [{transformed_params_str}];",
+                    f"}},",
+                ]
 
             if num_members != 0:
                 lines.append("")
+            option_indent = 12 * " "
             lines += [
-                f"    get {signal.js_name}(): Signal<({param_typings_str}) => void> {{",
-                f"        return new SignalWrapper(this._{signal.js_name}, ({', '.join(p.js_name for p in signal.parameters)}) => {{",
-                f"            return [{transformed_params_str}];",
+                f"    get {signal.js_name}(): Signal<_{signal.handler_type_name}> {{",
+                f"        return new SignalWrapper<__{signal.handler_type_name}, _{signal.handler_type_name}>(this._{signal.js_name}, {{",
+                *[option_indent + line for line in option_lines],
                 f"        }});",
                 f"    }}",
             ]
@@ -866,9 +882,8 @@ class IOStream extends Duplex {
         "",
     ]
     for t in model.public_types.values():
-        if t.is_customized:
-            continue
-        lines.append(f"export type {t.name} = _{t.name};")
+        if not t.is_customized:
+            lines.append(f"export type {t.name} = _{t.name};")
         if isinstance(t, ObjectType):
             lines += [f"export type {s.handler_type_name} = _{s.handler_type_name};" for s in t.signals]
 
