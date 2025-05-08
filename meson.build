@@ -84,19 +84,7 @@ frida_core_dep = dependency('frida-core-1.0', default_options: [
 
 pkg_install_dir = get_option('libdir') / 'node_modules' / 'frida'
 
-package_json = custom_target('package.json',
-  input: 'package.json',
-  output: 'package.json',
-  command: [
-    python,
-    files('scripts' / 'adjust-version.py'),
-    version,
-    '@INPUT@',
-    '@OUTPUT@',
-  ],
-  install: true,
-  install_dir: pkg_install_dir,
-)
+package_json = files('package.json')
 tsconfig_json = files('tsconfig.json')
 
 subdir('src')

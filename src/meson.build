@@ -1,3 +1,5 @@
+subdir('assets')
+
 if frida_core_dep.type_name() == 'internal'
   frida_core_subprj = subproject('frida-core')
   frida_gir = frida_core_subprj.get_variable('core_public_gir')
@@ -78,7 +80,7 @@ custom_target('js',
     '@OUTDIR@',
     '@PRIVATE_DIR@',
     npm,
-    package_json,
+    adjusted_package_json,
     tsconfig_json,
     '@INPUT@',
   ],

@@ -57,7 +57,7 @@ def generate_ts(model: Model) -> str:
 const binding: FridaBinding = bindings({
     bindings: "frida_binding",
     try: [
-        ["module_root", "bindings"],
+        ["module_root", "build", "bindings"],
         [process.cwd(), "bindings"],
     ]
 });"""
