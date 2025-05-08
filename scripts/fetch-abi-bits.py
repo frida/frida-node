@@ -78,15 +78,6 @@ def load_dev_assets(gyp_os: str,
                     node: Path,
                     outdir: Path,
                     abidir: Path) -> tuple[list[Path], Path, list[Path]]:
-    if gyp_os != "win":
-        node_incroot = node.parent.parent / "include"
-        node_incdir = node_incroot / "node"
-        if node_incdir.exists():
-            abidir.mkdir()
-            node_gypdir = node_incdir
-            node_libs = []
-            return ([node_incdir, node_incroot], node_gypdir, node_libs)
-
     version = f"v16.0.0"
     node_arch = "x86" if gyp_arch == "ia32" else gyp_arch
 
