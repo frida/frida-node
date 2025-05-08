@@ -20,9 +20,9 @@ IMPORT_OBJECT_HDR_SIG2 = 0xffff
 
 
 def main(argv: list[str]):
-    runtime, target, gyp_os, gyp_arch = argv[1:5]
-    flavor = "|".join(argv[1:5])
-    node, npm, outdir = [Path(p) for p in argv[5:8]]
+    gyp_os, gyp_arch = argv[1:3]
+    flavor = "|".join(argv[1:3])
+    node, npm, outdir = [Path(p) for p in argv[3:6]]
 
     abidir = outdir / "abi-bits"
     metadata_file = abidir / "abi-bits.json"
@@ -37,23 +37,16 @@ def main(argv: list[str]):
         if abidir.exists():
             shutil.rmtree(abidir)
 
-        (node_incdirs, node_gypdir, node_libs) = load_dev_assets(runtime, target, gyp_os, gyp_arch,
-                                                                 node, outdir, abidir)
+        (node_incdirs, node_gypdir, node_libs) = load_dev_assets(gyp_os, gyp_arch, node, outdir, abidir)
 
         subprocess.run([npm, "init", "-y"],
                        capture_output=True,
                        cwd=abidir,
                        check=True)
-        subprocess.run([npm, "install", "node-abi", "node-gyp"],
+        subprocess.run([npm, "install", "node-gyp"],
                        capture_output=True,
                        cwd=abidir,
                        check=True)
-
-        abi = subprocess.run([node, "-e", f"import('node-abi').then(abi => {{ console.log(abi.getAbi('{target}', '{runtime}')); }})"],
-                             capture_output=True,
-                             encoding="utf-8",
-                             cwd=abidir,
-                             check=True).stdout.strip()
 
         node_defines = load_node_defines(gyp_os, gyp_arch, node_gypdir,
                                          abidir / "node_modules" / "node-gyp" / "gyp" / "pylib")
@@ -63,7 +56,6 @@ def main(argv: list[str]):
 
         metadata = {
             "flavor": flavor,
-            "abi": abi,
             "node_defines": node_defines,
             "node_incdirs": [str(d) for d in node_incdirs_rel],
             "node_libs": [str(l) for l in node_libs_rel],
@@ -74,7 +66,6 @@ def main(argv: list[str]):
 
 
 def print_metadata(metadata: dict[str, Union[str, list[str]]]):
-    print("abi:", metadata["abi"])
     print("node_defines:", " ".join(metadata["node_defines"]))
     for d in metadata["node_incdirs"]:
         print("node_incdir:", d)
@@ -82,14 +73,12 @@ def print_metadata(metadata: dict[str, Union[str, list[str]]]):
         print("node_lib:", l)
 
 
-def load_dev_assets(runtime: str,
-                    target: str,
-                    gyp_os: str,
+def load_dev_assets(gyp_os: str,
                     gyp_arch: str,
                     node: Path,
                     outdir: Path,
                     abidir: Path) -> tuple[list[Path], Path, list[Path]]:
-    if runtime == "node" and target == "" and gyp_os != "win":
+    if gyp_os != "win":
         node_incroot = node.parent.parent / "include"
         node_incdir = node_incroot / "node"
         if node_incdir.exists():
@@ -98,29 +87,13 @@ def load_dev_assets(runtime: str,
             node_libs = []
             return ([node_incdir, node_incroot], node_gypdir, node_libs)
 
-    if target == "":
-        version = subprocess.run([node, "--version"], capture_output=True, encoding="utf-8").stdout.strip()
-    else:
-        version = f"v{target}"
-
+    version = f"v24.0.0"
     node_arch = "x86" if gyp_arch == "ia32" else gyp_arch
 
-    if runtime == "node":
-        base_url = f"https://nodejs.org/dist/{version}"
-        headers_stem = f"node-{version}-headers"
-        libs_subpath = f"/win-{node_arch}"
-        compression_formats = ["xz", "gz"]
-    elif runtime == "electron":
-        base_url = f"https://electronjs.org/headers/{version}"
-        headers_stem = f"node-{version}-headers"
-        libs_subpath = f"/win-{node_arch}"
-        compression_formats = ["gz"]
-    else:
-        assert runtime == "node-webkit"
-        base_url = f"https://node-webkit.s3.amazonaws.com/{version}"
-        headers_stem = f"nw-headers-{version}"
-        libs_subpath = "" if node_arch == "x86" else f"/{node_arch}"
-        compression_formats = ["gz"]
+    base_url = f"https://nodejs.org/dist/{version}"
+    headers_stem = f"node-{version}-headers"
+    libs_subpath = f"/win-{node_arch}"
+    compression_formats = ["xz", "gz"]
 
     download_error = None
     for compression in compression_formats:
@@ -158,25 +131,11 @@ def load_dev_assets(runtime: str,
             node_lib.write_bytes(redacted_lib.getvalue())
         node_libnames.append(node_lib.name)
 
-        if runtime == "node-webkit":
-            nw_lib = libdir / "nw.lib"
-            with urllib.request.urlopen(f"{base_url}{libs_subpath}/nw.lib") as response:
-                nw_lib.write_bytes(response.read())
-            node_libnames.append(nw_lib.name)
-
     os.rename(extracted_rootdir, abidir)
 
-    if runtime == "node-webkit":
-        node_incdirs = [
-            abidir / "src",
-            abidir / "deps" / "uv" / "include",
-            abidir / "deps" / "v8" / "include",
-        ]
-        node_gypdir = abidir
-    else:
-        incdir = abidir / "include" / "node"
-        node_incdirs = [incdir]
-        node_gypdir = incdir
+    incdir = abidir / "include" / "node"
+    node_incdirs = [incdir]
+    node_gypdir = incdir
 
     node_libs = [abidir / "lib" / name for name in node_libnames]
 
@@ -194,7 +153,7 @@ def load_node_defines(gyp_os: str, gyp_arch: str, node_gypdir: Path, gyp_pylib: 
       "target_name": "frida_binding",
       "type": "loadable_module",
       "sources": [
-        "src/addon.cc",
+        "src/frida_binding.c",
       ],
     },
   ],

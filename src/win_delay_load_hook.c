@@ -24,46 +24,32 @@ static FARPROC WINAPI
 load_exe_hook (unsigned int event,
                DelayLoadInfo * info)
 {
-#ifdef FRIDA_NODE_WEBKIT
   static HMODULE node_dll = NULL;
-  static HMODULE nw_dll = NULL;
 
   switch (event)
   {
-    case dliStartProcessing:
-      node_dll = GetModuleHandle ("node.dll");
-      nw_dll = GetModuleHandle ("nw.dll");
+    case dliNoteStartProcessing:
+      if (node_dll == NULL)
+      {
+        HMODULE m = GetModuleHandle (NULL);
+        if (GetProcAddress (m, "napi_define_class") != NULL)
+          node_dll = m;
+        else
+          node_dll = GetModuleHandle ("node.dll");
+      }
       return NULL;
     case dliNotePreLoadLibrary:
       if (_stricmp (info->szDll, "node.exe") == 0)
         return (FARPROC) node_dll;
       return NULL;
     case dliNotePreGetProcAddress:
-    {
-      FARPROC ret = GetProcAddress (node_dll, info->dlp.szProcName);
-      if (ret)
-        return ret;
-      return GetProcAddress (nw_dll, info->dlp.szProcName);
-    }
+      return GetProcAddress (node_dll, info->dlp.szProcName);
     default:
       return NULL;
   }
-#else
-  HMODULE m;
-
-  if (event != dliNotePreLoadLibrary)
-    return NULL;
-
-  if (_stricmp (info->szDll, HOST_BINARY) != 0)
-    return NULL;
-
-  m = GetModuleHandle (NULL);
-
-  return (FARPROC) m;
-#endif
 }
 
-decltype(__pfnDliNotifyHook2) __pfnDliNotifyHook2 = load_exe_hook;
+const PfnDliHook __pfnDliNotifyHook2 = load_exe_hook;
 
 #pragma managed(pop)
 
