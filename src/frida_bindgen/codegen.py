@@ -1213,6 +1213,15 @@ def generate_method_code(method: Method) -> str:
     storage_prefix = "operation->" if method.is_async else ""
     invalid_arg_label = "invalid_argument" if method.is_async else "beach"
 
+    if method.input_parameters:
+        args_declarations = f"""\
+size_t argc = {len(method.input_parameters)};
+napi_value args[{len(method.input_parameters)}];"""
+        get_cb_info_argc_args = "&argc, args"
+    else:
+        args_declarations = ""
+        get_cb_info_argc_args = "NULL, NULL"
+
     param_conversions = generate_input_parameter_conversions_code(
         method, storage_prefix, invalid_arg_label
     )
@@ -1252,9 +1261,7 @@ static void
 static napi_value
 {otype_cprefix}_{method.name} (napi_env env,
 {calculate_indent('')}napi_callback_info info)
-{{
-  size_t argc = {len(method.input_parameters)};
-  napi_value args[{len(method.input_parameters)}];
+{{{indent_c_code(args_declarations, 1, prologue=one_newline)}
   napi_value jsthis;
   {otype.c_type} * handle;
   napi_deferred deferred;
@@ -1262,7 +1269,7 @@ static napi_value
   {operation_type_name} * operation;
   GSource * source;
 
-  if (napi_get_cb_info (env, info, &argc, args, &jsthis, NULL) != napi_ok)
+  if (napi_get_cb_info (env, info, {get_cb_info_argc_args}, &jsthis, NULL) != napi_ok)
     return NULL;
 
   if (napi_unwrap (env, jsthis, (void **) &handle) != napi_ok)
@@ -1382,13 +1389,11 @@ static napi_value
 {otype_cprefix}_{method.name} (napi_env env,
 {calculate_indent('')}napi_callback_info info)
 {{
-  napi_value js_retval = NULL;
-  size_t argc = {len(method.input_parameters)};
-  napi_value args[{len(method.input_parameters)}];
+  napi_value js_retval = NULL;{indent_c_code(args_declarations, 1, prologue=one_newline)}
   napi_value jsthis;
   {otype.c_type} * handle;{indent_c_code(param_declarations, 1, prologue=one_newline)}{indent_c_code(return_declaration, 1, prologue=one_newline)}
 
-  if (napi_get_cb_info (env, info, &argc, args, &jsthis, NULL) != napi_ok)
+  if (napi_get_cb_info (env, info, {get_cb_info_argc_args}, &jsthis, NULL) != napi_ok)
     goto beach;
 
   if (napi_unwrap (env, jsthis, (void **) &handle) != napi_ok)
