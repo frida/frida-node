@@ -1,7 +1,7 @@
-import * as frida from "../lib";
-import { LabRat } from "./labrat";
+import { LabRat } from "./labrat.js";
 
 import { expect } from "chai";
+import frida from "frida";
 import "mocha";
 
 declare function gc(): void;
@@ -32,7 +32,7 @@ describe("Session", () => {
         try {
             await evaluteScript("Script.runtime", { runtime: frida.ScriptRuntime.V8 });
         } catch (e) {
-            if (/V8 runtime not available due to build configuration/.test(e.message)) {
+            if (/V8 runtime not available due to build configuration/.test((e as Error).message)) {
                 return;
             }
             throw e;

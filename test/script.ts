@@ -1,7 +1,7 @@
-import * as frida from "../lib";
-import { LabRat } from "./labrat";
+import { LabRat } from "./labrat.js";
 
 import { expect } from "chai";
+import frida from "frida";
 import "mocha";
 
 declare function gc(): void;
@@ -56,10 +56,10 @@ describe("Script", function () {
         try {
             await agent.add(1, -2);
         } catch (e) {
-            thrownException = e;
+            thrownException = e as Error;
         }
         expect(thrownException).to.not.be.equal(null);
-        expect(thrownException.message).to.equal("no");
+        expect(thrownException!.message).to.equal("no");
 
         const buf = await agent.speak();
         expect(buf.toJSON().data).to.deep.equal([0x59, 0x6f]);
@@ -88,10 +88,10 @@ describe("Script", function () {
         try {
             await script.exports.init();
         } catch (e) {
-            thrownException = e;
+            thrownException = e as Error;
         }
         expect(thrownException).to.not.equal(null);
-        expect(thrownException.message).to.equal("Script is destroyed");
+        expect(thrownException!.message).to.equal("Script is destroyed");
     });
 
     it("should fail rpc request if script is unloaded mid-request", async () => {
@@ -110,10 +110,10 @@ describe("Script", function () {
         try {
             await script.exports.waitForever();
         } catch (e) {
-            thrownException = e;
+            thrownException = e as Error;
         }
         expect(thrownException).to.not.equal(null);
-        expect(thrownException.message).to.equal("Script is destroyed");
+        expect(thrownException!.message).to.equal("Script is destroyed");
     });
 
     it("should fail rpc request if session gets detached mid-request", async () => {
@@ -132,10 +132,10 @@ describe("Script", function () {
         try {
             await script.exports.waitForever();
         } catch (e) {
-            thrownException = e;
+            thrownException = e as Error;
         }
         expect(thrownException).to.not.equal(null);
-        expect(thrownException.message).to.equal("Script is destroyed");
+        expect(thrownException!.message).to.equal("Script is destroyed");
     });
 
     it("should fail rpc request if cancelled mid-request", async () => {
@@ -156,10 +156,10 @@ describe("Script", function () {
         try {
             await script.exports.waitForever(cancellable);
         } catch (e) {
-            thrownException = e;
+            thrownException = e as Error;
         }
         expect(thrownException).to.not.equal(null);
-        expect(thrownException.message).to.equal("Operation was cancelled");
+        expect(thrownException!.message).to.equal("Operation was cancelled");
     });
 
     it("should support returning rpc exports object from async method", async () => {

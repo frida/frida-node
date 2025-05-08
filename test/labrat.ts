@@ -1,5 +1,5 @@
-import * as frida from "../lib";
-import { targetProgram } from "./data";
+import frida from "frida";
+import { targetProgram } from "./data/index.js";
 
 export class LabRat {
     private constructor(private _pid: number) {

@@ -21,20 +21,24 @@
   ],
   "homepage": "https://frida.re",
   "engines": {
-    "node": ">=16 || 14 >=14.17"
+    "node": ">=16"
   },
-  "main": "./dist",
+  "main": "build/src/frida.js",
+  "exports": {
+    ".": "./build/src/frida.js"
+  },
+  "type": "module",
   "files": [
     "BSDmakefile",
     "Makefile",
+    "build/src/*.d.ts",
+    "build/src/*.js",
     "configure",
     "configure.bat",
-    "dist/",
     "make.bat",
     "meson.build",
     "meson.options",
     "tsconfig.json",
-    "lib/",
     "releng/*.py",
     "releng/*.toml",
     "releng/devkit-assets/",
@@ -51,25 +55,24 @@
   ],
   "dependencies": {
     "bindings": "^1.5.0",
-    "minimatch": "^9.0.3",
-    "nan": "^2.18.0",
-    "prebuild-install": "^7.1.1"
+    "minimatch": "^10.0.1",
+    "prebuild-install": "^7.1.3"
   },
   "devDependencies": {
-    "@types/chai": "^4.2.18",
-    "@types/mocha": "^10.0.3",
-    "@types/node": "^20.8.8",
-    "chai": "^4.3.4",
-    "mocha": "^10.0.0",
-    "ts-node": "^10.0.0",
-    "typescript": "^5.2.2"
+    "@types/bindings": "^1.5.5",
+    "@types/chai": "^5.2.1",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "^22.13.16",
+    "chai": "^5.2.0",
+    "mocha": "^11.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.2"
   },
   "scripts": {
-    "prepare": "npm run build",
-    "build": "tsc",
-    "watch": "tsc -w",
     "install": "node scripts/install.js",
-    "test": "node --expose-gc node_modules/mocha/bin/_mocha -r ts-node/register test/*.ts"
+    "test": "node --loader ts-node/esm --expose-gc node_modules/mocha/bin/_mocha --extension ts test/*.ts",
+    "examples:build": "tsc -p tsconfig.examples.json",
+    "examples:watch": "tsc -p tsconfig.examples.json -w"
   },
   "binary": {
     "host": "https://github.com",

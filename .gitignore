@@ -1,7 +1,6 @@
 /build/
 /deps/
-/dist/
 /node_modules/
 /npm-debug.log
-/prebuilds/
+/src/frida_bindgen/__pycache__/
 /subprojects/*
