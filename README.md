@@ -8,7 +8,7 @@ Node.js bindings for [Frida](https://frida.re).
 
 ## Depends
 
-- Node.js 8.x or newer
+- Node.js v16.x or newer
 
 ## Install
 
@@ -21,14 +21,6 @@ $ npm install frida
 Install from source:
 
 ```sh
-$ make
-$ npm install
-```
-
-Build for Electron:
-
-```sh
-$ ./configure --with-runtime=electron --with-target=27.0.0
 $ make
 $ npm install
 ```
@@ -52,7 +44,6 @@ To recompile only the C++ files that have changed, first run the
 ### Packaging
 
 ```sh
-$ ./configure --with-runtime=electron --with-target=27.0.0
 $ make prebuild
 ```
 
