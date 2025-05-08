@@ -78,7 +78,7 @@ def load_dev_assets(gyp_os: str,
                     node: Path,
                     outdir: Path,
                     abidir: Path) -> tuple[list[Path], Path, list[Path]]:
-    version = f"v16.0.0"
+    version = f"v24.0.0"
     node_arch = "x86" if gyp_arch == "ia32" else gyp_arch
 
     base_url = f"https://nodejs.org/dist/{version}"
