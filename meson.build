@@ -69,14 +69,7 @@ endforeach
 
 if host_machine.system() == 'windows'
   extra_c_args += [
-    '/Zc:__cplusplus',
-    '/Zc:inline',
-    '/Zc:threadSafeInit-',
     '/wd4244',
-    '/wd4251',
-    '/wd4275',
-    '/wd5051',
-    '-DNOMINMAX',
   ]
   extra_link_args += [
     '/DELAYLOAD:node.exe',
