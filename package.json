@@ -77,7 +77,14 @@
   "binary": {
     "host": "https://github.com",
     "remote_path": "frida/frida/releases/download/{version}",
-    "module_path": "build"
+    "module_path": "build",
+    "napi_versions": [
+      8
+    ]
+  },
+  "config": {
+    "runtime": "napi",
+    "target": "8"
   },
   "license": "LGPL-2.0 WITH WxWindows-exception-3.1",
   "repository": {
