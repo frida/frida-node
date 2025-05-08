@@ -1,12 +1,12 @@
-project('frida-node', 'cpp',
+project('frida-node', 'c',
   version: run_command(find_program('python3'), files('scripts' / 'detect-version.py'),
     capture: true,
     check: true).stdout().strip(),
   meson_version: '>=1.1.0',
 )
 
-cpp = meson.get_compiler('cpp')
-strip = (cpp.get_argument_syntax() == 'msvc') ? '' : find_program('strip')
+cc = meson.get_compiler('c')
+strip = (cc.get_argument_syntax() == 'msvc') ? '' : find_program('strip')
 
 node = find_program('node')
 npm = find_program('npm')
@@ -76,16 +76,16 @@ foreach item : metadata
   endif
 endforeach
 
-extra_cpp_args = []
+extra_c_args = []
 extra_link_args = []
 extra_link_depends = []
 
 foreach d : node_defines
-  extra_cpp_args += '-D' + d
+  extra_c_args += '-D' + d
 endforeach
 
 if host_machine.system() == 'windows'
-  extra_cpp_args += [
+  extra_c_args += [
     '/Zc:__cplusplus',
     '/Zc:inline',
     '/Zc:threadSafeInit-',
@@ -101,52 +101,12 @@ if host_machine.system() == 'windows'
   ]
 endif
 
-nan_dep = dependency('nan')
-
 frida_core_dep = dependency('frida-core-1.0', default_options: [
   f'frida_version=@version@',
   'compiler_backend=disabled',
 ])
 
-subdir('src')
-
 pkg_install_dir = get_option('libdir') / 'node_modules' / 'frida'
-
-binding = shared_module('frida_binding', frida_binding_sources,
-  name_prefix: '',
-  name_suffix: 'node',
-  include_directories: include_directories(node_incdirs),
-  implicit_include_directories: false,
-  override_options: [
-    'cpp_std=c++17',
-    'cpp_eh=none',
-    'cpp_rtti=false',
-  ],
-  cpp_args: [
-    '-DBUILDING_NODE_EXTENSION',
-    '-DNODE_GYP_MODULE_NAME=frida_binding',
-    f'-DHOST_BINARY="@host_binary@"',
-    '-DFRIDA_' + runtime.underscorify().to_upper(),
-  ] + extra_cpp_args,
-  link_args: node_libs + extra_link_args,
-  link_depends: extra_link_depends,
-  dependencies: [frida_core_dep, nan_dep],
-  install: true,
-  install_dir: pkg_install_dir / 'build',
-)
-
-custom_target('prebuild',
-  input: [binding],
-  output: [f'frida-v@version@-@runtime@-v@abi@-@node_platform@-@gyp_arch@.tar.gz'],
-  command: [
-    python,
-    files('scripts' / 'package.py'),
-    '>>>', strip, '<<<',
-    get_option('strip').to_string(),
-    '@INPUT@',
-    '@OUTPUT@',
-  ],
-)
 
 package_json = custom_target('package.json',
   input: 'package.json',
@@ -163,4 +123,37 @@ package_json = custom_target('package.json',
 )
 tsconfig_json = files('tsconfig.json')
 
-subdir('lib')
+subdir('src')
+
+binding = shared_module('frida_binding', frida_binding_sources,
+  name_prefix: '',
+  name_suffix: 'node',
+  include_directories: include_directories(node_incdirs),
+  implicit_include_directories: false,
+  c_args: [
+    '-DBUILDING_NODE_EXTENSION',
+    '-DNODE_GYP_MODULE_NAME=frida_binding',
+    '-DNAPI_VERSION=8',
+    f'-DHOST_BINARY="@host_binary@"',
+    '-DFRIDA_' + runtime.underscorify().to_upper(),
+  ] + extra_c_args,
+  link_args: node_libs + extra_link_args,
+  link_depends: extra_link_depends,
+  dependencies: frida_core_dep,
+  install: true,
+  install_dir: pkg_install_dir / 'build',
+  vs_module_defs: 'src' / 'addon.def',
+)
+
+custom_target('prebuild',
+  input: [binding],
+  output: [f'frida-v@version@-@runtime@-v@abi@-@node_platform@-@gyp_arch@.tar.gz'],
+  command: [
+    python,
+    files('scripts' / 'package.py'),
+    '>>>', strip, '<<<',
+    get_option('strip').to_string(),
+    '@INPUT@',
+    '@OUTPUT@',
+  ],
+)

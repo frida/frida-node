@@ -1,6 +1,5 @@
-import * as frida from "../lib";
-
 import { expect } from "chai";
+import frida from "frida";
 import "mocha";
 
 declare function gc(): void;
