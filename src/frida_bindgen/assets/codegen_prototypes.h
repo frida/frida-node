@@ -45,7 +45,7 @@ static gboolean fdn_options_from_value (napi_env env, GType object_type, napi_va
 
 static napi_value fdn_object_subclass_to_value (napi_env env, GObject * object);
 static napi_value fdn_object_new (napi_env env, GObject * handle, napi_ref constructor);
-static gboolean fdn_object_wrap (napi_env env, napi_value wrapper, GObject * handle, node_api_nogc_finalize finalizer);
+static gboolean fdn_object_wrap (napi_env env, napi_value wrapper, GObject * handle, napi_finalize finalizer);
 static gboolean fdn_object_unwrap (napi_env env, napi_value wrapper, GType expected_type, GObject ** handle);
 static void fdn_object_finalize (napi_env env, void * finalize_data, void * finalize_hint);
 static napi_value fdn_object_get_signal (napi_env env, napi_callback_info info, const gchar * name, const gchar * js_storage_name, FdnSignalBehavior behavior);

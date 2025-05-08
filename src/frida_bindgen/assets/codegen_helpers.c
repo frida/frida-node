@@ -1275,7 +1275,7 @@ static gboolean
 fdn_object_wrap (napi_env env,
                  napi_value wrapper,
                  GObject * handle,
-                 node_api_nogc_finalize finalizer)
+                 napi_finalize finalizer)
 {
   napi_ref ref;
 
