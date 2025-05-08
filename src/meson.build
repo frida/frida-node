@@ -92,7 +92,7 @@ frida_binding_sources = [
 ]
 
 if system == 'windows'
-  if cpp.get_argument_syntax() != 'msvc'
+  if cc.get_argument_syntax() != 'msvc'
     symfile = 'addon.symbols'
     extra_link_args += '-Wl,--retain-symbols-file,' + meson.current_source_dir() / symfile
     extra_link_depends += files(symfile)

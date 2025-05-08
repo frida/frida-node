@@ -13,10 +13,10 @@ npm = find_program('npm')
 python = import('python').find_installation()
 
 version = meson.project_version()
-runtime = get_option('runtime')
-target = get_option('target')
 
 system = host_machine.system()
+
+napi_version = 8
 
 node_platforms = {
   'windows': 'win32',
@@ -38,34 +38,17 @@ gyp_archs = {
 cpu_family = host_machine.cpu_family()
 gyp_arch = gyp_archs.get(cpu_family, cpu_family)
 
-fs = import('fs')
-if runtime == 'node-webkit'
-  host_binary = 'node'
-  if host_machine.system() == 'windows'
-    host_binary += '.dll'
-  endif
-else
-  host_binary = 'node'
-  if host_machine.system() == 'windows'
-    host_binary += '.exe'
-  endif
-endif
-
 message('Fetching ABI bits')
 metadata = run_command(python, files('scripts' / 'fetch-abi-bits.py'),
-  runtime, target, gyp_os, gyp_arch,
-  node, npm, meson.current_build_dir(),
+  gyp_os, gyp_arch, node, npm, meson.current_build_dir(),
   capture: true,
   check: true,
 ).stdout().strip().split('\n')
-abi = 0
 node_defines = []
 node_incdirs = []
 node_libs = []
 foreach item : metadata
-  if item.startswith('abi: ')
-    abi = item.substring(5)
-  elif item.startswith('node_defines: ')
+  if item.startswith('node_defines: ')
     node_defines += item.substring(14).split(' ')
   elif item.startswith('node_incdir: ')
     node_incdirs += item.substring(13)
@@ -96,7 +79,7 @@ if host_machine.system() == 'windows'
     '-DNOMINMAX',
   ]
   extra_link_args += [
-    '/DELAYLOAD:' + host_binary,
+    '/DELAYLOAD:node.exe',
     '-lDelayImp',
   ]
 endif
@@ -133,9 +116,7 @@ binding = shared_module('frida_binding', frida_binding_sources,
   c_args: [
     '-DBUILDING_NODE_EXTENSION',
     '-DNODE_GYP_MODULE_NAME=frida_binding',
-    '-DNAPI_VERSION=8',
-    f'-DHOST_BINARY="@host_binary@"',
-    '-DFRIDA_' + runtime.underscorify().to_upper(),
+    f'-DNAPI_VERSION=@napi_version@',
   ] + extra_c_args,
   link_args: node_libs + extra_link_args,
   link_depends: extra_link_depends,
@@ -147,7 +128,7 @@ binding = shared_module('frida_binding', frida_binding_sources,
 
 custom_target('prebuild',
   input: [binding],
-  output: [f'frida-v@version@-@runtime@-v@abi@-@node_platform@-@gyp_arch@.tar.gz'],
+  output: [f'frida-v@version@-napi-v@napi_version@-@node_platform@-@gyp_arch@.tar.gz'],
   command: [
     python,
     files('scripts' / 'package.py'),
