@@ -79,7 +79,6 @@ endif
 
 frida_core_dep = dependency('frida-core-1.0', default_options: [
   f'frida_version=@version@',
-  'compiler_backend=disabled',
 ])
 
 pkg_install_dir = get_option('libdir') / 'node_modules' / 'frida'
