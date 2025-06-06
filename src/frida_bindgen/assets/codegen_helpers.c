@@ -990,6 +990,8 @@ fdn_gvalue_to_value (napi_env env,
 
       return fdn_utf8_to_value (env, str);
     }
+    case G_TYPE_VARIANT:
+      return fdn_variant_to_value (env, g_value_get_variant (value));
     default:
     {
       napi_value result;
