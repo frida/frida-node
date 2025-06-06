@@ -1774,7 +1774,13 @@ fdn_signal_closure_deliver (napi_env env,
         napi_get_global (env, &global);
         napi_get_reference_value (env, self->handler, &handler);
 
-        napi_call_function (env, global, handler, args->len, js_args, &js_result);
+        if (napi_call_function (env, global, handler, args->len, js_args, &js_result) == napi_pending_exception)
+        {
+          napi_value err;
+
+          napi_get_and_clear_last_exception (env, &err);
+          napi_fatal_exception (env, err);
+        }
       }
 
       for (i = 0; i != args->len; i++)
