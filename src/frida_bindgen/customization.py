@@ -778,6 +778,11 @@ const assetRoot = params?.assetRoot ?? null;
         "Injector": ObjectTypeCustomizations(drop=True),
         "RpcClient": ObjectTypeCustomizations(drop=True),
         "RpcPeer": ObjectTypeCustomizations(drop=True),
+        "Compiler": ObjectTypeCustomizations(
+            signals={
+                "output": SignalCustomizations(behavior="FDN_SIGNAL_KEEP_ALIVE"),
+            },
+        ),
         "Cancellable": ObjectTypeCustomizations(
             methods={
                 "is_cancelled": MethodCustomizations(hide=True),
