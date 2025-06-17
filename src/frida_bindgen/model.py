@@ -30,6 +30,8 @@ NUMERIC_GIR_TYPES = {
     "guint16",
     "guint32",
     "guint64",
+    "gfloat",
+    "gdouble",
     "GType",
     "GQuark",
 }
