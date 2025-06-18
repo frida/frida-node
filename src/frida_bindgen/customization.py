@@ -445,7 +445,7 @@ if (opts !== undefined) {
                     custom_logic="const pid = await this.#getPid(target, cancellable);",
                 ),
                 "open_channel": MethodCustomizations(
-                    return_typing="Promise<NodeJS.ReadWriteStream>",
+                    return_typing='Promise<import("stream").Duplex>',
                     return_wrapper="new IOStreamAdapter",
                 ),
             },
