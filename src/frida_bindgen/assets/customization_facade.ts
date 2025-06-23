@@ -146,12 +146,7 @@ async function findMatchingDevice(predicate: DevicePredicate, cancellable?: Canc
 
     const devices = await deviceManager.enumerateDevices(cancellable);
 
-    const matching = devices.filter(predicate);
-    if (matching.length === 0) {
-        return null;
-    }
-
-    return matching[0];
+    return devices.find(predicate) ?? null;
 }
 
 type DevicePredicate = (device: Device) => boolean;
