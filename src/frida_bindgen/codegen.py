@@ -586,6 +586,7 @@ def generate_operation_structs(object_types: List[ObjectType]) -> str:
                     f"""\
 typedef struct {{
   napi_deferred deferred;
+  napi_threadsafe_function tsfn;
   {otype.c_type} * handle;{decls}
 }} {method.operation_type_name};
 """
@@ -751,14 +752,6 @@ def generate_tsfn_declarations(object_types: List[ObjectType]) -> str:
     declarations = []
 
     for otype in object_types:
-        async_methods = [method for method in otype.methods if method.is_async]
-        if async_methods:
-            declarations.append("")
-            for method in async_methods:
-                declarations.append(
-                    f"static napi_threadsafe_function {otype.c_symbol_prefix}_{method.name}_tsfn;"
-                )
-
         if isinstance(otype, InterfaceObjectType) and otype.has_abstract_base:
             declarations.append(
                 f"static napi_threadsafe_function {otype.abstract_base_c_symbol_prefix}_release_js_resources_tsfn;"
@@ -908,18 +901,11 @@ def generate_object_type_registration_code(otype: ObjectType, model: Model) -> s
         else f"\n  napi_create_reference (env, constructor, 1, &{otype_cprefix}_constructor);"
     )
     jsprop_registrations = []
-    tsfn_initializations = []
 
     for method in otype.methods:
         if method.is_property_accessor:
             continue
         jsprop_registrations.append(generate_method_registration_entry(method))
-        if method.is_async:
-            tsfn_initializations.append(
-                f"""\
-napi_create_threadsafe_function (env, NULL, NULL, fdn_utf8_to_value (env, "{method.prefixed_js_name}"), 0, 1, NULL, NULL, NULL, {otype_cprefix}_{method.name}_deliver, &{otype_cprefix}_{method.name}_tsfn);
-napi_unref_threadsafe_function (env, {otype_cprefix}_{method.name}_tsfn);"""
-            )
 
     for prop in otype.properties:
         jsprop_registrations.append(generate_property_registration_entry(prop))
@@ -941,7 +927,6 @@ napi_unref_threadsafe_function (env, {otype_cprefix}_{method.name}_tsfn);"""
                 jsprop_registrations.append(generate_signal_registration_entry(signal))
 
     jsprop_registrations_str = "\n    ".join(jsprop_registrations)
-    tsfn_initializations_code = "\n\n".join(tsfn_initializations)
 
     def calculate_indent(suffix: str) -> str:
         return " " * (len(otype_cprefix) + len(suffix) + 2)
@@ -961,7 +946,7 @@ static void
 
   napi_define_class (env, "{otype.prefixed_js_name}", NAPI_AUTO_LENGTH, {otype_cprefix}_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);{ctor_ref_creation}
 
-  napi_set_named_property (env, exports, "{otype.prefixed_js_name}", constructor);{indent_c_code(tsfn_initializations_code, 1, prologue=two_newlines)}
+  napi_set_named_property (env, exports, "{otype.prefixed_js_name}", constructor);
 }}
 """
 
@@ -1279,6 +1264,8 @@ static napi_value
 
   operation = g_slice_new0 ({operation_type_name});
   operation->deferred = deferred;
+  napi_create_threadsafe_function (env, NULL, NULL, fdn_utf8_to_value (env, "{method.prefixed_js_name}"), 0, 1, NULL, NULL, NULL,
+      {otype_cprefix}_{method.name}_deliver, &operation->tsfn);
   operation->handle = handle;
   operation->error = NULL;{indent_c_code(param_conversions, 1, prologue=two_newlines)}
 
@@ -1287,8 +1274,6 @@ static napi_value
       operation, NULL);
   g_source_attach (source, frida_get_main_context ());
   g_source_unref (source);
-
-  napi_ref_threadsafe_function (env, {otype_cprefix}_{method.name}_tsfn);
 
   return promise;
 
@@ -1321,7 +1306,7 @@ static void
 
   {return_assignment}{method.finish_c_identifier} (operation->handle, res, &operation->error);
 
-  napi_call_threadsafe_function ({otype_cprefix}_{method.name}_tsfn, operation, napi_tsfn_blocking);
+  napi_call_threadsafe_function (operation->tsfn, operation, napi_tsfn_blocking);
 }}
 
 static void
@@ -1345,9 +1330,9 @@ static void
     napi_resolve_deferred (env, operation->deferred, js_retval);{indent_c_code(keep_alive_code, 2)}
   }}
 
-  {otype_cprefix}_{method.name}_operation_free (operation);
+  napi_release_threadsafe_function (operation->tsfn, napi_tsfn_release);
 
-  napi_unref_threadsafe_function (env, {otype_cprefix}_{method.name}_tsfn);
+  {otype_cprefix}_{method.name}_operation_free (operation);
 }}
 
 {operation_free_function}
