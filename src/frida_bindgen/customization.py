@@ -388,6 +388,11 @@ if (opts !== undefined) {
         options.cwd = cwd;
     }
 
+    const stdio = opts.stdio;
+    if (stdio !== undefined) {
+        options.stdio = stdio;
+    }
+
     options.aux = Object.fromEntries(Object.entries(opts).filter(([k, v]) => !STANDARD_SPAWN_OPTION_NAMES.has(k)));
 }
                     """,
