@@ -52,6 +52,7 @@ typedef struct {
   guint ref_count;
   GObject * handle;
   gulong signal_handler_id;
+  napi_threadsafe_function tsfn;
 } FdnKeepAliveContext;
 
 typedef gboolean (* FdnIsDestroyedFunc) (GObject * handle);

@@ -1742,16 +1742,12 @@ fdn_signal_closure_deliver (napi_env env,
       FdnSignalClosureMessageDestroy * d = &message->payload.destroy;
       napi_value js_sig;
       FdnSignal * sig;
-      FdnSignalBehavior behavior;
 
       napi_get_reference_value (env, d->js_sig, &js_sig);
       napi_unwrap (env, js_sig, (void **) &sig);
-      behavior = sig->behavior;
 
       napi_delete_reference (env, d->handler);
       napi_delete_reference (env, d->js_sig);
-      if (behavior == FDN_SIGNAL_KEEP_ALIVE)
-        napi_unref_threadsafe_function (env, d->tsfn);
       napi_release_threadsafe_function (d->tsfn, napi_tsfn_abort);
 
       break;
@@ -1814,7 +1810,7 @@ fdn_keep_alive_until (napi_env env,
   context->handle = g_object_ref (handle);
   context->signal_handler_id = 0;
 
-  napi_ref_threadsafe_function (env, fdn_keep_alive_tsfn);
+  napi_create_threadsafe_function (env, NULL, NULL, fdn_utf8_to_value (env, "FridaKeepAlive"), 0, 1, NULL, NULL, context, fdn_keep_alive_on_tsfn_invoke, &context->tsfn);
 
   napi_add_finalizer (env, js_object, context, fdn_keep_alive_on_finalize, NULL, NULL);
 
@@ -1863,7 +1859,7 @@ fdn_keep_alive_schedule_cleanup (FdnKeepAliveContext * context)
   if (fdn_in_cleanup)
     return;
 
-  napi_call_threadsafe_function (fdn_keep_alive_tsfn, context, napi_tsfn_blocking);
+  napi_call_threadsafe_function (context->tsfn, NULL, napi_tsfn_blocking);
 }
 
 static void
@@ -1872,7 +1868,7 @@ fdn_keep_alive_on_tsfn_invoke (napi_env env,
                                void * context,
                                void * data)
 {
-  FdnKeepAliveContext * ctx = data;
+  FdnKeepAliveContext * ctx = context;
 
   if (ctx->signal_handler_id != 0)
   {
@@ -1882,7 +1878,8 @@ fdn_keep_alive_on_tsfn_invoke (napi_env env,
     g_object_unref (ctx->handle);
     ctx->handle = NULL;
 
-    napi_unref_threadsafe_function (env, fdn_keep_alive_tsfn);
+    napi_release_threadsafe_function (ctx->tsfn, napi_tsfn_abort);
+    ctx->tsfn = NULL;
   }
 
   if (g_atomic_int_dec_and_test (&ctx->ref_count))
