@@ -69,6 +69,7 @@ static void fdn_keep_alive_on_destroy_signal (GObject * handle, gpointer user_da
 static void fdn_keep_alive_on_destroy_signal_handler_detached (gpointer data, GClosure * closure);
 static void fdn_keep_alive_schedule_cleanup (FdnKeepAliveContext * context);
 static void fdn_keep_alive_on_tsfn_invoke (napi_env env, napi_value js_cb, void * context, void * data);
+static void fdn_keep_alive_context_unref (FdnKeepAliveContext * ctx);
 
 static void fdn_inherit_val_val (napi_env env, napi_value sub_ctor, napi_value super_ctor, napi_value object_ctor, napi_value set_proto);
 G_GNUC_UNUSED static void fdn_inherit_val_ref (napi_env env, napi_value sub_ctor, napi_ref super_ctor, napi_value object_ctor, napi_value set_proto);

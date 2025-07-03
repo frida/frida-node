@@ -1856,10 +1856,15 @@ fdn_keep_alive_on_destroy_signal_handler_detached (gpointer data,
 static void
 fdn_keep_alive_schedule_cleanup (FdnKeepAliveContext * context)
 {
+  napi_threadsafe_function tsfn;
+
   if (fdn_in_cleanup)
     return;
 
-  napi_call_threadsafe_function (context->tsfn, NULL, napi_tsfn_blocking);
+  if ((tsfn = g_atomic_pointer_exchange (&context->tsfn, NULL)) != NULL)
+    napi_call_threadsafe_function (tsfn, tsfn, napi_tsfn_blocking);
+  else
+    fdn_keep_alive_context_unref (context);
 }
 
 static void
@@ -1869,19 +1874,22 @@ fdn_keep_alive_on_tsfn_invoke (napi_env env,
                                void * data)
 {
   FdnKeepAliveContext * ctx = context;
+  napi_threadsafe_function tsfn = data;
 
-  if (ctx->signal_handler_id != 0)
-  {
-    g_signal_handler_disconnect (ctx->handle, ctx->signal_handler_id);
-    ctx->signal_handler_id = 0;
+  g_signal_handler_disconnect (ctx->handle, ctx->signal_handler_id);
+  ctx->signal_handler_id = 0;
 
-    g_object_unref (ctx->handle);
-    ctx->handle = NULL;
+  g_object_unref (ctx->handle);
+  ctx->handle = NULL;
 
-    napi_release_threadsafe_function (ctx->tsfn, napi_tsfn_abort);
-    ctx->tsfn = NULL;
-  }
+  napi_release_threadsafe_function (tsfn, napi_tsfn_abort);
 
+  fdn_keep_alive_context_unref (ctx);
+}
+
+static void
+fdn_keep_alive_context_unref (FdnKeepAliveContext * ctx)
+{
   if (g_atomic_int_dec_and_test (&ctx->ref_count))
     g_slice_free (FdnKeepAliveContext, ctx);
 }
