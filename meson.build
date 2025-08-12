@@ -84,6 +84,7 @@ frida_core_dep = dependency('frida-core-1.0', default_options: [
 pkg_install_dir = get_option('libdir') / 'node_modules' / 'frida'
 
 package_json = files('package.json')
+package_lock_json = files('package-lock.json')
 tsconfig_json = files('tsconfig.json')
 
 subdir('src')

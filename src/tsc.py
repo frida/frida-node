@@ -5,11 +5,11 @@ import sys
 
 
 def main(argv: list[str]):
-    outdir, privdir, npm, package_json, tsconfig, *sources = [Path(s) for s in argv[1:]]
+    outdir, privdir, npm, package_json, package_lock_json, tsconfig, *sources = [Path(s) for s in argv[1:]]
 
     try:
         privdir.mkdir(exist_ok=True)
-        for asset in [package_json, tsconfig]:
+        for asset in [package_json, package_lock_json, tsconfig]:
             shutil.copy(asset, privdir)
 
         srcdir = privdir / "src"
@@ -29,7 +29,7 @@ def main(argv: list[str]):
             "encoding": "utf-8",
             "check": True,
         }
-        subprocess.run([npm, "install", "--ignore-scripts"],
+        subprocess.run([npm, "ci", "--ignore-scripts"],
                        cwd=privdir,
                        **run_kwargs)
         subprocess.run([npm, "exec", "tsc"],
