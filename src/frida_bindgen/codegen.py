@@ -2093,20 +2093,24 @@ def generate_options_conversion_functions(otype: ObjectType) -> str:
         return " " * (len(cprefix) + len(suffix) + 2)
 
     selection_code = ""
-    for method in otype.methods:
-        if not method.is_select_method:
-            continue
+    current_otype = otype
+    while current_otype is not None:
+        opts_variable = "opts" if current_otype is otype else f"{current_otype.c_cast_macro} (opts)"
 
-        plural_noun = method.select_plural_noun
-        param_type = method.select_element_type
-        param_from_value = f"fdn_{param_type.nick}_from_value"
+        for method in current_otype.methods:
+            if not method.is_select_method:
+                continue
 
-        element_destroy_code = ""
-        destroy_func = param_type.destroy_func
-        if destroy_func is not None:
-            element_destroy_code = f"\n\n        {destroy_func} (element);"
+            plural_noun = method.select_plural_noun
+            param_type = method.select_element_type
+            param_from_value = f"fdn_{param_type.nick}_from_value"
 
-        selection_code += f"""
+            element_destroy_code = ""
+            destroy_func = param_type.destroy_func
+            if destroy_func is not None:
+                element_destroy_code = f"\n\n        {destroy_func} (element);"
+
+            selection_code += f"""
 
   {{
     napi_value js_{plural_noun};
@@ -2136,10 +2140,12 @@ def generate_options_conversion_functions(otype: ObjectType) -> str:
         if (!{param_from_value} (env, js_element, &element))
           goto propagate_error;
 
-        {method.c_identifier} (opts, element);{element_destroy_code}
+        {method.c_identifier} ({opts_variable}, element);{element_destroy_code}
       }}
     }}
   }}"""
+
+        current_otype = current_otype.parent
 
     cleanup_code = ""
     if selection_code:
