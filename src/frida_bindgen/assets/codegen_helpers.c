@@ -633,6 +633,7 @@ fdn_variant_from_value (napi_env env,
           {
             napi_value second;
             GVariant * val;
+            napi_value desc_prop;
             napi_value desc;
             gchar * type;
             GVariant * t[2];
@@ -640,11 +641,23 @@ fdn_variant_from_value (napi_env env,
             if (napi_get_element (env, value, 1, &second) != napi_ok)
               return FALSE;
 
-            if (!fdn_variant_from_value (env, second, &val))
-              return FALSE;
-
-            napi_coerce_to_string (env, first, &desc);
+            desc_prop = fdn_utf8_to_value (env, "description");
+            napi_get_property (env, first, desc_prop, &desc);
             fdn_utf8_from_value (env, desc, &type);
+
+            if (strcmp (type, "uint64") == 0)
+            {
+              gint64 i;
+
+              if (!fdn_int64_from_value (env, second, &i))
+                return FALSE;
+
+              val = g_variant_new_uint64 ((guint64) i);
+            }
+            else if (!fdn_variant_from_value (env, second, &val))
+            {
+              return FALSE;
+            }
 
             t[0] = g_variant_new_take_string (type);
             t[1] = val;
