@@ -656,7 +656,7 @@ fdn_variant_from_value (napi_env env,
             }
             else if (!fdn_variant_from_value (env, second, &val))
             {
-                return FALSE;
+              return FALSE;
             }
 
             t[0] = g_variant_new_take_string (type);
