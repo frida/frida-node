@@ -248,7 +248,7 @@ fdn_int64_to_value (napi_env env,
                     gint64 i)
 {
   napi_value result;
-  napi_create_int64 (env, i, &result);
+  napi_create_bigint_int64 (env, i, &result);
   return result;
 }
 
@@ -257,7 +257,7 @@ fdn_uint64_to_value (napi_env env,
                      guint64 u)
 {
   napi_value result;
-  napi_create_double (env, u, &result);
+  napi_create_bigint_uint64 (env, u, &result);
   return result;
 }
 
