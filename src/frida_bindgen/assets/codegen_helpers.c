@@ -530,7 +530,7 @@ fdn_vardict_from_value (napi_env env,
     if (!fdn_variant_from_value (env, js_val, &val))
       goto propagate_error;
 
-    g_hash_table_insert (dict, g_steal_pointer (&key), g_variant_ref_sink (val));
+    g_hash_table_insert (dict, g_steal_pointer (&key), val);
   }
 
   *vardict = dict;
@@ -591,7 +591,7 @@ fdn_variant_from_value (napi_env env,
       if (!fdn_boolean_from_value (env, value, &b))
         return FALSE;
 
-      *variant = g_variant_new_boolean (b);
+      *variant = g_variant_ref_sink (g_variant_new_boolean (b));
       return TRUE;
     }
     case napi_number:
@@ -601,7 +601,7 @@ fdn_variant_from_value (napi_env env,
       if (!fdn_int64_from_value (env, value, &i))
         return FALSE;
 
-      *variant = g_variant_new_int64 (i);
+      *variant = g_variant_ref_sink (g_variant_new_int64 (i));
       return TRUE;
     }
     case napi_string:
@@ -611,7 +611,7 @@ fdn_variant_from_value (napi_env env,
       if (!fdn_utf8_from_value (env, value, &str))
         return FALSE;
 
-      *variant = g_variant_new_take_string (str);
+      *variant = g_variant_ref_sink (g_variant_new_take_string (str));
       return TRUE;
     }
     case napi_object:
@@ -633,7 +633,7 @@ fdn_variant_from_value (napi_env env,
           return FALSE;
 
         copy = g_memdup2 (data, size);
-        *variant = g_variant_new_from_data (G_VARIANT_TYPE_BYTESTRING, copy, size, TRUE, g_free, copy);
+        *variant = g_variant_ref_sink (g_variant_new_from_data (G_VARIANT_TYPE_BYTESTRING, copy, size, TRUE, g_free, copy));
         return TRUE;
       }
 
@@ -679,7 +679,7 @@ fdn_variant_from_value (napi_env env,
               if (!fdn_int64_from_value (env, second, &i))
                 return FALSE;
 
-              val = g_variant_new_uint64 ((guint64) i);
+              val = g_variant_ref_sink (g_variant_new_uint64 ((guint64) i));
             }
             else if (!fdn_variant_from_value (env, second, &val))
             {
@@ -689,7 +689,10 @@ fdn_variant_from_value (napi_env env,
             t[0] = g_variant_new_take_string (type);
             t[1] = val;
 
-            *variant = g_variant_new_tuple (t, G_N_ELEMENTS (t));
+            *variant = g_variant_ref_sink (g_variant_new_tuple (t, G_N_ELEMENTS (t)));
+
+            g_variant_unref (val);
+
             return TRUE;
           }
         }
@@ -714,9 +717,11 @@ fdn_variant_from_value (napi_env env,
           }
 
           g_variant_builder_add (&builder, "v", v);
+
+          g_variant_unref (v);
         }
 
-        *variant = g_variant_builder_end (&builder);
+        *variant = g_variant_ref_sink (g_variant_builder_end (&builder));
         return TRUE;
       }
 
@@ -754,10 +759,12 @@ fdn_variant_from_value (napi_env env,
         }
 
         g_variant_builder_add (&builder, "{sv}", key_str, v);
+
+        g_variant_unref (v);
         g_free (key_str);
       }
 
-      *variant = g_variant_builder_end (&builder);
+      *variant = g_variant_ref_sink (g_variant_builder_end (&builder));
       return TRUE;
     }
     default:
