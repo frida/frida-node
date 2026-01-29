@@ -157,6 +157,24 @@ fdn_uint_to_value (napi_env env,
   return result;
 }
 
+static napi_value
+fdn_int8_to_value (napi_env env,
+                   gint8 i)
+{
+  napi_value result;
+  napi_create_int32 (env, i, &result);
+  return result;
+}
+
+static napi_value
+fdn_int16_to_value (napi_env env,
+                    gint16 i)
+{
+  napi_value result;
+  napi_create_int32 (env, i, &result);
+  return result;
+}
+
 static gboolean
 fdn_uint16_from_value (napi_env env,
                        napi_value value,
@@ -185,6 +203,15 @@ fdn_uint16_to_value (napi_env env,
                      guint16 u)
 {
   return fdn_uint32_to_value (env, u);
+}
+
+static napi_value
+fdn_int32_to_value (napi_env env,
+                    gint32 i)
+{
+  napi_value result;
+  napi_create_int32 (env, i, &result);
+  return result;
 }
 
 static napi_value
@@ -754,6 +781,16 @@ fdn_variant_to_value (napi_env env,
       const gchar * str = g_variant_get_string (variant, NULL);
       return fdn_utf8_to_value (env, str);
     }
+    case G_VARIANT_CLASS_BYTE:
+      return fdn_int8_to_value (env, g_variant_get_byte (variant));
+    case G_VARIANT_CLASS_INT16:
+      return fdn_int16_to_value (env, g_variant_get_int16 (variant));
+    case G_VARIANT_CLASS_UINT16:
+      return fdn_uint16_to_value (env, g_variant_get_uint16 (variant));
+    case G_VARIANT_CLASS_INT32:
+      return fdn_int32_to_value (env, g_variant_get_int32 (variant));
+    case G_VARIANT_CLASS_UINT32:
+      return fdn_uint32_to_value (env, g_variant_get_uint32 (variant));
     case G_VARIANT_CLASS_INT64:
       return fdn_int64_to_value (env, g_variant_get_int64 (variant));
     case G_VARIANT_CLASS_UINT64:
@@ -819,8 +856,41 @@ fdn_variant_to_value (napi_env env,
 
       break;
     case G_VARIANT_CLASS_TUPLE:
-      napi_get_undefined (env, &result);
+    {
+      napi_value array;
+      GVariantIter iter;
+      uint32_t i;
+      GVariant * child;
+
+      if (g_variant_n_children (variant) == 0)
+      {
+        napi_get_undefined (env, &result);
+        return result;
+      }
+
+      napi_create_array (env, &array);
+
+      g_variant_iter_init (&iter, variant);
+      i = 0;
+      while ((child = g_variant_iter_next_value (&iter)) != NULL)
+      {
+        napi_value element = fdn_variant_to_value (env, child);
+        napi_set_element (env, array, i++, element);
+        g_variant_unref (child);
+      }
+
+      return array;
+    }
+    case G_VARIANT_CLASS_VARIANT:
+    {
+      GVariant * inner;
+
+      inner = g_variant_get_variant (variant);
+      result = fdn_variant_to_value (env, inner);
+      g_variant_unref (inner);
+
       return result;
+    }
     default:
       break;
   }
