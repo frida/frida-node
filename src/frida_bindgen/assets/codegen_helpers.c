@@ -252,6 +252,25 @@ fdn_int64_to_value (napi_env env,
   return result;
 }
 
+static gboolean
+fdn_uint64_from_value (napi_env env,
+                       napi_value value,
+                       guint64 * u)
+{
+  bool lossless;
+
+  if (napi_get_value_bigint_uint64 (env, value, u, &lossless) != napi_ok)
+    goto invalid_argument;
+
+  return TRUE;
+
+invalid_argument:
+  {
+    napi_throw_error (env, NULL, "expected an unsigned BigInt");
+    return FALSE;
+  }
+}
+
 static napi_value
 fdn_uint64_to_value (napi_env env,
                      guint64 u)
@@ -765,6 +784,16 @@ fdn_variant_from_value (napi_env env,
       }
 
       *variant = g_variant_ref_sink (g_variant_builder_end (&builder));
+      return TRUE;
+    }
+    case napi_bigint:
+    {
+      guint64 u;
+
+      if (!fdn_uint64_from_value (env, value, &u))
+        return FALSE;
+
+      *variant = g_variant_ref_sink (g_variant_new_uint64 (u));
       return TRUE;
     }
     default:
