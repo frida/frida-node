@@ -691,16 +691,7 @@ fdn_variant_from_value (napi_env env,
             napi_get_property (env, first, desc_prop, &desc);
             fdn_utf8_from_value (env, desc, &type);
 
-            if (strcmp (type, "uint64") == 0)
-            {
-              gint64 i;
-
-              if (!fdn_int64_from_value (env, second, &i))
-                return FALSE;
-
-              val = g_variant_ref_sink (g_variant_new_uint64 ((guint64) i));
-            }
-            else if (!fdn_variant_from_value (env, second, &val))
+            if (!fdn_variant_from_value (env, second, &val))
             {
               g_free (type);
               return FALSE;
