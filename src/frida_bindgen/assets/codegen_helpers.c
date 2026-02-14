@@ -702,6 +702,7 @@ fdn_variant_from_value (napi_env env,
             }
             else if (!fdn_variant_from_value (env, second, &val))
             {
+              g_free (type);
               return FALSE;
             }
 
