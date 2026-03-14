@@ -809,6 +809,31 @@ get isCancelled(): boolean {
 }
 """,
                     ),
+                    CustomMethod(
+                        typing="static withTimeout(ms: number): Cancellable",
+                        code="""
+static withTimeout(ms: number): Cancellable {
+    const c = new Cancellable();
+    setTimeout(() => c.cancel(), ms).unref();
+    return c;
+}
+""",
+                    ),
+                    CustomMethod(
+                        typing="combine(other: Cancellable): Cancellable",
+                        code="""
+combine(other: Cancellable): Cancellable {
+    const c = new Cancellable();
+    this.cancelled.connect(() => c.cancel());
+    other.cancelled.connect(() => c.cancel());
+    if (this.isCancelled)
+        c.cancel();
+    if (other.isCancelled)
+        c.cancel();
+    return c;
+}
+""",
+                    ),
                 ],
             ),
         ),
