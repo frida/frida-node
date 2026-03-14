@@ -813,9 +813,9 @@ get isCancelled(): boolean {
                         typing="static withTimeout(ms: number): Cancellable",
                         code="""
 static withTimeout(ms: number): Cancellable {
-    const cancel = new Cancellable();
-    setTimeout(() => cancel.cancel(), ms).unref();
-    return cancel;
+    const c = new Cancellable();
+    setTimeout(() => c.cancel(), ms).unref();
+    return c;
 }
 """,
                     ),
@@ -823,12 +823,14 @@ static withTimeout(ms: number): Cancellable {
                         typing="combine(other: Cancellable): Cancellable",
                         code="""
 combine(other: Cancellable): Cancellable {
-    const cancel = new Cancellable();
-    this.cancelled.connect(() => cancel.cancel());
-    other.cancelled.connect(() => cancel.cancel());
-    if (this.isCancelled) cancel.cancel();
-    if (other.isCancelled) cancel.cancel();
-    return cancel;
+    const c = new Cancellable();
+    this.cancelled.connect(() => c.cancel());
+    other.cancelled.connect(() => c.cancel());
+    if (this.isCancelled)
+        c.cancel();
+    if (other.isCancelled)
+        c.cancel();
+    return c;
 }
 """,
                     ),
