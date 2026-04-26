@@ -2021,7 +2021,7 @@ if (!fdn_{retval.type.nick}_from_value (env, js_retval, &retval))
 raw_result = {result_conversion};"""
 
         if retval.nullable:
-            code = f"if (!fdn_is_null (js_result))\n{{  {indent_c_code(code, 1)}\n}} else {{\n  raw_result = NULL;\n }}"
+            code = f"if (!fdn_is_null (env, js_retval))\n{{\n{indent_c_code(code, 1)}\n}} else {{\n  raw_result = NULL;\n}}"
 
     else:
         code = "raw_result = NULL;"
