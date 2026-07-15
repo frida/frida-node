@@ -15,7 +15,7 @@ else
 endif
 
 env = environment()
-env.set('PYTHONPATH', meson.current_source_dir())
+env.set('PYTHONPATH', [meson.current_source_dir(), meson.project_source_root() / 'frida-bindgen'])
 
 code = custom_target('binding-code',
   output: [
@@ -44,7 +44,13 @@ code = custom_target('binding-code',
       'frida_bindgen' / 'assets' / 'customization_facade.ts',
       'frida_bindgen' / 'assets' / 'customization_helpers.imports',
       'frida_bindgen' / 'assets' / 'customization_helpers.ts',
-    )
+    ),
+    files(
+      meson.project_source_root() / 'frida-bindgen' / 'frida_bindgen_core' / '__init__.py',
+      meson.project_source_root() / 'frida-bindgen' / 'frida_bindgen_core' / 'loader.py',
+      meson.project_source_root() / 'frida-bindgen' / 'frida_bindgen_core' / 'model.py',
+      meson.project_source_root() / 'frida-bindgen' / 'frida_bindgen_core' / 'naming.py',
+    ),
   ],
   command: [
     python, '-m', 'frida_bindgen',

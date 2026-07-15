@@ -35,6 +35,7 @@
     "build/src/*.js",
     "configure",
     "configure.bat",
+    "frida-bindgen/frida_bindgen_core/",
     "make.bat",
     "meson.build",
     "meson.options",
