@@ -974,6 +974,26 @@ fdn_gvalue_from_value (napi_env env,
 
       break;
     }
+    case G_TYPE_INT64:
+    {
+      gint64 i;
+
+      if (!fdn_int64_from_value (env, js_value, &i))
+        return FALSE;
+      g_value_set_int64 (value, i);
+
+      break;
+    }
+    case G_TYPE_UINT64:
+    {
+      guint64 u;
+
+      if (!fdn_uint64_from_value (env, js_value, &u))
+        return FALSE;
+      g_value_set_uint64 (value, u);
+
+      break;
+    }
     case G_TYPE_FLOAT:
     {
       gdouble d;
@@ -1059,6 +1079,17 @@ fdn_gvalue_from_value (napi_env env,
         if (!fdn_tls_certificate_from_value (env, js_value, &certificate))
           return FALSE;
         g_value_take_object (value, certificate);
+
+        return TRUE;
+      }
+
+      if (G_TYPE_IS_OBJECT (type))
+      {
+        GObject * object;
+
+        if (!fdn_object_unwrap (env, js_value, type, &object))
+          return FALSE;
+        g_value_take_object (value, object);
 
         return TRUE;
       }
@@ -1248,6 +1279,87 @@ fdn_tls_certificate_to_value (napi_env env,
   g_free (pem);
 
   return result;
+}
+
+static gboolean
+fdn_object_apply_properties (napi_env env,
+                             GObject * object,
+                             napi_value value,
+                             const gchar * const * skipped_keys)
+{
+  gboolean success = FALSE;
+  napi_valuetype value_type;
+  napi_value keys;
+  uint32_t n_keys, i;
+  GObjectClass * object_class;
+  gchar * gobject_property_name = NULL;
+
+  if (napi_typeof (env, value, &value_type) != napi_ok || value_type != napi_object)
+    goto expected_an_object;
+
+  if (napi_get_property_names (env, value, &keys) != napi_ok)
+    return FALSE;
+
+  if (napi_get_array_length (env, keys, &n_keys) != napi_ok)
+    return FALSE;
+
+  object_class = G_OBJECT_GET_CLASS (object);
+
+  for (i = 0; i != n_keys; i++)
+  {
+    napi_value js_key, js_value;
+    gchar * property_name;
+    GParamSpec * pspec;
+    GValue property_value = G_VALUE_INIT;
+
+    if (napi_get_element (env, keys, i, &js_key) != napi_ok)
+      goto beach;
+
+    if (!fdn_utf8_from_value (env, js_key, &property_name))
+      goto beach;
+
+    if (skipped_keys != NULL && g_strv_contains ((const gchar * const *) skipped_keys, property_name))
+    {
+      g_free (property_name);
+      continue;
+    }
+
+    gobject_property_name = fdn_camel_case_to_kebab_case (property_name);
+    g_free (property_name);
+
+    pspec = g_object_class_find_property (object_class, gobject_property_name);
+    if (pspec == NULL || (pspec->flags & G_PARAM_WRITABLE) == 0)
+    {
+      g_clear_pointer (&gobject_property_name, g_free);
+      continue;
+    }
+
+    if (napi_get_property (env, value, js_key, &js_value) != napi_ok)
+      goto beach;
+
+    if (!fdn_gvalue_from_value (env, pspec->value_type, js_value, &property_value))
+      goto beach;
+
+    g_object_set_property (object, gobject_property_name, &property_value);
+
+    g_value_unset (&property_value);
+    g_clear_pointer (&gobject_property_name, g_free);
+  }
+
+  success = TRUE;
+  goto beach;
+
+expected_an_object:
+  {
+    napi_throw_type_error (env, NULL, "expected an object");
+    return FALSE;
+  }
+beach:
+  {
+    g_free (gobject_property_name);
+
+    return success;
+  }
 }
 
 static gboolean

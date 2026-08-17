@@ -87,6 +87,19 @@ class ObjectType(core.ObjectType):
         return to_macro_case(self.abstract_base_c_type)
 
     @cached_property
+    def supports_settings(self) -> bool:
+        if self.is_frida_options or self.is_frida_list:
+            return False
+        ctor = self.constructors[0] if self.constructors else None
+        if ctor is None or ctor.parameters:
+            return False
+        return bool(self.settable_properties) or any(m.is_select_method for m in self.methods)
+
+    @cached_property
+    def settable_properties(self) -> List[Property]:
+        return [p for p in self.properties if p.writable and not p.construct_only]
+
+    @cached_property
     def wrapped_methods(self) -> List[Method]:
         return [m for m in self.methods if m.needs_wrapper]
 
@@ -226,7 +239,16 @@ class Method(core.Method):
 
     @cached_property
     def is_select_method(self) -> bool:
-        return self.name.startswith("select_") or self.name.startswith("add_")
+        if not (self.name.startswith("select_") or self.name.startswith("add_")):
+            return False
+        n_params = len(self.parameters)
+        if n_params == 1:
+            return True
+        return n_params == 2 and self.parameters[0].type.name == "utf8"
+
+    @cached_property
+    def is_mapping_select_method(self) -> bool:
+        return self.is_select_method and len(self.parameters) == 2
 
     @cached_property
     def select_noun(self) -> str:
@@ -237,7 +259,7 @@ class Method(core.Method):
 
     @cached_property
     def select_plural_noun(self) -> str:
-        return f"{self.select_noun}s"
+        return to_camel_case(f"{self.select_noun}s")
 
     @cached_property
     def select_element_type(self) -> Type:

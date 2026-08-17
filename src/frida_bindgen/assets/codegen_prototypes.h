@@ -45,6 +45,7 @@ static gboolean fdn_file_from_value (napi_env env, napi_value value, GFile ** fi
 static napi_value fdn_file_to_value (napi_env env, GFile * file);
 static gboolean fdn_tls_certificate_from_value (napi_env env, napi_value value, GTlsCertificate ** certificate);
 static napi_value fdn_tls_certificate_to_value (napi_env env, GTlsCertificate * certificate);
+static gboolean fdn_object_apply_properties (napi_env env, GObject * object, napi_value value, const gchar * const * skipped_keys);
 static gboolean fdn_options_from_value (napi_env env, GType object_type, napi_value value, gpointer * options);
 
 static napi_value fdn_object_subclass_to_value (napi_env env, GObject * object);

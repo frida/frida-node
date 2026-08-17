@@ -389,6 +389,8 @@ def generate_napi_dts(model: Model) -> str:
             if otype.constructors:
                 constructor = otype.constructors[0]
                 params = ", ".join(param.typing for param in constructor.parameters)
+                if not constructor.parameters and otype.supports_settings:
+                    params = f"settings?: {{ {' '.join(settings_typings(otype, model))} }}"
                 lines.append(f"    constructor({params});")
 
         if otype.is_frida_options:
@@ -529,6 +531,8 @@ def generate_napi_bindings(model: Model) -> str:
 
         code += generate_object_type_registration_code(otype, model)
         code += generate_object_type_conversion_functions(otype)
+        if otype.supports_settings:
+            code += generate_settings_conversion_functions(otype)
         code += generate_object_type_constructor(otype)
         code += generate_object_type_finalizer(otype)
         code += generate_object_type_cleanup_code(otype)
@@ -645,6 +649,10 @@ def generate_prototypes(
             prototypes.append(
                 f"static napi_value {otype_cprefix}_construct (napi_env env, napi_callback_info info);"
             )
+            if otype.supports_settings:
+                prototypes.append(
+                    f"static gboolean {otype_cprefix}_apply_settings (napi_env env, {otype.c_type} * self, napi_value value);"
+                )
 
             custom = otype.customizations
             if custom is not None and custom.cleanup is not None:
@@ -1023,6 +1031,9 @@ def generate_object_type_constructor(otype: ObjectType) -> str:
             param_conversions = generate_input_parameter_conversions_code(
                 ctor, storage_prefix, invalid_arg_label
             )
+        elif otype.supports_settings:
+            param_conversions = """if (argc > 1)
+  goto invalid_handle;"""
         else:
             param_conversions = """if (argc != 0)
   goto invalid_handle;"""
@@ -1032,6 +1043,11 @@ def generate_object_type_constructor(otype: ObjectType) -> str:
         constructor_call = (
             f"handle = {otype.c_cast_macro} ({ctor.c_identifier} ({call_args}));"
         )
+        if not ctor.parameters and otype.supports_settings:
+            constructor_call += f"""
+
+if (argc == 1 && !{otype.c_symbol_prefix}_apply_settings (env, handle, args[0]))
+  goto propagate_error;"""
         unconstructable_logic = ""
 
         if ctor.throws:
@@ -2086,22 +2102,125 @@ static napi_value
 """
 
 
+def settings_typings(otype: ObjectType, model) -> List[str]:
+    typings = []
+    current = otype
+    while current is not None:
+        for method in current.methods:
+            if not method.is_select_method:
+                continue
+            if method.is_mapping_select_method:
+                value_type = model.resolve_js_type(method.parameters[1].type)
+                typings.append(f"{method.select_plural_noun}?: {{ [name: string]: {value_type} }};")
+            else:
+                element_type = model.resolve_js_type(method.select_element_type)
+                typings.append(f"{method.select_plural_noun}?: {element_type}[];")
+        for prop in current.settable_properties:
+            typings.append(f"{prop.js_name}?: {model.resolve_js_type(prop.type)};")
+        current = current.parent
+    return typings
+
+
 def generate_options_conversion_functions(otype: ObjectType) -> str:
     cprefix = otype.c_symbol_prefix
 
     def calculate_indent(suffix: str) -> str:
         return " " * (len(cprefix) + len(suffix) + 2)
 
-    selection_code = ""
+    selection_code = generate_selection_code(otype, "opts")
+
+    cleanup_code = ""
+    if selection_code:
+        cleanup_code += """
+
+propagate_error:
+  {
+    g_object_unref (opts);
+    return FALSE;
+  }"""
+
+    return f"""
+static gboolean
+{cprefix}_from_value (napi_env env,
+{calculate_indent("_from_value")}napi_value value,
+{calculate_indent("_from_value")}{otype.c_type} ** options)
+{{
+  {otype.c_type} * opts;
+
+  if (!fdn_options_from_value (env, {otype.get_type} (), value, (gpointer *) &opts))
+    return FALSE;{selection_code}
+
+  *options = opts;
+  return TRUE;{cleanup_code}
+}}
+"""
+
+
+def generate_settings_conversion_functions(otype: ObjectType) -> str:
+    cprefix = otype.c_symbol_prefix
+
+    def calculate_indent(suffix: str) -> str:
+        return " " * (len(cprefix) + len(suffix) + 2)
+
+    selection_code = generate_selection_code(otype, "self")
+
+    cleanup_code = ""
+    if selection_code:
+        cleanup_code += """
+
+propagate_error:
+  {
+    return FALSE;
+  }"""
+
+    selector_keys = selection_keys(otype)
+    if selector_keys:
+        keys_literal = "".join(f'"{key}", ' for key in selector_keys)
+        skipped_keys_declaration = f"  static const gchar * const skipped_keys[] = {{ {keys_literal}NULL }};\n\n"
+        skipped_keys_argument = "skipped_keys"
+    else:
+        skipped_keys_declaration = ""
+        skipped_keys_argument = "NULL"
+
+    return f"""
+static gboolean
+{cprefix}_apply_settings (napi_env env,
+{calculate_indent("_apply_settings")}{otype.c_type} * self,
+{calculate_indent("_apply_settings")}napi_value value)
+{{
+{skipped_keys_declaration}  if (!fdn_object_apply_properties (env, G_OBJECT (self), value, {skipped_keys_argument}))
+    return FALSE;{selection_code}
+
+  return TRUE;{cleanup_code}
+}}
+"""
+
+
+def selection_keys(otype: ObjectType) -> List[str]:
+    keys = []
+    current = otype
+    while current is not None:
+        keys += [m.select_plural_noun for m in current.methods if m.is_select_method]
+        current = current.parent
+    return keys
+
+
+def generate_selection_code(otype: ObjectType, target: str) -> str:
+    code = ""
     current_otype = otype
     while current_otype is not None:
-        opts_variable = "opts" if current_otype is otype else f"{current_otype.c_cast_macro} (opts)"
+        target_expr = target if current_otype is otype else f"{current_otype.c_cast_macro} ({target})"
 
         for method in current_otype.methods:
             if not method.is_select_method:
                 continue
 
             plural_noun = method.select_plural_noun
+
+            if method.is_mapping_select_method:
+                code += generate_mapping_selection_code(method, plural_noun, target_expr)
+                continue
+
             param_type = method.select_element_type
             param_from_value = f"fdn_{param_type.nick}_from_value"
 
@@ -2110,7 +2229,7 @@ def generate_options_conversion_functions(otype: ObjectType) -> str:
             if destroy_func is not None:
                 element_destroy_code = f"\n\n        {destroy_func} (element);"
 
-            selection_code += f"""
+            code += f"""
 
   {{
     napi_value js_{plural_noun};
@@ -2140,38 +2259,78 @@ def generate_options_conversion_functions(otype: ObjectType) -> str:
         if (!{param_from_value} (env, js_element, &element))
           goto propagate_error;
 
-        {method.c_identifier} ({opts_variable}, element);{element_destroy_code}
+        {method.c_identifier} ({target_expr}, element);{element_destroy_code}
       }}
     }}
   }}"""
 
         current_otype = current_otype.parent
 
-    cleanup_code = ""
-    if selection_code:
-        cleanup_code += """
+    return code
 
-propagate_error:
-  {
-    g_object_unref (opts);
-    return FALSE;
-  }"""
+
+def generate_mapping_selection_code(method, plural_noun: str, target_expr: str) -> str:
+    key_type, value_type = [param.type for param in method.parameters]
+    value_from_value = f"fdn_{value_type.nick}_from_value"
+
+    element_destroy_code = ""
+    destroy_func = value_type.destroy_func
+    if destroy_func is not None:
+        element_destroy_code = f"\n\n        {destroy_func} (element);"
 
     return f"""
-static gboolean
-{cprefix}_from_value (napi_env env,
-{calculate_indent("_from_value")}napi_value value,
-{calculate_indent("_from_value")}{otype.c_type} ** options)
-{{
-  {otype.c_type} * opts;
 
-  if (!fdn_options_from_value (env, {otype.get_type} (), value, (gpointer *) &opts))
-    return FALSE;{selection_code}
+  {{
+    napi_value js_{plural_noun};
+    napi_valuetype value_type;
 
-  *options = opts;
-  return TRUE;{cleanup_code}
-}}
-"""
+    if (napi_get_named_property (env, value, "{plural_noun}", &js_{plural_noun}) != napi_ok)
+      goto propagate_error;
+
+    if (napi_typeof (env, js_{plural_noun}, &value_type) != napi_ok)
+      goto propagate_error;
+
+    if (value_type != napi_undefined)
+    {{
+      napi_value js_keys;
+      uint32_t length, i;
+
+      if (napi_get_property_names (env, js_{plural_noun}, &js_keys) != napi_ok)
+        goto propagate_error;
+
+      if (napi_get_array_length (env, js_keys, &length) != napi_ok)
+        goto propagate_error;
+
+      for (i = 0; i != length; i++)
+      {{
+        napi_value js_key, js_element;
+        gchar * key;
+        {value_type.c.replace('const ', '')} element;
+
+        if (napi_get_element (env, js_keys, i, &js_key) != napi_ok)
+          goto propagate_error;
+
+        if (!fdn_utf8_from_value (env, js_key, &key))
+          goto propagate_error;
+
+        if (napi_get_property (env, js_{plural_noun}, js_key, &js_element) != napi_ok)
+        {{
+          g_free (key);
+          goto propagate_error;
+        }}
+
+        if (!{value_from_value} (env, js_element, &element))
+        {{
+          g_free (key);
+          goto propagate_error;
+        }}
+
+        {method.c_identifier} ({target_expr}, key, element);{element_destroy_code}
+
+        g_free (key);
+      }}
+    }}
+  }}"""
 
 
 def generate_list_conversion_functions(otype: ObjectType) -> str:
