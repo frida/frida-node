@@ -418,6 +418,13 @@ fdn_utf8_to_value (napi_env env,
                    const gchar * str)
 {
   napi_value result;
+
+  if (str == NULL)
+  {
+    napi_get_null (env, &result);
+    return result;
+  }
+
   napi_create_string_utf8 (env, str, NAPI_AUTO_LENGTH, &result);
   return result;
 }
@@ -1366,6 +1373,12 @@ fdn_object_new (napi_env env,
 {
   napi_value result, ctor, handle_wrapper;
   napi_ref wrapper_ref;
+
+  if (handle == NULL)
+  {
+    napi_get_null (env, &result);
+    return result;
+  }
 
   wrapper_ref = g_object_get_data (handle, "fdn-wrapper");
   if (wrapper_ref != NULL)
