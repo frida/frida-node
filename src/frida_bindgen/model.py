@@ -607,6 +607,8 @@ FACTORY = core.Factory(
 def js_type_from_gir(name: str) -> str:
     if name == "gboolean":
         return "boolean"
+    if name in {"gint64", "guint64"}:
+        return "bigint"
     if name in NUMERIC_GIR_TYPES:
         return "number"
     if name == "utf8":
