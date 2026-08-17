@@ -19,6 +19,7 @@ static napi_value fdn_int32_to_value (napi_env env, gint32 i);
 static napi_value fdn_uint32_to_value (napi_env env, guint32 u);
 static gboolean fdn_int64_from_value (napi_env env, napi_value value, gint64 * i);
 static napi_value fdn_int64_to_value (napi_env env, gint64 i);
+static gboolean fdn_uint64_from_value (napi_env env, napi_value value, guint64 * u);
 static napi_value fdn_uint64_to_value (napi_env env, guint64 u);
 static gboolean fdn_ulong_from_value (napi_env env, napi_value value, gulong * u);
 static gboolean fdn_double_from_value (napi_env env, napi_value value, gdouble * d);
