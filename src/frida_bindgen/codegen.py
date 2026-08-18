@@ -934,7 +934,17 @@ def generate_object_type_registration_code(otype: ObjectType, model: Model) -> s
             for signal in itype.signals:
                 jsprop_registrations.append(generate_signal_registration_entry(signal))
 
-    jsprop_registrations_str = "\n    ".join(jsprop_registrations)
+    if jsprop_registrations:
+        jsprop_registrations_str = "\n    ".join(jsprop_registrations)
+        properties_declaration = f"""  napi_property_descriptor properties[] =
+  {{
+    {jsprop_registrations_str}
+  }};
+"""
+        properties_arguments = "G_N_ELEMENTS (properties), properties"
+    else:
+        properties_declaration = ""
+        properties_arguments = "0, NULL"
 
     def calculate_indent(suffix: str) -> str:
         return " " * (len(otype_cprefix) + len(suffix) + 2)
@@ -946,13 +956,9 @@ static void
 {otype_cprefix}_register (napi_env env,
 {calculate_indent("_register")}napi_value exports)
 {{
-  napi_property_descriptor properties[] =
-  {{
-    {jsprop_registrations_str}
-  }};
-  napi_value constructor;
+{properties_declaration}  napi_value constructor;
 
-  napi_define_class (env, "{otype.prefixed_js_name}", NAPI_AUTO_LENGTH, {otype_cprefix}_construct, NULL, G_N_ELEMENTS (properties), properties, &constructor);{ctor_ref_creation}
+  napi_define_class (env, "{otype.prefixed_js_name}", NAPI_AUTO_LENGTH, {otype_cprefix}_construct, NULL, {properties_arguments}, &constructor);{ctor_ref_creation}
 
   napi_set_named_property (env, exports, "{otype.prefixed_js_name}", constructor);
 }}
