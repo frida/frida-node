@@ -6,7 +6,23 @@ from typing import Dict, List, Optional
 
 from .model import (ClassObjectType, CustomTypeKind, Enumeration,
                     InterfaceObjectType, Method, Model, ObjectType, Parameter,
-                    Procedure, Property, Signal, Tuple, to_pascal_case)
+                    Procedure, Property, Signal, Tuple, to_camel_case,
+                    to_pascal_case)
+
+
+def primary_constructor(otype: ObjectType) -> Optional[Procedure]:
+    if not otype.constructors:
+        return None
+    return next((c for c in otype.constructors if c.name == "new"), otype.constructors[0])
+
+
+def factory_constructors(otype: ObjectType) -> List[Procedure]:
+    primary = primary_constructor(otype)
+    return [
+        ctor
+        for ctor in otype.constructors
+        if ctor is not primary and all(not p.type.nick.endswith("array") for p in ctor.input_parameters)
+    ]
 
 ASSETS_DIR = Path(__file__).resolve().parent / "assets"
 CODEGEN_HELPERS_TS = (ASSETS_DIR / "codegen_helpers.ts").read_text(encoding="utf-8")
@@ -116,7 +132,7 @@ const binding: FridaBinding = bindings({
                 ol.append(indent_ts_code(method.code.strip(), 1))
                 num_members += 1
 
-        ctor = otype.constructors[0] if otype.constructors else None
+        ctor = primary_constructor(otype)
         if ctor is not None and ctor.needs_wrapper:
             ol.append(f"    constructor({', '.join(ctor.param_typings)}) {{")
 
@@ -339,7 +355,7 @@ def generate_napi_dts(model: Model) -> str:
                     if typing is not None:
                         lines.append(f"    {typing};")
 
-            ctor = otype.constructors[0] if otype.constructors else None
+            ctor = primary_constructor(otype)
             if ctor is not None and ctor.needs_wrapper:
                 lines.append(f"    constructor({', '.join(ctor.param_typings)});")
 
@@ -386,12 +402,16 @@ def generate_napi_dts(model: Model) -> str:
                 f"export class {otype.prefixed_js_name}{extends}{implements} {{"
             )
 
-            if otype.constructors:
-                constructor = otype.constructors[0]
+            constructor = primary_constructor(otype)
+            if constructor is not None:
                 params = ", ".join(param.typing for param in constructor.parameters)
                 if not constructor.parameters and otype.supports_settings:
                     params = f"settings?: {{ {' '.join(settings_typings(otype, model))} }}"
                 lines.append(f"    constructor({params});")
+
+            for ctor in factory_constructors(otype):
+                params = ", ".join(param.typing for param in ctor.parameters)
+                lines.append(f"    static {to_camel_case(ctor.name)}({params}): {otype.prefixed_js_name};")
 
         if otype.is_frida_options:
             for method in otype.methods:
@@ -534,6 +554,8 @@ def generate_napi_bindings(model: Model) -> str:
         if otype.supports_settings:
             code += generate_settings_conversion_functions(otype)
         code += generate_object_type_constructor(otype)
+        for ctor in factory_constructors(otype):
+            code += generate_object_type_factory(otype, ctor)
         code += generate_object_type_finalizer(otype)
         code += generate_object_type_cleanup_code(otype)
 
@@ -652,6 +674,11 @@ def generate_prototypes(
             if otype.supports_settings:
                 prototypes.append(
                     f"static gboolean {otype_cprefix}_apply_settings (napi_env env, {otype.c_type} * self, napi_value value);"
+                )
+
+            for ctor in factory_constructors(otype):
+                prototypes.append(
+                    f"static napi_value {otype_cprefix}_{ctor.name} (napi_env env, napi_callback_info info);"
                 )
 
             custom = otype.customizations
@@ -910,6 +937,9 @@ def generate_object_type_registration_code(otype: ObjectType, model: Model) -> s
     )
     jsprop_registrations = []
 
+    for ctor in factory_constructors(otype):
+        jsprop_registrations.append(generate_factory_registration_entry(otype, ctor))
+
     for method in otype.methods:
         if method.is_property_accessor:
             continue
@@ -969,6 +999,10 @@ def generate_method_registration_entry(method: Method) -> str:
     return f'{{ "{method.prefixed_js_name}", NULL, {method.object_type.c_symbol_prefix}_{method.name}, NULL, NULL, NULL, napi_default, NULL }},'
 
 
+def generate_factory_registration_entry(otype: ObjectType, ctor: Procedure) -> str:
+    return f'{{ "{to_camel_case(ctor.name)}", NULL, {otype.c_symbol_prefix}_{ctor.name}, NULL, NULL, NULL, napi_static, NULL }},'
+
+
 def generate_property_registration_entry(prop: Property) -> str:
     otype_cprefix = prop.object_type.c_symbol_prefix
 
@@ -1020,7 +1054,7 @@ def generate_object_type_constructor(otype: ObjectType) -> str:
     def calculate_indent(suffix: str) -> str:
         return " " * (len(otype_cprefix) + len(suffix) + 2)
 
-    ctor = next(iter(otype.constructors), None)
+    ctor = primary_constructor(otype)
 
     n_parameters = max(len(ctor.parameters) if ctor is not None else 0, 1)
 
@@ -1159,6 +1193,65 @@ static napi_value
   }}
 beach:
   {{{indent_c_code(param_destructions, 2, prologue=one_newline)}
+    return result;
+  }}
+}}
+"""
+
+
+def generate_object_type_factory(otype: ObjectType, ctor: Procedure) -> str:
+    otype_cprefix = otype.c_symbol_prefix
+    fn_name = f"{otype_cprefix}_{ctor.name}"
+
+    def calculate_indent(suffix: str) -> str:
+        return " " * (len(otype_cprefix) + len(suffix) + 2)
+
+    n_parameters = max(len(ctor.parameters), 1)
+
+    param_declarations = generate_parameter_variable_declarations(ctor, initialize=True)
+    param_conversions = generate_input_parameter_conversions_code(ctor, "", "beach")
+    param_destructions = generate_parameter_destructions_code(ctor, "")
+    call_args = generate_call_arguments_code(ctor, "")
+
+    error_check = ""
+    construction_failed_logic = ""
+    if ctor.throws:
+        error_check = """if (error != NULL)
+  goto construction_failed;"""
+        construction_failed_logic = """construction_failed:
+  {
+    napi_throw (env, fdn_error_to_value (env, error));
+    g_error_free (error);
+    goto beach;
+  }
+"""
+
+    one_newline = "\n"
+    two_newlines = "\n\n"
+
+    return f"""
+static napi_value
+{fn_name} (napi_env env,
+{calculate_indent(f"_{ctor.name}")}napi_callback_info info)
+{{
+  napi_value result = NULL;
+  size_t argc = {n_parameters};
+  napi_value args[{n_parameters}];{indent_c_code(param_declarations, 1, prologue=one_newline)}
+  {otype.c_type} * handle = NULL;
+
+  if (napi_get_cb_info (env, info, &argc, args, NULL, NULL) != napi_ok)
+    goto beach;
+
+{indent_c_code(param_conversions, 1)}
+
+  handle = {otype.c_cast_macro} ({ctor.c_identifier} ({call_args}));{indent_c_code(error_check, 1, prologue=one_newline)}
+
+  result = fdn_object_new (env, G_OBJECT (handle), {otype_cprefix}_constructor);
+  goto beach;
+
+{construction_failed_logic}beach:
+  {{
+    g_clear_object (&handle);{indent_c_code(param_destructions, 2, prologue=one_newline)}
     return result;
   }}
 }}
