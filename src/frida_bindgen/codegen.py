@@ -4,6 +4,7 @@ import textwrap
 from pathlib import Path
 from typing import Dict, List, Optional
 
+from frida_bindgen_core import Direction
 from .model import (ClassObjectType, CustomTypeKind, Enumeration,
                     InterfaceObjectType, Method, Model, ObjectType, Parameter,
                     Procedure, Property, Signal, Tuple, to_camel_case,
@@ -1517,8 +1518,12 @@ def generate_parameter_variable_declarations(
     decls = []
 
     for param in proc.parameters:
-        line = f"{param.type.c.replace('const ', '')} {param.name}"
-        if initialize:
+        c_type = param.type.c.replace("const ", "")
+        is_out = param.direction == Direction.OUT
+        if is_out:
+            c_type = c_type[:-1].strip()
+        line = f"{c_type} {param.name}"
+        if initialize and not is_out:
             default_val = param.type.default_value
             if default_val is not None:
                 line += f" = {default_val}"
@@ -1592,7 +1597,12 @@ def generate_call_arguments_code(
     names = []
     if instance_arg is not None:
         names.append(instance_arg)
-    names += [f"{storage_prefix}{param.name}" for param in proc.parameters]
+    names += [
+        f"&{storage_prefix}{param.name}"
+        if param.direction == Direction.OUT
+        else f"{storage_prefix}{param.name}"
+        for param in proc.parameters
+    ]
     if proc.throws:
         names.append(f"&{storage_prefix}error")
     return ", ".join(names)
@@ -1611,6 +1621,13 @@ def generate_return_assignment_code(method: Method, storage_prefix: str) -> str:
 
 
 def generate_return_conversion_code(method: Method, storage_prefix: str) -> str:
+    out = method.optional_out_parameter
+    if out is not None:
+        convert = f"js_retval = fdn_{out.type.nick}_to_value (env, {storage_prefix}{out.name});"
+        return (f"if ({storage_prefix}retval)" + "\n"
+                + f"  {convert}" + "\n"
+                + "else" + "\n"
+                + "  napi_get_null (env, &js_retval);")
     if method.return_value is not None:
         custom = method.customizations
         if custom is not None and custom.return_cconversion is not None:

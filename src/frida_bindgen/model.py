@@ -40,6 +40,13 @@ class Model(core.Model):
 
 class ObjectType(core.ObjectType):
     @cached_property
+    def methods(self) -> List["Method"]:
+        return [
+            m for m in super().methods
+            if not m.out_parameters or m.optional_out_parameter is not None
+        ]
+
+    @cached_property
     def js_name(self) -> str:
         custom = self.customizations
         if custom is not None and custom.js_name is not None:
@@ -211,8 +218,12 @@ class Method(core.Method):
 
     @cached_property
     def prefixed_return_typing(self) -> str:
-        retval = self.return_value
-        typing = retval.typing if retval is not None else "void"
+        out = self.optional_out_parameter
+        if out is not None:
+            typing = f"{self.object_type.model.resolve_js_type(out.type)} | null"
+        else:
+            retval = self.return_value
+            typing = retval.typing if retval is not None else "void"
         return f"Promise<{typing}>" if self.is_async else typing
 
     @property
@@ -559,6 +570,7 @@ def _make_class(
     type_struct,
     parent,
     constructors,
+    functions,
     methods,
     properties,
     signals,
@@ -573,6 +585,7 @@ def _make_class(
         type_struct,
         parent,
         constructors,
+        functions,
         methods,
         properties,
         signals,
@@ -590,6 +603,7 @@ def _make_interface(
     type_struct,
     parent,
     constructors,
+    functions,
     methods,
     properties,
     signals,
@@ -603,6 +617,7 @@ def _make_interface(
         type_struct,
         parent,
         constructors,
+        functions,
         methods,
         properties,
         signals,
