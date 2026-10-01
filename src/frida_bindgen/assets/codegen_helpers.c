@@ -1389,7 +1389,7 @@ fdn_options_from_value (napi_env env,
     goto beach;
 
   property_names = g_newa (const char *, n_keys);
-  property_values = g_newa (GValue, n_keys);
+  property_values = g_newa0 (GValue, n_keys);
 
   object_class = G_OBJECT_CLASS (g_type_class_ref (object_type));
 
