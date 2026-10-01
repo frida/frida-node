@@ -361,7 +361,8 @@ class Signal(core.Signal):
 class Parameter(core.Parameter):
     @cached_property
     def js_name(self) -> str:
-        return to_camel_case(self.name)
+        name = to_camel_case(self.name)
+        return f"{name}_" if name in JS_RESERVED_WORDS else name
 
     @cached_property
     def ctyping(self) -> str:
@@ -382,6 +383,17 @@ class Parameter(core.Parameter):
     @cached_property
     def destroy_func(self) -> Optional[str]:
         return self.type.destroy_func
+
+
+JS_RESERVED_WORDS = {
+    "await", "break", "case", "catch", "class", "const", "continue",
+    "debugger", "default", "delete", "do", "else", "enum", "export",
+    "extends", "false", "finally", "for", "function", "if", "implements",
+    "import", "in", "instanceof", "interface", "let", "new", "null",
+    "package", "private", "protected", "public", "return", "static",
+    "super", "switch", "this", "throw", "true", "try", "typeof", "var",
+    "void", "while", "with", "yield",
+}
 
 
 class ReturnValue(core.ReturnValue):
