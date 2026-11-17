@@ -11,18 +11,16 @@ from .model import (ClassObjectType, CustomTypeKind, Enumeration,
                     to_pascal_case)
 
 
-def primary_constructor(otype: ObjectType) -> Optional[Procedure]:
-    if not otype.constructors:
-        return None
-    return next((c for c in otype.constructors if c.name == "new"), otype.constructors[0])
+def inline_constructor(otype: ObjectType) -> Optional[Procedure]:
+    return next((c for c in otype.constructors if c.name == "new"), None)
 
 
 def factory_constructors(otype: ObjectType) -> List[Procedure]:
-    primary = primary_constructor(otype)
+    inline = inline_constructor(otype)
     return [
         ctor
         for ctor in otype.constructors
-        if ctor is not primary and all(not p.type.nick.endswith("array") for p in ctor.input_parameters)
+        if ctor is not inline and all(not p.type.nick.endswith("array") for p in ctor.input_parameters)
     ]
 
 ASSETS_DIR = Path(__file__).resolve().parent / "assets"
@@ -133,7 +131,7 @@ const binding: FridaBinding = bindings({
                 ol.append(indent_ts_code(method.code.strip(), 1))
                 num_members += 1
 
-        ctor = primary_constructor(otype)
+        ctor = inline_constructor(otype)
         if ctor is not None and ctor.needs_wrapper:
             ol.append(f"    constructor({', '.join(ctor.param_typings)}) {{")
 
@@ -356,7 +354,7 @@ def generate_napi_dts(model: Model) -> str:
                     if typing is not None:
                         lines.append(f"    {typing};")
 
-            ctor = primary_constructor(otype)
+            ctor = inline_constructor(otype)
             if ctor is not None and ctor.needs_wrapper:
                 lines.append(f"    constructor({', '.join(ctor.param_typings)});")
 
@@ -403,7 +401,7 @@ def generate_napi_dts(model: Model) -> str:
                 f"export class {otype.prefixed_js_name}{extends}{implements} {{"
             )
 
-            constructor = primary_constructor(otype)
+            constructor = inline_constructor(otype)
             if constructor is not None:
                 params = ", ".join(param.typing for param in constructor.parameters)
                 if not constructor.parameters and otype.supports_settings:
@@ -1055,7 +1053,7 @@ def generate_object_type_constructor(otype: ObjectType) -> str:
     def calculate_indent(suffix: str) -> str:
         return " " * (len(otype_cprefix) + len(suffix) + 2)
 
-    ctor = primary_constructor(otype)
+    ctor = inline_constructor(otype)
 
     n_parameters = max(len(ctor.parameters) if ctor is not None else 0, 1)
 
